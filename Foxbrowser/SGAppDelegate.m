@@ -3,7 +3,7 @@
 //  Foxbrowser
 //
 //  Created by simon on 27.06.12.
-//  Copyright (c) 2012 Cybercon GmbH. All rights reserved.
+//  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
 
 #import "SGAppDelegate.h"

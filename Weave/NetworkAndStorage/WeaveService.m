@@ -3,7 +3,7 @@
 //  Foxbrowser
 //
 //  Created by simon on 13.07.12.
-//  Copyright (c) 2012 Cybercon GmbH. All rights reserved.
+//  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
 
 #import "WeaveService.h"
