@@ -1,0 +1,21 @@
+//
+// Prefix header for all source files of the 'Foxbrowser' target in the 'Foxbrowser' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+
+#import "SGAppDelegate.h"
+#import "SGTabsViewController.h"
+#import "SGToolbar.h"
+#import "WeaveService.h"
+#import "UIViewController+TabsController.h"
+
+#endif
