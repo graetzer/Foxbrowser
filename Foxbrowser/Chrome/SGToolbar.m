@@ -70,6 +70,8 @@
         self.searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.searchBar.delegate = self;
         self.searchBar.placeholder = NSLocalizedString(@"Enter URL or search query here", nil);
+        self.searchBar.keyboardType = UIKeyboardTypeURL;
+        self.searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
         self.searchItem = [[UIBarButtonItem alloc] initWithCustomView:_searchBar];
         
         self.bookmarksItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemBookmarks
