@@ -30,6 +30,11 @@ id<WeaveService> weaveService;
     weaveService = self;
     _reachability = [Reachability reachabilityForInternetConnection];
     
+    // Enable cookies
+    NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage
+                                          sharedHTTPCookieStorage];
+    [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
     

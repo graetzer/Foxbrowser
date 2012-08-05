@@ -313,12 +313,12 @@
 #pragma mark - SGBarDelegate
 
 - (void)addTab; {
+    if (self.count >= self.maxCount) {
+        return;
+    }
     SGBlankController *latest = [SGBlankController new];
     [self addTab:latest];
     [self showViewController:latest];
-    if (self.count >= self.maxCount) {
-        [self removeIndex:0];
-    }
 }
 
 - (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;{
@@ -327,7 +327,10 @@
     v.title = title;
     [self addTab:v];
     if (self.count >= self.maxCount) {
-        [self removeIndex:0];
+        if (self.tabsView.selected != 0)
+            [self removeIndex:0];
+        else
+            [self removeIndex:1];
     }
 }
 
