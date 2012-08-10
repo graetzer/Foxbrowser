@@ -66,11 +66,11 @@
         self.progressView = [[SGProgressCircleView alloc] init];
         self.progressItem = [[UIBarButtonItem alloc] initWithCustomView:self.progressView];
         
-        self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 489.0, 0.0)];
+        self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 503.0, 0.0)];
         self.searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.searchBar.delegate = self;
         self.searchBar.placeholder = NSLocalizedString(@"Enter URL or search query here", nil);
-        self.searchBar.keyboardType = UIKeyboardTypeURL;
+        self.searchBar.keyboardType = UIKeyboardTypeASCIICapable;
         self.searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
         self.searchItem = [[UIBarButtonItem alloc] initWithCustomView:_searchBar];
         
@@ -80,7 +80,7 @@
         self.fixed = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
                                                                                 target:nil 
                                                                                 action:nil];
-        self.fixed.width = 10.;
+        self.fixed.width = 20.;
         
         self.flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                    target:nil
@@ -98,7 +98,7 @@
                                                                       target:self.delegate
                                                                       action:@selector(stop)];
         
-        self.items = [NSArray arrayWithObjects:_backItem, _forwardItem, _bookmarksItem,
+        self.items = [NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
                       _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil];
         
         self.urlBarViewController = [[SGURLBarController alloc] initWithStyle:UITableViewStylePlain];
@@ -327,8 +327,7 @@
 }
 
 - (void)updateChrome {
-    //![self.searchBar isFirstResponder] && 
-    if ([self.delegate respondsToSelector:@selector(location)]) {
+    if (![self.searchBar isFirstResponder] && [self.delegate respondsToSelector:@selector(location)]) {
             self.searchBar.text = [self.delegate location];
     }
     self.forwardItem.enabled = [self.delegate canGoForward];
@@ -340,18 +339,18 @@
             if ([self.delegate isLoading]) {
                 self.reloadItem.enabled = NO;
                 self.stopItem.enabled = YES;
-                [self setItems:[NSArray arrayWithObjects:_backItem, _forwardItem, _bookmarksItem,
+                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
                               _fixed, _sytemItem, _progressItem, _searchItem, _stopItem, nil] animated:YES];
             } else {
                 self.reloadItem.enabled = YES;
                 self.stopItem.enabled = NO;
-                [self setItems:[NSArray arrayWithObjects:_backItem, _forwardItem, _bookmarksItem,
+                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
                  _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:YES];
             }
         } else {
             self.reloadItem.enabled = NO;
             self.stopItem.enabled = NO;
-            [self setItems:[NSArray arrayWithObjects:_backItem, _forwardItem, _bookmarksItem,
+            [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
                           _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:YES];
         }
         

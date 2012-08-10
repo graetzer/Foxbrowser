@@ -67,7 +67,7 @@
        
         CGRect f = CGRectMake(0, 0, labelWidth + 20., gRect.size.height);
         _marker = [[UIView alloc] initWithFrame:f];
-        _marker.backgroundColor = [UIColor colorWithRed:0.2 green:0.2 blue:0.8 alpha:0.5];
+        _marker.backgroundColor = [UIColor colorWithRed:0.1 green:0.2 blue:0.9 alpha:0.4];
         _marker.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         [group addSubview:_marker];
         

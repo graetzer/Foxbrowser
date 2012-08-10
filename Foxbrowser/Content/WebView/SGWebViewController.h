@@ -9,6 +9,8 @@
 
 
 #import <UIKit/UIKit.h>
+#import <Security/Security.h>
+
 #import "SGToolbar.h"
 
 typedef enum {
@@ -16,16 +18,19 @@ typedef enum {
     SGWebTypeImage
 } SGWebType;
 
-@class SGTabsViewController;
+@class SGTabsViewController, DDAlertPrompt;
 
 @interface SGWebViewController : UIViewController <UITextFieldDelegate, UIWebViewDelegate, 
-UIGestureRecognizerDelegate, UIActionSheetDelegate, SGToolbarDelegate>
+UIGestureRecognizerDelegate, UIActionSheetDelegate, SGToolbarDelegate, NSURLConnectionDelegate, UIAlertViewDelegate> {
+    NSUInteger _historyPointer;
+    BOOL _userConfirmedCert;
+}
+
 @property (strong, nonatomic) IBOutlet UIWebView *webView;
 
-@property (strong, nonatomic) NSURL *URL;
+@property (readonly, nonatomic) NSURLRequest *request;
 @property (readonly, nonatomic, getter = isLoading) BOOL loading;
+@property (readonly, nonatomic) NSMutableArray *history;
 
-- (void)start;
-
-
+- (void)openURL:(NSURL *)url;
 @end

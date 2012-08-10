@@ -9,6 +9,8 @@
 #import "UIWebView+WebViewAdditions.h"
 #import "NSURL+IFUnicodeURL.h"
 #import "UIImage+Scaling.h"
+#import "SGDimensions.h"
+
 
 @implementation UIWebView (WebViewAdditions)
 
@@ -49,6 +51,12 @@
     return [self stringByEvaluatingJavaScriptFromString:@"window.location.toString()"];;
 }
 
+- (void)setLocationHash:(NSString *)location {
+    if (!location)
+        location = @"";
+    [self stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"window.location.hash = '%@'", location]];
+}
+
 - (void)clearContent {
     [self stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML = ''"];
 }
@@ -77,7 +85,7 @@
         screen = [screen cutImageToSize:CGSizeMake(screen.size.width, screen.size.height)];
     }
     
-    screen = [screen scaleProportionalToSize:CGSizeMake(220., 185.)];
+    screen = [screen scaleProportionalToSize:CGSizeMake(kSGPanelWidth, kSGPanelHeigth)];
     if (screen) {
         NSData *data = UIImagePNGRepresentation(screen);
         [data writeToFile:path atomically:NO];
@@ -198,27 +206,7 @@ BOOL IsNativeAppURL(NSURL* url)
 	{
 			if ([url.scheme isEqualToString: @"http"] || [url.scheme isEqualToString: @"https"])
 			{
-				// Try to recognize Google Maps URLs. We are a bit relaxed with google urls because it seems that iOS also
-				// recogizes maps.google.nl. Apple says ditu.google.com is also valid but I have never seen that used.
-				return NO;
-                
-				if ([[url host] hasPrefix: @"maps.google."] || [[url host] hasPrefix: @"ditu.google."])
-				{
-					if ([[url path] isEqualToString: @"/maps"] || [[url path] isEqualToString: @"/local"] || [[url path] isEqualToString: @"/m"])
-					{
-						return YES;
-					}
-				}
-                
-				// Try to recognize YouTube URLs
-				
-				if ([[url host] isEqualToString: @"www.youtube.com"])
-				{
-					if ([[url path] isEqualToString: @"/watch"] || [[url path] hasPrefix: @"/v/"])
-					{
-						return YES;
-					}
-				}
+                return NO;
 			} else if([[UIApplication sharedApplication] canOpenURL:url]) {
                 return YES;
             }

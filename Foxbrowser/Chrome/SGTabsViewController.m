@@ -134,7 +134,7 @@
     NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
     for (UIViewController *controller in self.childViewControllers) {
         if ([controller isKindOfClass:[SGWebViewController class]]) {
-            NSURL *url = ((SGWebViewController*)controller).URL;
+            NSURL *url = ((SGWebViewController*)controller).request.URL;
             [latest addObject:url.absoluteString];
         }
     }
@@ -276,9 +276,9 @@
         _currentViewController = viewController;
         [self transitionFromViewController:old
                           toViewController:viewController 
-                                  duration:0.1 
+                                  duration:0 
                                    options:UIViewAnimationOptionAllowAnimatedContent
-                                animations:nil 
+                                animations:NULL
                                 completion:^(BOOL finished){
                                     [old removeFromParentViewController];
                                     [viewController didMoveToParentViewController:self];
@@ -295,7 +295,7 @@
 #pragma mark - Propertys
 
 - (NSUInteger)maxCount {
-    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 6 : 4;
+    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 8 : 4;
 }
 
 - (NSUInteger)count {
@@ -322,10 +322,10 @@
 }
 
 - (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;{
-    SGWebViewController *v = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
-    v.URL = url;
-    v.title = title;
-    [self addTab:v];
+    SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
+    webC.title = title;
+    [webC openURL:url];
+    [self addTab:webC];
     if (self.count >= self.maxCount) {
         if (self.tabsView.selected != 0)
             [self removeIndex:0];
@@ -338,13 +338,12 @@
     NSURL *url = [WeaveOperations parseURLString:input];
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        webC.URL = url;
         webC.title = title;
-        [webC start];
+        [webC openURL:url];
     } else {
         SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
-        webC.URL = url;
         webC.title = title;
+        [webC openURL:url];
         [self swapCurrentViewControllerWith:webC];
     }
 }
@@ -415,7 +414,7 @@
 - (NSURL *)URL {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.URL;
+        return webC.request.URL;
     }
     return nil;
 }
@@ -423,12 +422,13 @@
 - (NSString *)location {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.URL.absoluteString;
+        return webC.request.URL.absoluteString;
     }
     return @"";
 }
 
 - (void)updateChrome {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
     [self.toolbar updateChrome];
 }
 

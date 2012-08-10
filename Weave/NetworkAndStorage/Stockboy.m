@@ -223,7 +223,7 @@ static NSDictionary *_gNetworkPaths = nil;
   //set the flag to "A-ok boss!"
   syncCompletedSuccessfully = YES;
   
-  [weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:NSLocalizedString(@"authorizing", @"authorizing") waitUntilDone:NO];
+  [weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:NSLocalizedString(@"Authorizing", @"Authorizing") waitUntilDone:NO];
   
   if ([weaveService canConnectToInternet]) 
   {   

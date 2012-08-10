@@ -54,6 +54,10 @@
     self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
 }
 
+- (UIView *)rotatingFooterView {
+    return self.bottomView;
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     CGSize scrollSize = self.scrollView.bounds.size;
     CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);

@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
 
+#import "SGDimensions.h"
 #import "SGPreviewPanel.h"
 #import "UIWebView+WebViewAdditions.h"
 #import "Store.h"
@@ -43,8 +44,7 @@ const CGFloat kSGPanelHeigth = 185.;
         self.label.text = title;
         [self addSubview:self.label];
         
-        lFrame = CGRectMake(0, 0,
-                            frame.size.width, frame.size.height - size.height - 10.);
+        lFrame = CGRectMake(0, 0, frame.size.width, frame.size.height - size.height - 10.);
         self.imageButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.imageButton.frame = lFrame;
         self.imageButton.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
@@ -116,7 +116,6 @@ static SGPreviewPanel *_singletone;
         CGRect frame = tile.frame;
         frame.origin.x = column*(kSGPanelWidth + PADDING) + startX;
         frame.origin.y = line*(kSGPanelHeigth + PADDING) + startY;
-        
         tile.frame = frame;
         i++;
     }
@@ -148,6 +147,7 @@ static SGPreviewPanel *_singletone;
         UIImage *image = [self imageForURLString:urlS];
         SGPreviewTile *tile = [[SGPreviewTile alloc] initWithImage:image title:title];
         tile.info = item;
+        tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
         tap.delegate  = self;

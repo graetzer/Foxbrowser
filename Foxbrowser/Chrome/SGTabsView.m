@@ -61,7 +61,7 @@
     // Float the subview in from rigth
     CGRect frame = CGRectMake(self.bounds.size.width, 0, width, self.bounds.size.height - kTabsBottomMargin);
     SGTabView *newTab = [[SGTabView alloc] initWithFrame:frame title:title];
-    newTab.alpha = 0.8;
+    newTab.alpha = 0.9;
     newTab.closeButton.hidden = YES;
     
     // Setup gesture recognizers
@@ -118,7 +118,7 @@
             [self bringSubviewToFront:tab];
         } else {
             tab.closeButton.hidden = YES;
-            tab.alpha = 0.8;
+            tab.alpha = 0.9;
             [tab setNeedsLayout];
         }
         [tab setNeedsDisplay];

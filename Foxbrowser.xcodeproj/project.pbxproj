@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F447BD7C15D1FA3400FDFF61 /* NSURL+Compare.m in Sources */ = {isa = PBXBuildFile; fileRef = F447BD7B15D1FA3400FDFF61 /* NSURL+Compare.m */; };
 		F44DE37615B8268D00D21E89 /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = F44DE37515B8268D00D21E89 /* left.png */; };
 		F44DE37815B8274200D21E89 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = F44DE37715B8274200D21E89 /* right.png */; };
 		F44F863915C9D64B003D1C31 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = F44F863815C9D64B003D1C31 /* Default-Portrait~ipad.png */; };
@@ -131,6 +132,7 @@
 		F4C1EE2E15B0934000FB2B97 /* SGURLBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C1EE2D15B0934000FB2B97 /* SGURLBarController.m */; };
 		F4CE241915B616340025EC07 /* BookmarkPage.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFD915A6446B00EACFBD /* BookmarkPage.m */; };
 		F4E2F99815AF82C000A56DCB /* WeaveService.m in Sources */ = {isa = PBXBuildFile; fileRef = F4E2F99715AF82C000A56DCB /* WeaveService.m */; };
+		F4E4880115D18DCD00CA27BC /* DDAlertPrompt.m in Sources */ = {isa = PBXBuildFile; fileRef = F4E4880015D18DCD00CA27BC /* DDAlertPrompt.m */; };
 		F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FCC8F815B77D4800207BEA /* Twitter.framework */; };
 		F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */; };
 		F4FD2B6D15AE030F005DBAB4 /* WelcomePage.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFED15A6446B00EACFBD /* WelcomePage.m */; };
@@ -151,6 +153,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F4024D7A15D0533900DA334C /* SGDimensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGDimensions.h; sourceTree = "<group>"; };
+		F447BD7A15D1FA3400FDFF61 /* NSURL+Compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Compare.h"; sourceTree = "<group>"; };
+		F447BD7B15D1FA3400FDFF61 /* NSURL+Compare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Compare.m"; sourceTree = "<group>"; };
 		F44DE37515B8268D00D21E89 /* left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = left.png; sourceTree = "<group>"; };
 		F44DE37715B8274200D21E89 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
 		F44F863815C9D64B003D1C31 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
@@ -246,7 +251,7 @@
 		F467005715A64C9500EACFBD /* NSURL+IFUnicodeURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+IFUnicodeURL.m"; sourceTree = "<group>"; };
 		F467005815A64C9500EACFBD /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		F467005915A64C9500EACFBD /* Stockboy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stockboy.h; sourceTree = "<group>"; };
-		F467005A15A64C9500EACFBD /* Stockboy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stockboy.m; sourceTree = "<group>"; };
+		F467005A15A64C9500EACFBD /* Stockboy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Stockboy.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		F467005B15A64C9500EACFBD /* Store.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Store.h; sourceTree = "<group>"; };
 		F467005C15A64C9500EACFBD /* Store.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Store.m; sourceTree = "<group>"; };
 		F467005D15A64C9500EACFBD /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
@@ -460,6 +465,8 @@
 		F4C1EE2D15B0934000FB2B97 /* SGURLBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGURLBarController.m; sourceTree = "<group>"; };
 		F4DACE8615AC86C400131DED /* WeaveService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeaveService.h; sourceTree = "<group>"; };
 		F4E2F99715AF82C000A56DCB /* WeaveService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WeaveService.m; sourceTree = "<group>"; };
+		F4E487FF15D18DCD00CA27BC /* DDAlertPrompt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAlertPrompt.h; sourceTree = "<group>"; };
+		F4E4880015D18DCD00CA27BC /* DDAlertPrompt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAlertPrompt.m; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FD2B6715ADDB9D005DBAB4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -935,7 +942,7 @@
 		F48AF7B715A3960A003A8DF0 /* Content */ = {
 			isa = PBXGroup;
 			children = (
-				F4BF6F4515B735BA005FD2B6 /* Web */,
+				F4BF6F4515B735BA005FD2B6 /* WebView */,
 				F4C1EE1F15B07F9F00FB2B97 /* Preview */,
 			);
 			path = Content;
@@ -968,22 +975,27 @@
 			path = Chrome;
 			sourceTree = "<group>";
 		};
-		F4BF6F4515B735BA005FD2B6 /* Web */ = {
+		F4BF6F4515B735BA005FD2B6 /* WebView */ = {
 			isa = PBXGroup;
 			children = (
+				F4E487FF15D18DCD00CA27BC /* DDAlertPrompt.h */,
+				F4E4880015D18DCD00CA27BC /* DDAlertPrompt.m */,
 				F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */,
 				F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */,
 				F49EE8B615A246AE001B4D5F /* SGWebViewController.h */,
 				F49EE8B715A246AE001B4D5F /* SGWebViewController.m */,
 				F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */,
 				F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */,
+				F447BD7A15D1FA3400FDFF61 /* NSURL+Compare.h */,
+				F447BD7B15D1FA3400FDFF61 /* NSURL+Compare.m */,
 			);
-			name = Web;
+			path = WebView;
 			sourceTree = "<group>";
 		};
 		F4C1EE1F15B07F9F00FB2B97 /* Preview */ = {
 			isa = PBXGroup;
 			children = (
+				F4024D7A15D0533900DA334C /* SGDimensions.h */,
 				F4C1EE2015B07F9F00FB2B97 /* SGBlankController.h */,
 				F4C1EE2115B07F9F00FB2B97 /* SGBlankController.m */,
 				F4C1EE2315B07FCB00FB2B97 /* SGPreviewPanel.h */,
@@ -1270,6 +1282,8 @@
 				F459C15F15C6AF3200740236 /* SGBottomView.m in Sources */,
 				F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */,
 				F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */,
+				F4E4880115D18DCD00CA27BC /* DDAlertPrompt.m in Sources */,
+				F447BD7C15D1FA3400FDFF61 /* NSURL+Compare.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1377,8 +1391,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Simon Graetzer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1393,7 +1407,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
-				PROVISIONING_PROFILE = "429FDD1F-E6F1-4662-B3BC-4C50A9E08916";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -1406,8 +1420,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Simon Graetzer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = "";
@@ -1416,7 +1430,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
-				PROVISIONING_PROFILE = "429FDD1F-E6F1-4662-B3BC-4C50A9E08916";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -1427,8 +1441,8 @@
 		F4FE2C5E159B6C58001B04D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Simon Graetzer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1439,7 +1453,7 @@
 					"\"$(SRCROOT)/External/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "429FDD1F-E6F1-4662-B3BC-4C50A9E08916";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1448,8 +1462,8 @@
 		F4FE2C5F159B6C58001B04D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Simon Graetzer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1460,7 +1474,7 @@
 					"\"$(SRCROOT)/External/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "429FDD1F-E6F1-4662-B3BC-4C50A9E08916";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				WRAPPER_EXTENSION = app;
 			};

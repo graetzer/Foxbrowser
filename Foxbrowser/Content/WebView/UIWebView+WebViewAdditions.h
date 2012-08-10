@@ -17,6 +17,7 @@
 
 - (NSString *)title;
 - (NSString *)location;
+- (void)setLocationHash:(NSString *)location;
 
 - (void)disableContextMenu;
 - (void)clearContent;

@@ -78,6 +78,9 @@
 	if(!_running) return;
 	
 	_displayProgress += AnimationIncrement;
+    if (_displayProgress > 1.0) {
+        _displayProgress = 0;
+    }
 	[self setNeedsDisplay];
 	
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateTwirl) object:nil];
