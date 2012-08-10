@@ -1,4 +1,4 @@
-### Foxbrowser
+# Foxbrowser
 
 The purpose of the project is to provide a full Firefox Sync powered replacement for Mobile Safari on the iPad. 
 The backend code is forked from Firefox Home for iOS, on top of that I created an entirely new UI.
@@ -13,9 +13,13 @@ The backend code is forked from Firefox Home for iOS, on top of that I created a
 - Send Tweet's and mail's directly from the App
 - Best of all: It's free
 
-## Licence
-© 2012 Simon Peter Grätzer
+### Limitations
+The Firefox Home codebase doesn't allow changes to the sync data, currently the browser works read-only.
 
+#### Licence
+© 2012 Simon Peter Grätzer. All rights reserved
+
+This will probably change in a future update.
 
 
 ![Logo](https://raw.github.com/graetzer/Foxbrowser/master/iTunesArtwork.png)
