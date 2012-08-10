@@ -33,11 +33,19 @@
 
 @implementation SGWebViewController
 
+// TODO Allow to change this preferences in the Settings App
 + (void)load {
     // Enable cookies
     NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage
                                           sharedHTTPCookieStorage];
     [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
+    
+    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+    path = [path stringByAppendingPathComponent:@"WebCache"];
+    NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024*1024*5
+                                                      diskCapacity:1024*1024*30
+                                                          diskPath:path];
+    [NSURLCache setSharedURLCache:cache];
 }
 
 - (void)loadView {

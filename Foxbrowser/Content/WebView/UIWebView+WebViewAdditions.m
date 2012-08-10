@@ -166,19 +166,6 @@ BOOL IsNativeAppURLWithoutChoice(NSURL* url)
             
 			else if ([[url scheme] isEqual:@"http"] || [[url scheme] isEqual:@"https"])
 			{
-                
-				// Disabled this case. We now simply trigger on itunes.apple.com or phobos.apple.com. The worst thing
-				// that can happen is that Safari is launched. We can live with that.
-                
-                //			if ([[url host] isEqualToString: @"phobos.apple.com"] || [[url host] isEqualToString: @"itunes.apple.com"])
-                //			{
-                //				if ([[url path] isEqualToString: @"/WebObjects/MZStore.woa/wa/viewSoftware"])
-                //				{
-                //					[[UIApplication sharedApplication] openURL: url];
-                //					return NO;
-                //				}
-                //			}
-                
 				if ([[url host] isEqualToString: @"itunes.com"])
 				{
 					if ([[url path] hasPrefix: @"/apps/"])
@@ -206,12 +193,11 @@ BOOL IsNativeAppURL(NSURL* url)
 	{
 			if ([url.scheme isEqualToString: @"http"] || [url.scheme isEqualToString: @"https"])
 			{
-                return NO;
+                return NO;// Don't check for youtube or maps, on iOS 6 they aren't installed anymore
 			} else if([[UIApplication sharedApplication] canOpenURL:url]) {
                 return YES;
             }
 	}
-    
 	return NO;
 }
 
