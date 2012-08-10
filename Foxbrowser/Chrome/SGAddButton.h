@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SGAddView : UIView
+@interface SGAddButton : UIView
 
 @property (strong, nonatomic) UIButton *button;
 @property (nonatomic, strong) UIColor *tabColor;

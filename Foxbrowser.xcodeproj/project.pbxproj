@@ -149,7 +149,7 @@
 		F4FE2C4E159B6C58001B04D7 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FE2C4D159B6C58001B04D7 /* CoreGraphics.framework */; };
 		F4FE2C56159B6C58001B04D7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE2C55159B6C58001B04D7 /* main.m */; };
 		F4FE2C5A159B6C58001B04D7 /* SGAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE2C59159B6C58001B04D7 /* SGAppDelegate.m */; };
-		F4FE7F2015B48F8900471BD1 /* SGAddView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE7F1F15B48F8900471BD1 /* SGAddView.m */; };
+		F4FE7F2015B48F8900471BD1 /* SGAddButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE7F1F15B48F8900471BD1 /* SGAddButton.m */; };
 		F4FE7F2415B49AA100471BD1 /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = F4FE7F2215B49AA000471BD1 /* plus.png */; };
 /* End PBXBuildFile section */
 
@@ -501,8 +501,8 @@
 		F4FE2C57159B6C58001B04D7 /* Foxbrowser-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Foxbrowser-Prefix.pch"; sourceTree = "<group>"; };
 		F4FE2C58159B6C58001B04D7 /* SGAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGAppDelegate.h; sourceTree = "<group>"; };
 		F4FE2C59159B6C58001B04D7 /* SGAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SGAppDelegate.m; sourceTree = "<group>"; };
-		F4FE7F1E15B48F8900471BD1 /* SGAddView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGAddView.h; sourceTree = "<group>"; };
-		F4FE7F1F15B48F8900471BD1 /* SGAddView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGAddView.m; sourceTree = "<group>"; };
+		F4FE7F1E15B48F8900471BD1 /* SGAddButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGAddButton.h; sourceTree = "<group>"; };
+		F4FE7F1F15B48F8900471BD1 /* SGAddButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGAddButton.m; sourceTree = "<group>"; };
 		F4FE7F2215B49AA000471BD1 /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = plus.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -972,8 +972,8 @@
 				F458C9F815C4A5CE0012CF87 /* UIViewController+TabsController.m */,
 				F49EE8AB15A24426001B4D5F /* SGToolbar.h */,
 				F49EE8AC15A24426001B4D5F /* SGToolbar.m */,
-				F4FE7F1E15B48F8900471BD1 /* SGAddView.h */,
-				F4FE7F1F15B48F8900471BD1 /* SGAddView.m */,
+				F4FE7F1E15B48F8900471BD1 /* SGAddButton.h */,
+				F4FE7F1F15B48F8900471BD1 /* SGAddButton.m */,
 				F47D5A5F15D5B9B4007F087F /* SGSearchBar.h */,
 				F47D5A6015D5B9B4007F087F /* SGSearchBar.m */,
 			);
@@ -1277,7 +1277,7 @@
 				F4C1EE2215B07F9F00FB2B97 /* SGBlankController.m in Sources */,
 				F4C1EE2515B07FCB00FB2B97 /* SGPreviewPanel.m in Sources */,
 				F4C1EE2E15B0934000FB2B97 /* SGURLBarController.m in Sources */,
-				F4FE7F2015B48F8900471BD1 /* SGAddView.m in Sources */,
+				F4FE7F2015B48F8900471BD1 /* SGAddButton.m in Sources */,
 				F4CE241915B616340025EC07 /* BookmarkPage.m in Sources */,
 				F4BF6F2C15B7174C005FD2B6 /* AboutScreen.m in Sources */,
 				F4BF6F4415B73062005FD2B6 /* LogoutController.m in Sources */,

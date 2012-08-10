@@ -23,7 +23,7 @@
 #import "SGTabsViewController.h"
 #import "SGTabsView.h"
 #import "SGTabView.h"
-#import "SGAddView.h"
+#import "SGAddButton.h"
 #import "SGTabDefines.h"
 #import "SGWebViewController.h"
 #import "UIWebView+WebViewAdditions.h"
@@ -32,7 +32,7 @@
 @interface SGTabsViewController ()
 @property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) SGTabsView *tabsView;
-@property (nonatomic, strong) SGAddView *addButton;
+@property (nonatomic, strong) SGAddButton *addButton;
 @property (nonatomic, strong) SGToolbar *toolbar;
 
 
@@ -92,7 +92,7 @@
     _tabsView = [[SGTabsView alloc] initWithFrame:frame];
     
     frame = CGRectMake(head.origin.x + frame.size.width, kTabsToolbarHeigth, kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
-    _addButton = [[SGAddView alloc] initWithFrame:frame];
+    _addButton = [[SGAddButton alloc] initWithFrame:frame];
     _addButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     [_addButton.button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
     

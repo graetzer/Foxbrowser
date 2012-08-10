@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
 
-#import "SGAddView.h"
+#import "SGAddButton.h"
 #import "SGTabDefines.h"
 #import <math.h>
 
-@implementation SGAddView
+@implementation SGAddButton
 @synthesize button, tabColor;
 
 - (id)initWithFrame:(CGRect)frame
