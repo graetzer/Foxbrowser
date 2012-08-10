@@ -340,18 +340,18 @@
                 self.reloadItem.enabled = NO;
                 self.stopItem.enabled = YES;
                 [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
-                              _fixed, _sytemItem, _progressItem, _searchItem, _stopItem, nil] animated:YES];
+                              _fixed, _sytemItem, _progressItem, _searchItem, _stopItem, nil] animated:NO];
             } else {
                 self.reloadItem.enabled = YES;
                 self.stopItem.enabled = NO;
                 [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
-                 _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:YES];
+                 _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:NO];
             }
         } else {
             self.reloadItem.enabled = NO;
             self.stopItem.enabled = NO;
             [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
-                          _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:YES];
+                          _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:NO];
         }
         
     }

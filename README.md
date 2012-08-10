@@ -13,5 +13,9 @@ The backend code is forked from Firefox Home for iOS, on top of that I created a
 - Send Tweet's and mail's directly from the App
 - Best of all: It's free
 
+## Licence
+© 2012 Simon Peter Grätzer
+
+
 
 ![Logo](https://raw.github.com/graetzer/Foxbrowser/master/iTunesArtwork.png)
