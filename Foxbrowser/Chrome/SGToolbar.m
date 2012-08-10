@@ -26,6 +26,7 @@
 #import "SGAppDelegate.h"
 #import "SGTabsViewController.h"
 #import "SGProgressCircleView.h"
+#import "SGSearchBar.h"
 #import "SettingsController.h"
 
 @interface SGToolbar ()
@@ -66,12 +67,8 @@
         self.progressView = [[SGProgressCircleView alloc] init];
         self.progressItem = [[UIBarButtonItem alloc] initWithCustomView:self.progressView];
         
-        self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 503.0, 0.0)];
-        self.searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        self.searchBar = [[SGSearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 503.0, 0.0)];
         self.searchBar.delegate = self;
-        self.searchBar.placeholder = NSLocalizedString(@"Enter URL or search query here", nil);
-        self.searchBar.keyboardType = UIKeyboardTypeASCIICapable;
-        self.searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
         self.searchItem = [[UIBarButtonItem alloc] initWithCustomView:_searchBar];
         
         self.bookmarksItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemBookmarks
@@ -276,19 +273,6 @@
      [self dismissPopovers];
 }
 
-- (void)searchBarTextDidEndEditing:(UISearchBar *)aSearchBar {
-    
-    // If the user finishes editing text in the search bar by, for example:
-    // tapping away rather than selecting from the recents list, then just dismiss the popover
-    [self dismissPopovers];
-    
-    if ([self.delegate respondsToSelector:@selector(location)]) {
-        self.searchBar.text = [self.delegate location];
-    }
-    [aSearchBar resignFirstResponder];
-}
-
-
 - (void)searchBar:(UISearchBar *)aSearchBar textDidChange:(NSString *)searchText {
     if (searchText.length > 0) {
         [self showPopover];
@@ -300,6 +284,17 @@
     [self.urlBarViewController filterResultsUsingString:searchText];
 }
 
+- (void)searchBarTextDidEndEditing:(UISearchBar *)aSearchBar {
+    
+    // If the user finishes editing text in the search bar by, for example:
+    // tapping away rather than selecting from the recents list, then just dismiss the popover
+    [self dismissPopovers];
+    
+    if ([self.delegate respondsToSelector:@selector(location)]) {
+        self.searchBar.text = [self.delegate location];
+    }
+    [aSearchBar resignFirstResponder];
+}
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)aSearchBar {
     

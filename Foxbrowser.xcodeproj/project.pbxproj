@@ -113,6 +113,7 @@
 		F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */; };
 		F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */; };
 		F476627415C8654E00F5E1E5 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F476627215C8654E00F5E1E5 /* ManualSetupViewController.xib */; };
+		F47D5A6115D5B9B4007F087F /* SGSearchBar.m in Sources */ = {isa = PBXBuildFile; fileRef = F47D5A6015D5B9B4007F087F /* SGSearchBar.m */; };
 		F485A5F815B786FA00C7304E /* SettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BF6F2715B716B9005FD2B6 /* SettingsController.m */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
 		F493B43615A4684500FC40B6 /* JSTools.js in Resources */ = {isa = PBXBuildFile; fileRef = F48AF7BB15A396FE003A8DF0 /* JSTools.js */; };
@@ -424,6 +425,8 @@
 		F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
 		F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Scaling.m"; sourceTree = "<group>"; };
 		F476627315C8654E00F5E1E5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = Foxbrowser/en.lproj/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
+		F47D5A5F15D5B9B4007F087F /* SGSearchBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGSearchBar.h; sourceTree = "<group>"; };
+		F47D5A6015D5B9B4007F087F /* SGSearchBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGSearchBar.m; sourceTree = "<group>"; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
 		F48AF7BB15A396FE003A8DF0 /* JSTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = JSTools.js; sourceTree = "<group>"; };
@@ -971,6 +974,8 @@
 				F49EE8AC15A24426001B4D5F /* SGToolbar.m */,
 				F4FE7F1E15B48F8900471BD1 /* SGAddView.h */,
 				F4FE7F1F15B48F8900471BD1 /* SGAddView.m */,
+				F47D5A5F15D5B9B4007F087F /* SGSearchBar.h */,
+				F47D5A6015D5B9B4007F087F /* SGSearchBar.m */,
 			);
 			path = Chrome;
 			sourceTree = "<group>";
@@ -1284,6 +1289,7 @@
 				F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */,
 				F4E4880115D18DCD00CA27BC /* DDAlertPrompt.m in Sources */,
 				F447BD7C15D1FA3400FDFF61 /* NSURL+Compare.m in Sources */,
+				F47D5A6115D5B9B4007F087F /* SGSearchBar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1392,7 +1398,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1421,7 +1427,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = "";
@@ -1442,7 +1448,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1463,7 +1469,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";

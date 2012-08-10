@@ -26,7 +26,7 @@ static NSArray* gFreshSearchHits = nil;
 {
     [super viewDidLoad];
 	
-    self.contentSizeForViewInPopover = CGSizeMake(500., 320.);
+    self.contentSizeForViewInPopover = CGSizeMake(500., 280.);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
