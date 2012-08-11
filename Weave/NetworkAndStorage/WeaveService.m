@@ -91,13 +91,13 @@ NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
         @"histUri" : [existing objectForKey:@"url"],
         @"title" : [existing objectForKey:@"title"],
         @"modified" : @([[NSDate date] timeIntervalSince1970]),
-        @"sortindex" : @(sortIndex + 2000)};
+        @"sortindex" : @(sortIndex + 100)};
     } else {
         historyEntry = @{ @"id" : [NSString stringWithFormat:@"abc%i", url.hash],// No idea about this
         @"histUri" : urlText,
         @"title" : title,
         @"modified" : @([[NSDate date] timeIntervalSince1970]),
-        @"sortindex" : @10000};// Choosen without further information
+        @"sortindex" : @100};// Choosen without further information
     }
     
     [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];

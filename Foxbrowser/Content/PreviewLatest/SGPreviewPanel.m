@@ -12,7 +12,7 @@
 #import "Store.h"
 
 #define PADDING 25.
-#define PANEL_MAX 8
+#define TILES_MAX 8
 
 const CGFloat kSGPanelWidth = 220.;
 const CGFloat kSGPanelHeigth = 185.;
@@ -134,7 +134,7 @@ static SGPreviewPanel *_singletone;
     NSArray *history = [[Store getStore] getHistory];
     
     NSUInteger i = self.tiles.count;
-    while (self.tiles.count < PANEL_MAX && i < history.count) {
+    while (self.tiles.count < TILES_MAX && i < history.count) {
         NSDictionary *item = [history objectAtIndex:i];
         i++;
         id ID = [item objectForKey:@"id"];
@@ -161,6 +161,14 @@ static SGPreviewPanel *_singletone;
     }
 }
 
+- (void)willMoveToSuperview:(UIView *)newSuperview {
+    if (newSuperview) {
+        if (self.tiles.count < TILES_MAX) {
+            [self addMissingTiles];
+        }
+    }
+}
+
 - (void)refresh {
     self.blacklist = [NSMutableArray arrayWithContentsOfFile:[SGPreviewPanel blacklistFilePath]];
     if (!self.blacklist)
@@ -172,7 +180,7 @@ static SGPreviewPanel *_singletone;
         [tile removeFromSuperview];
     }
     [self.tiles removeAllObjects];
-    self.tiles = [NSMutableArray arrayWithCapacity:PANEL_MAX];
+    self.tiles = [NSMutableArray arrayWithCapacity:TILES_MAX];
     [self addMissingTiles];
 }
 
