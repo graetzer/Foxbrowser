@@ -30,8 +30,3 @@
 - (NSDictionary *)tagsForPosition:(CGPoint)pt;
 
 @end
-
-BOOL IsNativeAppURLWithoutChoice(NSURL* link);
-BOOL IsNativeAppURL(NSURL* url);
-BOOL IsSafariURL(NSURL* url);
-BOOL IsBlockedURL(NSURL* url);

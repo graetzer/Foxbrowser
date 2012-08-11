@@ -131,7 +131,7 @@
 	//The user has now logged in successfully at least once, so set the flag to prevent
 	// showing the Welcome page from now on
 
-	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showedFirstRunPage"];
+	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kWeaveShowedFirstRunPage];
 	[Stockboy restock];
 
 	[_delegate easySetupViewControllerDidLogin: self];

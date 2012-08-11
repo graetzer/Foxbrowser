@@ -272,7 +272,6 @@
     }
 }
 
-
 #pragma mark - UIWebViewDelegate
 
 -  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
@@ -302,10 +301,11 @@
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     [webView disableContextMenu];
     self.title = [webView title];
-    _request = webView.request;
     
     _loading = NO;
     [self.tabsViewController updateChrome];
+    
+    [WeaveOperations addHistoryURL:self.request.URL title:self.title];
     
     // Do the screenshot if needed
     NSString *path = [UIWebView pathForURL:self.request.URL];
@@ -343,14 +343,12 @@
 }
 
 - (void)addHistoryRequest:(NSURLRequest *)request {
-    //if (![self.history containsObject:request]) {
-        if (self.history.count && _historyPointer < self.history.count - 1) {
-            [self.history removeObjectsAtIndexes:
-             [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(_historyPointer + 1, self.history.count - _historyPointer - 1)]];
-        }
-        _historyPointer = self.history.count;
-        [self.history addObject:request];
-    //}
+    if (self.history.count && _historyPointer < self.history.count - 1) {
+        [self.history removeObjectsAtIndexes:
+         [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(_historyPointer + 1, self.history.count - _historyPointer - 1)]];
+    }
+    _historyPointer = self.history.count;
+    [self.history addObject:request];
 }
 
 #pragma mark NSURLConnectionDelegate
@@ -468,14 +466,12 @@
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-//    if (self.credPrompt == alertView) {
-        if (buttonIndex == 0) {
-            [self cancelConnection];
-            self.credPrompt = nil;
-        }else if (buttonIndex == 1) {
-            [self loadRequest:self.request];// Reload the request
-        }
-//    }
+    if (buttonIndex == 0) {
+        [self cancelConnection];
+        self.credPrompt = nil;
+    }else if (buttonIndex == 1) {
+        [self loadRequest:self.request];// Reload the request
+    }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {

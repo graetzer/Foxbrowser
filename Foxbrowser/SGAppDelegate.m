@@ -99,7 +99,7 @@ id<WeaveService> weaveService;
         [[NSUserDefaults standardUserDefaults] synchronize];
 	}
     
-    BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:@"showedFirstRunPage"];
+    BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
     if (!showedFirstRunPage)
     {
         //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
@@ -190,7 +190,7 @@ id<WeaveService> weaveService;
 	
     //	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useCustomServer"];
     //	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"customServerURL"];
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"showedFirstRunPage"];
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveShowedFirstRunPage];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"needsFullReset"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"backgroundedAtTime"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useSafari"];

@@ -27,7 +27,9 @@
 #import "SGTabsViewController.h"
 #import "SGProgressCircleView.h"
 #import "SGSearchBar.h"
+
 #import "SettingsController.h"
+#import "WelcomePage.h"
 
 @interface SGToolbar ()
 @property (nonatomic, strong) UIBarButtonItem *forwardItem;
@@ -192,10 +194,24 @@
             
         case 3:
             {
-                SettingsController *settings = [SettingsController new];
-                UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
-                nav.modalPresentationStyle = UIModalPresentationFormSheet;
-                [appDelegate.tabsController presentModalViewController:nav animated:YES];
+                BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
+                if (!showedFirstRunPage)
+                {
+                    //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
+                    // afterwards, they will be taken to the login page, one way or ther other
+                    WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
+                    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
+                    navController.modalPresentationStyle = UIModalPresentationFormSheet;
+                    [self.window.rootViewController presentViewController:navController animated:YES completion:NULL];
+                }
+                else
+                {
+                    SettingsController *settings = [SettingsController new];
+                    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
+                    nav.modalPresentationStyle = UIModalPresentationFormSheet;
+                    [appDelegate.tabsController presentModalViewController:nav animated:YES];
+                }
+                
             }
             
             break;

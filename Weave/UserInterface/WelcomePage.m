@@ -51,7 +51,12 @@ JPAKEReporter* gSharedReporter = nil;
 
 - (void) viewDidLoad
 {
-    self.title = NSLocalizedString(@"Foxbrowser", @"app name"); 
+    self.title = NSLocalizedString(@"Foxbrowser", @"app name");
+    self.navigationItem.leftBarButtonItem =[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"cancel")
+                                                                            style:UIBarButtonItemStyleDone
+                                                                           target:self
+                                                                           action:@selector(cancel:)];
+    
 	NSString* language = [[NSLocale preferredLanguages] objectAtIndex: 0];
 	if ([language isEqualToString: @"ru"] || [language isEqualToString: @"id"]) {
 		_setupButton.titleLabel.font = [UIFont fontWithName: _setupButton.titleLabel.font.fontName
@@ -74,7 +79,7 @@ JPAKEReporter* gSharedReporter = nil;
 
 - (void) manualSetupViewControllerDidLogin: (ManualSetupViewController*) vc
 {
-	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showedFirstRunPage"];
+	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kWeaveShowedFirstRunPage];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
 	//[vc dismissModalViewControllerAnimated: NO];
@@ -85,7 +90,7 @@ JPAKEReporter* gSharedReporter = nil;
 
 - (void) easySetupViewControllerDidLogin: (EasySetupViewController*) vc
 {
-	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showedFirstRunPage"];
+	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kWeaveShowedFirstRunPage];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
 	//[vc dismissModalViewControllerAnimated: NO];
@@ -154,6 +159,10 @@ JPAKEReporter* gSharedReporter = nil;
 	if (accountHelp != nil) {
 		[self.navigationController pushViewController:accountHelp animated:YES];
 	}
+}
+
+- (IBAction)cancel:(id)sender {
+    [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
 }
 
 @end

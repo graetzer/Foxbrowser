@@ -32,6 +32,12 @@
 extern NSString *kWeaveDataRefreshNotification;
 extern NSString *kWeaveSyncStatusChangedNotification;
 extern NSString *kWeaveMessageKey;
+extern NSString *kWeaveShowedFirstRunPage;
+
+BOOL IsNativeAppURLWithoutChoice(NSURL* link);
+BOOL IsNativeAppURL(NSURL* url);
+BOOL IsSafariURL(NSURL* url);
+BOOL IsBlockedURL(NSURL* url);
 
 extern id<WeaveService> weaveService;
 
@@ -39,5 +45,6 @@ extern id<WeaveService> weaveService;
 
 + (NSURL *)parseURLString:(NSString *)input;
 + (BOOL)handleURLInternal:(NSURL *)url;
++ (void)addHistoryURL:(NSURL *)url title:(NSString *)title;
 
 @end
