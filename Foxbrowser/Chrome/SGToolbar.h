@@ -49,7 +49,7 @@
 @end
 
 
-@class SGURLBarController, SGProgressCircleView, SGSearchBar;
+@class SGURLBarController, SGProgressCircleView;
 @interface SGToolbar : UIToolbar <UISearchBarDelegate, UIPopoverControllerDelegate, 
 UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGURLBarDelegate> {
     UIColor *_bottomColor;
@@ -57,7 +57,7 @@ UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGURLBarDelegate> {
 
 @property (nonatomic, weak) id<SGToolbarDelegate> delegate;
 
-@property (nonatomic, strong) SGSearchBar *searchBar;
+@property (nonatomic, strong) UISearchBar *searchBar;
 @property (nonatomic, strong) SGProgressCircleView *progressView;
 
 @property (nonatomic, strong) UIPopoverController *popoverController;
