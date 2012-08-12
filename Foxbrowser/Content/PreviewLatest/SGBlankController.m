@@ -66,7 +66,7 @@
     
     self.previewPanel = [SGPreviewPanel instance];
     self.previewPanel.delegate = self;
-    self.previewPanel.frame = self.scrollView.bounds;
+    self.previewPanel.frame = self.view.bounds;
     //[self.previewPanel refresh];
     [self.scrollView addSubview:self.previewPanel];
     
