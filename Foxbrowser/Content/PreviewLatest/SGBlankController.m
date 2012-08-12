@@ -52,6 +52,7 @@
     CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
     self.tabBrowser.view.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
     self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
+    [self.previewPanel layout];
 }
 
 - (UIView *)rotatingFooterView {
@@ -66,8 +67,9 @@
     
     self.previewPanel = [SGPreviewPanel instance];
     self.previewPanel.delegate = self;
-    self.previewPanel.frame = self.view.bounds;
-    //[self.previewPanel refresh];
+    CGRect previewFrame = self.view.bounds;
+    previewFrame.size.height -= 60.;
+    self.previewPanel.frame = previewFrame;
     [self.scrollView addSubview:self.previewPanel];
     
     [[NSNotificationCenter defaultCenter] addObserver:self

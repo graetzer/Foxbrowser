@@ -94,7 +94,7 @@ static SGPreviewPanel *_singletone;
     return self;
 }
 
-- (void)layoutSubviews {
+- (void)layout {
     UIInterfaceOrientation orientation;
     // Some bug related to whatever
     if (self.bounds.size.width > self.bounds.size.height) {
@@ -119,6 +119,10 @@ static SGPreviewPanel *_singletone;
         tile.frame = frame;
         i++;
     }
+}
+
+- (void)layoutSubviews {
+    [self layout];
 }
 
 - (BOOL)tilesContainID:(id)ID {

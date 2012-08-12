@@ -33,5 +33,6 @@
 + (SGPreviewPanel *)instance;
 + (NSString *)blacklistFilePath;
 
+- (void)layout;
 - (void)refresh;
 @end
