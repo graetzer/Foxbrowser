@@ -26,7 +26,7 @@
         [self addSubview:logoView];
         
         NSString *text = @"Foxbrowser";
-        UIFont *font = [UIFont fontWithName:@"Helvetica-Light" size:20.];
+        UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Light" size:20.];
         CGSize size = [text sizeWithFont:font];
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(70., (frame.size.height - size.height)/2, size.width, size.height)];
         label.autoresizingMask =  UIViewAutoresizingFlexibleRightMargin;
@@ -36,7 +36,7 @@
         label.text = text;
         [self addSubview:label];
         
-        font = [UIFont fontWithName:@"Helvetica-Light" size:17.];
+        font = [UIFont fontWithName:@"HelveticaNeue-Light" size:17.];
         text = NSLocalizedString(@"Most popular", @"Most popular websites");
         size = [text sizeWithFont:font];
         NSString *text2 = NSLocalizedString(@"Other devices", @"Tabs of other devices");

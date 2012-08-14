@@ -34,7 +34,7 @@ const CGFloat kSGPanelHeigth = 185.;
     CGRect frame = CGRectMake(0, 0, kSGPanelWidth, kSGPanelHeigth);
     
     if (self = [super initWithFrame:frame]) {
-        UIFont *font = [UIFont fontWithName:@"Helvetica-Light" size:16.0];
+        UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Light" size:16.0];
         CGSize size = [title sizeWithFont:font forWidth:frame.size.width lineBreakMode:UILineBreakModeTailTruncation];
         CGRect lFrame = CGRectMake(0, frame.size.height - size.height, size.width, size.height);
         self.label = [[UILabel alloc] initWithFrame:lFrame];
