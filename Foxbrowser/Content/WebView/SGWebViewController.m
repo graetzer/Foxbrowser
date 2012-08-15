@@ -400,7 +400,7 @@
         
         if(result == kSecTrustResultProceed) {
             [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-        } else if(result == kSecTrustResultConfirm) {
+        } else{
             if (_userConfirmedCert) {
                 // Cert not trusted, but user is OK with that
                 [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
@@ -414,17 +414,6 @@
                 [alert show];
                 [self cancelConnection];
             }
-        } else {
-            // invalid or revoked certificate
-            //[challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-            //[challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-//            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error Loading Page", @"error loading page")
-//                                                            message:NSLocalizedString(@"Invalid or revoked certificate", @"The Servert cert is not valid")
-//                                                           delegate:nil
-//                                                  cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
-//                                                  otherButtonTitles:nil];
-//            [alert show];
-            [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
         }
     }
     else if(challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic
