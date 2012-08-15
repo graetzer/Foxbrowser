@@ -121,12 +121,12 @@
                       [NSString stringWithFormat:@"MyAppGetHTMLElementsAtPoint(%i,%i);",(NSInteger)pt.x,(NSInteger)pt.y]];
     
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:2];
-    NSArray *tags = [tagString componentsSeparatedByString:@","];
+    NSArray *tags = [tagString componentsSeparatedByString:@"||"];
     for (NSString *tag in tags) {
         NSRange start = [tag rangeOfString:@"["];
-        if (start.location != NSNotFound) {
+        NSRange end = [tag rangeOfString:@"]"];
+        if (start.location != NSNotFound && end.location != NSNotFound) {
             NSString *tagname = [tag substringToIndex:start.location];
-            NSRange end = [tag rangeOfString:@"]"];
             NSString *urlString = [tag substringWithRange:NSMakeRange(start.location + 1, end.location - start.location - 1)];
             [info setObject:urlString forKey:tagname];
         }

@@ -5,9 +5,9 @@ function MyAppGetHTMLElementsAtPoint(x,y) {
         if (e.tagName) {
             var name = e.tagName.toUpperCase();
             if (name == 'A') {
-                tags += 'A[' + e.href + '],';
+                tags += 'A[' + e.href + ']||';
             } else if (name == 'IMG') {
-                tags += 'IMG[' + e.src + '],';
+                tags += 'IMG[' + e.src + ']||';
             }
         }
         e = e.parentNode;
