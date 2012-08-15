@@ -1121,7 +1121,7 @@
 			attributes = {
 				CLASSPREFIX = SG;
 				LastUpgradeCheck = 0430;
-				ORGANIZATIONNAME = "Cybercon GmbH";
+				ORGANIZATIONNAME = "Simon Peter Grätzer";
 			};
 			buildConfigurationList = F4FE2C3F159B6C58001B04D7 /* Build configuration list for PBXProject "Foxbrowser" */;
 			compatibilityVersion = "Xcode 3.2";
