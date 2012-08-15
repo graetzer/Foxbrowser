@@ -470,6 +470,10 @@
         [self cancelConnection];
         self.credPrompt = nil;
     }else if (buttonIndex == 1) {
+        if (self.credPrompt != alertView) {
+            _userConfirmedCert = YES;
+        }
+        
         [self loadRequest:self.request];// Reload the request
     }
 }
