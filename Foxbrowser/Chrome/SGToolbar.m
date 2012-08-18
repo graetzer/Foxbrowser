@@ -69,7 +69,7 @@
         self.progressView = [[SGProgressCircleView alloc] init];
         self.progressItem = [[UIBarButtonItem alloc] initWithCustomView:self.progressView];
         
-        self.searchBar = [[SGSearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 503.0, 0.0)];
+        self.searchBar = [[SGSearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 483.0, 0.0)];
         self.searchBar.delegate = self;
         self.searchItem = [[UIBarButtonItem alloc] initWithCustomView:_searchBar];
         
@@ -97,7 +97,7 @@
                                                                       target:self.delegate
                                                                       action:@selector(stop)];
         
-        self.items = [NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
+        self.items = [NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
                       _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil];
         
         self.urlBarViewController = [[SGURLBarController alloc] initWithStyle:UITableViewStylePlain];
@@ -350,18 +350,18 @@
             if ([self.delegate isLoading]) {
                 self.reloadItem.enabled = NO;
                 self.stopItem.enabled = YES;
-                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
+                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
                               _fixed, _sytemItem, _progressItem, _searchItem, _stopItem, nil] animated:NO];
             } else {
                 self.reloadItem.enabled = YES;
                 self.stopItem.enabled = NO;
-                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
+                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
                  _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:NO];
             }
         } else {
             self.reloadItem.enabled = NO;
             self.stopItem.enabled = NO;
-            [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _bookmarksItem,
+            [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
                           _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:NO];
         }
         

@@ -18,7 +18,17 @@ NSString *kWeaveMessageKey = @"Message";
 NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
 NSString *kWeaveUseNativeApps = @"useNativeApps";
 
+static NSOperationQueue *_queue;
+
 @implementation WeaveOperations
+
++ (NSOperationQueue *)queue {
+    if (!_queue) {
+        _queue = [NSOperationQueue new];
+        _queue.maxConcurrentOperationCount = 1;
+    }
+    return _queue;
+}
 
 + (NSURL *)parseURLString:(NSString *)input {
     NSString *destination;
@@ -75,33 +85,36 @@ NSString *kWeaveUseNativeApps = @"useNativeApps";
 }
 
 + (void)addHistoryURL:(NSURL *)url title:(NSString *)title {
-    NSString *urlText = url.absoluteString;
-    
-    // Check if this history entry already exists
-    NSDictionary *existing = nil;
-    for (NSDictionary *entry in [[Store getStore] getHistory]) {
-        if ([urlText isEqualToString:[entry objectForKey:@"url"]]) {
-            existing = entry;
+    // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
+    [[self queue] addOperationWithBlock:^{
+        NSString *urlText = url.absoluteString;
+        
+        // Check if this history entry already exists
+        NSDictionary *existing = nil;
+        for (NSDictionary *entry in [[Store getStore] getHistory]) {
+            if ([urlText isEqualToString:[entry objectForKey:@"url"]]) {
+                existing = entry;
+            }
         }
-    }
-    
-    NSDictionary *historyEntry = nil;
-    if (existing) {// There is a differnce between the two dictionary formats
-        NSInteger sortIndex = [[existing objectForKey:@"sortindex"] integerValue];
-        historyEntry = @{ @"id" : [existing objectForKey:@"id"],
-        @"histUri" : [existing objectForKey:@"url"],
-        @"title" : [existing objectForKey:@"title"],
-        @"modified" : @([[NSDate date] timeIntervalSince1970]),
-        @"sortindex" : @(sortIndex + 100)};
-    } else {
-        historyEntry = @{ @"id" : [NSString stringWithFormat:@"abc%i", url.hash],// No idea about this
-        @"histUri" : urlText,
-        @"title" : title,
-        @"modified" : @([[NSDate date] timeIntervalSince1970]),
-        @"sortindex" : @100};// Choosen without further information
-    }
-    
-    [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
+        
+        NSDictionary *historyEntry = nil;
+        if (existing) {// There is a differnce between the two dictionary formats
+            NSInteger sortIndex = [[existing objectForKey:@"sortindex"] integerValue];
+            historyEntry = @{ @"id" : [existing objectForKey:@"id"],
+            @"histUri" : [existing objectForKey:@"url"],
+            @"title" : [existing objectForKey:@"title"],
+            @"modified" : @([[NSDate date] timeIntervalSince1970]),
+            @"sortindex" : @(sortIndex + 100)};
+        } else {
+            historyEntry = @{ @"id" : [NSString stringWithFormat:@"abc%i", url.hash],// No idea about this
+            @"histUri" : urlText,
+            @"title" : title,
+            @"modified" : @([[NSDate date] timeIntervalSince1970]),
+            @"sortindex" : @100};// Choosen without further information
+        }
+        
+        [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
+    }];
 }
 
 @end

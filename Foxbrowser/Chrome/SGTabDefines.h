@@ -35,7 +35,7 @@
 #define kCornerRadius 6.5
 #define kShadowRadius 5.0
 
-#define kTabColor  [UIColor colorWithRed:178./255. green:182./255. blue:195./255. alpha:1.0]
+#define kTabColor  [UIColor colorWithRed:188./255. green:192./255. blue:205./255. alpha:1.0]
 #define kTabDarkerColor [UIColor colorWithRed:138./255. green:142./255. blue:155./255. alpha:1.0]
 
 
