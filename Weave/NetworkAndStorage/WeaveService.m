@@ -16,6 +16,7 @@ NSString *kWeaveDataRefreshNotification = @"kWeaveDataRefreshNotification";
 NSString *kWeaveSyncStatusChangedNotification = @"SyncStatusChanged";
 NSString *kWeaveMessageKey = @"Message";
 NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
+NSString *kWeaveUseNativeApps = @"useNativeApps";
 
 @implementation WeaveOperations
 
@@ -44,7 +45,7 @@ NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
                                                                (__bridge CFStringRef)string,
                                                                NULL,
                                                                (CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
-                                                               CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+                                                               kCFStringEncodingUTF8);
 }
 
 + (BOOL)handleURLInternal:(NSURL *)url; {
@@ -65,7 +66,7 @@ NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
     
     // If the link is to a native app and we have turned that on, let the OS open the link
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults boolForKey: @"useNativeApps"] && IsNativeAppURL(url)) {
+    if ([defaults boolForKey: kWeaveUseNativeApps] && IsNativeAppURL(url)) {
         [[UIApplication sharedApplication] openURL:url];
         return NO;
     }

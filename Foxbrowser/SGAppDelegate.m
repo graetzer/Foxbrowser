@@ -94,7 +94,7 @@ id<WeaveService> weaveService;
 	{
 		NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
         [dictionary setObject: [NSNumber numberWithBool: NO] forKey: @"useCustomServer"];
-        [dictionary setObject: [NSNumber numberWithBool: YES] forKey: @"useNativeApps"];			
+        [dictionary setObject: [NSNumber numberWithBool: YES] forKey: kWeaveUseNativeApps];			
         [[NSUserDefaults standardUserDefaults] registerDefaults: dictionary];
         [[NSUserDefaults standardUserDefaults] synchronize];
 	}
@@ -194,7 +194,7 @@ id<WeaveService> weaveService;
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"needsFullReset"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"backgroundedAtTime"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useSafari"];
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useNativeApps"];
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveUseNativeApps];
 	[[NSUserDefaults standardUserDefaults] synchronize];
     
     //redraw everything

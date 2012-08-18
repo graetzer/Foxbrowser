@@ -19,6 +19,8 @@
 #import "NSURL+Compare.h"
 #import "DDAlertPrompt.h"
 
+#define HTTP_AGENT @"Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10"
+
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
 
@@ -275,20 +277,15 @@
 #pragma mark - UIWebViewDelegate
 
 -  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    if (navigationType != UIWebViewNavigationTypeOther) {
-        [self addHistoryRequest:request];
-        if ([self.request.URL isEqualExceptFragment:request.URL]) {
-            // Switch to an anchor in the same page
-            _request = request;
-            [self.tabsViewController updateChrome];
-            return YES;
-        }
-        
-        if ([WeaveOperations handleURLInternal:request.URL])
-            [self loadRequest:request];
-        
+    if (navigationType != UIWebViewNavigationTypeOther) {        
+        return [self loadRequest:request];
+    } else if ([request.URL.scheme isEqualToString:@"newtab"]) {
+        NSString *urlString = [[request.URL resourceSpecifier] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.request.URL];
+        [self.tabsViewController addTabWithURL:url withTitle:url.absoluteString];
         return NO;
     }
+    
     [self.tabsViewController updateChrome];
     return YES;
 }
@@ -299,7 +296,10 @@
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
+    [webView loadJSTools];
     [webView disableContextMenu];
+    [webView modifyLinkTargets];
+    [webView modifyOpen];
     self.title = [webView title];
     
     _loading = NO;
@@ -355,9 +355,10 @@
  
 - (void)openURL:(NSURL *)url {
     if (url) {
-        _request = [NSURLRequest requestWithURL:url
-                                    cachePolicy:NSURLRequestReloadRevalidatingCacheData
-                                timeoutInterval:10.];
+        _request = [NSMutableURLRequest requestWithURL:url
+                                           cachePolicy:NSURLRequestReloadRevalidatingCacheData
+                                       timeoutInterval:10.];
+        
     }
     if (![self isViewLoaded]) {
         return;
@@ -369,21 +370,33 @@
                                                        delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil];
         [alert show];
     } else {
-        //[self.webView clearContent];
-        [self addHistoryRequest:self.request];
         [self loadRequest:self.request];
     }
 }
 
-- (void)loadRequest:(NSURLRequest *)request {
-    if (_request != request)
-        _request = request;
+- (BOOL)loadRequest:(NSURLRequest *)request {
+    if (![WeaveOperations handleURLInternal:request.URL])  return NO;
     
+    if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
+        [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+    }
+    [self addHistoryRequest:request];
+        
+    if (self.request != request && [self.request.URL isEqualExceptFragment:request.URL]) {
+        // Switch to an anchor in the same page
+        _request = request;
+        [self.tabsViewController updateChrome];
+        return YES;
+    }
+    
+    _request = request;
     _loading = YES;
     [self.tabsViewController updateChrome];
     
     [self.connection cancel];
     self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES];
+    
+    return NO;
 }
 
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
@@ -424,11 +437,14 @@
             NSString *user = [self.credPrompt.plainTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             NSString *pass = [self.credPrompt.secretTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             
-            //NSURLCredentialPersistencePermanent TODO: ask user if he wants to save it 
+            //NSURLCredentialPersistencePermanent TODO: ask user if he wants to save it permanently
             NSURLCredential *credential = [NSURLCredential credentialWithUser:user
                                                                      password:pass
                                                                   persistence:NSURLCredentialPersistenceForSession];
             [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+            
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
+                                                                forProtectionSpace:challenge.protectionSpace];
             self.credPrompt = nil;
         } else {
             self.credPrompt = [[DDAlertPrompt alloc] initWithTitle:NSLocalizedString(@"Authorizing", @"Authorizing")
@@ -445,7 +461,7 @@
                 }
             }
             // Cancel the request and show the prompt
-            // If the user entert everything, retry the request
+            // If the user presses ok, retry the request
             [self.credPrompt show];
             [self cancelConnection];
         }

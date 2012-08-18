@@ -57,13 +57,29 @@
     [self stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"window.location.hash = '%@'", location]];
 }
 
-- (void)clearContent {
-    [self stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML = ''"];
+- (void)loadJSTools {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"JSTools" ofType:@"js"];
+    NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    [self stringByEvaluatingJavaScriptFromString:jsCode];
 }
 
 - (void)disableContextMenu {
     [self stringByEvaluatingJavaScriptFromString:@"document.body.style.webkitTouchCallout='none';"];
 }
+
+- (void)modifyLinkTargets {
+    [self stringByEvaluatingJavaScriptFromString:@"FoxbrowserModifyLinkTargets()"];
+}
+
+- (void)modifyOpen {
+    [self stringByEvaluatingJavaScriptFromString:@"FoxbrowserModifyOpen()"];
+}
+
+- (void)clearContent {
+    [self stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML = ''"];
+}
+
+
 
 #pragma mark - Screenshot stuff
 
@@ -89,9 +105,7 @@
     if (screen) {
         NSData *data = UIImagePNGRepresentation(screen);
         [data writeToFile:path atomically:NO];
-#ifdef DEBUG
-        NSLog(@"Write screenshot to: %@", path);
-#endif
+        DLog(@"Write screenshot to: %@", path);
     }
 }
 
@@ -112,16 +126,12 @@
 #pragma mark - Tag stuff
 
 - (NSDictionary *)tagsForPosition:(CGPoint)pt {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"JSTools" ofType:@"js"];
-    NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    [self stringByEvaluatingJavaScriptFromString:jsCode];
-    
     // get the Tags at the touch location
     NSString *tagString = [self stringByEvaluatingJavaScriptFromString:
-                      [NSString stringWithFormat:@"MyAppGetHTMLElementsAtPoint(%i,%i);",(NSInteger)pt.x,(NSInteger)pt.y]];
+                      [NSString stringWithFormat:@"FoxbrowserGetHTMLElementsAtPoint(%i,%i);",(NSInteger)pt.x,(NSInteger)pt.y]];
     
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:2];
-    NSArray *tags = [tagString componentsSeparatedByString:@"||"];
+    NSArray *tags = [tagString componentsSeparatedByString:@"|&|"];
     for (NSString *tag in tags) {
         NSRange start = [tag rangeOfString:@"["];
         NSRange end = [tag rangeOfString:@"]"];

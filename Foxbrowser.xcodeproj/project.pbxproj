@@ -429,7 +429,7 @@
 		F47D5A6015D5B9B4007F087F /* SGSearchBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGSearchBar.m; sourceTree = "<group>"; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
-		F48AF7BB15A396FE003A8DF0 /* JSTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = JSTools.js; sourceTree = "<group>"; };
+		F48AF7BB15A396FE003A8DF0 /* JSTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = JSTools.js; path = ../../JSTools.js; sourceTree = "<group>"; };
 		F49EE8A415A24426001B4D5F /* SGTabDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGTabDefines.h; sourceTree = "<group>"; };
 		F49EE8A515A24426001B4D5F /* SGTabView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGTabView.h; sourceTree = "<group>"; };
 		F49EE8A615A24426001B4D5F /* SGTabView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGTabView.m; sourceTree = "<group>"; };
@@ -993,6 +993,7 @@
 				F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */,
 				F447BD7A15D1FA3400FDFF61 /* NSURL+Compare.h */,
 				F447BD7B15D1FA3400FDFF61 /* NSURL+Compare.m */,
+				F48AF7BB15A396FE003A8DF0 /* JSTools.js */,
 			);
 			path = WebView;
 			sourceTree = "<group>";
@@ -1088,7 +1089,6 @@
 				F4FE2C51159B6C58001B04D7 /* Foxbrowser-Info.plist */,
 				F4FE2C55159B6C58001B04D7 /* main.m */,
 				F4FE2C57159B6C58001B04D7 /* Foxbrowser-Prefix.pch */,
-				F48AF7BB15A396FE003A8DF0 /* JSTools.js */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";

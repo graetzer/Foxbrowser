@@ -19,7 +19,10 @@
 - (NSString *)location;
 - (void)setLocationHash:(NSString *)location;
 
+- (void)loadJSTools;
 - (void)disableContextMenu;
+- (void)modifyLinkTargets;
+- (void)modifyOpen;
 - (void)clearContent;
 
 - (UIImage *)screenshot;

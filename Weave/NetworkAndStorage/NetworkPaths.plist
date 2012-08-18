@@ -36,6 +36,8 @@
 	<string>http://support.mozilla.com/kb/Cannot+log+in+to+Firefox+Home+App</string>
 	<key>Google URL</key>
 	<string>http://www.google.com/search?ie=UTF-8&amp;oe=UTF-8&amp;sourceid=navclient&amp;gfns=1&amp;q=%@</string>
+	<key>Google URL pure</key>
+	<string>http://www.google.com/search?q=%@</string>
 	<key>Collections Info Path</key>
 	<string>info/collections</string>
 </dict>

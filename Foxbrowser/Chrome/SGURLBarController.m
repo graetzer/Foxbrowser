@@ -9,6 +9,7 @@
 #import "SGURLBarController.h"
 #import "Store.h"
 #import "Stockboy.h"
+#import "WeaveService.h"
 
 
 @interface SGURLBarController ()
@@ -157,7 +158,7 @@ static NSArray* gFreshSearchHits = nil;
 		NSString* destination = nil;        
 		if (indexPath.section == 1)
 		{
-			destination = gLastSearchString;
+            destination = [NSString stringWithFormat:[Stockboy getURIForKey:@"Google URL pure"], [WeaveOperations urlEncode:gLastSearchString]];
 		}
 		else 
 		{

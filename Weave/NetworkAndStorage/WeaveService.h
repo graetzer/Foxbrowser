@@ -33,6 +33,7 @@ extern NSString *kWeaveDataRefreshNotification;
 extern NSString *kWeaveSyncStatusChangedNotification;
 extern NSString *kWeaveMessageKey;
 extern NSString *kWeaveShowedFirstRunPage;
+extern NSString *kWeaveUseNativeApps;
 
 BOOL IsNativeAppURLWithoutChoice(NSURL* link);
 BOOL IsNativeAppURL(NSURL* url);
@@ -44,6 +45,7 @@ extern id<WeaveService> weaveService;
 @interface WeaveOperations : NSObject
 
 + (NSURL *)parseURLString:(NSString *)input;
++ (NSString *)urlEncode:(NSString *)string;
 + (BOOL)handleURLInternal:(NSURL *)url;
 + (void)addHistoryURL:(NSURL *)url title:(NSString *)title;
 
