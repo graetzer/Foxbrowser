@@ -32,4 +32,9 @@ If you visit a site that's not already in the history, it's added locally.
    See the License for the specific language governing permissions and
    limitations under the License.
 
-![Logo](https://raw.github.com/graetzer/Foxbrowser/master/iTunesArtwork.png)
+### Screenshots
+
+![Screenshot 1](http://graetzer.org/wp-content/uploads/2012/08/foxbrowser_screen1.png)
+![Screenshot 1](http://graetzer.org/wp-content/uploads/2012/08/foxbrowser_screen2.png)
+
+![Logo](https://raw.github.com/graetzer/Foxbrowser/master/Weave/Images/logo@2x.png)
