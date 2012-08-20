@@ -17,20 +17,13 @@
 #import "Reachability.h"
 #import "WeaveService.h"
 #import "NSURL+Compare.h"
-#import "DDAlertPrompt.h"
+#import "SGURLProtocol.h"
+
 
 #define HTTP_AGENT @"Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10"
 
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
-
-// For custom loading
-@property (nonatomic, strong) NSURLConnection *connection;
-@property (nonatomic, strong) NSURLResponse *response;
-@property (nonatomic, strong) NSMutableData *buffer;
-@property (nonatomic, strong) DDAlertPrompt *credPrompt;
-
-- (void)addHistoryRequest:(NSURLRequest *)request;
 @end
 
 @implementation SGWebViewController
@@ -68,6 +61,8 @@
 {
     [super viewDidLoad];
     
+    [SGURLProtocol registerProtocol];
+    
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.webView.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
@@ -88,6 +83,8 @@
 }
 
 - (void)viewWillUnload {
+    [SGURLProtocol unregisterProtocol];
+    
     [self.webView stopLoading];
     self.webView.delegate = nil;
     [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
@@ -103,55 +100,6 @@
     if (!self.webView.request) {
         [self openURL:nil];
     }
-}
-
-#pragma mark - Propertys
-
-@synthesize history = _history;
-- (NSMutableArray *)history {
-    if (!_history) {
-        _history = [[NSMutableArray alloc] initWithCapacity:5];
-    }
-    return _history;
-}
-
-# pragma mark - SGBarDelegate
-
-- (void)reload {
-    [self openURL:nil];
-}
-
-- (void)stop {
-    [self.webView stopLoading];
-    [self cancelConnection];
-}
-
-- (void)goBack {
-    _historyPointer--;
-    NSURLRequest *request = [self.history objectAtIndex:_historyPointer];
-    if ([self.request.URL isEqualExceptFragment:request.URL]) {
-        [self.webView setLocationHash:request.URL.fragment];
-    } else {
-        [self loadRequest:request];
-    }
-}
-
-- (void)goForward {
-    _historyPointer++;
-    NSURLRequest *request = [self.history objectAtIndex:_historyPointer];
-    if ([self.request.URL isEqualExceptFragment:request.URL]) {
-        [self.webView setLocationHash:request.URL.fragment];
-    } else {
-        [self loadRequest:request];
-    }
-}
-
-- (BOOL)canGoBack {
-    return _historyPointer >= 1;
-}
-
-- (BOOL)canGoForward {
-    return self.history.count && _historyPointer < self.history.count - 1;
 }
 
 #pragma mark - UILongPressGesture
@@ -277,17 +225,21 @@
 #pragma mark - UIWebViewDelegate
 
 -  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    if (navigationType != UIWebViewNavigationTypeOther) {        
-        return [self loadRequest:request];
-    } else if ([request.URL.scheme isEqualToString:@"newtab"]) {
+    if ([request.URL.scheme isEqualToString:@"newtab"]) {
         NSString *urlString = [[request.URL resourceSpecifier] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.request.URL];
         [self.tabsViewController addTabWithURL:url withTitle:url.absoluteString];
         return NO;
     }
     
+    if (navigationType != UIWebViewNavigationTypeOther) _request = request;
+    if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
+        [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+    }
+    
+    
     [self.tabsViewController updateChrome];
-    return YES;
+    return [WeaveOperations handleURLInternal:request.URL];
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
@@ -342,22 +294,13 @@
     }
 }
 
-- (void)addHistoryRequest:(NSURLRequest *)request {
-    if (self.history.count && _historyPointer < self.history.count - 1) {
-        [self.history removeObjectsAtIndexes:
-         [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(_historyPointer + 1, self.history.count - _historyPointer - 1)]];
-    }
-    _historyPointer = self.history.count;
-    [self.history addObject:request];
-}
-
 #pragma mark NSURLConnectionDelegate
  
 - (void)openURL:(NSURL *)url {
     if (url) {
         _request = [NSMutableURLRequest requestWithURL:url
                                            cachePolicy:NSURLRequestReloadRevalidatingCacheData
-                                       timeoutInterval:10.];
+                                       timeoutInterval:5.];
         
     }
     if (![self isViewLoaded]) {
@@ -370,190 +313,8 @@
                                                        delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil];
         [alert show];
     } else {
-        [self loadRequest:self.request];
+        [self.webView loadRequest:self.request];
     }
-}
-
-- (BOOL)loadRequest:(NSURLRequest *)request {
-    if (![WeaveOperations handleURLInternal:request.URL])  return NO;
-    
-    if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
-        [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
-    }
-    [self addHistoryRequest:request];
-        
-    if (self.request != request && [self.request.URL isEqualExceptFragment:request.URL]) {
-        // Switch to an anchor in the same page
-        _request = request;
-        [self.tabsViewController updateChrome];
-        return YES;
-    }
-    
-    _request = request;
-    _loading = YES;
-    [self.tabsViewController updateChrome];
-    
-    [self.connection cancel];
-    self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES];
-    
-    return NO;
-}
-
-- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    if (self.connection != connection) {
-        [challenge.sender cancelAuthenticationChallenge:challenge];
-        return;
-    }
-    
-    if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust)
-    {
-        SecTrustRef serverTrust = [[challenge protectionSpace] serverTrust];
-        SecTrustResultType result;
-        SecTrustEvaluate(serverTrust, &result);
-        
-        if(result == kSecTrustResultProceed) {
-            [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-        } else{
-            if (_userConfirmedCert) {
-                // Cert not trusted, but user is OK with that
-                [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-                _userConfirmedCert = NO;
-            } else {
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Untrusted server certificate", @"The cert the server provided is not trusted")
-                                                                message:NSLocalizedString(@"Caution: use at own risk", @"Caution: use at own risk")
-                                                               delegate:self
-                                                      cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
-                                                      otherButtonTitles:NSLocalizedString(@"OK", @"ok"), nil];
-                [alert show];
-                [self cancelConnection];
-            }
-        }
-    }
-    else if(challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic
-            || challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPDigest
-            || challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodNTLM)
-    {
-        if (self.credPrompt && challenge.previousFailureCount == 0) {
-            NSString *user = [self.credPrompt.plainTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            NSString *pass = [self.credPrompt.secretTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            
-            //NSURLCredentialPersistencePermanent TODO: ask user if he wants to save it permanently
-            NSURLCredential *credential = [NSURLCredential credentialWithUser:user
-                                                                     password:pass
-                                                                  persistence:NSURLCredentialPersistenceForSession];
-            [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-            
-            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
-                                                                forProtectionSpace:challenge.protectionSpace];
-            self.credPrompt = nil;
-        } else {
-            self.credPrompt = [[DDAlertPrompt alloc] initWithTitle:NSLocalizedString(@"Authorizing", @"Authorizing")
-                                                      delegate:self
-                                             cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
-                                              otherButtonTitle:NSLocalizedString(@"OK", @"ok")];
-            
-            if (challenge.proposedCredential) {
-                if (challenge.proposedCredential.hasPassword && challenge.previousFailureCount == 0) {
-                    [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
-                    return;
-                } else {
-                    self.credPrompt.plainTextField.text = challenge.proposedCredential.user;
-                }
-            }
-            // Cancel the request and show the prompt
-            // If the user presses ok, retry the request
-            [self.credPrompt show];
-            [self cancelConnection];
-        }
-    } else {
-        [challenge.sender cancelAuthenticationChallenge:challenge];
-    }
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (buttonIndex == 0) {
-        [self cancelConnection];
-        self.credPrompt = nil;
-    }else if (buttonIndex == 1) {
-        if (self.credPrompt != alertView) {
-            _userConfirmedCert = YES;
-        }
-        
-        [self loadRequest:self.request];// Reload the request
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    if (self.connection == connection) {
-        [self cancelConnection];
-        self.response = nil;
-        self.credPrompt = nil;
-        
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error Loading Page", @"error loading page")
-                                                        message:[error localizedDescription]
-                                                       delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles: nil];
-        [alert show];
-    }
-}
-
-// http://stackoverflow.com/questions/1446509/handling-redirects-correctly-with-nsurlconnection
-- (NSURLRequest *)connection: (NSURLConnection *)inConnection
-             willSendRequest: (NSURLRequest *)inRequest
-            redirectResponse: (NSURLResponse *)inRedirectResponse;
-{
-    if (inRedirectResponse) {
-        DLog(@"Redirected to %@", [[inRequest URL] absoluteString]);
-        NSMutableURLRequest *r = [self.request mutableCopy];
-        [r setURL: [inRequest URL]];
-        _request = r;
-        return r;
-    } else {
-        return inRequest;
-    }
-}
-
-- (NSCachedURLResponse *)connection:(NSURLConnection *)connection
-                  willCacheResponse:(NSCachedURLResponse *)cachedResponse {
-    return cachedResponse;
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-    if (self.connection == connection) {
-        long long length = response.expectedContentLength != NSURLResponseUnknownLength ? response.expectedContentLength : 1024*512;
-        self.buffer = [[NSMutableData alloc] initWithCapacity:length];
-        self.response = response;
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    if (self.connection == connection) {
-        [self.buffer appendData:data];
-    }
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    if (self.connection != connection)
-        return;
-    
-    [self.webView loadData:self.buffer
-                  MIMEType:_response.MIMEType
-          textEncodingName:_response.textEncodingName
-                   baseURL:_response.URL];
-    
-    self.connection = nil;
-    self.buffer = nil;
-    _loading = NO;
-    [self.tabsViewController updateChrome];
-}
-
-- (void)cancelConnection {
-    [self.connection cancel];
-    self.connection = nil;
-    self.buffer = nil;
-    
-    _loading = NO;
-    [self.tabsViewController updateChrome];
 }
 
 @end

@@ -355,14 +355,14 @@
 - (void)reload; {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC reload];
+        [webC.webView reload];
     }
 }
 
 - (void)stop {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC stop];
+        [webC.webView stopLoading];
     }
 }
 
@@ -377,21 +377,21 @@
 - (void)goBack; {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC goBack];
+        [webC.webView goBack];
     }
 }
 
 - (void)goForward; {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC goForward];
+        [webC.webView goForward];
     }
 }
 
 - (BOOL)canGoBack; {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return [webC canGoBack];
+        return [webC.webView canGoBack];
     }
     return NO;
 }
@@ -399,7 +399,7 @@
 - (BOOL)canGoForward; {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return [webC canGoForward];
+        return [webC.webView canGoForward];
     }
     return NO;
 }

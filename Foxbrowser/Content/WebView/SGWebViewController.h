@@ -13,24 +13,16 @@
 
 #import "SGToolbar.h"
 
-typedef enum {
-    SGWebTypeLink,
-    SGWebTypeImage
-} SGWebType;
-
-@class SGTabsViewController, DDAlertPrompt;
+@class SGTabsViewController;
 
 @interface SGWebViewController : UIViewController <UITextFieldDelegate, UIWebViewDelegate, 
-UIGestureRecognizerDelegate, UIActionSheetDelegate, SGToolbarDelegate, NSURLConnectionDelegate, UIAlertViewDelegate> {
-    NSUInteger _historyPointer;
-    BOOL _userConfirmedCert;
+UIGestureRecognizerDelegate, UIActionSheetDelegate, UIAlertViewDelegate> {
 }
 
 @property (strong, nonatomic) IBOutlet UIWebView *webView;
 
 @property (readonly, nonatomic) NSURLRequest *request;
 @property (readonly, nonatomic, getter = isLoading) BOOL loading;
-@property (readonly, nonatomic) NSMutableArray *history;
 
 - (void)openURL:(NSURL *)url;
 @end

@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SGCredentialsPrompt : UIAlertView
+@interface SGCredentialsPrompt : UIAlertView <UITextFieldDelegate>
+@property (strong, nonatomic) UITextField *usernameField;
+@property (strong, nonatomic) UITextField *passwordField;
+@property (strong, nonatomic) UISegmentedControl* rememberCredentials;
 
+- (id)initWithUsername:(NSString *)username persistence:(NSURLCredentialPersistence)persistence;
 @end
