@@ -16,6 +16,7 @@
 #import "SGAppDelegate.h"
 #import "Reachability.h"
 #import "WeaveService.h"
+#import "NSURL+IFUnicodeURL.h"
 #import "NSURL+Compare.h"
 #import "SGURLProtocol.h"
 
@@ -227,23 +228,24 @@
 -  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     if ([request.URL.scheme isEqualToString:@"newtab"]) {
         NSString *urlString = [[request.URL resourceSpecifier] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.request.URL];
+        NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.location];
         [self.tabsViewController addTabWithURL:url withTitle:url.absoluteString];
         return NO;
     }
     
-    if (navigationType != UIWebViewNavigationTypeOther) _request = request;
-    if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
-        [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+    if (navigationType != UIWebViewNavigationTypeOther) {
+        self.location = request.URL;
+        if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
+            [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+        }
+        [self.tabsViewController updateChrome];
+        return [WeaveOperations handleURLInternal:request.URL];
     }
     
-    
-    [self.tabsViewController updateChrome];
-    return [WeaveOperations handleURLInternal:request.URL];
+    return YES;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-    _loading = YES;
     [self.tabsViewController updateChrome];
 }
 
@@ -254,13 +256,17 @@
     [webView modifyOpen];
     self.title = [webView title];
     
-    _loading = NO;
+    NSString *webLoc = [self.webView location];
+    if (webLoc.length) {
+        self.location = [NSURL URLWithUnicodeString:webLoc];
+    }
+    
     [self.tabsViewController updateChrome];
     
-    [WeaveOperations addHistoryURL:self.request.URL title:self.title];
+    [WeaveOperations addHistoryURL:self.location title:self.title];
     
     // Do the screenshot if needed
-    NSString *path = [UIWebView pathForURL:self.request.URL];
+    NSString *path = [UIWebView pathForURL:self.location];
     NSFileManager *fm = [NSFileManager defaultManager];
     if ([fm fileExistsAtPath:path]) {
         NSDictionary *attr = [fm attributesOfItemAtPath:path error:NULL];
@@ -279,12 +285,10 @@
     //ignore these
     if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"]) return;
     
-    _loading = NO;
     [self.tabsViewController updateChrome];
     
     if ([error.domain isEqualToString:@"NSURLErrorDomain"])
     {
-        
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error Loading Page", @"error loading page")
                                                         message:[error localizedDescription]
                                                        delegate:nil
@@ -298,10 +302,7 @@
  
 - (void)openURL:(NSURL *)url {
     if (url) {
-        _request = [NSMutableURLRequest requestWithURL:url
-                                           cachePolicy:NSURLRequestReloadRevalidatingCacheData
-                                       timeoutInterval:5.];
-        
+        self.location = url;
     }
     if (![self isViewLoaded]) {
         return;
@@ -313,7 +314,11 @@
                                                        delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil];
         [alert show];
     } else {
-        [self.webView loadRequest:self.request];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location
+                                           cachePolicy:NSURLRequestReloadRevalidatingCacheData
+                                       timeoutInterval:10.];
+        [request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+        [self.webView loadRequest:request];
     }
 }
 

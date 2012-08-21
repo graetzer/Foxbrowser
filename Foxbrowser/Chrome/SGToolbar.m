@@ -306,8 +306,8 @@
     // tapping away rather than selecting from the recents list, then just dismiss the popover
     [self dismissPopovers];
     
-    if ([self.delegate respondsToSelector:@selector(location)]) {
-        self.searchBar.text = [self.delegate location];
+    if ([self.delegate respondsToSelector:@selector(URL)]) {
+        self.searchBar.text = [self.delegate URL].absoluteString;
     }
     [aSearchBar resignFirstResponder];
 }
@@ -328,18 +328,17 @@
 }
 
 - (void)finishSearchWithString:(NSString *)searchString {
+    [self.delegate handleURLInput:searchString];
     
     // Conduct the search. In this case, simply report the search term used.
     [self.popoverController dismissPopoverAnimated:YES];
     self.popoverController = nil;
     [self.searchBar resignFirstResponder];
-    
-    [self.delegate handleURLInput:searchString];
 }
 
 - (void)updateChrome {
-    if (![self.searchBar isFirstResponder] && [self.delegate respondsToSelector:@selector(location)]) {
-            self.searchBar.text = [self.delegate location];
+    if (![self.searchBar isFirstResponder] && [self.delegate respondsToSelector:@selector(URL)]) {
+            self.searchBar.text = [self.delegate URL].absoluteString;
     }
     self.forwardItem.enabled = [self.delegate canGoForward];
     self.backItem.enabled = [self.delegate canGoBack];

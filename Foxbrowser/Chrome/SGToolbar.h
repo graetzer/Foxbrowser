@@ -41,7 +41,6 @@
 
 @optional
 - (NSURL *)URL;
-- (NSString *)location;
 
 - (BOOL)canStopOrReload;
 - (void)handleURLInput:(NSString*)input;

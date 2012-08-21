@@ -134,7 +134,7 @@
     NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
     for (UIViewController *controller in self.childViewControllers) {
         if ([controller isKindOfClass:[SGWebViewController class]]) {
-            NSURL *url = ((SGWebViewController*)controller).request.URL;
+            NSURL *url = ((SGWebViewController*)controller).location;
             [latest addObject:url.absoluteString];
         }
     }
@@ -369,7 +369,7 @@
 - (BOOL)isLoading {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return [webC isLoading];
+        return webC.webView.loading;
     }
     return NO;
 }
@@ -414,17 +414,9 @@
 - (NSURL *)URL {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.request.URL;
+        return webC.location;
     }
     return nil;
-}
-
-- (NSString *)location {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.request.URL.absoluteString;
-    }
-    return @"";
 }
 
 - (void)updateChrome {

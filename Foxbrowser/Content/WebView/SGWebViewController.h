@@ -11,7 +11,6 @@
 #import <UIKit/UIKit.h>
 #import <Security/Security.h>
 
-#import "SGToolbar.h"
 
 @class SGTabsViewController;
 
@@ -20,9 +19,7 @@ UIGestureRecognizerDelegate, UIActionSheetDelegate, UIAlertViewDelegate> {
 }
 
 @property (strong, nonatomic) IBOutlet UIWebView *webView;
-
-@property (readonly, nonatomic) NSURLRequest *request;
-@property (readonly, nonatomic, getter = isLoading) BOOL loading;
+@property (strong, nonatomic) NSURL *location;
 
 - (void)openURL:(NSURL *)url;
 @end
