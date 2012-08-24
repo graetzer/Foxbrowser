@@ -128,17 +128,15 @@ static NSLock*                      VariableLock                 = nil;
 
 }
 
+- (BOOL)connectionShouldUseCredentialStorage:(NSURLConnection *)connection{
+	return YES;
+}
 
 - (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace{
 	return YES;
 }
 
-
-- (BOOL)connectionShouldUseCredentialStorage:(NSURLConnection *)connection{
-	return YES;
-}
-
-- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
         if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust)
         {
             SecTrustRef serverTrust = [[challenge protectionSpace] serverTrust];

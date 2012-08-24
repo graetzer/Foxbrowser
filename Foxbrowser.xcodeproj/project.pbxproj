@@ -110,7 +110,6 @@
 		F467FFB015A6446300EACFBD /* jpake_err.c in Sources */ = {isa = PBXBuildFile; fileRef = F467FF2F15A6446200EACFBD /* jpake_err.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F467FFBD15A6446300EACFBD /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F467FF9315A6446300EACFBD /* libcrypto.a */; };
 		F467FFBE15A6446300EACFBD /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F467FF9415A6446300EACFBD /* libssl.a */; };
-		F467FFBF15A6446300EACFBD /* openssl-1.0.0a.tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F467FF9515A6446300EACFBD /* openssl-1.0.0a.tar.gz */; };
 		F467FFC315A6446300EACFBD /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FF9B15A6446300EACFBD /* RegexKitLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */; };
 		F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */; };
@@ -391,7 +390,6 @@
 		F467FF9115A6446300EACFBD /* x509v3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x509v3.h; sourceTree = "<group>"; };
 		F467FF9315A6446300EACFBD /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		F467FF9415A6446300EACFBD /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
-		F467FF9515A6446300EACFBD /* openssl-1.0.0a.tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = "openssl-1.0.0a.tar.gz"; sourceTree = "<group>"; };
 		F467FF9915A6446300EACFBD /* RegexKitLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegexKitLite.h; sourceTree = "<group>"; };
 		F467FF9B15A6446300EACFBD /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
 		F467FFD215A6446B00EACFBD /* AccountHelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountHelp.h; sourceTree = "<group>"; };
@@ -764,7 +762,6 @@
 			children = (
 				F467FF4815A6446200EACFBD /* include */,
 				F467FF9215A6446300EACFBD /* lib */,
-				F467FF9515A6446300EACFBD /* openssl-1.0.0a.tar.gz */,
 			);
 			path = "ios-openssl";
 			sourceTree = "<group>";
@@ -1157,7 +1154,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F493B43615A4684500FC40B6 /* JSTools.js in Resources */,
-				F467FFBF15A6446300EACFBD /* openssl-1.0.0a.tar.gz in Resources */,
 				F467006815A64C9500EACFBD /* IFUnicodeURL-LICENSE.txt in Resources */,
 				F467007115A64C9500EACFBD /* README.txt in Resources */,
 				F46700BF15A64DFC00EACFBD /* ffhomeDB.sq3 in Resources */,
@@ -1423,6 +1419,7 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
+				VALID_ARCHS = armv7;
 			};
 			name = Debug;
 		};
@@ -1447,6 +1444,7 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = armv7;
 			};
 			name = Release;
 		};
@@ -1464,6 +1462,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/External/ios-openssl/lib\"",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1485,6 +1484,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/External/ios-openssl/lib\"",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
