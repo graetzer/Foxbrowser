@@ -13,6 +13,8 @@ The backend code is forked from Firefox Home for iOS, on top of that I created a
 - Send Tweet's and mail's directly from the App
 - Best of all: It's free
 
+[More info](http://git.graetzer.org/Foxbrowser/)
+
 ### Limitations
 The Firefox Home codebase doesn't allow changes to the sync data yet, currently the browser works read-only.
 If you visit a site that's not already in the history, it's added locally.
