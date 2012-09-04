@@ -17,7 +17,6 @@
 #import "Reachability.h"
 #import "WeaveService.h"
 #import "NSURL+IFUnicodeURL.h"
-#import "NSURL+Compare.h"
 #import "SGURLProtocol.h"
 
 

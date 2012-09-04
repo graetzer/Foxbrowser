@@ -15,6 +15,7 @@
 #import "Store.h"
 #import "CryptoUtils.h"
 #import "WelcomePage.h"
+#import "SGPreviewPanel.h"
 
 
 SGAppDelegate *appDelegate;
@@ -184,6 +185,9 @@ id<WeaveService> weaveService;
 	for (cookie in [storage cookies])  {
 		[storage deleteCookie: cookie];
 	}
+    
+    NSString *path = [SGPreviewPanel blacklistFilePath];
+    [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
     
 	// Workaround for #602419 - If the wifi is turned off, it acts as if a blank account is signed in
 	// See a more detailed description in LogoutController

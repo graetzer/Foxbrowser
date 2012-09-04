@@ -34,13 +34,27 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>org.graetzer.foxbrowser</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>https</string>
+				<string>http</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright (C) 2012 Simon Peter Grätzer. Licensed under the Apache License, Version 2.0</string>
 	<key>UIPrerenderedIcon</key>
 	<true/>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -55,19 +69,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>org.graetzer.foxbrowser</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>https</string>
-				<string>http</string>
-			</array>
-		</dict>
-	</array>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright (C) 2012 Simon Peter Grätzer. Licensed under the Apache License, Version 2.0</string>
 </dict>
 </plist>

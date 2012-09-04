@@ -132,6 +132,7 @@
 	// showing the Welcome page from now on
 
 	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kWeaveShowedFirstRunPage];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 	[Stockboy restock];
 
 	[_delegate easySetupViewControllerDidLogin: self];
