@@ -95,8 +95,8 @@
     NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage]
                                    defaultCredentialForProtectionSpace:protectionSpace];
     
-    NSError *error = [NSError errorWithDomain:@"org.graetzer.http.auth" code:401 userInfo:nil];
-    self = [self initWithProtectionSpace:protectionSpace
+    NSError *error = [NSError errorWithDomain:@"org.graetzer.http" code:401 userInfo:nil];
+    self = [super initWithProtectionSpace:protectionSpace
                       proposedCredential:credential
                     previousFailureCount:failureCount
                          failureResponse:URLResponse

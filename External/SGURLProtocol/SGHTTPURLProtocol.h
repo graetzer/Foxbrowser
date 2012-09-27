@@ -19,13 +19,7 @@
 
 @end
 
-@class SGHTTPAuthenticationChallenge;
 @interface SGHTTPURLProtocol : NSURLProtocol <NSStreamDelegate, NSURLAuthenticationChallengeSender>
-
-@property (strong, nonatomic) NSInputStream *HTTPStream;
-@property (strong, nonatomic) NSHTTPURLResponse *URLResponse;
-@property (strong, nonatomic) NSMutableData *buffer;
-@property (strong, nonatomic) SGHTTPAuthenticationChallenge *authChallenge;
 
 + (void) registerProtocol;
 + (void) unregisterProtocol;

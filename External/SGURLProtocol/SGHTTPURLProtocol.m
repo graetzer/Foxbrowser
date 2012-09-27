@@ -13,12 +13,18 @@ static NSLock* VariableLock;
 static NSMutableArray *Requests;
 static NSMutableArray *AuthDelegates;
 
+@interface SGHTTPURLProtocol ()
+@property (strong, nonatomic) NSInputStream *HTTPStream;
+@property (strong, nonatomic) NSHTTPURLResponse *URLResponse;
+@property (strong, nonatomic) NSMutableData *buffer;
+@property (strong, nonatomic) SGHTTPAuthenticationChallenge *authChallenge;
+@end
+
 @implementation SGHTTPURLProtocol {
     CFHTTPMessageRef _HTTPMessage;
     NSInteger _authenticationAttempts;
     id<SGAuthDelegate> _authDelegate;
 }
-@synthesize buffer = _buffer;
 
 + (void)load {
     VariableLock = [[NSLock alloc] init];
@@ -157,19 +163,23 @@ static NSMutableArray *AuthDelegates;
             NSString *location = [self.URLResponse.allHeaderFields objectForKey:@"Location"];
             
             // If the response was an authentication failure, try to request fresh credentials.
-            if ((code == 401 || code == 407)
-                && !location) {// The && statement is a workaround for servers who redirect with an 401 after an successful auth
+            if (code == 401 || code == 407) {// The && statement is a workaround for servers who redirect with an 401 after an successful auth
                 // Cancel any further loading and ask the delegate for authentication
                 [self stopLoading];
                 
                 NSAssert(!self.authChallenge,
                          @"Authentication challenge received while another is in progress");
                 self.authChallenge = [[SGHTTPAuthenticationChallenge alloc] initWithResponse:response
-                                                                              previousFailureCount:_authenticationAttempts
+                                                                              previousFailureCount:_authenticationAttempts+1
                                                                                    failureResponse:self.URLResponse
                                                                                             sender:self];
 
                 if (self.authChallenge) {
+                    if (_authenticationAttempts == -1 && self.authChallenge.proposedCredential) {
+                        [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
+                        return;
+                    }
+                    
                     _authenticationAttempts++;
                     if (_authDelegate) {
                         [_authDelegate URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
@@ -177,9 +187,10 @@ static NSMutableArray *AuthDelegates;
                         [self.client URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
                     }
                     return; // Stops the delegate being sent a response received message
+                } else {
+                    [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http" code:401 userInfo:nil]];
                 }
-            } else if (code == 301 ||code == 302 || code == 303
-                       || (code == 401 && location)) { // Workaround
+            } else if (code == 301 ||code == 302 || code == 303) { // Workaround
                 // Redirect with a new GET request, assume the server processed the request
                 // http://en.wikipedia.org/wiki/HTTP_301 Handle 301 only if GET or HEAD
                 // TODO: Maybe implement 301 differently.
@@ -229,12 +240,19 @@ static NSMutableArray *AuthDelegates;
     switch (streamEvent)
     {
             
-        case NSStreamEventOpenCompleted:
-            self.buffer = [[NSMutableData alloc] initWithCapacity:1024*1024];
-            break;
+//        case NSStreamEventOpenCompleted:
+//            
+//            break;
             
         case NSStreamEventHasBytesAvailable:
         {
+            if (!self.buffer) {
+                NSUInteger capacity = (NSUInteger)[[self.URLResponse.allHeaderFields objectForKey:@"Content-Length"] integerValue];
+                if (capacity == 0)
+                    capacity = 1024*1024;
+                self.buffer = [[NSMutableData alloc] initWithCapacity:capacity];
+            }
+            
             while ([theStream hasBytesAvailable])
             {
                 uint8_t buf[1024];
@@ -261,13 +279,13 @@ static NSMutableArray *AuthDelegates;
         }
             
         case NSStreamEventErrorOccurred:{    // Report an error in the stream as the operation failing
-            ELog(@"An error occured")
+            ELog(@"An stream error occured")
             [self.client URLProtocol:self didFailWithError:[theStream streamError]];
             break;
         }
             
         default: {
-            DLog(@"Error: Unhandled event %i", streamEvent);
+            DLog(@"Unhandled event %i", streamEvent);
         }
     }
 }
@@ -287,7 +305,7 @@ static NSMutableArray *AuthDelegates;
 
     
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Host"), (__bridge CFStringRef)request.URL.host);
-    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Charset"), CFSTR("utf-8, ISO-8859-1;q=0.7"));
+    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Charset"), CFSTR("utf-8;q=1.0, ISO-8859-1;q=0.5"));
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Encoding"), CFSTR("gzip;q=1.0, deflate;q=0.6, identity;q=0.5, *;q=0"));
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Connection"), CFSTR("Keep-Alive"));
 

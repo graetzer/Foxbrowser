@@ -342,7 +342,7 @@
             NSURLCredential *credential = [NSURLCredential credentialWithUser:creds.usernameField.text
                                                                      password:creds.passwordField.text
                                                                   persistence:creds.persistence];
-            [[NSURLCredentialStorage sharedCredentialStorage] setCredential:credential
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
                                                          forProtectionSpace:creds.challenge.protectionSpace];
             [creds.challenge.sender useCredential:credential
                        forAuthenticationChallenge:creds.challenge];
