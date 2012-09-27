@@ -6,17 +6,19 @@
 //  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
 
-#import "SGURLBarController.h"
+#import "SGSearchController.h"
 #import "Store.h"
 #import "Stockboy.h"
 #import "WeaveService.h"
 
 
-@interface SGURLBarController ()
+@interface SGSearchController ()
 
 @end
 
-@implementation SGURLBarController
+@implementation SGSearchController {
+    NSString* gLastSearchString;
+}
 @synthesize delegate;
 @synthesize searchHits;
 
@@ -53,7 +55,7 @@ static NSArray* gFreshSearchHits = nil;
     //first section is normal sync results, the final section has magic "goto" behavior
     if (section == 0)
     {
-        if (self.delegate.searchBar.text != nil && self.delegate.searchBar.text.length != 0 && [searchHits count])
+        if (self.delegate.text.length != 0 && [searchHits count])
         {
             return [searchHits count];
         }
@@ -158,13 +160,13 @@ static NSArray* gFreshSearchHits = nil;
 		NSString* destination = nil;        
 		if (indexPath.section == 1)
 		{
-            destination = [NSString stringWithFormat:[Stockboy getURIForKey:@"Google URL pure"], [WeaveOperations urlEncode:gLastSearchString]];
+            destination = [[WeaveOperations sharedOperations] searchURL:gLastSearchString];
 		}
 		else 
 		{
 			destination = cell.detailTextLabel.text;
 		}
-		[self.delegate finishSearchWithString:destination];
+		[self.delegate finishSearch:destination title:cell.textLabel.text];
 	}
     
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -187,8 +189,9 @@ static NSArray* gFreshSearchHits = nil;
     } else {
         //now fire up a new search thread
         gRefreshThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadRefreshHits:) object:query];
-        if (gRefreshThread != nil)//Seems to be nessesary sometimes
+        if (gRefreshThread != nil) {//Seems to be nessesary sometimes
             [gRefreshThread start];
+        }
     }
 }
 
@@ -200,21 +203,23 @@ static NSArray* gFreshSearchHits = nil;
             [self refreshHits:searchText];
             if ([[NSThread currentThread] isCancelled])  //we might be cancelled, because a better search came along, so don't display our results
             {
-                NSLog(@"search thread was cancelled and replaced");
+                DLog(@"search thread was cancelled and replaced");
             }
             else
             {
-                [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                if (self.tableView) {// View might as well be gone
+                    [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+                }
             }
         }
         @catch (NSException *e) 
         {
-            NSLog(@"Failed to update search results");
+            ELog(@"Failed to update search results");
         }
-        @finally 
-        {
-            gRefreshThread = nil;
-        }
+//        @finally 
+//        {
+//            gRefreshThread = nil;
+//        }
     }
 }
 

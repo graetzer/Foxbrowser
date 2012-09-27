@@ -59,13 +59,14 @@
 	
 	CGRect r = CGRectInset(rect, 7.5, 7.5);
 	
-	CGContextSetRGBStrokeColor(context, 108./255., 115./255., 122./255, 1.0);
+    CGFloat c = 108./255.;
+	CGContextSetRGBStrokeColor(context, c, c, c, 1.);//108./255., 115./255., 122./255, 1.0);
     CGContextSetLineWidth(context, 3.0);
     CGContextAddEllipseInRect(context, r);
 	CGContextStrokePath(context);
 	
 	
-	CGContextSetRGBFillColor(context, 108./255., 115./255., 122./255 ,1);
+	CGContextSetRGBFillColor(context, c, c, c, 1.);//108./255., 115./255., 122./255 ,1);
     float start = (M_PI*2.0 *_displayProgress) - (M_PI/2.0);
     
     CGContextAddArc(context, rect.size.width/2, rect.size.height/2, (rect.size.width/2)-7, start, start + (M_PI/2.0), false);
@@ -85,7 +86,6 @@
 	
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateTwirl) object:nil];
 	[self performSelector:@selector(updateTwirl) withObject:nil afterDelay:AnimationTimer];
-	
 }
 
 - (void)startAnimating {
@@ -95,6 +95,15 @@
 
 - (void)stopAnimating {
     _running = NO;
+}
+
+- (void)setHidden:(BOOL)hidden {
+    [super setHidden:hidden];
+    if (hidden) {
+        [self stopAnimating];
+    } else {
+        [self startAnimating];
+    }
 }
 
 - (void)didMoveToSuperview {

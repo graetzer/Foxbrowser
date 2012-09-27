@@ -30,10 +30,12 @@
 @end
 
 extern NSString *kWeaveDataRefreshNotification;
+extern NSString *kWeaveBackgroundedAtTime;
 extern NSString *kWeaveSyncStatusChangedNotification;
 extern NSString *kWeaveMessageKey;
 extern NSString *kWeaveShowedFirstRunPage;
 extern NSString *kWeaveUseNativeApps;
+extern NSString *kWeavePrivateMode;
 
 BOOL IsNativeAppURLWithoutChoice(NSURL* link);
 BOOL IsNativeAppURL(NSURL* url);
@@ -43,10 +45,15 @@ BOOL IsBlockedURL(NSURL* url);
 extern id<WeaveService> weaveService;
 
 @interface WeaveOperations : NSObject
+@property (strong, atomic) NSOperationQueue *queue;
 
-+ (NSURL *)parseURLString:(NSString *)input;
-+ (NSString *)urlEncode:(NSString *)string;
-+ (BOOL)handleURLInternal:(NSURL *)url;
-+ (void)addHistoryURL:(NSURL *)url title:(NSString *)title;
+- (NSURL *)parseURLString:(NSString *)input;
+- (NSString *)urlEncode:(NSString *)string;
+- (NSString *)searchURL:(NSString *)string;
+- (BOOL)handleURLInternal:(NSURL *)url;
+- (void)modifyRequest:(NSURLRequest *)request;
+- (void)addHistoryURL:(NSURL *)url title:(NSString *)title;
+
++ (WeaveOperations *)sharedOperations;
 
 @end

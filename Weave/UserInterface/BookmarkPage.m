@@ -58,8 +58,8 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(refresh)
+    [[NSNotificationCenter defaultCenter] addObserver:self.tableView
+                                             selector:@selector(reloadData)
                                                  name:kWeaveDataRefreshNotification
                                                object:nil];
 }
@@ -67,12 +67,12 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
 	[super viewWillDisappear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self.tableView];
 }
 
 - (void) refresh
 {
-  [(UITableView*)self.view reloadData];
+  [self.tableView reloadData];
 }
 
 
@@ -210,7 +210,7 @@
 	{
 		if ([weaveService canConnectToInternet])
 		{
-            [self.delegate handleURLInput: cell.detailTextLabel.text withTitle: cell.textLabel.text];
+            [self.delegate handleURLInput: cell.detailTextLabel.text title: cell.textLabel.text];
 		}
 		else 
 		{

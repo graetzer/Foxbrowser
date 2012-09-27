@@ -8,10 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class SGBlankController;
+@class SGBlankView;
 @interface SGBottomView : UIView
 @property (assign, nonatomic) CGFloat markerPosititon;
 @property (readonly, nonatomic) UIView *marker;
-@property (weak, nonatomic) SGBlankController *container;
+@property (weak, nonatomic) SGBlankView *container;
 
 @end

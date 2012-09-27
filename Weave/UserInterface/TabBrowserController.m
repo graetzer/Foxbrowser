@@ -156,7 +156,7 @@
 	
 	if ([weaveService canConnectToInternet])
 	{
-        [appDelegate.tabsController handleURLInput:cell.detailTextLabel.text withTitle:cell.textLabel.text];
+        [appDelegate.tabsController handleURLInput:cell.detailTextLabel.text title:cell.textLabel.text];
 	}
 	else 
 	{

@@ -12,6 +12,8 @@
 @property (strong, nonatomic) UITextField *usernameField;
 @property (strong, nonatomic) UITextField *passwordField;
 @property (strong, nonatomic) UISegmentedControl* rememberCredentials;
+@property (strong, nonatomic) NSURLAuthenticationChallenge *challenge;
+@property (assign, nonatomic) NSURLCredentialPersistence persistence;
 
-- (id)initWithUsername:(NSString *)username persistence:(NSURLCredentialPersistence)persistence;
+- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge delegate:(id<UIAlertViewDelegate>)delegate;
 @end

@@ -468,7 +468,7 @@ static Store* _gStore = nil;
 			NSString *id_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_ID_COLUMN)];
 			NSString *url_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_URL_COLUMN)];
 			NSString *title_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_TITLE_COLUMN)];
-			NSNumber *sort_col = [[NSNumber alloc] initWithDouble:(double)sqlite3_column_double(dbStatement, BOOKMARKS_SORTINDEX_COLUMN)];
+			NSNumber *sort_col = [[NSNumber alloc] initWithInt:sqlite3_column_int(dbStatement, HISTORY_SORTINDEX_COLUMN)];
 
 			[historyItem setObject:id_col forKey:@"id"];
 			[historyItem setObject:url_col forKey:@"url"];
@@ -926,7 +926,7 @@ static Store* _gStore = nil;
 			int resultCode = sqlite3_finalize(stmnt);
 			if (resultCode != SQLITE_OK)
 			{
-				NSLog(@"Error storing history item: %d)", resultCode);
+				DLog(@"Error storing history item: %d)", resultCode);
 				result = NO;
 			}
 		}

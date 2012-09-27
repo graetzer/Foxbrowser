@@ -8,16 +8,24 @@
 
 #import "SGSearchBar.h"
 
-@implementation SGSearchBar
+@implementation SGSearchBar {
+    UIToolbar *_inputAccessory;
+}
 
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
+- (id)initWithDelegate:(id<UITextFieldDelegate>)delegate {
+    if (self = [super initWithFrame:CGRectMake(0, 0, 200., 30.)]) {
+        self.delegate = delegate;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.placeholder = NSLocalizedString(@"Enter URL or search query here", nil);
         self.keyboardType = UIKeyboardTypeASCIICapable;
         self.autocapitalizationType = UITextAutocapitalizationTypeNone;
+        self.autocorrectionType = UITextAutocorrectionTypeNo;
+        self.borderStyle = UITextBorderStyleRoundedRect;
+        self.clearButtonMode = UITextFieldViewModeAlways;
+        self.textColor = [UIColor darkTextColor];
+        
+        self.leftView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"magnify"]];
+        self.leftViewMode = UITextFieldViewModeAlways;
     }
     return self;
 }
@@ -52,7 +60,7 @@
 }
 
 - (IBAction)addText:(UIBarButtonItem *)sender {
-    self.text = [self.text stringByAppendingString:sender.title];
+    [self insertText:sender.title];
 }
 
 @end

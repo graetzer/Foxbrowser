@@ -13,7 +13,11 @@
 #import "SGBottomView.h"
 
 @implementation SGBlankController
-@synthesize tabBrowser = _tabBrowser, previewPanel = _previewPanel, scrollView = _scrollView;
+@dynamic blankView;
+
+- (SGBlankView *)blankView {
+    return (SGBlankView *)self.view;
+}
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -21,14 +25,8 @@
 }
 
 - (void)loadView {
-    self.view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 768., 925.)];
-    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 768., 865.)];
-    self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.scrollView.canCancelContentTouches = NO;
-    self.scrollView.bounces = NO;
-    self.scrollView.backgroundColor = [UIColor whiteColor];
-    self.scrollView.delegate = self;
-    [self.view addSubview:self.scrollView];
+    self.view = [[SGBlankView alloc] initWithFrame:CGRectZero];
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 }
 
 - (void)viewDidLoad {
@@ -36,41 +34,33 @@
     
     self.title = NSLocalizedString(@"New Tab", @"New Tab");
     
-    CGRect bottomFrame = CGRectMake(0, self.view.bounds.size.height - 60., self.view.bounds.size.width, 60.);
-    self.bottomView = [[SGBottomView alloc] initWithFrame:bottomFrame];
-    self.bottomView.container = self;
-    [self.view addSubview:self.bottomView];
-
     self.tabBrowser = [[TabBrowserController alloc] initWithStyle:UITableViewStylePlain];
     [self addChildViewController:self.tabBrowser];
-    [self.scrollView addSubview:self.tabBrowser.tableView];
+    self.blankView.tabBrowserView = self.tabBrowser.view;
+    [self.blankView.scrollView addSubview:self.tabBrowser.view];
     [self.tabBrowser didMoveToParentViewController:self];
+    
+    //[self layoutAllViews];
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    CGSize scrollSize = self.scrollView.bounds.size;
-    CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
-    self.tabBrowser.view.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
-    self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
-    [self.previewPanel layout];
+    //[self layoutAllViews];
+    //[self.blankView.previewPanel layout];
 }
 
 - (UIView *)rotatingFooterView {
-    return self.bottomView;
+    return self.blankView.bottomView;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    CGSize scrollSize = self.scrollView.bounds.size;
-    CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
-    self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
-    self.tabBrowser.view.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
-    
-    self.previewPanel = [SGPreviewPanel instance];
-    self.previewPanel.delegate = self;
+    self.blankView.previewPanel = [SGPreviewPanel instance];
+    self.blankView.previewPanel.delegate = self;
     CGRect previewFrame = self.view.bounds;
     previewFrame.size.height -= 60.;
-    self.previewPanel.frame = previewFrame;
-    [self.scrollView addSubview:self.previewPanel];
+    self.blankView.previewPanel.frame = previewFrame;
+    [self.blankView.scrollView addSubview:self.blankView.previewPanel];
+    
+   // [self layoutAllViews];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(refresh)
@@ -90,14 +80,13 @@
 - (void)viewDidUnload {
     [super viewDidUnload];
     
-    self.previewPanel = nil;
     [self.tabBrowser willMoveToParentViewController:nil];
     [self.tabBrowser removeFromParentViewController];
     self.tabBrowser = nil;
 }
 
 - (void)refresh {
-    [self.previewPanel refresh];
+    [self.blankView.previewPanel refresh];
 }
 
 #pragma mark - SGPreviewPanelDelegate
@@ -118,13 +107,55 @@
         NSString *url = [item objectForKey:@"url"];
         if (url) {
             SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
-            [tabsC handleURLInput:url withTitle:tile.label.text];
+            [tabsC handleURLInput:url title:tile.label.text];
         }
     }
 }
 
+@end
+
+@implementation SGBlankView
+
+#define SG_BOTTOM_BAR_HEIGHT 60.
+
+- (id)initWithFrame:(CGRect)frame {
+    frame = CGRectMake(0, 80, 768., 925.);//TODO a proper calculation?
+    
+    if (self = [super initWithFrame:frame]) {
+        frame.size.height -= SG_BOTTOM_BAR_HEIGHT;
+        self.scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
+        self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.scrollView.canCancelContentTouches = NO;
+        self.scrollView.bounces = NO;
+        self.scrollView.backgroundColor = [UIColor whiteColor];
+        self.scrollView.delegate = self;
+        [self addSubview:self.scrollView];
+        
+        CGRect bottomFrame = CGRectMake(0, frame.size.height, frame.size.width, SG_BOTTOM_BAR_HEIGHT);
+        self.bottomView = [[SGBottomView alloc] initWithFrame:bottomFrame];
+        self.bottomView.container = self;
+        [self addSubview:self.bottomView];
+    }
+    
+    return self;
+}
+
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     self.bottomView.markerPosititon = scrollView.contentOffset.x/SG_TAB_WIDTH;
+}
+
+- (void)layoutSubviews {
+    CGSize scrollSize = self.scrollView.frame.size;
+//    if (scrollSize.width < scrollSize.height) {
+//        // The parent view is not yet properly sized
+//        CGFloat width = scrollSize.width;
+//        scrollSize.width = scrollSize.height;
+//        scrollSize.height = width;
+//    }
+    
+    CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
+    self.tabBrowserView.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
+    self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
 }
 
 @end

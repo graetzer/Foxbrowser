@@ -24,8 +24,7 @@
 #import <MessageUI/MessageUI.h>
 #import <Twitter/Twitter.h>
 
-#import "SGURLBarController.h"
-
+#import "SGSearchController.h"
 
 @protocol SGToolbarDelegate <NSObject>
 - (void)reload;
@@ -33,7 +32,7 @@
 
 - (BOOL)isLoading;
 
-- (void)goBack;
+- (void)goBack; 
 - (void)goForward;
 
 - (BOOL)canGoBack;
@@ -43,25 +42,26 @@
 - (NSURL *)URL;
 
 - (BOOL)canStopOrReload;
-- (void)handleURLInput:(NSString*)input;
-- (void)handleURLInput:(NSString*)input withTitle:(NSString *)title;
+- (void)handleURLInput:(NSString*)input title:(NSString *)title;
 @end
 
 
-@class SGURLBarController, SGProgressCircleView;
-@interface SGToolbar : UIToolbar <UISearchBarDelegate, UIPopoverControllerDelegate, 
+@class SGSearchController, SGProgressCircleView, BookmarkPage, SGSearchBar;
+
+@interface SGToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
 UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGURLBarDelegate> {
     UIColor *_bottomColor;
 }
 
 @property (nonatomic, weak) id<SGToolbarDelegate> delegate;
 
-@property (nonatomic, strong) UISearchBar *searchBar;
+@property (nonatomic, strong) SGSearchBar *searchField;
 @property (nonatomic, strong) SGProgressCircleView *progressView;
 
-@property (nonatomic, strong) UIPopoverController *popoverController;
+@property (nonatomic, strong) UINavigationController *bookmarks;
+@property (nonatomic, strong) SGSearchController *urlBarViewController;
+@property (strong, nonatomic) UIPopoverController *popoverController;
 @property (nonatomic, strong) UIActionSheet *actionSheet;
-@property (nonatomic, strong) SGURLBarController *urlBarViewController;
 
 - (id)initWithFrame:(CGRect)frame delegate:(id<SGToolbarDelegate>)delegate;
 - (void)updateChrome;

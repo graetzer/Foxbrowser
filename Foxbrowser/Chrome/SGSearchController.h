@@ -11,14 +11,12 @@
 
 @protocol SGURLBarDelegate <NSObject>
 
-- (void)finishSearchWithString:(NSString *)searchString;
-@property (nonatomic, strong) UISearchBar *searchBar;
+- (void)finishSearch:(NSString *)searchString title:(NSString *)title;
+- (NSString *)text;
 
 @end
 
-@interface SGURLBarController : UITableViewController {
-    NSString* gLastSearchString;
-}
+@interface SGSearchController : UITableViewController 
 
 @property (nonatomic, weak) id<SGURLBarDelegate> delegate;
 @property (nonatomic, retain) NSArray *searchHits;

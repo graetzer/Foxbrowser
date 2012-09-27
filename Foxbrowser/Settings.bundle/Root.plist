@@ -5,54 +5,44 @@
 	<key>PreferenceSpecifiers</key>
 	<array>
 		<dict>
-			<key>Title</key>
-			<string>Group</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Version 1.2</string>
+			<key>Key</key>
+			<string></string>
 		</dict>
 		<dict>
-			<key>AutocapitalizationType</key>
-			<string>None</string>
-			<key>AutocorrectionType</key>
-			<string>No</string>
 			<key>DefaultValue</key>
-			<string></string>
-			<key>IsSecure</key>
 			<false/>
 			<key>Key</key>
-			<string>name_preference</string>
-			<key>KeyboardType</key>
-			<string>Alphabet</string>
+			<string>org.graetzer.trackHeader</string>
 			<key>Title</key>
-			<string>Name</string>
-			<key>Type</key>
-			<string>PSTextFieldSpecifier</string>
-		</dict>
-		<dict>
-			<key>DefaultValue</key>
-			<true/>
-			<key>Key</key>
-			<string>enabled_preference</string>
-			<key>Title</key>
-			<string>Enabled</string>
+			<string>Do Not Track Header</string>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 		</dict>
 		<dict>
-			<key>DefaultValue</key>
-			<real>0.5</real>
-			<key>Key</key>
-			<string>slider_preference</string>
-			<key>MaximumValue</key>
-			<integer>1</integer>
-			<key>MaximumValueImage</key>
-			<string></string>
-			<key>MinimumValue</key>
-			<integer>0</integer>
-			<key>MinimumValueImage</key>
-			<string></string>
 			<key>Type</key>
-			<string>PSSliderSpecifier</string>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Search Engine</string>
+			<key>Key</key>
+			<string>org.graetzer.search</string>
+			<key>DefaultValue</key>
+			<string>https://duckduckgo.com/?q=%@&amp;kl=%@&amp;t=foxbrowser</string>
+			<key>Titles</key>
+			<array>
+				<string>DuckDuckGo</string>
+				<string>Google</string>
+				<string>Bing</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>https://duckduckgo.com/?q=%@&amp;kl=%@&amp;t=foxbrowser</string>
+				<string>http://www.google.com/search?q=%@&amp;hl=%@</string>
+				<string>http://www.bing.com/search?q=%@&amp;mkt=%@</string>
+			</array>
 		</dict>
 	</array>
 	<key>StringsTable</key>

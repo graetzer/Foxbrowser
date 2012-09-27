@@ -54,12 +54,10 @@
     // Fill with current tab color
     CGColorRef startColor = [self.tabColor CGColor];
     
-    CGContextSaveGState(ctx);
-    CGContextAddPath(ctx, path);
     CGContextSetFillColorWithColor(ctx, startColor);
     CGContextSetShadow(ctx, CGSizeMake(0, -1), kShadowRadius);
+    CGContextAddPath(ctx, path);
     CGContextFillPath(ctx);
-    CGContextRestoreGState(ctx);
     
     CGPathRelease(path);
     

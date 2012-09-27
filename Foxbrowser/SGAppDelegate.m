@@ -38,6 +38,7 @@ id<WeaveService> weaveService;
     self.window.rootViewController = self.tabsController;
     [self.window makeKeyAndVisible];
     
+    [self evaluateDefaultSettings];
     // Weave stuff
     [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
     
@@ -46,7 +47,7 @@ id<WeaveService> weaveService;
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
     if ([url.scheme isEqualToString: @"http"] || [url.scheme isEqualToString: @"https"]) {
-        [self.tabsController addTabWithURL:url withTitle:url.host];
+        [self.tabsController addTabWithURL:url withTitle:sourceApplication];
         return YES;
     }
     return NO;
@@ -60,7 +61,7 @@ id<WeaveService> weaveService;
 {
     //stop timers, threads, spinner animations, etc.
     // note the time we were suspended, so we can decide whether to do a refresh when we are resumed
-    [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970] forKey:@"backgroundedAtTime"];
+    [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970] forKey:kWeaveBackgroundedAtTime];
     [self stopProgressSpinners];
     [Stockboy cancel];
     
@@ -77,7 +78,7 @@ id<WeaveService> weaveService;
 	}
     
     //check to see if we were suspended for 5 minutes or more, and refresh if true
-    double slept = [[NSUserDefaults standardUserDefaults] doubleForKey:@"backgroundedAtTime"];
+    double slept = [[NSUserDefaults standardUserDefaults] doubleForKey:kWeaveBackgroundedAtTime];
     double now =[[NSDate date] timeIntervalSince1970];
     
     if ((now - slept) >= FIVE_MINUTES_ELAPSED)
@@ -88,8 +89,28 @@ id<WeaveService> weaveService;
 
 #pragma mark - WeaveService
 
+- (void)evaluateDefaultSettings
+{
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"Settings" ofType:@"bundle"];
+    id mutable = [NSMutableDictionary dictionary];
+    id settings = [NSDictionary dictionaryWithContentsOfFile: [path stringByAppendingPathComponent:@"Root.plist"]];
+    id specifiers = [settings objectForKey: @"PreferenceSpecifiers"];
+    for (id prefItem in specifiers) {
+        id key = [prefItem objectForKey: @"Key"];
+        id value = [prefItem objectForKey: @"DefaultValue"];
+        if ( key && value ) {
+            [mutable setObject: value
+                        forKey: key];
+        }
+    }
+    NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
+    [def registerDefaults:mutable];
+    [def synchronize];
+}
+
 - (void)setupWeave {
     [Stockboy prepare];
+    
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 	if (userDefaults != nil)
 	{
@@ -163,7 +184,7 @@ id<WeaveService> weaveService;
     [[NSNotificationCenter defaultCenter] postNotificationName:kWeaveDataRefreshNotification object:self];
 }
 
-- (void) login{
+- (void) login {
     // Present the WelcomePage with the TabBarController as it's parent
     WelcomePage* welcomePage = [WelcomePage new];
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
@@ -196,7 +217,7 @@ id<WeaveService> weaveService;
     //	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"customServerURL"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveShowedFirstRunPage];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"needsFullReset"];
-	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"backgroundedAtTime"];
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveBackgroundedAtTime];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useSafari"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveUseNativeApps];
 	[[NSUserDefaults standardUserDefaults] synchronize];

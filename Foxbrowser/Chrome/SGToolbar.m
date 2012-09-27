@@ -32,21 +32,17 @@
 #import "WelcomePage.h"
 
 @interface SGToolbar ()
-@property (nonatomic, strong) UIBarButtonItem *forwardItem;
-@property (nonatomic, strong) UIBarButtonItem *backItem;
-@property (nonatomic, strong) UIBarButtonItem *reloadItem;
-@property (nonatomic, strong) UIBarButtonItem *stopItem;
-@property (nonatomic, strong) UIBarButtonItem *progressItem;
-@property (nonatomic, strong) UIBarButtonItem *searchItem;
-@property (nonatomic, strong) UIBarButtonItem *bookmarksItem;
-@property (nonatomic, strong) UIBarButtonItem *fixed;
-@property (nonatomic, strong) UIBarButtonItem *flexible;
-@property (nonatomic, strong) UIBarButtonItem *sytemItem;
+@property (nonatomic, strong) UIButton *forwardItem;
+@property (nonatomic, strong) UIButton *backItem;
+@property (nonatomic, strong) UIButton *bookmarksItem;
+@property (nonatomic, strong) UIButton *systemItem;
+@property (nonatomic, strong) UIButton *reloadItem;
+@property (nonatomic, strong) UIButton *stopItem;
+
 
 @end
 
 @implementation SGToolbar
-@synthesize delegate = _myDelegate;
 
 - (id)initWithFrame:(CGRect)frame delegate:(id<SGToolbarDelegate>)delegate
 {
@@ -56,53 +52,71 @@
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         _bottomColor = kTabColor;
         
-        self.backItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"left"] 
-                                                         style:UIBarButtonItemStylePlain 
-                                                        target:self.delegate 
-                                                        action:@selector(goBack)];
+        CGRect btnRect = CGRectMake(0, 0, 30, 30);
+
+        self.backItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.backItem.frame = btnRect;
+        self.backItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        self.backItem.backgroundColor = [UIColor clearColor];
+        self.backItem.showsTouchWhenHighlighted = YES;
+        [self.backItem setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
+        [self.backItem addTarget:self.delegate action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.backItem];
         
-        self.forwardItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"right"] 
-                                                       style:UIBarButtonItemStylePlain 
-                                                      target:self.delegate 
-                                                      action:@selector(goForward)];
+        self.forwardItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.forwardItem.frame = btnRect;
+        self.forwardItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        self.forwardItem.backgroundColor = [UIColor clearColor];
+        self.forwardItem.showsTouchWhenHighlighted = YES;
+        [self.forwardItem setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
+        [self.forwardItem addTarget:self.delegate action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.forwardItem];
+        
+        self.bookmarksItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.bookmarksItem.frame = btnRect;
+        self.bookmarksItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        self.bookmarksItem.backgroundColor = [UIColor clearColor];
+        self.bookmarksItem.showsTouchWhenHighlighted = YES;
+        [self.bookmarksItem setImage:[UIImage imageNamed:@"bookmark"] forState:UIControlStateNormal];
+        [self.bookmarksItem addTarget:self action:@selector(showLibrary:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.bookmarksItem];
+        
+        self.systemItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.systemItem.frame = btnRect;
+        self.systemItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        self.systemItem.backgroundColor = [UIColor clearColor];
+        self.systemItem.showsTouchWhenHighlighted = YES;
+        [self.systemItem setImage:[UIImage imageNamed:@"system"] forState:UIControlStateNormal];
+        [self.systemItem addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.systemItem];
         
         self.progressView = [[SGProgressCircleView alloc] init];
-        self.progressItem = [[UIBarButtonItem alloc] initWithCustomView:self.progressView];
+        [self addSubview:self.progressView];
         
-        self.searchBar = [[SGSearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 483.0, 0.0)];
-        self.searchBar.delegate = self;
-        self.searchItem = [[UIBarButtonItem alloc] initWithCustomView:_searchBar];
+        self.searchField = [[SGSearchBar alloc] initWithDelegate:self];
+        [self addSubview:self.searchField];
         
-        self.bookmarksItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemBookmarks
-                                                                                       target:self 
-                                                                                       action:@selector(showLibrary:)];
-        self.fixed = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
-                                                                                target:nil 
-                                                                                action:nil];
-        self.fixed.width = 20.;
+        self.reloadItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.reloadItem.frame = btnRect;
+        self.reloadItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        self.reloadItem.backgroundColor = [UIColor clearColor];
+        self.reloadItem.showsTouchWhenHighlighted = YES;
+        [self.reloadItem setImage:[UIImage imageNamed:@"reload"] forState:UIControlStateNormal];
+        [self.reloadItem addTarget:self.delegate action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.reloadItem];
         
-        self.flexible = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
-                                                                   target:nil
-                                                                   action:nil];
-
+        self.stopItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.stopItem.frame = btnRect;
+        self.stopItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        self.stopItem.backgroundColor = [UIColor clearColor];
+        self.stopItem.showsTouchWhenHighlighted = YES;
+        [self.stopItem setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
+        [self.stopItem addTarget:self.delegate action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.stopItem];
         
-        self.sytemItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction
-                                                                                   target:self 
-                                                                                   action:@selector(showOptions:)];
-        
-        self.reloadItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh 
-                                                                                     target:self.delegate 
-                                                                                     action:@selector(reload)];
-        self.stopItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop
-                                                                      target:self.delegate
-                                                                      action:@selector(stop)];
-        
-        self.items = [NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
-                      _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil];
-        
-        self.urlBarViewController = [[SGURLBarController alloc] initWithStyle:UITableViewStylePlain];
+        self.urlBarViewController = [[SGSearchController alloc] initWithStyle:UITableViewStylePlain];
         self.urlBarViewController.delegate = self;
-        
+                
         [self updateChrome];
     }
     return self;
@@ -112,7 +126,7 @@
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGPoint topCenter = CGPointMake(CGRectGetMidX(self.bounds), 0.0f);
     CGPoint bottomCenter = CGPointMake(CGRectGetMidX(self.bounds), self.bounds.size.height);
-    CGFloat locations[2] = { 0.00, 0.95};
+    CGFloat locations[2] = { 0.00, 1.0};
     
     CGFloat redEnd, greenEnd, blueEnd, alphaEnd;
     [_bottomColor getRed:&redEnd green:&greenEnd blue:&blueEnd alpha:&alphaEnd];
@@ -126,34 +140,59 @@
     CGColorSpaceRelease(colorspace);
 }
 
-#pragma mark - Libary
-
-- (IBAction)showLibrary:(UIBarButtonItem *)sender {
-    if (self.popoverController) {
-        [self.popoverController dismissPopoverAnimated:YES];
-        self.popoverController = nil;
-        return;
-    }
-    [self dismissPopovers];
+- (void)layoutSubviews {
+    CGFloat diff = 5.;
+    CGFloat length = 40.;
     
-    BookmarkPage *bookmarks = [BookmarkPage new];
-    bookmarks.delegate = self.delegate;
-    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:bookmarks];
-    self.popoverController = [[UIPopoverController alloc] initWithContentViewController:nav];
-    self.popoverController.delegate = self;
-    [self.popoverController presentPopoverFromBarButtonItem:sender
-                                   permittedArrowDirections:UIPopoverArrowDirectionAny
-                                                   animated:YES];
+    CGRect btnR = CGRectMake(diff, (self.bounds.size.height - length)/2, length, length);
+    self.backItem.frame = btnR;
+    
+    btnR.origin.x += length + diff;
+    self.forwardItem.frame = btnR;
+    
+    btnR.origin.x += length + 2*diff;
+    self.bookmarksItem.frame = btnR;
+    
+    btnR.origin.x += length + diff;
+    self.systemItem.frame = btnR;
+    
+    CGRect org = self.searchField.frame;
+    org.size.width = self.bounds.size.width - (btnR.origin.x + 3*length + 3*diff);
+    org.origin.x = self.bounds.size.width - 2*diff - length - org.size.width;
+    org.origin.y = (self.bounds.size.height - org.size.height)/2;
+    self.searchField.frame = org;
+    
+    btnR.origin.x = self.bounds.size.width - length - diff;
+    self.reloadItem.frame = btnR;
+    self.stopItem.frame = btnR;
+    
+    btnR.origin.x = org.origin.x - diff - length;
+    self.progressView.frame = btnR;
 }
 
-- (IBAction)showOptions:(UIBarButtonItem *)sender {
-    if (self.actionSheet) {
-        [self.actionSheet dismissWithClickedButtonIndex:-1 animated:YES];
-        self.actionSheet = nil;
-        return;
-    }
-    [self dismissPopovers];
+#pragma mark - Libary
+
+- (IBAction)showLibrary:(UIButton *)sender {
+    [self destroyPopovers];
     
+    if (!self.bookmarks) {
+        BookmarkPage *bookmarksPage = [BookmarkPage new];
+        bookmarksPage.delegate = self.delegate;
+        self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
+    }
+    
+    self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.bookmarks];
+    self.popoverController.delegate = self;
+    [self.popoverController presentPopoverFromRect:sender.frame
+                                            inView:self
+                          permittedArrowDirections:UIPopoverArrowDirectionAny
+                                          animated:YES];
+}
+
+- (IBAction)showOptions:(UIButton *)sender {
+    [self destroyPopovers];
+    
+    //BOOL privateMode = [[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode];
     self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil 
                             delegate:self
                             cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
@@ -162,18 +201,19 @@
                             NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                             NSLocalizedString(@"Email URL", nil),
                             NSLocalizedString(@"Tweet", @"Tweet the current url"),
+                        //!privateMode ? NSLocalizedString(@"Enable Private Browsing", nil) : NSLocalizedString(@"Disable Private Browsing", nil) ,
                             NSLocalizedString(@"Settings", nil), nil];
-    [self.actionSheet showFromBarButtonItem:sender animated:YES];
+    [self.actionSheet showFromRect:sender.frame inView:self animated:YES];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     NSURL *url = [self.delegate URL];
 
     switch (buttonIndex) {
-        case 0:
+        case 0: // Open in mobile safari
             [[UIApplication sharedApplication] openURL:url];
             break;
-        case 1:
+        case 1: // Send a mail
             if ([MFMailComposeViewController canSendMail]) {
                 MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
                 mail.mailComposeDelegate = self;
@@ -184,21 +224,32 @@
             }
             break;
             
-        case 2:
+        case 2: // Send a tweet
             if ([TWTweetComposeViewController canSendTweet]) {
                 TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
                 [tw addURL:url];
                 [appDelegate.tabsController presentModalViewController:tw animated:YES];
             }
             break;
+        
+//        case 3: // Toggle private mode
+//            {
+//                BOOL privateMode = ![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode];
+//                [[NSUserDefaults standardUserDefaults] setBool:privateMode forKey:kWeavePrivateMode];
+//                if (privateMode) {// Enable it
+//                    
+//                } else {
+//                    
+//                }
+//                [[NSUserDefaults standardUserDefaults] synchronize];
+//            }
+//            break;
             
-        case 3:
+        case 3: // Show settings or welcome page
             {
                 BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
                 if (!showedFirstRunPage)
                 {
-                    //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
-                    // afterwards, they will be taken to the login page, one way or ther other
                     WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
                     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
                     navController.modalPresentationStyle = UIModalPresentationFormSheet;
@@ -246,7 +297,51 @@
     [appDelegate.tabsController dismissModalViewControllerAnimated:YES];
 }
 
-- (void)dismissPopovers {
+- (void)updateChrome {
+    if (![self.searchField isFirstResponder] && [self.delegate respondsToSelector:@selector(URL)]) {
+            self.searchField.text = [self.delegate URL].absoluteString;
+    }
+    self.forwardItem.enabled = [self.delegate canGoForward];
+    self.backItem.enabled = [self.delegate canGoBack];
+    
+    if ([self.delegate respondsToSelector:@selector(canStopOrReload)]) {
+        BOOL canStopOrReload = [self.delegate canStopOrReload];
+        if (canStopOrReload) {
+            if ([self.delegate isLoading]) {
+                self.reloadItem.hidden = YES;
+                self.stopItem.hidden = NO;
+                self.progressView.hidden = NO;
+            } else {
+                self.reloadItem.hidden = NO;
+                self.reloadItem.enabled = YES;
+                self.stopItem.hidden = YES;
+                self.progressView.hidden = YES;
+            }
+        } else {
+            self.reloadItem.hidden = NO;
+            self.reloadItem.enabled = NO;
+            self.stopItem.hidden = YES;
+            self.progressView.hidden = YES;
+        }
+    }
+}
+
+- (void)createPopover {
+    if (!self.popoverController) // create the popover if not already open
+    {
+        self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.urlBarViewController];
+        self.popoverController.delegate = self;
+        
+        // Ensure the popover is not dismissed if the user taps in the search bar.
+        self.popoverController.passthroughViews = [NSArray arrayWithObject:self];
+    }
+}
+
+- (void)destroyPopovers {
+    if (self.popoverController) {
+        [self.popoverController dismissPopoverAnimated:YES];
+        self.popoverController = nil;
+    }
     if (self.popoverController) {
         [self.popoverController dismissPopoverAnimated:YES];
         self.popoverController = nil;
@@ -257,114 +352,62 @@
     }
 }
 
-#pragma mark -
-#pragma mark Search bar delegate methods
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    [self createPopover];
+}
 
-- (void)showPopover {
-    if (!self.popoverController) // create the popover if not already open
-    {
-        // Create a navigation controller to contain the recent searches controller,
-        // and create the popover controller to contain the navigation controller.
-        UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:self.urlBarViewController];
-        
-        UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:navigationController];
-        self.popoverController = popover;
-        self.popoverController.delegate = self;
-        
-        // Ensure the popover is not dismissed if the user taps in the search bar.
-        popover.passthroughViews = [NSArray arrayWithObject:self.searchBar];
-        
-        // Display the search results controller popover.
-        [self.popoverController presentPopoverFromRect:[self.searchBar bounds]
-                                                inView:self.searchBar
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    NSString *searchText = [textField.text stringByReplacingCharactersInRange:range withString:string];
+    if (searchText.length > 0 && !self.popoverController.isPopoverVisible) {
+        [self.popoverController presentPopoverFromRect:[self bounds]
+                                                inView:self
                               permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-    }
-}
-
-- (void)searchBarTextDidBeginEditing:(UISearchBar *)aSearchBar {
-//    if (aSearchBar.text.length > 0) {
-//        [self showPopover];
-//        [self.urlBarViewController filterResultsUsingString:aSearchBar.text];
-//    }
-     [self dismissPopovers];
-}
-
-- (void)searchBar:(UISearchBar *)aSearchBar textDidChange:(NSString *)searchText {
-    if (searchText.length > 0) {
-        [self showPopover];
-    } else {
-        [self dismissPopovers];
+    } else if (searchText.length == 0 && self.popoverController.isPopoverVisible) {
+        [self.popoverController dismissPopoverAnimated:YES];
     }
     
     // When the search string changes, filter the recents list accordingly.
-    [self.urlBarViewController filterResultsUsingString:searchText];
+    if (self.popoverController) {
+        [self.urlBarViewController filterResultsUsingString:searchText];
+    }
+    
+    return YES;
 }
 
-- (void)searchBarTextDidEndEditing:(UISearchBar *)aSearchBar {
-    
+- (void)textFieldDidEndEditing:(UITextField *)textField {
     // If the user finishes editing text in the search bar by, for example:
     // tapping away rather than selecting from the recents list, then just dismiss the popover
-    [self dismissPopovers];
+    [self destroyPopovers];
     
     if ([self.delegate respondsToSelector:@selector(URL)]) {
-        self.searchBar.text = [self.delegate URL].absoluteString;
+        self.searchField.text = [self.delegate URL].absoluteString;
     }
-    [aSearchBar resignFirstResponder];
 }
 
-- (void)searchBarSearchButtonClicked:(UISearchBar *)aSearchBar {
-    
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
     // When the search button is tapped, add the search term to recents and conduct the search.
-    NSString *searchString = [self.searchBar text];
-    //[self.urlBarViewController addToRecentSearches:searchString]; TODO change history
-    [self finishSearchWithString:searchString];
+    NSString *searchString = [textField text];
+    [self finishSearch:searchString title:nil];
+    return YES;
+}
+
+- (NSString *)text {
+    return self.searchField.text;
 }
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
     
     // Remove focus from the search bar without committing the search.
-    [self.searchBar resignFirstResponder];
+    [self resignFirstResponder];
     self.popoverController = nil;
 }
 
-- (void)finishSearchWithString:(NSString *)searchString {
-    [self.delegate handleURLInput:searchString];
+- (void)finishSearch:(NSString *)searchString title:(NSString *)title {
+    [self.delegate handleURLInput:searchString title:title];
     
     // Conduct the search. In this case, simply report the search term used.
-    [self.popoverController dismissPopoverAnimated:YES];
-    self.popoverController = nil;
-    [self.searchBar resignFirstResponder];
-}
-
-- (void)updateChrome {
-    if (![self.searchBar isFirstResponder] && [self.delegate respondsToSelector:@selector(URL)]) {
-            self.searchBar.text = [self.delegate URL].absoluteString;
-    }
-    self.forwardItem.enabled = [self.delegate canGoForward];
-    self.backItem.enabled = [self.delegate canGoBack];
-    
-    if ([self.delegate respondsToSelector:@selector(canStopOrReload)]) {
-        BOOL canStopOrReload = [self.delegate canStopOrReload];
-        if (canStopOrReload) {
-            if ([self.delegate isLoading]) {
-                self.reloadItem.enabled = NO;
-                self.stopItem.enabled = YES;
-                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
-                              _fixed, _sytemItem, _progressItem, _searchItem, _stopItem, nil] animated:NO];
-            } else {
-                self.reloadItem.enabled = YES;
-                self.stopItem.enabled = NO;
-                [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
-                 _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:NO];
-            }
-        } else {
-            self.reloadItem.enabled = NO;
-            self.stopItem.enabled = NO;
-            [self setItems:[NSArray arrayWithObjects:_backItem, _fixed, _forwardItem, _fixed, _bookmarksItem,
-                          _fixed, _sytemItem, _flexible, _searchItem, _reloadItem, nil] animated:NO];
-        }
-        
-    }
+    [self destroyPopovers];
+    [self.searchField resignFirstResponder];
 }
 
 @end

@@ -17,16 +17,16 @@
 #import "Reachability.h"
 #import "WeaveService.h"
 #import "NSURL+IFUnicodeURL.h"
-#import "SGURLProtocol.h"
-
-
-#define HTTP_AGENT @"Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10"
+#import "SGCredentialsPrompt.h"
 
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
+@property (strong, atomic) SGCredentialsPrompt *credentialsPrompt;
 @end
 
-@implementation SGWebViewController
+@implementation SGWebViewController {
+    int _dialogResult;
+}
 
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
@@ -61,7 +61,7 @@
 {
     [super viewDidLoad];
     
-    [SGURLProtocol registerProtocol];
+    [SGHTTPURLProtocol registerProtocol];
     
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -83,7 +83,7 @@
 }
 
 - (void)viewWillUnload {
-    [SGURLProtocol unregisterProtocol];
+    [SGHTTPURLProtocol unregisterProtocol];
     
     [self.webView stopLoading];
     self.webView.delegate = nil;
@@ -202,11 +202,13 @@
 }
 
 - (void)saveImageURL:(NSURL *)url {
-    NSData *data = [NSData dataWithContentsOfURL:url];
-    if (data) {
-        UIImage *img = [UIImage imageWithData:data];
-        UIImageWriteToSavedPhotosAlbum(img, self, 
-                                       @selector(image:didFinishSavingWithError:contextInfo:), nil);
+    @autoreleasepool {
+        NSData *data = [NSData dataWithContentsOfURL:url];
+        if (data) {
+            UIImage *img = [UIImage imageWithData:data];
+            UIImageWriteToSavedPhotosAlbum(img, self,
+                                           @selector(image:didFinishSavingWithError:contextInfo:), nil);
+        }
     }
 }
 
@@ -232,23 +234,26 @@
         return NO;
     }
     
+    [SGHTTPURLProtocol setAuthDelegate:self forRequest:request];
+    
     if (navigationType != UIWebViewNavigationTypeOther) {
         self.location = request.URL;
-        if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
-            [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
-        }
         [self.tabsViewController updateChrome];
-        return [WeaveOperations handleURLInternal:request.URL];
+        
+        WeaveOperations *op = [WeaveOperations sharedOperations];
+        [op modifyRequest:request];
+        return [op handleURLInternal:request.URL];
     }
-    
     return YES;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
+    self.loading = YES;
     [self.tabsViewController updateChrome];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
+    self.loading = NO;
     [webView loadJSTools];
     [webView disableContextMenu];
     [webView modifyLinkTargets];
@@ -262,7 +267,10 @@
     
     [self.tabsViewController updateChrome];
     
-    [WeaveOperations addHistoryURL:self.location title:self.title];
+    // Private mode
+    //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
+        [[WeaveOperations sharedOperations] addHistoryURL:self.location title:self.title];
+    //}
     
     // Do the screenshot if needed
     NSString *path = [UIWebView pathForURL:self.location];
@@ -280,14 +288,26 @@
 //there are too many spurious warnings, so I'm going to just ignore or log them all for now.
 - (void)webView:(UIWebView *)theWebView didFailLoadWithError:(NSError *)error
 {
+    self.loading = NO;
+    [self.tabsViewController updateChrome];
+    
     NSLog(@"Error code: %d", error.code);
     //ignore these
     if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"]) return;
     
-    [self.tabsViewController updateChrome];
-    
     if ([error.domain isEqualToString:@"NSURLErrorDomain"])
     {
+        DLog(@"Webview error code: %i", error.code);
+        // Host not found, try adding www. in front?
+        if (error.code == -1003 && [self.location.host rangeOfString:@"www"].location == NSNotFound) {
+            NSMutableString *url = [self.location.absoluteString mutableCopy];
+            NSRange range = [url rangeOfString:@"://"];
+            if (range.location != NSNotFound) {
+                [url insertString:@"www." atIndex:range.location+range.length];
+                [self openURL:[NSURL URLWithString:url]];
+                return;
+            }
+        }
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error Loading Page", @"error loading page")
                                                         message:[error localizedDescription]
                                                        delegate:nil
@@ -296,6 +316,51 @@
         return;
     }
 }
+
+- (void)URLProtocol:(NSURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    if (!self.credentialsPrompt) {
+        // The protocol states you shall execute the response on the same thread.
+        // So show the prompt on the main thread and wait until the result is finished
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            _dialogResult = -1;
+            self.credentialsPrompt = [[SGCredentialsPrompt alloc] initWithChallenge:challenge delegate:self];
+            [self.credentialsPrompt show];
+        });
+        
+        NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
+        while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
+            LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
+        
+//        dispatch_sync(dispatch_get_main_queue(), ^{
+//            NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
+//            while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
+//                LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
+//        });
+        
+        SGCredentialsPrompt *creds = self.credentialsPrompt;
+        if (_dialogResult == 1) {
+            NSURLCredential *credential = [NSURLCredential credentialWithUser:creds.usernameField.text
+                                                                     password:creds.passwordField.text
+                                                                  persistence:creds.persistence];
+            [[NSURLCredentialStorage sharedCredentialStorage] setCredential:credential
+                                                         forProtectionSpace:creds.challenge.protectionSpace];
+            [creds.challenge.sender useCredential:credential
+                       forAuthenticationChallenge:creds.challenge];
+        } else {
+            DLog(@"Cancel authenctication");
+            [creds.challenge.sender
+             cancelAuthenticationChallenge:creds.challenge];
+        }
+        self.credentialsPrompt = nil;
+    } else {
+        DLog(@"Called while showing other credential");
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    _dialogResult = buttonIndex;
+}
+
 
 #pragma mark NSURLConnectionDelegate
  
@@ -310,13 +375,13 @@
     if (![appDelegate canConnectToInternet]) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil)
                                                         message:NSLocalizedString(@"No connection aviable", nil)
-                                                       delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil];
+                                                       delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
         [alert show];
     } else {
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location
                                            cachePolicy:NSURLRequestReloadRevalidatingCacheData
                                        timeoutInterval:10.];
-        [request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+        [[WeaveOperations sharedOperations] modifyRequest:request];
         [self.webView loadRequest:request];
     }
 }

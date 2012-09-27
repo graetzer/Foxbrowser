@@ -10,26 +10,31 @@
 
 @implementation SGCredentialsPrompt
 
-- (id)initWithUsername:(NSString *)username persistence:(NSURLCredentialPersistence)persistence; {
+- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge delegate:(id<UIAlertViewDelegate>)delegate; {
     self = [super initWithTitle:NSLocalizedString(@"Authorizing", @"Authorizing")
 																  message:@"\n \n \n \n \n"
-																 delegate:self
+																 delegate:delegate
 														cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
 														otherButtonTitles:NSLocalizedString(@"OK", @"ok"), nil];
     if (!self) return self;
     
+    self.challenge = challenge;
+    
 	self.usernameField                    = [[UITextField alloc] initWithFrame:CGRectMake(12.0, 55.0, 260.0, 25.0)];
-	self.usernameField.text               = username;
 	self.usernameField.placeholder        = NSLocalizedString(@"Account", @"Account");
 	self.usernameField.autocorrectionType = UITextAutocorrectionTypeNo;
+    self.usernameField.autocapitalizationType = UITextAutocapitalizationTypeNone;
 	self.usernameField.delegate           = self;
+    self.usernameField.borderStyle        = UITextBorderStyleBezel;
 	[self.usernameField  setBackgroundColor:[UIColor whiteColor]];
 	[self addSubview:self.usernameField];
 	
 	self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(12.0, 90.0, 260.0, 25.0)];
 	self.passwordField.placeholder        = NSLocalizedString(@"Password", @"Password");
 	self.passwordField.autocorrectionType = UITextAutocorrectionTypeNo;
+    self.passwordField.autocapitalizationType = UITextAutocapitalizationTypeNone;
  	self.passwordField.delegate           = self;
+    self.passwordField.borderStyle        = UITextBorderStyleBezel;
 	[self.passwordField setSecureTextEntry:YES];
 	[self.passwordField setBackgroundColor:[UIColor whiteColor]];
 	[self addSubview:self.passwordField];
@@ -40,7 +45,11 @@
                                                       NSLocalizedString(@"Permanent", @"Permanent")]];
 	self.rememberCredentials.tintColor             = [UIColor colorWithRed:78.0/255.0 green:87.0/255.0 blue:121.0/255.0 alpha:0.0];
 	self.rememberCredentials.frame                 = CGRectMake(12.0, 120.0, 260.0, 35.0);
-	switch (persistence) {
+    [self.rememberCredentials addTarget:self action:@selector(persistenceChanged:) forControlEvents:UIControlEventValueChanged];
+    
+    _persistence = [[NSUserDefaults standardUserDefaults] integerForKey:@"credentialPersitence"];
+    
+	switch (_persistence) {
 		case NSURLCredentialPersistenceNone:
 			self.rememberCredentials.selectedSegmentIndex  = 0;
 			break;
@@ -56,11 +65,38 @@
 	}
 	self.rememberCredentials.segmentedControlStyle = UISegmentedControlStyleBar;
 	[self addSubview: self.rememberCredentials];
+    
+    if (challenge.proposedCredential) {
+        self.usernameField.text = challenge.proposedCredential.user;
+        if (challenge.previousFailureCount == 0) {
+            self.passwordField.text = challenge.proposedCredential.password;
+        }
+    }
 	
 	// Enable for IPhone
-	// CGAffineTransform transform = CGAffineTransformMakeTranslation(0.0, 80.0);
-	// [LoginView setTransform:transform];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        CGAffineTransform transform = CGAffineTransformMakeTranslation(0.0, 80.0);
+        [self setTransform:transform];
+    }
     return self;
+}
+
+- (IBAction)persistenceChanged:(id)sender {
+    switch (self.rememberCredentials.selectedSegmentIndex) {
+        case 0:
+            _persistence = NSURLCredentialPersistenceNone;
+            break;
+        case 1:
+            _persistence = NSURLCredentialPersistenceForSession;
+            break;
+        case 2:
+            _persistence = NSURLCredentialPersistencePermanent;
+            break;
+        default:
+            _persistence = NSURLCredentialPersistenceForSession;
+            break;
+    }
+    [[NSUserDefaults standardUserDefaults] setInteger:_persistence forKey:@"credentialPersitence"];
 }
 
 - (void)show {
@@ -78,6 +114,5 @@
 - (BOOL)textFieldShouldClear:(UITextField *)textField{
 	return NO;
 }
-
 
 @end

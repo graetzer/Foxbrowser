@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SGSearchBar : UISearchBar {
-    UIToolbar *_inputAccessory;
-}
+@interface SGSearchBar : UITextField
+
+- (id)initWithDelegate:(id<UITextFieldDelegate>)delegate;
 
 @end

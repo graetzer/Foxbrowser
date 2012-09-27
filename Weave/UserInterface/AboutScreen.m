@@ -20,12 +20,9 @@
   {
       //[[appDelegate settings] dismissModalViewControllerAnimated:NO];
 
-    NSString* destString = [Stockboy getURIForKey:@"TOS URL"];
-      [appDelegate.tabsController handleURLInput:destString];
+      NSString* destString = [Stockboy getURIForKey:@"TOS URL"];
+      [appDelegate.tabsController handleURLInput:destString title:@"Terms of Service"];
       [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
-      //WebPageController* web = [appDelegate webController];
-      //[TapActionController slideWebBrowserIn]; 
-      //[web loadLocation: destString withTitle: NSLocalizedString(@"Terms Of Service", @"terms of service")];
   }
   else 
   {
@@ -41,14 +38,10 @@
   if ([weaveService canConnectToInternet])
   {    
     NSString* destString = [Stockboy getURIForKey:@"PP URL"];
-      [appDelegate.tabsController handleURLInput:destString];
+      [appDelegate.tabsController handleURLInput:destString title:@"Privacy policy"];
       [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
-//    WebPageController* web = [appDelegate webController];
-//    [TapActionController slideWebBrowserIn]; 
-//    [web loadLocation: destString withTitle: NSLocalizedString(@"Privacy Policy", @"privacy policy")];
   }
-  else 
-  {
+  else {
     //no connectivity, put up alert
     NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Load Page", @"unable to load page"), @"title", 
                              NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
@@ -60,7 +53,6 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-  hasRotatedOnce = NO;
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
 }
 

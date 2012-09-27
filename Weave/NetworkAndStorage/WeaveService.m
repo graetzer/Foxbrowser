@@ -13,24 +13,34 @@
 #import "NSURL+IFUnicodeURL.h"
 
 NSString *kWeaveDataRefreshNotification = @"kWeaveDataRefreshNotification";
+NSString *kWeaveBackgroundedAtTime= @"backgroundedAtTime";
 NSString *kWeaveSyncStatusChangedNotification = @"SyncStatusChanged";
 NSString *kWeaveMessageKey = @"Message";
 NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
 NSString *kWeaveUseNativeApps = @"useNativeApps";
+NSString *kWeavePrivateMode = @"privateMode";
 
-static NSOperationQueue *_queue;
+#define HTTP_AGENT @"Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10"
+
 
 @implementation WeaveOperations
 
-+ (NSOperationQueue *)queue {
-    if (!_queue) {
-        _queue = [NSOperationQueue new];
-        _queue.maxConcurrentOperationCount = 1;
-    }
-    return _queue;
++ (WeaveOperations *)sharedOperations {
+    static dispatch_once_t once;
+    static WeaveOperations *shared;
+    dispatch_once(&once, ^ { shared = [[self alloc] init]; });
+    return shared;
 }
 
-+ (NSURL *)parseURLString:(NSString *)input {
+- (id)init {
+    if (self = [super init]) {
+        self.queue = [NSOperationQueue new];
+        self.queue.maxConcurrentOperationCount = 1;//Operate sequentially
+    }
+    return self;
+}
+
+- (NSURL *)parseURLString:(NSString *)input {
     NSString *destination;
     
     BOOL hasSpace = ([input rangeOfString:@" "].location != NSNotFound);
@@ -44,13 +54,12 @@ static NSOperationQueue *_queue;
             destination = [NSString stringWithFormat:@"http://%@", input];
         }
     } else  {
-        NSString *google = [Stockboy getURIForKey:@"Google URL"];
-        destination = [NSString stringWithFormat:google, [self urlEncode:input]];
+        destination = [[WeaveOperations sharedOperations] searchURL:input];
     }
     return [NSURL URLWithUnicodeString:destination];// TODO 
 }
 
-+ (NSString *)urlEncode:(NSString *)string {
+- (NSString *)urlEncode:(NSString *)string {
 	return (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
                                                                (__bridge CFStringRef)string,
                                                                NULL,
@@ -58,7 +67,15 @@ static NSOperationQueue *_queue;
                                                                kCFStringEncodingUTF8);
 }
 
-+ (BOOL)handleURLInternal:(NSURL *)url; {
+- (NSString *)searchURL:(NSString *)string {
+    NSString *url = [[NSUserDefaults standardUserDefaults] stringForKey:@"org.graetzer.search"];
+    
+    NSArray *locales = [NSLocale preferredLanguages];
+    NSString *locale = locales.count > 0 ? [locales objectAtIndex:0]: @"en";
+    return [NSString stringWithFormat:url, [self urlEncode:string], locale];
+}
+
+- (BOOL)handleURLInternal:(NSURL *)url; {
     // We don't want to render some URLs like for example file URLs. Note that file URLs do not
     // actually go through this method. It seems that at least on iOS 4 the UIWebView does not
     // load them at all. But just to be on the safe side we do the check.
@@ -84,7 +101,17 @@ static NSOperationQueue *_queue;
     return YES;
 }
 
-+ (void)addHistoryURL:(NSURL *)url title:(NSString *)title {
+- (void)modifyRequest:(NSURLRequest *)request {
+    if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
+        [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.trackHeader"]) {
+            [(id)request setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
+            [(id)request setValue:@"1" forHTTPHeaderField:@"DNT"];
+        }
+    }
+}
+
+- (void)addHistoryURL:(NSURL *)url title:(NSString *)title {
     // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
     [[self queue] addOperationWithBlock:^{
         NSString *urlText = url.absoluteString;
@@ -99,7 +126,8 @@ static NSOperationQueue *_queue;
         
         NSDictionary *historyEntry = nil;
         if (existing) {// There is a differnce between the two dictionary formats
-            NSInteger sortIndex = [[existing objectForKey:@"sortindex"] integerValue];
+            int sortIndex = [[existing objectForKey:@"sortindex"] intValue];
+            
             historyEntry = @{ @"id" : [existing objectForKey:@"id"],
             @"histUri" : [existing objectForKey:@"url"],
             @"title" : [existing objectForKey:@"title"],

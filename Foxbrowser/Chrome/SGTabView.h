@@ -24,13 +24,11 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 
-@interface SGTabView : UIView {
-    CGSize _tSize;
-    CGFloat _cap;
-}
+@interface SGTabView : UIView
 
+@property (nonatomic, readonly, strong) UIButton *closeButton;
 @property (nonatomic, strong) NSString *title;
-@property (nonatomic, strong) UIButton *closeButton;
+@property (assign, nonatomic) BOOL selected;
 
 - (id)initWithFrame:(CGRect)frame title:(NSString *)title;
 

@@ -177,7 +177,7 @@ static NSDictionary *_gNetworkPaths = nil;
 	self = [super init];
 	if (self) 
   {
-    _stockboyThread = [[[NSThread alloc] initWithTarget:self selector:@selector(restockEverything) object:nil] autorelease];
+    _stockboyThread = [[NSThread alloc] initWithTarget:self selector:@selector(restockEverything) object:nil];
 	}
 	
 	return self;

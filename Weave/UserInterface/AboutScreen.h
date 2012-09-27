@@ -11,7 +11,6 @@
 
 @interface AboutScreen : UIViewController 
 {
-  BOOL hasRotatedOnce;
 }
 
 

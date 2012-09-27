@@ -125,9 +125,10 @@ static SGPreviewPanel *_singletone;
     [self layout];
 }
 
-- (BOOL)tilesContainID:(id)ID {
+- (BOOL)tilesContainItem:(NSDictionary *)item {
+    NSString *url = [item objectForKey:@"url"];
     for (SGPreviewTile *tile in self.tiles) {
-        if (tile.info && [[tile.info objectForKey:@"id"] isEqual:ID]) {
+        if ([[tile.info objectForKey:@"url"] isEqualToString:url]) {
             return YES;
         }
     }
@@ -141,8 +142,9 @@ static SGPreviewPanel *_singletone;
     while (self.tiles.count < TILES_MAX && i < history.count) {
         NSDictionary *item = [history objectAtIndex:i];
         i++;
-        id ID = [item objectForKey:@"id"];
-        if ([self tilesContainID:ID] || [self.blacklist containsObject:ID]) {
+        
+        id url = [item objectForKey:@"url"];
+        if ([self tilesContainItem:item] || [self.blacklist containsObject:url]) {
             continue;
         }
 
@@ -202,7 +204,7 @@ static SGPreviewPanel *_singletone;
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             self.selected = (SGPreviewTile*)recognizer.view;
-            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:nil
+            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:[self.selected.info objectForKey:@"url"]
                                                                delegate:self
                                                       cancelButtonTitle:nil
                                                  destructiveButtonTitle:nil
@@ -228,7 +230,7 @@ static SGPreviewPanel *_singletone;
         case 2:
         {
             NSDictionary *item = self.selected.info;
-            [self.blacklist addObject:[item objectForKey:@"id"]];
+            [self.blacklist addObject:[item objectForKey:@"url"]];
             [self.tiles removeObject:self.selected];
             
            [UIView transitionWithView:self

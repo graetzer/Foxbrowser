@@ -42,6 +42,9 @@
         NSString *ext = [htmlTitle pathExtension];
         if ([[UIWebView fileTypes] containsObject:ext]) {
             htmlTitle = [htmlTitle lastPathComponent];
+        } else {
+            htmlTitle = [htmlTitle stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+            htmlTitle = [htmlTitle stringByReplacingOccurrencesOfString:@"https://" withString:@""];
         }
     }
     return htmlTitle;
@@ -101,7 +104,8 @@
         screen = [screen cutImageToSize:CGSizeMake(screen.size.width, screen.size.height)];
     }
     
-    screen = [screen scaleProportionalToSize:CGSizeMake(kSGPanelWidth, kSGPanelHeigth)];
+    CGFloat scale = [UIScreen mainScreen].scale;
+    screen = [screen scaleProportionalToSize:CGSizeMake(scale*kSGPanelWidth, scale*kSGPanelHeigth)];
     if (screen) {
         NSData *data = UIImagePNGRepresentation(screen);
         [data writeToFile:path atomically:NO];

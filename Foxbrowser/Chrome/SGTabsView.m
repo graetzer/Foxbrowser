@@ -61,8 +61,6 @@
     // Float the subview in from rigth
     CGRect frame = CGRectMake(self.bounds.size.width, 0, width, self.bounds.size.height - kTabsBottomMargin);
     SGTabView *newTab = [[SGTabView alloc] initWithFrame:frame title:title];
-    newTab.alpha = 0.9;
-    newTab.closeButton.hidden = YES;
     
     // Setup gesture recognizers
     UITapGestureRecognizer *tapG = [[UITapGestureRecognizer alloc] initWithTarget:self 
@@ -78,7 +76,8 @@
     [newTab addGestureRecognizer:panG];
     
     // Setup close button
-    [newTab.closeButton addTarget:self action:@selector(handleRemove:) forControlEvents:UIControlEventTouchCancel];
+    UIControlEvents event = [[UIDevice currentDevice].systemVersion doubleValue] < 6 ? UIControlEventTouchCancel : UIControlEventTouchUpInside;
+    [newTab.closeButton addTarget:self action:@selector(handleRemove:) forControlEvents:event];
     
     // Add the tab
     [self.tabs addObject:newTab];
@@ -113,12 +112,12 @@
                 tab.closeButton.hidden = NO;
             }
             
-            tab.alpha = 1.0;
+            tab.selected = YES;
             [tab setNeedsLayout];
             [self bringSubviewToFront:tab];
         } else {
             tab.closeButton.hidden = YES;
-            tab.alpha = 0.9;
+            tab.selected = NO;
             [tab setNeedsLayout];
         }
         [tab setNeedsDisplay];

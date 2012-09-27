@@ -62,12 +62,11 @@
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    CGRect head = self.headerView.frame;
-    CGRect bounds = self.view.bounds;
-    _contentFrame = CGRectMake(bounds.origin.x,
-                               bounds.origin.y + head.size.height,
-                               bounds.size.width,
-                               bounds.size.height - head.size.height);
+
+    self.currentViewController.view.frame = self.contentFrame;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
     self.currentViewController.view.frame = self.contentFrame;
 }
 
@@ -81,32 +80,28 @@
     
     CGRect bounds = self.view.bounds;
     
-    CGRect head = CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, kTabsToolbarHeigth + kTabsHeigth);
+    CGRect head = CGRectMake(0, 0, bounds.size.width, kTabsToolbarHeigth + kTabsHeigth);
     self.headerView = [[UIView alloc] initWithFrame:head];
     self.headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    self.headerView.backgroundColor = [UIColor clearColor];
     
-    CGRect frame = CGRectMake(head.origin.x, head.origin.y, head.size.width, kTabsToolbarHeigth);
+    CGRect frame = CGRectMake(0, 0, head.size.width, kTabsToolbarHeigth);
     _toolbar = [[SGToolbar alloc] initWithFrame:frame delegate:self];
     
-    frame = CGRectMake(head.origin.x, kTabsToolbarHeigth, head.size.width - kAddButtonWidth, kTabsHeigth);
+    frame = CGRectMake(0, kTabsToolbarHeigth, head.size.width - kAddButtonWidth, kTabsHeigth);
     _tabsView = [[SGTabsView alloc] initWithFrame:frame];
     
-    frame = CGRectMake(head.origin.x + frame.size.width, kTabsToolbarHeigth, kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
+    frame = CGRectMake(head.size.width - kAddButtonWidth, kTabsToolbarHeigth, kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
     _addButton = [[SGAddButton alloc] initWithFrame:frame];
     _addButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     [_addButton.button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
     
-    [self.headerView addSubview:_toolbar];
     [self.headerView addSubview:_tabsView];
     [self.headerView addSubview:_addButton];
+    [self.headerView addSubview:_toolbar];
      
     [self.view addSubview:self.headerView];
-    
-    _contentFrame = CGRectMake(bounds.origin.x,
-                               bounds.origin.y + head.size.height,
-                               bounds.size.width,
-                               bounds.size.height - head.size.height);
-}
+    }
 
 - (void)viewDidLoad {
     self.tabsView.tabsController = self;
@@ -147,6 +142,15 @@
     return path;
 }
 
+- (CGRect)contentFrame {
+    CGRect head = self.headerView.frame;
+    CGRect bounds = self.view.bounds;
+    return CGRectMake(bounds.origin.x,
+                      bounds.origin.y + head.size.height,
+                      bounds.size.width,
+                      bounds.size.height - head.size.height);
+}
+
 #pragma mark - Tab stuff
 
 - (void)addTab:(UIViewController *)viewController {
@@ -159,6 +163,7 @@
                         context:NULL];
     
     if (!self.currentViewController) {
+        [viewController.view setNeedsLayout];
         _currentViewController = viewController;
         [self.tabsView addTab:viewController.title];
         [self.view addSubview:viewController.view];
@@ -192,6 +197,7 @@
     }
     
     viewController.view.frame = self.contentFrame;
+    [viewController.view setNeedsLayout];
     [self transitionFromViewController:self.currentViewController
                       toViewController:viewController
                               duration:0
@@ -295,7 +301,7 @@
 #pragma mark - Propertys
 
 - (NSUInteger)maxCount {
-    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 8 : 4;
+    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 10 : 4;
 }
 
 - (NSUInteger)count {
@@ -334,8 +340,13 @@
     }
 }
 
-- (void)handleURLInput:(NSString*)input withTitle:(NSString *)title {
-    NSURL *url = [WeaveOperations parseURLString:input];
+- (void)handleURLInput:(NSString*)input title:(NSString *)title {
+    NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
+    if (!title) {
+        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
+    }
+    
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
         webC.title = title;
@@ -346,10 +357,6 @@
         [webC openURL:url];
         [self swapCurrentViewControllerWith:webC];
     }
-}
-
-- (void)handleURLInput:(NSString*)input {
-    [self handleURLInput:input withTitle:input];
 }
 
 - (void)reload; {
@@ -363,13 +370,14 @@
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
         [webC.webView stopLoading];
+        [self updateChrome];
     }
 }
 
 - (BOOL)isLoading {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.webView.loading;
+        return webC.loading;
     }
     return NO;
 }
@@ -378,6 +386,7 @@
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
         [webC.webView goBack];
+        [self updateChrome];
     }
 }
 
@@ -385,6 +394,7 @@
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
         [webC.webView goForward];
+        [self updateChrome];
     }
 }
 
