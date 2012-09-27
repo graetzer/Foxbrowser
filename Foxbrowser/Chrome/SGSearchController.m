@@ -223,7 +223,7 @@ static NSArray* gFreshSearchHits = nil;
     }
 }
 
-#define MAXPERLIST 8
+#define MAXPERLIST 15
 
 //This method works by side-effect.  It's complicated and rather ugly, but it was important not to have to
 // duplicate it for each of the three lists

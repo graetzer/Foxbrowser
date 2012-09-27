@@ -175,16 +175,15 @@ static NSMutableArray *AuthDelegates;
                                                                                             sender:self];
 
                 if (self.authChallenge) {
-                    if (_authenticationAttempts == -1 && self.authChallenge.proposedCredential) {
-                        [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
-                        return;
-                    }
-                    
                     _authenticationAttempts++;
-                    if (_authDelegate) {
-                        [_authDelegate URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
+                    if (_authenticationAttempts == 0 && self.authChallenge.proposedCredential) {
+                        [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
                     } else {
-                        [self.client URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
+                        if (_authDelegate) {
+                            [_authDelegate URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
+                        } else {
+                            [self.client URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
+                        }
                     }
                     return; // Stops the delegate being sent a response received message
                 } else {
