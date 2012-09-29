@@ -169,13 +169,13 @@ static NSMutableArray *AuthDelegates;
                 
                 NSAssert(!self.authChallenge, @"Authentication challenge received while another is in progress");
                 
+                _authenticationAttempts++;
                 self.authChallenge = [[SGHTTPAuthenticationChallenge alloc] initWithResponse:response
                                                                               previousFailureCount:_authenticationAttempts
                                                                                    failureResponse:self.URLResponse
                                                                                             sender:self];
 
                 if (self.authChallenge) {
-                    _authenticationAttempts++;
                     if (_authenticationAttempts == 0 && self.authChallenge.proposedCredential) {
                         [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
                     } else {
