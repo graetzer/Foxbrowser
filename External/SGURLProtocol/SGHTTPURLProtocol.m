@@ -304,6 +304,8 @@ static NSMutableArray *AuthDelegates;
 
     
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Host"), (__bridge CFStringRef)request.URL.host);
+    NSString *language = [[NSLocale preferredLanguages] componentsJoinedByString:@","];
+    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Language"), (__bridge CFStringRef)language);
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Charset"), CFSTR("utf-8;q=1.0, ISO-8859-1;q=0.5"));
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Encoding"), CFSTR("gzip;q=1.0, deflate;q=0.6, identity;q=0.5, *;q=0"));
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Connection"), CFSTR("Keep-Alive"));

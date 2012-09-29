@@ -20,7 +20,8 @@ NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
 NSString *kWeaveUseNativeApps = @"useNativeApps";
 NSString *kWeavePrivateMode = @"privateMode";
 
-#define HTTP_AGENT @"Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10"
+#define HTTP_AGENT5 @"Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3"
+#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; U; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A403 Safari/8536.25"
 
 
 @implementation WeaveOperations
@@ -103,10 +104,12 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (void)modifyRequest:(NSURLRequest *)request {
     if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
-        [(id)request setValue:HTTP_AGENT forHTTPHeaderField:@"User-Agent"];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.trackHeader"]) {
+        [(id)request setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
+        
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
             [(id)request setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
             [(id)request setValue:@"1" forHTTPHeaderField:@"DNT"];
+            [(id)request setValue:@"do-not-track" forHTTPHeaderField:@"X-Tracking-Choice"];
         }
     }
 }

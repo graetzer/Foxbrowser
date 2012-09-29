@@ -16,7 +16,7 @@
 			<key>DefaultValue</key>
 			<false/>
 			<key>Key</key>
-			<string>org.graetzer.trackHeader</string>
+			<string>org.graetzer.track</string>
 			<key>Title</key>
 			<string>Do Not Track Header</string>
 			<key>Type</key>
