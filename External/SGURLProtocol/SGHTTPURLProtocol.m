@@ -297,6 +297,7 @@ static NSMutableArray *AuthDelegates;
 }
 
 - (CFHTTPMessageRef)newMessageWithURLRequest:(NSURLRequest *)request {
+    DLog(@"Request method: %@", [request HTTPMethod]);
     CFHTTPMessageRef message = CFHTTPMessageCreateRequest(NULL,
                                               (__bridge CFStringRef)[request HTTPMethod],
                                               (__bridge CFURLRef)[request URL],
@@ -324,6 +325,7 @@ static NSMutableArray *AuthDelegates;
 
     }
     
+    DLog(@"Request headers: %@", request.allHTTPHeaderFields);
     for (NSString *key in request.allHTTPHeaderFields) {
         NSString *val = [request.allHTTPHeaderFields objectForKey:key];
         CFHTTPMessageSetHeaderFieldValue(message,
@@ -334,14 +336,7 @@ static NSMutableArray *AuthDelegates;
     NSData *body = [request HTTPBody];
     if (body)
     {
-        NSString *encoding = [request.allHTTPHeaderFields objectForKey:@"Transfer-Encoding"];
-        // Check if already encoded
-        if (encoding.length) {// || [encoding isEqualToString:@"identity"
-            CFHTTPMessageSetBody(message, (__bridge CFDataRef)body);
-        } else {
-            CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Transfer-Encoding"), CFSTR("gzip"));
-            CFHTTPMessageSetBody(message, (__bridge CFDataRef)[body gzipDeflate]);
-        }
+        CFHTTPMessageSetBody(message, (__bridge CFDataRef)body);
     }
     return message;
 }

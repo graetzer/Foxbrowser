@@ -85,6 +85,8 @@ id<WeaveService> weaveService;
     {
         [Stockboy restock];
     }
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark - WeaveService
