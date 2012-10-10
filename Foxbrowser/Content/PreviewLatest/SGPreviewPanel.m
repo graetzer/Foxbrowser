@@ -18,7 +18,6 @@ const CGFloat kSGPanelWidth = 220.;
 const CGFloat kSGPanelHeigth = 185.;
 
 @implementation SGPreviewTile
-@synthesize imageButton, label, info;
 
 /*
  Helvetica-LightOblique,
@@ -45,13 +44,12 @@ const CGFloat kSGPanelHeigth = 185.;
         [self addSubview:self.label];
         
         lFrame = CGRectMake(0, 0, frame.size.width, frame.size.height - size.height - 10.);
-        self.imageButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.imageButton.frame = lFrame;
-        self.imageButton.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
-        [self.imageButton setImage:image forState:UIControlStateNormal];
-        self.imageButton.layer.borderColor = [UIColor grayColor].CGColor;
-        self.imageButton.layer.borderWidth = 1.f;
-        [self addSubview:self.imageButton];
+        self.imageView = [[UIImageView alloc] initWithFrame:lFrame];
+        self.imageView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
+        self.imageView.image = image;
+        self.imageView.layer.borderColor = [UIColor grayColor].CGColor;
+        self.imageView.layer.borderWidth = 1.f;
+        [self addSubview:self.imageView];
         
         self.opaque = YES;
 
@@ -182,7 +180,7 @@ static SGPreviewPanel *_singletone;
     
     for (SGPreviewTile *tile in self.tiles) {
         tile.label = nil;
-        tile.imageButton = nil;
+        tile.imageView = nil;
         [tile removeFromSuperview];
     }
     [self.tiles removeAllObjects];

@@ -11,7 +11,7 @@
 
 @interface SGPreviewTile : UIView
 
-@property (nonatomic, strong) UIButton *imageButton;
+@property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *label;
 @property (nonatomic, strong) NSDictionary *info;
 
