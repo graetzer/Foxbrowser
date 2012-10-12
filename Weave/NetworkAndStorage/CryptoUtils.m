@@ -306,8 +306,7 @@ static CryptoUtils* _cryptoManager = nil;
 // 3. tell the user there was a network problem, try again later  (non-auth related exeption while getting cluster)  THROW EXCEPTION
 // 4. ask the user if they want to try different credentials or just try again later (auth-related exception while getting cluster)  THROW EXCEPTION
 
-- (id) init
-{
+- (id) init {
 	if (self = [super init]) 
 	{
 		_credentials = [[KeychainItemWrapper alloc] initWithIdentifier:CREDENTIALS_NAME accessGroup:nil];

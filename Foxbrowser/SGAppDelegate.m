@@ -123,18 +123,15 @@ id<WeaveService> weaveService;
         [[NSUserDefaults standardUserDefaults] synchronize];
 	}
     
-    BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
-    if (!showedFirstRunPage)
-    {
+    BOOL showedFirstRunPage = [userDefaults boolForKey:kWeaveShowedFirstRunPage];
+    if (!showedFirstRunPage) {
         //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
         // afterwards, they will be taken to the login page, one way or ther other
         WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
         UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
         navController.modalPresentationStyle = UIModalPresentationFormSheet;
         [self.window.rootViewController presentViewController:navController animated:YES completion:NULL];
-    }
-    else
-    {
+    } else {
         //show the main page, and start up the Stockboy to get fresh data
         [Stockboy restock];
     }
