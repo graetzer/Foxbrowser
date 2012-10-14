@@ -88,7 +88,7 @@ static NSMutableArray *AuthDelegates;
     { // map different fragments to same base file
         NSMutableURLRequest *mutable = [request mutableCopy];
         NSString *s = [url absoluteString];
-        s  =[s substringToIndex:s.length - frag.length];	// remove fragment
+        s  =[s substringToIndex:s.length - frag.length];// remove fragment
         mutable.URL = [NSURL URLWithString:s];
         return mutable;
     }
@@ -146,7 +146,10 @@ static NSMutableArray *AuthDelegates;
 #pragma mark - CFStreamDelegate
 - (void)stream:(NSInputStream *)theStream handleEvent:(NSStreamEvent)streamEvent
 {
-    NSParameterAssert(theStream == _HTTPStream);
+    //NSParameterAssert(theStream == _HTTPStream);
+    if (theStream != _HTTPStream) {
+        return;
+    }
     
     // Handle the response as soon as it's available
     if (!self.URLResponse)
@@ -238,11 +241,6 @@ static NSMutableArray *AuthDelegates;
     // Next course of action depends on what happened to the stream
     switch (streamEvent)
     {
-            
-//        case NSStreamEventOpenCompleted:
-//            
-//            break;
-            
         case NSStreamEventHasBytesAvailable:
         {
             if (!self.buffer) {
@@ -305,7 +303,7 @@ static NSMutableArray *AuthDelegates;
 
     
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Host"), (__bridge CFStringRef)request.URL.host);
-    NSString *language = [[NSLocale preferredLanguages] componentsJoinedByString:@","];
+    NSString *language = [[[NSLocale preferredLanguages] subarrayWithRange:NSMakeRange(0, 3)] componentsJoinedByString:@","];
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Language"), (__bridge CFStringRef)language);
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Charset"), CFSTR("utf-8;q=1.0, ISO-8859-1;q=0.5"));
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Encoding"), CFSTR("gzip;q=1.0, deflate;q=0.6, identity;q=0.5, *;q=0"));
