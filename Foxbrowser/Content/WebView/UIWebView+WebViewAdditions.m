@@ -82,7 +82,9 @@
     [self stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML = ''"];
 }
 
-
+- (void)enableDoNotTrack {
+    [self stringByEvaluatingJavaScriptFromString:@"document.navigator.doNotTrack = '1';"];
+}
 
 #pragma mark - Screenshot stuff
 

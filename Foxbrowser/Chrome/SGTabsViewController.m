@@ -362,7 +362,8 @@
 - (void)reload; {
     if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC.webView reload];
+        [webC reload];
+        [self updateChrome];
     }
 }
 

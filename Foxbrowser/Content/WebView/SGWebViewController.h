@@ -22,4 +22,6 @@ UIActionSheetDelegate, UIAlertViewDelegate, SGAuthDelegate>
 @property (assign, nonatomic, getter = isLoading) BOOL loading;
 
 - (void)openURL:(NSURL *)url;
+
+- (void)reload;
 @end

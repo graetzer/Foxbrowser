@@ -1,7 +1,7 @@
 //
 //  SGProgressCircleView.h
 //  Created by Devin Ross on 1/1/11.
-//  modified by Simon Grätzer on 1/8/12
+//  modified by Simon Grätzer on 20/10/12
 /*
  
  tapku.com || http://github.com/devinross/tapkulibrary
@@ -30,13 +30,10 @@
  */
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 /** A progress circle view */
-@interface SGProgressCircleView : UIView {
-	float _displayProgress;
-    BOOL _running;
-}
-
+@interface SGProgressCircleView : UIView 
 /** Initialized a new progress circle view. */
 - (id) init;
 

@@ -21,7 +21,7 @@ NSString *kWeaveUseNativeApps = @"useNativeApps";
 NSString *kWeavePrivateMode = @"privateMode";
 
 #define HTTP_AGENT5 @"Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3"
-#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; U; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A403 Safari/8536.25"
+#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A403 Safari/8536.25"
 
 
 @implementation WeaveOperations
@@ -104,7 +104,8 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (void)modifyRequest:(NSURLRequest *)request {
     if ([request respondsToSelector:@selector(setValue:forHTTPHeaderField:)]) {
-        [(id)request setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
+        NSString *agent = [[UIDevice currentDevice].systemVersion doubleValue] < 6 ? HTTP_AGENT5 : HTTP_AGENT6;
+        [(id)request setValue:agent forHTTPHeaderField:@"User-Agent"];
         
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
             [(id)request setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];

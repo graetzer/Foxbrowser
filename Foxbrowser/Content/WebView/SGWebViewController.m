@@ -88,6 +88,7 @@
     [self.webView stopLoading];
     self.webView.delegate = nil;
     [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
+    [super viewWillUnload];
 }
 
 - (void)viewDidUnload
@@ -258,6 +259,9 @@
     [webView disableContextMenu];
     [webView modifyLinkTargets];
     [webView modifyOpen];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
+        [webView enableDoNotTrack];
+    }
     self.title = [webView title];
     
     NSString *webLoc = [self.webView location];
@@ -317,6 +321,8 @@
     }
 }
 
+#pragma mark - HTTP Authentication
+
 - (void)URLProtocol:(NSURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     if (!self.credentialsPrompt) {
         // The protocol states you shall execute the response on the same thread.
@@ -362,7 +368,7 @@
 }
 
 
-#pragma mark NSURLConnectionDelegate
+#pragma mark - Networking
  
 - (void)openURL:(NSURL *)url {
     if (url) {
@@ -384,6 +390,10 @@
         [[WeaveOperations sharedOperations] modifyRequest:request];
         [self.webView loadRequest:request];
     }
+}
+
+- (void)reload {
+    [self openURL:nil];
 }
 
 @end

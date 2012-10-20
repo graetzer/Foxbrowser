@@ -24,6 +24,7 @@
 - (void)modifyLinkTargets;
 - (void)modifyOpen;
 - (void)clearContent;
+- (void)enableDoNotTrack;
 
 - (UIImage *)screenshot;
 - (void)saveScreenTo:(NSString *)path;

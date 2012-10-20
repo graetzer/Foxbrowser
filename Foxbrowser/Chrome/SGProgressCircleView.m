@@ -48,7 +48,6 @@
 	self.backgroundColor = [UIColor clearColor];
 	self.userInteractionEnabled = NO;
 	self.opaque = NO;
-	_running = NO;
 	
 	return self;
 }
@@ -67,34 +66,27 @@
 	
 	
 	CGContextSetRGBFillColor(context, c, c, c, 1.);//108./255., 115./255., 122./255 ,1);
-    float start = (M_PI*2.0 *_displayProgress) - (M_PI/2.0);
+    float start = (M_PI/2.0);//(M_PI*2.0 *_displayProgress) - 
     
     CGContextAddArc(context, rect.size.width/2, rect.size.height/2, (rect.size.width/2)-7, start, start + (M_PI/2.0), false);
     CGContextAddLineToPoint(context, rect.size.width/2, rect.size.height/2);
     CGContextFillPath(context);
 }
 
-
-- (void) updateTwirl{
-	if(!_running) return;
-	
-	_displayProgress += AnimationIncrement;
-    if (_displayProgress > 1.0) {
-        _displayProgress = 0;
-    }
-	[self setNeedsDisplay];
-	
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateTwirl) object:nil];
-	[self performSelector:@selector(updateTwirl) withObject:nil afterDelay:AnimationTimer];
-}
-
-- (void)startAnimating {
-    _running = YES;
-    [self updateTwirl];
+- (void)startAnimating {    
+    CABasicAnimation* rotationAnimation;
+    rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+    rotationAnimation.toValue = [NSNumber numberWithFloat: M_PI * 2.0];
+    rotationAnimation.duration = 1.0;
+    rotationAnimation.cumulative = NO;
+    rotationAnimation.repeatCount = MAXFLOAT;
+    rotationAnimation.autoreverses = NO;
+    
+    [self.layer addAnimation:rotationAnimation forKey:@"rotationAnimation"];
 }
 
 - (void)stopAnimating {
-    _running = NO;
+    [self.layer removeAnimationForKey:@"rotationAnimation"];
 }
 
 - (void)setHidden:(BOOL)hidden {
