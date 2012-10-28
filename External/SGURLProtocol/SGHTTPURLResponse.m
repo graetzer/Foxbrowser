@@ -30,12 +30,16 @@
         MIMEType = [input objectAtIndex:0];
     }
     
-    NSInteger contentLength = [[_headerFields objectForKey:@"Content-Length"] integerValue];
+    long long contentLength = [[_headerFields objectForKey:@"Content-Length"] longLongValue];
+    if (contentLength <= 0)
+        contentLength = NSURLResponseUnknownLength;
     
     NSString *encoding = @"UTF-8";
     if (input.count >= 2) {
-        encoding = [input objectAtIndex:1];
-        encoding = [encoding stringByReplacingOccurrencesOfString:@"charset=" withString:@""];
+        NSString *sendEncoding = [[input objectAtIndex:1] stringByReplacingOccurrencesOfString:@"charset=" withString:@""];
+        sendEncoding = [sendEncoding stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (sendEncoding.length)
+            encoding = sendEncoding;
     }
     
     if (self = [super initWithURL:URL MIMEType:MIMEType expectedContentLength:contentLength textEncodingName:encoding])

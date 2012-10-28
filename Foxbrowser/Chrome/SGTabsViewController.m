@@ -126,14 +126,17 @@
 }
 
 - (void)saveCurrentURLs {
-    NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
-    for (UIViewController *controller in self.childViewControllers) {
-        if ([controller isKindOfClass:[SGWebViewController class]]) {
-            NSURL *url = ((SGWebViewController*)controller).location;
-            [latest addObject:url.absoluteString];
+    dispatch_queue_t q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    dispatch_async(q, ^{
+        NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
+        for (UIViewController *controller in self.childViewControllers) {
+            if ([controller isKindOfClass:[SGWebViewController class]]) {
+                NSURL *url = ((SGWebViewController*)controller).location;
+                [latest addObject:url.absoluteString];
+            }
         }
-    }
-    [latest writeToFile:[self savedURLs] atomically:NO];
+        [latest writeToFile:[self savedURLs] atomically:YES];
+    });
 }
 
 - (NSString *)savedURLs {
@@ -178,6 +181,7 @@
                      }
                      completion:^(BOOL finished){
                          [viewController didMoveToParentViewController:self];
+                         [self saveCurrentURLs];
                      }];
 }
 
@@ -251,6 +255,7 @@
                                 [viewController removeFromParentViewController];
                                 _currentViewController = to;
                                 [self updateChrome];
+                                [self saveCurrentURLs];
                             }];
 }
 
@@ -294,6 +299,7 @@
                                     [tab setTitle:viewController.title];
                                     [tab setNeedsLayout];
                                     tab.closeButton.hidden = ![self canRemoveTab:viewController];
+                                    [self saveCurrentURLs];
                                 }];
     }
 }

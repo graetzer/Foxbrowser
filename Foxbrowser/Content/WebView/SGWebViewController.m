@@ -61,8 +61,10 @@
 {
     [super viewDidLoad];
     
-    [SGHTTPURLProtocol registerProtocol];
-    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
+        [SGHTTPURLProtocol registerProtocol];
+    }
+        
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.webView.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
@@ -83,7 +85,9 @@
 }
 
 - (void)viewWillUnload {
-    [SGHTTPURLProtocol unregisterProtocol];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
+        [SGHTTPURLProtocol unregisterProtocol];
+    }
     
     [self.webView stopLoading];
     self.webView.delegate = nil;

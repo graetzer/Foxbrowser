@@ -13,13 +13,18 @@
 @protocol SGAuthDelegate <NSObject>
 
 - (void)URLProtocol:(NSURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
 //
 //@optional
 //- (void)URLProtocol:(NSURLProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 @end
 
+@class SGHTTPAuthenticationChallenge;
+
 @interface SGHTTPURLProtocol : NSURLProtocol <NSStreamDelegate, NSURLAuthenticationChallengeSender>
+@property (strong, nonatomic) NSHTTPURLResponse *URLResponse;
+@property (strong, nonatomic) SGHTTPAuthenticationChallenge *authChallenge;
 
 + (void) registerProtocol;
 + (void) unregisterProtocol;
