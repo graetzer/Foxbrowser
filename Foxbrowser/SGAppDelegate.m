@@ -125,6 +125,9 @@ id<WeaveService> weaveService;
     
     BOOL showedFirstRunPage = [userDefaults boolForKey:kWeaveShowedFirstRunPage];
     if (!showedFirstRunPage) {
+        // Workaround for the bug where the credentials seem to be not saved
+        [CryptoUtils deletePrivateKeys];
+        
         //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
         // afterwards, they will be taken to the login page, one way or ther other
         WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
