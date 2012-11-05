@@ -172,14 +172,11 @@ static NSDictionary *_gNetworkPaths = nil;
 
 ////INSTANCE METHODS//
 
--(Stockboy *) init 
+- (Stockboy *) init 
 {
-	self = [super init];
-	if (self) 
-  {
-    _stockboyThread = [[NSThread alloc] initWithTarget:self selector:@selector(restockEverything) object:nil];
+	if (self = [super init]) {
+        _stockboyThread = [[NSThread alloc] initWithTarget:self selector:@selector(restockEverything) object:nil];
 	}
-	
 	return self;
 }
 
