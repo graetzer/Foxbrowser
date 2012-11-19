@@ -41,16 +41,8 @@
 
 @end
 
-@implementation SGTabsViewController
-@synthesize delegate;
-@synthesize tabContents = _tabContents, currentViewController = _currentViewController;
-@synthesize headerView = _headerView, tabsView = _tabsView, addButton = _addButton, toolbar = _toolbar;
-@synthesize contentFrame = _contentFrame;
-
-- (id)init {
-    if (self = [super initWithNibName:nil bundle:nil]) {
-    }
-    return self;
+@implementation SGTabsViewController {
+    NSTimer *_timer;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -68,6 +60,15 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     self.currentViewController.view.frame = self.contentFrame;
+    _timer = [NSTimer scheduledTimerWithTimeInterval:5
+                                              target:self
+                                            selector:@selector(saveCurrentURLs)
+                                            userInfo:nil repeats:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [_timer invalidate];
+    _timer = nil;
 }
 
 - (UIView *)rotatingHeaderView {
@@ -101,7 +102,7 @@
     [self.headerView addSubview:_toolbar];
      
     [self.view addSubview:self.headerView];
-    }
+}
 
 - (void)viewDidLoad {
     self.tabsView.tabsController = self;
@@ -114,7 +115,7 @@
         }
     } else {
         SGBlankController *latest = [SGBlankController new];
-        [self addTab:latest];
+        [self addViewController:latest];
     }
 }
 
@@ -123,6 +124,12 @@
     self.toolbar = nil;
     self.tabsView = nil;
     self.addButton = nil;
+}
+
+- (NSString *)savedURLs {
+    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+    path = [path stringByAppendingPathComponent:@"latestURLs.plist"];
+    return path;
 }
 
 - (void)saveCurrentURLs {
@@ -139,12 +146,6 @@
     });
 }
 
-- (NSString *)savedURLs {
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:@"latestURLs.plist"];
-    return path;
-}
-
 - (CGRect)contentFrame {
     CGRect head = self.headerView.frame;
     CGRect bounds = self.view.bounds;
@@ -156,19 +157,14 @@
 
 #pragma mark - Tab stuff
 
-- (void)addTab:(UIViewController *)viewController {
+- (void)addViewController:(UIViewController *)viewController {
     viewController.view.frame = self.contentFrame;
     [self addChildViewController:viewController];
-    [self.tabContents addObject:viewController];
-    [viewController addObserver:self
-                     forKeyPath:@"title"
-                        options:NSKeyValueObservingOptionNew
-                        context:NULL];
     
     if (!self.currentViewController) {
         [viewController.view setNeedsLayout];
         _currentViewController = viewController;
-        [self.tabsView addTab:viewController.title];
+        [self.tabsView addTab:viewController];
         [self.view addSubview:viewController.view];
         self.tabsView.selected = 0;
         [viewController didMoveToParentViewController:self];
@@ -177,28 +173,16 @@
     
     [UIView animateWithDuration:kAddTabDuration
                      animations:^{
-                         [self.tabsView addTab:viewController.title];
+                         [self.tabsView addTab:viewController];
                      }
                      completion:^(BOOL finished){
                          [viewController didMoveToParentViewController:self];
-                         [self saveCurrentURLs];
                      }];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if ([keyPath isEqualToString:@"title"]) {
-        NSUInteger index = [self.tabContents indexOfObject:object];
-        SGTabView *tab = [self.tabsView.tabs objectAtIndex:index];
-        [tab setTitle:[object title]];
-        [tab setNeedsLayout];
-    }
-}
-
 - (void)showViewController:(UIViewController *)viewController index:(NSUInteger)index {
-    if (viewController == self.currentViewController 
-        || ![self.tabContents containsObject:viewController]) {
+    if (viewController == self.currentViewController || [self.tabsView indexOfViewController:viewController] == NSNotFound)
         return;
-    }
     
     viewController.view.frame = self.contentFrame;
     [viewController.view setNeedsLayout];
@@ -216,75 +200,62 @@
 }
 
 - (void)showIndex:(NSUInteger)index; {
-    UIViewController *viewController = [self.tabContents objectAtIndex:index];
-    [self showViewController:viewController index:index];
+    [self showViewController:[self.tabsView viewControllerAtIndex:index] index:index];
 }
 
 - (void)showViewController:(UIViewController *)viewController {
-    NSUInteger index = [self.tabContents indexOfObject:viewController];
-    [self showViewController:viewController index:index];
+    [self showViewController:viewController index:[self.tabsView indexOfViewController:viewController]];
 }
 
 - (void)removeViewController:(UIViewController *)viewController index:(NSUInteger)index {
-    if (self.tabContents.count == 1) {
+    if (self.tabsView.tabs.count == 1) {// 0 shouldn't happen
         SGBlankController *latest = [SGBlankController new];
         [self swapCurrentViewControllerWith:latest];
         return;
     }
     
-    NSUInteger oldIndex = index;
-    [self.tabContents removeObjectAtIndex:oldIndex];
-    [viewController willMoveToParentViewController:nil];
-    [viewController removeObserver:self forKeyPath:@"title"];
-    if (oldIndex >= self.tabContents.count) {
-        index = self.tabContents.count-1;
-    }
+    NSUInteger newIndex = index;
+    UIViewController *to;
+    if (index == self.tabsView.tabs.count - 1) {
+        newIndex--;
+        to = [self.tabsView viewControllerAtIndex:newIndex];
+    } else
+        to  = [self.tabsView viewControllerAtIndex:newIndex+1];
     
-    UIViewController *to = [self.tabContents objectAtIndex:index];
     to.view.frame = self.contentFrame;
-    
+    [viewController willMoveToParentViewController:nil];
     [self transitionFromViewController:viewController
                       toViewController:to
                               duration:kRemoveTabDuration 
                                options:UIViewAnimationOptionAllowAnimatedContent
                             animations:^{
-                                [self.tabsView removeTab:oldIndex];
-                                self.tabsView.selected = index;
+                                [self.tabsView removeTab:index];
+                                self.tabsView.selected = newIndex;
                             }
                             completion:^(BOOL finished){
                                 [viewController removeFromParentViewController];
                                 _currentViewController = to;
                                 [self updateChrome];
-                                [self saveCurrentURLs];
                             }];
 }
 
 - (void)removeViewController:(UIViewController *)viewController {
-    NSUInteger index = [self.tabContents indexOfObject:viewController];
-    [self removeViewController:viewController index:index];
+    [self removeViewController:viewController index:[self.tabsView indexOfViewController:viewController]];
 }
 
 - (void)removeIndex:(NSUInteger)index {
-    UIViewController *viewController = [self.tabContents objectAtIndex:index];
-    [self removeViewController:viewController index:index];
+    [self removeViewController:[self.tabsView viewControllerAtIndex:index] index:index];
 }
 
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
     if (![self.childViewControllers containsObject:viewController]) {
         [self addChildViewController:viewController];
         viewController.view.frame = self.contentFrame;
-        [viewController addObserver:self
-                         forKeyPath:@"title"
-                            options:NSKeyValueObservingOptionNew
-                            context:NULL];
-        
+
         UIViewController *old = self.currentViewController;
-        [old willMoveToParentViewController:nil];
-        [old removeObserver:self forKeyPath:@"title"];
-        NSUInteger index = [self.tabContents indexOfObject:old];
-        [self.tabContents replaceObjectAtIndex:index withObject:viewController];
+        NSUInteger index = [self.tabsView indexOfViewController:old];
         
-        _currentViewController = viewController;
+        [old willMoveToParentViewController:nil];
         [self transitionFromViewController:old
                           toViewController:viewController 
                                   duration:0 
@@ -292,14 +263,15 @@
                                 animations:NULL
                                 completion:^(BOOL finished){
                                     [old removeFromParentViewController];
-                                    [viewController didMoveToParentViewController:self];
                                     
                                     // Update tab content
                                     SGTabView *tab = [self.tabsView.tabs objectAtIndex:index];
-                                    [tab setTitle:viewController.title];
-                                    [tab setNeedsLayout];
+                                    tab.viewController = viewController;
                                     tab.closeButton.hidden = ![self canRemoveTab:viewController];
-                                    [self saveCurrentURLs];
+                                    
+                                    [viewController didMoveToParentViewController:self];
+                                    _currentViewController = viewController;
+                                    [self updateChrome];
                                 }];
     }
 }
@@ -314,14 +286,6 @@
     return self.tabsView.tabs.count;
 }
 
-- (NSMutableArray *)tabContents {
-    if (!_tabContents) {
-        _tabContents = [[NSMutableArray alloc] initWithCapacity:self.maxCount];
-    }
-    return _tabContents;
-}
-
-
 #pragma mark - SGBarDelegate
 
 - (void)addTab; {
@@ -329,7 +293,7 @@
         return;
     }
     SGBlankController *latest = [SGBlankController new];
-    [self addTab:latest];
+    [self addViewController:latest];
     [self showViewController:latest];
 }
 
@@ -337,7 +301,7 @@
     SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
     webC.title = title;
     [webC openURL:url];
-    [self addTab:webC];
+    [self addViewController:webC];
     if (self.count >= self.maxCount) {
         if (self.tabsView.selected != 0)
             [self removeIndex:0];

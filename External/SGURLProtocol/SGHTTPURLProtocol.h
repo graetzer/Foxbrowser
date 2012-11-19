@@ -26,8 +26,9 @@
 @property (strong, nonatomic) NSHTTPURLResponse *URLResponse;
 @property (strong, nonatomic) SGHTTPAuthenticationChallenge *authChallenge;
 
-+ (void) registerProtocol;
-+ (void) unregisterProtocol;
-+ (void) setAuthDelegate:(id<SGAuthDelegate>)delegate forRequest:(NSURLRequest *)request;
++ (void)registerProtocol;
++ (void)unregisterProtocol;
++ (void)setAuthDelegate:(id<SGAuthDelegate>)delegate forRequest:(NSURLRequest *)request;
++ (void)removeAuthDelegate:(id<SGAuthDelegate>)delegate;
 
 @end

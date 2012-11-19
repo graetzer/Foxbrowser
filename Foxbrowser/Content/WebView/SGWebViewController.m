@@ -44,8 +44,9 @@
 }
 
 - (void)loadView {
-    self.webView = [[UIWebView alloc] initWithFrame:CGRectZero];
-    self.view = self.webView;
+    __strong UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectZero];
+    self.view = webView;
+    self.webView = webView;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -61,9 +62,8 @@
 {
     [super viewDidLoad];
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"])
         [SGHTTPURLProtocol registerProtocol];
-    }
         
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -76,23 +76,24 @@
     self.webView.scalesPageToFit = YES;
 }
 
-- (void)willMoveToParentViewController:(UIViewController *)parent {
+- (void)didMoveToParentViewController:(UIViewController *)parent {
     if (!parent) {// View is removed
+        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
         [self.webView stopLoading];
         self.webView.delegate = nil;
-        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
+            [SGHTTPURLProtocol removeAuthDelegate:self];
+            [SGHTTPURLProtocol unregisterProtocol];
+        }
     }
 }
 
 - (void)viewWillUnload {
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
-        [SGHTTPURLProtocol unregisterProtocol];
-    }
+    [super viewWillUnload];
     
+    [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
     [self.webView stopLoading];
     self.webView.delegate = nil;
-    [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
-    [super viewWillUnload];
 }
 
 - (void)viewDidUnload
@@ -105,6 +106,12 @@
     if (!self.webView.request) {
         [self openURL:nil];
     }
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"])
+        [SGHTTPURLProtocol unregisterProtocol];
 }
 
 #pragma mark - UILongPressGesture
@@ -239,7 +246,8 @@
         return NO;
     }
     
-    [SGHTTPURLProtocol setAuthDelegate:self forRequest:request];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"])
+        [SGHTTPURLProtocol setAuthDelegate:self forRequest:request];
     
     if (navigationType != UIWebViewNavigationTypeOther) {
         self.location = request.URL;
@@ -263,9 +271,9 @@
     [webView disableContextMenu];
     [webView modifyLinkTargets];
     [webView modifyOpen];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
         [webView enableDoNotTrack];
-    }
+        
     self.title = [webView title];
     
     NSString *webLoc = [self.webView location];
@@ -340,12 +348,6 @@
         NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
         while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
             LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-        
-//        dispatch_sync(dispatch_get_main_queue(), ^{
-//            NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-//            while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
-//                LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-//        });
         
         SGCredentialsPrompt *creds = self.credentialsPrompt;
         if (_dialogResult == 1) {

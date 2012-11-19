@@ -17,7 +17,7 @@
 @interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
 UIActionSheetDelegate, UIAlertViewDelegate, SGAuthDelegate>
 
-@property (strong, nonatomic) IBOutlet UIWebView *webView;
+@property (weak, nonatomic) UIWebView *webView;
 @property (strong, nonatomic) NSURL *location;
 @property (assign, nonatomic, getter = isLoading) BOOL loading;
 

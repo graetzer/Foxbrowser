@@ -55,10 +55,22 @@ typedef enum {
 	[VariableLock unlock];
 }
 
-+ (void) setAuthDelegate:(id<SGAuthDelegate>)delegate forRequest:(NSURLRequest *)request {
++ (void)setAuthDelegate:(id<SGAuthDelegate>)delegate forRequest:(NSURLRequest *)request {
     [VariableLock lock];
 	[AuthDelegates addObject:delegate];
     [Requests addObject:request];
+	[VariableLock unlock];
+}
+
++ (void)removeAuthDelegate:(id<SGAuthDelegate>)delegate {
+    [VariableLock lock];
+    
+    NSUInteger index = NSNotFound;
+    while ( (index = [AuthDelegates indexOfObject:delegate]) != NSNotFound) {
+        [AuthDelegates removeObjectAtIndex:index];
+        [Requests removeObjectAtIndex:index];
+    };
+	
 	[VariableLock unlock];
 }
 

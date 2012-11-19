@@ -502,6 +502,7 @@
 		F4C3906B161093D500349AA4 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		F4DACE8615AC86C400131DED /* WeaveService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeaveService.h; sourceTree = "<group>"; };
 		F4E2F99715AF82C000A56DCB /* WeaveService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WeaveService.m; sourceTree = "<group>"; };
+		F4F8F74D1659A46700F8CEF9 /* NSObject+Subscripts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Subscripts.h"; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FD2B6715ADDB9D005DBAB4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1146,6 +1147,7 @@
 				F49EE8A315A24426001B4D5F /* Chrome */,
 				F4FE2C58159B6C58001B04D7 /* SGAppDelegate.h */,
 				F4FE2C59159B6C58001B04D7 /* SGAppDelegate.m */,
+				F4F8F74D1659A46700F8CEF9 /* NSObject+Subscripts.h */,
 				F4FE2C50159B6C58001B04D7 /* Supporting Files */,
 			);
 			path = Foxbrowser;

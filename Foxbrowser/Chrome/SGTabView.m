@@ -35,10 +35,10 @@
     CGSize _tSize;
     CGFloat _cap;
 }
-@dynamic title;
+@synthesize viewController = _viewController;
 
-- (id)initWithFrame:(CGRect)frame title:(NSString *)title
-{
+- (id)initWithFrame:(CGRect)frame
+     viewController:(UIViewController *)controller {
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         self.tabColor = kTabColor;
@@ -56,7 +56,6 @@
         self.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14.0];
         self.titleLabel.minimumFontSize = 14.0;
         self.titleLabel.textColor = [UIColor darkGrayColor];
-        self.title = title;
         [self addSubview:self.titleLabel];
         
         _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -67,17 +66,35 @@
         [self.closeButton setShowsTouchWhenHighlighted:YES];
         self.closeButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:17.0];
         [self addSubview:self.closeButton];
+        
+        self.viewController = controller;
     }
     return self;
 }
 
-- (void)setTitle:(NSString *)title {
-    self.titleLabel.text = title;
-    _tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+- (void)dealloc {
+    [_viewController removeObserver:self forKeyPath:@"title"];
 }
 
-- (NSString *)title {
-    return self.titleLabel.text;
+- (void)setViewController:(UIViewController *)viewController {
+    [_viewController removeObserver:self forKeyPath:@"title"];
+    
+    _viewController = viewController;
+    [_viewController addObserver:self
+                     forKeyPath:@"title"
+                        options:NSKeyValueObservingOptionNew
+                        context:NULL];
+    self.titleLabel.text = _viewController.title;
+    _tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+    [self setNeedsLayout];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if ([keyPath isEqualToString:@"title"]) {
+        self.titleLabel.text = [object title];
+        _tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+        [self setNeedsLayout];
+    }
 }
 
 - (void)layoutSubviews {

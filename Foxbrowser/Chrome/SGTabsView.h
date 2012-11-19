@@ -25,12 +25,15 @@
 @class SGTabsViewController;
 
 @interface SGTabsView : UIView <UIGestureRecognizerDelegate>
-@property (nonatomic, weak) SGTabsViewController *tabsController; 
-@property (nonatomic, readonly, strong) NSMutableArray *tabs;
-@property (nonatomic, assign) NSUInteger selected;
+@property (weak, nonatomic) SGTabsViewController *tabsController;
+@property (strong, nonatomic, readonly) NSMutableArray *tabs;
+@property (assign, nonatomic) NSUInteger selected;
 
-- (void)addTab:(NSString *)title;
+- (NSUInteger)addTab:(UIViewController *)viewController;
 - (void)removeTab:(NSUInteger)index;
+
+- (NSUInteger)indexOfViewController:(UIViewController *)controller;
+- (UIViewController *)viewControllerAtIndex:(NSUInteger)index;
 
 /// Calculates the width each tabs needs and resizes the view
 - (void)resizeTabs;

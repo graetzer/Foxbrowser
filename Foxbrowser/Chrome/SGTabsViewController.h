@@ -41,8 +41,6 @@
 
 /// Currently visible view controller
 @property (nonatomic, readonly, weak) UIViewController *currentViewController;
-/// For internal use
-@property (nonatomic, readonly, strong) NSMutableArray *tabContents;
 /// The frame in wihich content is shown
 @property (nonatomic, readonly) CGRect contentFrame;
 
@@ -50,7 +48,7 @@
 - (void)addTab;
 
 /// Adds a tab, don't add the same instance twice!
-- (void)addTab:(UIViewController *)viewController;
+- (void)addViewController:(UIViewController *)viewController;
 - (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;
 
 /// Bring a tab to the frontpage
