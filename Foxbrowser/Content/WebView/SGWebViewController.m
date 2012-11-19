@@ -146,6 +146,12 @@
     NSString *link = [self.selected objectForKey:@"A"];
     NSString *imageSrc = [self.selected objectForKey:@"IMG"];
     
+    NSString *prefix = @"newtab:";
+    if ([link hasPrefix:prefix]) {
+        link = [link substringFromIndex:prefix.length];
+        link = [link stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    }
+    
     if (link && imageSrc) {
         sheet = [[UIActionSheet alloc] initWithTitle:link
                                             delegate:self 
@@ -183,6 +189,12 @@
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     NSString *link = [self.selected objectForKey:@"A"];
     NSString *imageSrc = [self.selected objectForKey:@"IMG"];
+    
+    NSString *prefix = @"newtab:";
+    if ([link hasPrefix:prefix]) {
+        link = [link substringFromIndex:prefix.length];
+        link = [link stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    }
     
     if (link && imageSrc) {
         if (buttonIndex == 0) {
@@ -240,7 +252,8 @@
 
 -  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     if ([request.URL.scheme isEqualToString:@"newtab"]) {
-        NSString *urlString = [[request.URL resourceSpecifier] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString *source = [request.URL resourceSpecifier];
+        NSString *urlString = [source stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.location];
         [self.tabsViewController addTabWithURL:url withTitle:url.absoluteString];
         return NO;

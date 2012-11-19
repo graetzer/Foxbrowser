@@ -45,7 +45,6 @@ BOOL IsBlockedURL(NSURL* url);
 extern id<WeaveService> weaveService;
 
 @interface WeaveOperations : NSObject
-@property (strong, atomic) NSOperationQueue *queue;
 
 - (NSURL *)parseURLString:(NSString *)input;
 - (NSString *)urlEncode:(NSString *)string;

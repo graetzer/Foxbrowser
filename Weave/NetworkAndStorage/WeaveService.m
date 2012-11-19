@@ -24,7 +24,9 @@ NSString *kWeavePrivateMode = @"privateMode";
 #define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A403 Safari/8536.25"
 
 
-@implementation WeaveOperations
+@implementation WeaveOperations {
+    dispatch_queue_t _queue;
+}
 
 + (WeaveOperations *)sharedOperations {
     static dispatch_once_t once;
@@ -35,8 +37,7 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (id)init {
     if (self = [super init]) {
-        self.queue = [NSOperationQueue new];
-        self.queue.maxConcurrentOperationCount = 1;//Operate sequentially
+        _queue = dispatch_queue_create(NULL, DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }
@@ -117,7 +118,7 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (void)addHistoryURL:(NSURL *)url title:(NSString *)title {
     // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
-    [[self queue] addOperationWithBlock:^{
+    dispatch_async(_queue, ^{
         NSString *urlText = url.absoluteString;
         
         // Check if this history entry already exists
@@ -146,7 +147,7 @@ NSString *kWeavePrivateMode = @"privateMode";
         }
         
         [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
-    }];
+    });
 }
 
 @end

@@ -37,7 +37,7 @@ function FoxbrowserModifyOpen() {
 
     window.open = function(url,target,param) {
         if (url && url.length > 0) {
-            if (!target) target = "_blank";
+            if (!target) target = '_blank';
             if (target != '_self') {
                 location.href = 'newtab:'+escape(url);
             } else {
