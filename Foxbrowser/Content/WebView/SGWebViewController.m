@@ -78,9 +78,11 @@
 
 - (void)didMoveToParentViewController:(UIViewController *)parent {
     if (!parent) {// View is removed
-        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
         [self.webView stopLoading];
+        [self.webView clearContent];
+        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
         self.webView.delegate = nil;
+        
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
             [SGHTTPURLProtocol removeAuthDelegate:self];
             [SGHTTPURLProtocol unregisterProtocol];
@@ -110,8 +112,6 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"])
-        [SGHTTPURLProtocol unregisterProtocol];
 }
 
 #pragma mark - UILongPressGesture

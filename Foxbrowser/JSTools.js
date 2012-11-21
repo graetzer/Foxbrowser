@@ -23,8 +23,17 @@ function FoxbrowserModifyLinkTargets() {
             var link = allLinks[i];
             var target = link.getAttribute('target');
             if (target && target == '_blank') {
-                link.setAttribute('target','_self');
-                link.href = 'newtab:'+escape(link.href);
+                //link.setAttribute('target','_self');
+                link.onclick = function (e) {
+                    var el = e.target;
+                    while (el.tagName != 'A' && el.parentNode)
+                        el = el.parentNode;
+                    
+                    if (el.href) {
+                        window.location.href = 'newtab:'+escape(el.href);
+                        return false;
+                    }
+                }
             }
         }
     }
