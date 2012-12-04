@@ -139,7 +139,8 @@
         for (UIViewController *controller in self.childViewControllers) {
             if ([controller isKindOfClass:[SGWebViewController class]]) {
                 NSURL *url = ((SGWebViewController*)controller).location;
-                [latest addObject:url.absoluteString];
+                if (url != nil)
+                    [latest addObject:[NSString stringWithFormat:@"%@",url]];
             }
         }
         [latest writeToFile:[self savedURLs] atomically:YES];

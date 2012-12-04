@@ -28,14 +28,14 @@
 
 #define kTabsToolbarHeigth 44.0
 #define kTabsHeigth  36.0
-#define kTabsBottomMargin 2.5
+#define kTabsBottomMargin 1.0
 
 #define kAddButtonWidth 40.
 
 #define kCornerRadius 6.5
 #define kShadowRadius 5.0
 
-#define kTabColor  [UIColor colorWithRed:188./255. green:192./255. blue:205./255. alpha:1.0]
+#define kTabColor  [UIColor colorWithRed:208./255. green:212./255. blue:225./255. alpha:1.0]
 #define kTabDarkerColor [UIColor colorWithRed:138./255. green:142./255. blue:155./255. alpha:1.0]
 
 

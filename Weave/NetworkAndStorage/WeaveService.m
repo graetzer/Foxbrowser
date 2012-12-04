@@ -25,7 +25,7 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 
 @implementation WeaveOperations {
-    dispatch_queue_t _queue;
+    NSOperationQueue *_queue;
 }
 
 + (WeaveOperations *)sharedOperations {
@@ -37,7 +37,8 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (id)init {
     if (self = [super init]) {
-        _queue = dispatch_queue_create(NULL, DISPATCH_QUEUE_SERIAL);
+        _queue = [NSOperationQueue new];
+        _queue.maxConcurrentOperationCount = 1;
     }
     return self;
 }
@@ -116,10 +117,10 @@ NSString *kWeavePrivateMode = @"privateMode";
     }
 }
 
-- (void)addHistoryURL:(NSURL *)url title:(NSString *)title {
+- (void)addHistoryURL:(NSURL *)url title:(NSString *)title {    
     // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
-    dispatch_async(_queue, ^{
-        NSString *urlText = url.absoluteString;
+    [_queue addOperationWithBlock:^{
+        NSString *urlText = [NSString stringWithFormat:@"%@", url];
         
         // Check if this history entry already exists
         NSDictionary *existing = nil;
@@ -139,15 +140,17 @@ NSString *kWeavePrivateMode = @"privateMode";
             @"modified" : @([[NSDate date] timeIntervalSince1970]),
             @"sortindex" : @(sortIndex + 100)};
         } else {
+            NSString *titleSrc = title != nil ? title : [NSString stringWithFormat:@"%@", url.host];
+            
             historyEntry = @{ @"id" : [NSString stringWithFormat:@"abc%i", url.hash],// No idea about this
             @"histUri" : urlText,
-            @"title" : title,
+            @"title" : titleSrc,
             @"modified" : @([[NSDate date] timeIntervalSince1970]),
             @"sortindex" : @100};// Choosen without further information
         }
         
         [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
-    });
+    }];
 }
 
 @end
