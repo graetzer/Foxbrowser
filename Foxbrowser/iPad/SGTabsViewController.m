@@ -29,11 +29,12 @@
 #import "UIWebView+WebViewAdditions.h"
 #import "SGBlankController.h"
 
+
 @interface SGTabsViewController ()
 @property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) SGTabsView *tabsView;
 @property (nonatomic, strong) SGAddButton *addButton;
-@property (nonatomic, strong) SGToolbar *toolbar;
+@property (nonatomic, strong) SGTabsToolbar *toolbar;
 
 
 - (void)showViewController:(UIViewController *)viewController index:(NSUInteger)index;
@@ -41,34 +42,23 @@
 
 @end
 
-@implementation SGTabsViewController {
-    NSTimer *_timer;
+@implementation SGTabsViewController
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? YES : UIInterfaceOrientationIsLandscape(interfaceOrientation);
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        return YES;
-    else
-        return UIInterfaceOrientationIsLandscape(interfaceOrientation);;
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-
-    self.currentViewController.view.frame = self.contentFrame;
+    self.selectedViewController.view.frame = self.contentFrame;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    self.currentViewController.view.frame = self.contentFrame;
-    _timer = [NSTimer scheduledTimerWithTimeInterval:5
-                                              target:self
-                                            selector:@selector(saveCurrentURLs)
-                                            userInfo:nil repeats:YES];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [_timer invalidate];
-    _timer = nil;
+    [super viewWillAppear:animated];
+    self.selectedViewController.view.frame = self.contentFrame;
 }
 
 - (UIView *)rotatingHeaderView {
@@ -87,7 +77,7 @@
     self.headerView.backgroundColor = [UIColor clearColor];
     
     CGRect frame = CGRectMake(0, 0, head.size.width, kTabsToolbarHeigth);
-    _toolbar = [[SGToolbar alloc] initWithFrame:frame delegate:self];
+    _toolbar = [[SGTabsToolbar alloc] initWithFrame:frame browser:self];
     
     frame = CGRectMake(0, kTabsToolbarHeigth, head.size.width - kAddButtonWidth, kTabsHeigth);
     _tabsView = [[SGTabsView alloc] initWithFrame:frame];
@@ -105,46 +95,17 @@
 }
 
 - (void)viewDidLoad {
+    [super viewDidLoad];
     self.tabsView.tabsController = self;
-    self.delegate = self;
-    
-    NSArray *latest = [NSArray arrayWithContentsOfFile:[self savedURLs]];
-    if (latest.count > 0) {
-        for (NSString *urlString in latest) {
-            [self addTabWithURL:[NSURL URLWithString:urlString] withTitle:urlString];
-        }
-    } else {
-        SGBlankController *latest = [SGBlankController new];
-        [self addViewController:latest];
-    }
+    [self addSavedTabs];
 }
 
 - (void)viewDidUnload {
+    [super viewDidUnload];
     self.headerView = nil;
     self.toolbar = nil;
     self.tabsView = nil;
     self.addButton = nil;
-}
-
-- (NSString *)savedURLs {
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:@"latestURLs.plist"];
-    return path;
-}
-
-- (void)saveCurrentURLs {
-    dispatch_queue_t q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    dispatch_async(q, ^{
-        NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
-        for (UIViewController *controller in self.childViewControllers) {
-            if ([controller isKindOfClass:[SGWebViewController class]]) {
-                NSURL *url = ((SGWebViewController*)controller).location;
-                if (url != nil)
-                    [latest addObject:[NSString stringWithFormat:@"%@",url]];
-            }
-        }
-        [latest writeToFile:[self savedURLs] atomically:YES];
-    });
 }
 
 - (CGRect)contentFrame {
@@ -162,9 +123,8 @@
     viewController.view.frame = self.contentFrame;
     [self addChildViewController:viewController];
     
-    if (!self.currentViewController) {
+    if (self.tabsView.tabs.count == 0) {
         [viewController.view setNeedsLayout];
-        _currentViewController = viewController;
         [self.tabsView addTab:viewController];
         [self.view addSubview:viewController.view];
         self.tabsView.selected = 0;
@@ -182,12 +142,13 @@
 }
 
 - (void)showViewController:(UIViewController *)viewController index:(NSUInteger)index {
-    if (viewController == self.currentViewController || [self.tabsView indexOfViewController:viewController] == NSNotFound)
+    UIViewController *current = [self selectedViewController];
+    if (viewController == current || [self.tabsView indexOfViewController:viewController] == NSNotFound)
         return;
     
     viewController.view.frame = self.contentFrame;
     [viewController.view setNeedsLayout];
-    [self transitionFromViewController:self.currentViewController
+    [self transitionFromViewController:current
                       toViewController:viewController
                               duration:0
                                options:0
@@ -195,7 +156,6 @@
                                 self.tabsView.selected = index;
                             }
                             completion:^(BOOL finished) {
-                                _currentViewController = viewController;
                                 [self updateChrome];
                             }];
 }
@@ -235,7 +195,6 @@
                             }
                             completion:^(BOOL finished){
                                 [viewController removeFromParentViewController];
-                                _currentViewController = to;
                                 [self updateChrome];
                             }];
 }
@@ -253,7 +212,7 @@
         [self addChildViewController:viewController];
         viewController.view.frame = self.contentFrame;
 
-        UIViewController *old = self.currentViewController;
+        UIViewController *old = [self selectedViewController];
         NSUInteger index = [self.tabsView indexOfViewController:old];
         
         [old willMoveToParentViewController:nil];
@@ -271,146 +230,30 @@
                                     tab.closeButton.hidden = ![self canRemoveTab:viewController];
                                     
                                     [viewController didMoveToParentViewController:self];
-                                    _currentViewController = viewController;
                                     [self updateChrome];
                                 }];
     }
 }
 
-#pragma mark - Propertys
+- (UIViewController *)selectedViewController {
+    return [self.tabsView viewControllerAtIndex:self.tabsView.selected];
+}
+
+- (NSUInteger)selected {
+    return self.tabsView.selected;
+}
 
 - (NSUInteger)maxCount {
-    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 10 : 4;
+    return 10;
 }
 
 - (NSUInteger)count {
     return self.tabsView.tabs.count;
 }
 
-#pragma mark - SGBarDelegate
-
-- (void)addTab; {
-    if (self.count >= self.maxCount) {
-        return;
-    }
-    SGBlankController *latest = [SGBlankController new];
-    [self addViewController:latest];
-    [self showViewController:latest];
-}
-
-- (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;{
-    SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
-    webC.title = title;
-    [webC openURL:url];
-    [self addViewController:webC];
-    if (self.count >= self.maxCount) {
-        if (self.tabsView.selected != 0)
-            [self removeIndex:0];
-        else
-            [self removeIndex:1];
-    }
-}
-
-- (void)handleURLInput:(NSString*)input title:(NSString *)title {
-    NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
-    if (!title) {
-        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
-        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
-    }
-    
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        webC.title = title;
-        [webC openURL:url];
-    } else {
-        SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
-        webC.title = title;
-        [webC openURL:url];
-        [self swapCurrentViewControllerWith:webC];
-    }
-}
-
-- (void)reload; {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC reload];
-        [self updateChrome];
-    }
-}
-
-- (void)stop {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC.webView stopLoading];
-        [self updateChrome];
-    }
-}
-
-- (BOOL)isLoading {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.loading;
-    }
-    return NO;
-}
-
-- (void)goBack; {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC.webView goBack];
-        [self updateChrome];
-    }
-}
-
-- (void)goForward; {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        [webC.webView goForward];
-        [self updateChrome];
-    }
-}
-
-- (BOOL)canGoBack; {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return [webC.webView canGoBack];
-    }
-    return NO;
-}
-
-- (BOOL)canGoForward; {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return [webC.webView canGoForward];
-    }
-    return NO;
-}
-
-- (BOOL)canStopOrReload {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        return YES;
-    }
-    return NO;
-}
-
-- (NSURL *)URL {
-    if ([self.currentViewController isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)self.currentViewController;
-        return webC.location;
-    }
-    return nil;
-}
-
 - (void)updateChrome {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
     [self.toolbar updateChrome];
-}
-
-- (BOOL)canRemoveTab:(UIViewController *)viewController {
-    if ([viewController isKindOfClass:[SGBlankController class]] && self.count == 1) {
-        return NO;
-    }
-    return YES;
 }
 
 @end

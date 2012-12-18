@@ -35,10 +35,12 @@
  
  ***** END LICENSE BLOCK *****/
 
+#import "TabBrowserController.h"
+
 #import "NSURL+IFUnicodeURL.h"
 #import "WeaveService.h"
 #import "SGAppDelegate.h"
-#import "TabBrowserController.h"
+#import "SGBrowserViewController.h"
 #import "Store.h"
 
 @implementation TabBrowserController
@@ -156,7 +158,7 @@
 	
 	if ([weaveService canConnectToInternet])
 	{
-        [appDelegate.tabsController handleURLInput:cell.detailTextLabel.text title:cell.textLabel.text];
+        [appDelegate.browserViewController handleURLInput:cell.detailTextLabel.text title:cell.textLabel.text];
 	}
 	else 
 	{

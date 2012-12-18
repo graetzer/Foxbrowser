@@ -10,11 +10,10 @@
 
 
 #import "SGWebViewController.h"
-#import "UIViewController+TabsController.h"
+#import "UIViewController+SGBrowserViewController.h"
 #import "UIWebView+WebViewAdditions.h"
 #import "SGTabsViewController.h"
 #import "SGAppDelegate.h"
-#import "Reachability.h"
 #import "WeaveService.h"
 #import "NSURL+IFUnicodeURL.h"
 #import "SGCredentialsPrompt.h"
@@ -31,16 +30,18 @@
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
     // Enable cookies
-    NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage
-                                          sharedHTTPCookieStorage];
-    [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
-    
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:@"WebCache"];
-    NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024*1024*5
-                                                      diskCapacity:1024*1024*30
-                                                          diskPath:path];
-    [NSURLCache setSharedURLCache:cache];
+    @autoreleasepool { // TODO private mode
+        NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage
+                                              sharedHTTPCookieStorage];
+        [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
+        
+        NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+        path = [path stringByAppendingPathComponent:@"WebCache"];
+        NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024*1024*5
+                                                          diskCapacity:1024*1024*30
+                                                              diskPath:path];
+        [NSURLCache setSharedURLCache:cache];
+    }
 }
 
 - (void)loadView {
@@ -201,7 +202,7 @@
             NSURL *url = [NSURL URLWithString:link];
             [self openURL:url];
         } else if (buttonIndex == 1) {
-            [self.tabsViewController addTabWithURL:[NSURL URLWithString:link] withTitle:link];
+            [self.browserViewController addTabWithURL:[NSURL URLWithString:link] withTitle:link];
         } else if (buttonIndex == 2) {
             [self performSelectorInBackground:@selector(saveImageURL:) withObject:[NSURL URLWithString:imageSrc]];
         } else if (buttonIndex == 3) {
@@ -212,7 +213,7 @@
             NSURL *url = [NSURL URLWithString:link];
             [self openURL:url];
         } else if (buttonIndex == 1) {
-            [self.tabsViewController addTabWithURL:[NSURL URLWithString:link] withTitle:link];
+            [self.browserViewController addTabWithURL:[NSURL URLWithString:link] withTitle:link];
         } else if (buttonIndex == 2) {
             [UIPasteboard generalPasteboard].string = link;
         }
@@ -255,7 +256,7 @@
         NSString *source = [request.URL resourceSpecifier];
         NSString *urlString = [source stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.location];
-        [self.tabsViewController addTabWithURL:url withTitle:url.absoluteString];
+        [self.browserViewController addTabWithURL:url withTitle:url.absoluteString];
         return NO;
     }
     
@@ -264,7 +265,7 @@
     
     if (navigationType != UIWebViewNavigationTypeOther) {
         self.location = request.URL;
-        [self.tabsViewController updateChrome];
+        [self.browserViewController updateChrome];
         
         WeaveOperations *op = [WeaveOperations sharedOperations];
         [op modifyRequest:request];
@@ -275,7 +276,7 @@
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     self.loading = YES;
-    [self.tabsViewController updateChrome];
+    [self.browserViewController updateChrome];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -293,8 +294,7 @@
     if (webLoc.length) {
         self.location = [NSURL URLWithUnicodeString:webLoc];
     }
-    
-    [self.tabsViewController updateChrome];
+    [self.browserViewController updateChrome];
     
     // Private mode
     //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
@@ -318,7 +318,7 @@
 - (void)webView:(UIWebView *)theWebView didFailLoadWithError:(NSError *)error
 {
     self.loading = NO;
-    [self.tabsViewController updateChrome];
+    [self.browserViewController updateChrome];
     
     NSLog(@"Error code: %d", error.code);
     //ignore these

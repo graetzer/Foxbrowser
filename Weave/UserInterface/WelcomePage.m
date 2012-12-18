@@ -71,6 +71,10 @@ JPAKEReporter* gSharedReporter = nil;
     self.helpButton = nil;
 }
 
+- (BOOL)shouldAutorotate {
+    return NO;
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad || toInterfaceOrientation == UIInterfaceOrientationPortrait;
 }

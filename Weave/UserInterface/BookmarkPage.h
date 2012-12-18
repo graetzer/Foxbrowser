@@ -37,8 +37,8 @@
 
 
 #import <UIKit/UIKit.h>
-#import "SGToolbar.h"
 
+@class SGBrowserViewController;
 //This is a bit clunky; I'm using one class for two slightly different bookmark displays
 // the top level one has no parentid, and shows three categories "menu", "toolbar", and "unfiled"
 // every other level of the heirarchy has a parent id, and only has a single category
@@ -49,7 +49,7 @@
   NSMutableArray* topLevelBookmarks;
 }
 
-@property (nonatomic, weak) id<SGToolbarDelegate> delegate;
+@property (nonatomic, weak) SGBrowserViewController *browser;
 
 - (void) setParent:(NSString*) parent;
 - (void) refresh;

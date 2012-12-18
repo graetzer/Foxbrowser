@@ -20,18 +20,19 @@
 //  limitations under the License.
 //
 
-#import "SGToolbar.h"
+#import "SGTabsToolbar.h"
 #import "SGTabDefines.h"
 #import "BookmarkPage.h"
 #import "SGAppDelegate.h"
 #import "SGTabsViewController.h"
 #import "SGProgressCircleView.h"
-#import "SGSearchBar.h"
+#import "SGSearchField.h"
+#import "SGBrowserViewController.h"
 
 #import "SettingsController.h"
 #import "WelcomePage.h"
 
-@interface SGToolbar ()
+@interface SGTabsToolbar ()
 @property (nonatomic, strong) UIButton *forwardItem;
 @property (nonatomic, strong) UIButton *backItem;
 @property (nonatomic, strong) UIButton *bookmarksItem;
@@ -42,13 +43,13 @@
 
 @end
 
-@implementation SGToolbar
+@implementation SGTabsToolbar
 
-- (id)initWithFrame:(CGRect)frame delegate:(id<SGToolbarDelegate>)delegate
+- (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.delegate = delegate;
+        _browser = browser;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         _bottomColor = kTabColor;
         
@@ -60,7 +61,7 @@
         self.backItem.backgroundColor = [UIColor clearColor];
         self.backItem.showsTouchWhenHighlighted = YES;
         [self.backItem setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
-        [self.backItem addTarget:self.delegate action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
+        [self.backItem addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.backItem];
         
         self.forwardItem = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -69,7 +70,7 @@
         self.forwardItem.backgroundColor = [UIColor clearColor];
         self.forwardItem.showsTouchWhenHighlighted = YES;
         [self.forwardItem setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
-        [self.forwardItem addTarget:self.delegate action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
+        [self.forwardItem addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.forwardItem];
         
         self.bookmarksItem = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -93,7 +94,7 @@
         self.progressView = [[SGProgressCircleView alloc] init];
         [self addSubview:self.progressView];
         
-        self.searchField = [[SGSearchBar alloc] initWithDelegate:self];
+        self.searchField = [[SGSearchField alloc] initWithDelegate:self];
         [self addSubview:self.searchField];
         
         self.reloadItem = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -102,7 +103,7 @@
         self.reloadItem.backgroundColor = [UIColor clearColor];
         self.reloadItem.showsTouchWhenHighlighted = YES;
         [self.reloadItem setImage:[UIImage imageNamed:@"reload"] forState:UIControlStateNormal];
-        [self.reloadItem addTarget:self.delegate action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
+        [self.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.reloadItem];
         
         self.stopItem = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -111,11 +112,11 @@
         self.stopItem.backgroundColor = [UIColor clearColor];
         self.stopItem.showsTouchWhenHighlighted = YES;
         [self.stopItem setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
-        [self.stopItem addTarget:self.delegate action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [self.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.stopItem];
         
-        self.urlBarViewController = [[SGSearchController alloc] initWithStyle:UITableViewStylePlain];
-        self.urlBarViewController.delegate = self;
+        self.searchController = [[SGSearchController alloc] initWithStyle:UITableViewStylePlain];
+        self.searchController.delegate = self;
                 
         [self updateChrome];
     }
@@ -177,7 +178,7 @@
     
     if (!self.bookmarks) {
         BookmarkPage *bookmarksPage = [BookmarkPage new];
-        bookmarksPage.delegate = self.delegate;
+        bookmarksPage.browser = self.browser;
         self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
     }
     
@@ -207,7 +208,7 @@
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    NSURL *url = [self.delegate URL];
+    NSURL *url = [self.browser URL];
 
     switch (buttonIndex) {
         case 0: // Open in mobile safari
@@ -220,7 +221,7 @@
                 [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
                 NSString *text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Here is that site we talked about:", nil), url.absoluteString];
                 [mail setMessageBody:text isHTML:NO];
-                [appDelegate.tabsController presentModalViewController:mail animated:YES];
+                [self.browser presentModalViewController:mail animated:YES];
             }
             break;
             
@@ -228,7 +229,7 @@
             if ([TWTweetComposeViewController canSendTweet]) {
                 TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
                 [tw addURL:url];
-                [appDelegate.tabsController presentModalViewController:tw animated:YES];
+                [self.browser presentModalViewController:tw animated:YES];
             }
             break;
         
@@ -253,14 +254,14 @@
                     WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
                     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
                     navController.modalPresentationStyle = UIModalPresentationFormSheet;
-                    [self.window.rootViewController presentViewController:navController animated:YES completion:NULL];
+                    [self.browser presentViewController:navController animated:YES completion:NULL];
                 }
                 else
                 {
                     SettingsController *settings = [SettingsController new];
                     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
                     nav.modalPresentationStyle = UIModalPresentationFormSheet;
-                    [appDelegate.tabsController presentModalViewController:nav animated:YES];
+                    [self.browser presentModalViewController:nav animated:YES];
                 }
                 
             }
@@ -277,37 +278,37 @@
     switch (result)
     {
         case MFMailComposeResultCancelled:
-            NSLog(@"Mail cancelled: you cancelled the operation and no email message was queued.");
+            DLog(@"Mail cancelled: you cancelled the operation and no email message was queued.");
             break;
         case MFMailComposeResultSaved:
-            NSLog(@"Mail saved: you saved the email message in the drafts folder.");
+            DLog(@"Mail saved: you saved the email message in the drafts folder.");
             break;
         case MFMailComposeResultSent:
-            NSLog(@"Mail send: the email message is queued in the outbox. It is ready to send.");
+            DLog(@"Mail send: the email message is queued in the outbox. It is ready to send.");
             break;
         case MFMailComposeResultFailed:
-            NSLog(@"Mail failed: the email message was not saved or queued, possibly due to an error.");
+            DLog(@"Mail failed: the email message was not saved or queued, possibly due to an error.");
             break;
         default:
-            NSLog(@"Mail not sent.");
+            DLog(@"Mail not sent.");
             break;
     }
     
     // Remove the mail view
-    [appDelegate.tabsController dismissModalViewControllerAnimated:YES];
+    [self.browser dismissModalViewControllerAnimated:YES];
 }
 
 - (void)updateChrome {
-    if (![self.searchField isFirstResponder] && [self.delegate respondsToSelector:@selector(URL)]) {
-            self.searchField.text = [self.delegate URL].absoluteString;
+    if (![self.searchField isFirstResponder]) {
+            self.searchField.text = [self.browser URL].absoluteString;
     }
-    self.forwardItem.enabled = [self.delegate canGoForward];
-    self.backItem.enabled = [self.delegate canGoBack];
+    self.forwardItem.enabled = [self.browser canGoForward];
+    self.backItem.enabled = [self.browser canGoBack];
     
-    if ([self.delegate respondsToSelector:@selector(canStopOrReload)]) {
-        BOOL canStopOrReload = [self.delegate canStopOrReload];
+    if ([self.browser respondsToSelector:@selector(canStopOrReload)]) {
+        BOOL canStopOrReload = [self.browser canStopOrReload];
         if (canStopOrReload) {
-            if ([self.delegate isLoading]) {
+            if ([self.browser isLoading]) {
                 self.reloadItem.hidden = YES;
                 self.stopItem.hidden = NO;
                 self.progressView.hidden = NO;
@@ -329,11 +330,11 @@
 - (void)createPopover {
     if (!self.popoverController) // create the popover if not already open
     {
-        self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.urlBarViewController];
+        self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.searchController];
         self.popoverController.delegate = self;
         
         // Ensure the popover is not dismissed if the user taps in the search bar.
-        self.popoverController.passthroughViews = [NSArray arrayWithObject:self];
+        self.popoverController.passthroughViews = @[self, self.searchField];
     }
 }
 
@@ -352,6 +353,8 @@
     }
 }
 
+#pragma mark - UITextFieldDelegate
+
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     [self createPopover];
 }
@@ -368,7 +371,7 @@
     
     // When the search string changes, filter the recents list accordingly.
     if (self.popoverController) {
-        [self.urlBarViewController filterResultsUsingString:searchText];
+        [self.searchController filterResultsUsingString:searchText];
     }
     
     return YES;
@@ -379,8 +382,8 @@
     // tapping away rather than selecting from the recents list, then just dismiss the popover
     [self destroyPopovers];
     
-    if ([self.delegate respondsToSelector:@selector(URL)]) {
-        self.searchField.text = [self.delegate URL].absoluteString;
+    if ([self.browser respondsToSelector:@selector(URL)]) {
+        self.searchField.text = [self.browser URL].absoluteString;
     }
 }
 
@@ -391,23 +394,27 @@
     return YES;
 }
 
+#pragma mark - SGURLBarDelegate
+
 - (NSString *)text {
     return self.searchField.text;
 }
+
+- (void)finishSearch:(NSString *)searchString title:(NSString *)title {
+    [self.browser handleURLInput:searchString title:title];
+    
+    // Conduct the search. In this case, simply report the search term used.
+    [self destroyPopovers];
+    [self.searchField resignFirstResponder];
+}
+
+#pragma mark - UIPopoverControllerDelegate
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
     
     // Remove focus from the search bar without committing the search.
     [self resignFirstResponder];
     self.popoverController = nil;
-}
-
-- (void)finishSearch:(NSString *)searchString title:(NSString *)title {
-    [self.delegate handleURLInput:searchString title:title];
-    
-    // Conduct the search. In this case, simply report the search term used.
-    [self destroyPopovers];
-    [self.searchField resignFirstResponder];
 }
 
 @end

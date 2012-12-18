@@ -10,7 +10,7 @@
 #import "WeaveService.h"
 #import "Stockboy.h"
 #import "SGAppDelegate.h"
-
+#import "SGBrowserViewController.h"
 
 @implementation AboutScreen
 
@@ -21,7 +21,7 @@
       //[[appDelegate settings] dismissModalViewControllerAnimated:NO];
 
       NSString* destString = [Stockboy getURIForKey:@"TOS URL"];
-      [appDelegate.tabsController handleURLInput:destString title:@"Terms of Service"];
+      [appDelegate.browserViewController handleURLInput:destString title:@"Terms of Service"];
       [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
   }
   else 
@@ -38,7 +38,7 @@
   if ([weaveService canConnectToInternet])
   {    
     NSString* destString = [Stockboy getURIForKey:@"PP URL"];
-      [appDelegate.tabsController handleURLInput:destString title:@"Privacy policy"];
+      [appDelegate.browserViewController handleURLInput:destString title:@"Privacy policy"];
       [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
   }
   else {

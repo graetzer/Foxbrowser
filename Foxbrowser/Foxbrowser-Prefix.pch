@@ -13,10 +13,9 @@
     #import <Foundation/Foundation.h>
 
 #import "SGAppDelegate.h"
-#import "SGTabsViewController.h"
-#import "SGToolbar.h"
+#import "SGTabsToolbar.h"
+#import "SGBrowserViewController.h"
 #import "WeaveService.h"
-#import "UIViewController+TabsController.h"
 
 #ifdef DEBUG
 #   define DLog(fmt, ...) {NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);}

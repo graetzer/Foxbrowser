@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
 
-#import "SGSearchBar.h"
+#import "SGSearchField.h"
 
-@implementation SGSearchBar {
+@implementation SGSearchField {
     UIToolbar *_inputAccessory;
 }
 

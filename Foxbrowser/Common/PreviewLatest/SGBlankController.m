@@ -8,7 +8,7 @@
 
 #import "SGBlankController.h"
 #import "SGTabsViewController.h"
-#import "UIViewController+TabsController.h"
+#import "UIViewController+SGBrowserViewController.h"
 #import "TabBrowserController.h"
 #import "SGBottomView.h"
 
@@ -74,7 +74,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [self.tabsViewController updateChrome];
+    [self.browserViewController updateChrome];
 }
 
 - (void)viewDidUnload {

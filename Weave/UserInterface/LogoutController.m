@@ -41,6 +41,7 @@
 #import "Stockboy.h"
 #import "WelcomePage.h"
 #import "SGAppDelegate.h"
+#import "SGBrowserViewController.h"
 
 @implementation LogoutController
 
@@ -88,12 +89,12 @@
 
 - (void) loginAgain
 {
-    NSUInteger c = appDelegate.tabsController.count;
+    NSUInteger c = appDelegate.browserViewController.count;
     for (NSUInteger i = 0;i < c; i++) {
-        [appDelegate.tabsController removeIndex:i];
+        [appDelegate.browserViewController removeIndex:i];
     }
     [self.parentViewController dismissViewControllerAnimated:YES completion:^{
-        [appDelegate.tabsController saveCurrentURLs];
+        [appDelegate.browserViewController saveCurrentTabs];
         [appDelegate login];
     }];
 }  

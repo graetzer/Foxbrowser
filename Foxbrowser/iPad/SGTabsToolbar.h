@@ -26,44 +26,26 @@
 
 #import "SGSearchController.h"
 
-@protocol SGToolbarDelegate <NSObject>
-- (void)reload;
-- (void)stop;
 
-- (BOOL)isLoading;
+@class SGSearchController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
 
-- (void)goBack; 
-- (void)goForward;
-
-- (BOOL)canGoBack;
-- (BOOL)canGoForward;
-
-@optional
-- (NSURL *)URL;
-
-- (BOOL)canStopOrReload;
-- (void)handleURLInput:(NSString*)input title:(NSString *)title;
-@end
-
-
-@class SGSearchController, SGProgressCircleView, BookmarkPage, SGSearchBar;
-
-@interface SGToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
-UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGURLBarDelegate> {
+@interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
+UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGSearchDelegate> {
     UIColor *_bottomColor;
 }
 
-@property (nonatomic, weak) id<SGToolbarDelegate> delegate;
+@property (nonatomic, weak, readonly) SGBrowserViewController *browser;
 
-@property (nonatomic, strong) SGSearchBar *searchField;
+@property (nonatomic, strong) SGSearchField *searchField;
+@property (nonatomic, strong) SGSearchController *searchController;
+
 @property (nonatomic, strong) SGProgressCircleView *progressView;
 
 @property (nonatomic, strong) UINavigationController *bookmarks;
-@property (nonatomic, strong) SGSearchController *urlBarViewController;
 @property (strong, nonatomic) UIPopoverController *popoverController;
 @property (nonatomic, strong) UIActionSheet *actionSheet;
 
-- (id)initWithFrame:(CGRect)frame delegate:(id<SGToolbarDelegate>)delegate;
+- (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
 - (void)updateChrome;
 
 @end

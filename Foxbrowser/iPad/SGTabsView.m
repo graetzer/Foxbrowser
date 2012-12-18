@@ -30,7 +30,7 @@
 @end
 
 @implementation SGTabsView
-@synthesize tabs = _tabs, tabsController, selected = _selected;
+@synthesize tabs = _tabs, selected = _selected;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -121,11 +121,7 @@
     for (int i = 0; i < self.tabs.count; i++) {
         SGTabView *tab = [self.tabs objectAtIndex:i];
         if (i == selected) {
-            if ([self.tabsController.delegate respondsToSelector:@selector(canRemoveTab:)]) {
-                tab.closeButton.hidden = ![self.tabsController.delegate canRemoveTab:tab.viewController];
-            } else {
-                tab.closeButton.hidden = NO;
-            }
+            tab.closeButton.hidden = ![self.tabsController canRemoveTab:tab.viewController];
             
             tab.selected = YES;
             [tab setNeedsLayout];

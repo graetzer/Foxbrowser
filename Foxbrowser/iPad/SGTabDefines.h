@@ -27,7 +27,7 @@
 #define kRemoveTabDuration 0.3
 
 #define kTabsToolbarHeigth 44.0
-#define kTabsHeigth  36.0
+#define kTabsHeigth  35.0
 #define kTabsBottomMargin 1.0
 
 #define kAddButtonWidth 40.

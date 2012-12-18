@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SGToolbar.h"
+#import "SGTabsToolbar.h"
 
-@protocol SGURLBarDelegate <NSObject>
+@protocol SGSearchDelegate <NSObject>
 
 - (void)finishSearch:(NSString *)searchString title:(NSString *)title;
 - (NSString *)text;
@@ -18,7 +18,7 @@
 
 @interface SGSearchController : UITableViewController 
 
-@property (nonatomic, weak) id<SGURLBarDelegate> delegate;
+@property (nonatomic, weak) id<SGSearchDelegate> delegate;
 @property (nonatomic, retain) NSArray *searchHits;
 
 - (void)filterResultsUsingString:(NSString *)filterString;

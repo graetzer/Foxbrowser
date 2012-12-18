@@ -7,10 +7,11 @@
 //
 
 #import "SGAppDelegate.h"
-#import "SGTabsViewController.h"
-#import "SGWebViewController.h"
-#import "Reachability.h"
 
+#import "SGTabsViewController.h"
+#import "SGPageViewController.h"
+
+#import "Reachability.h"
 #import "Stockboy.h"
 #import "Store.h"
 #import "CryptoUtils.h"
@@ -21,9 +22,9 @@
 SGAppDelegate *appDelegate;
 id<WeaveService> weaveService;
 
-@implementation SGAppDelegate
-@synthesize window = _window;
-@synthesize tabsController = _tabsController;
+@implementation SGAppDelegate {
+    Reachability *_reachability;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -34,12 +35,13 @@ id<WeaveService> weaveService;
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
     
-    self.tabsController = [SGTabsViewController new];
-    self.window.rootViewController = self.tabsController;
+    SGBrowserViewController *browser = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [SGPageViewController new] : [SGTabsViewController new];
+    self.browserViewController = browser;
+    self.window.rootViewController = browser;
     [self.window makeKeyAndVisible];
     
     [self evaluateDefaultSettings];
-    // Weave stuff
+    // Weave stuff. 0.5 delay as a workaround so that modal views work
     [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
     
     return YES;
@@ -47,14 +49,14 @@ id<WeaveService> weaveService;
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
     if ([url.scheme isEqualToString: @"http"] || [url.scheme isEqualToString: @"https"]) {
-        [self.tabsController addTabWithURL:url withTitle:sourceApplication];
+        [self.browserViewController addTabWithURL:url withTitle:sourceApplication];
         return YES;
     }
     return NO;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    [self.tabsController saveCurrentURLs];
+    [self.browserViewController saveCurrentTabs];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
@@ -65,7 +67,7 @@ id<WeaveService> weaveService;
     [self stopProgressSpinners];
     [Stockboy cancel];
     
-    [self.tabsController saveCurrentURLs];
+    [self.browserViewController saveCurrentTabs];
 }
 
 #define FIVE_MINUTES_ELAPSED (60 * 5)
@@ -191,7 +193,7 @@ id<WeaveService> weaveService;
     WelcomePage* welcomePage = [WelcomePage new];
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
     navController.modalPresentationStyle = UIModalPresentationFormSheet;
-    [self.tabsController presentViewController:navController animated:YES completion:NULL];
+    [self.browserViewController presentViewController:navController animated:YES completion:NULL];
 }
 
 - (void) eraseAllUserData

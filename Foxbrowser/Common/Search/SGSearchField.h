@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SGSearchBar : UITextField
+@interface SGSearchField : UITextField
 
 - (id)initWithDelegate:(id<UITextFieldDelegate>)delegate;
 

@@ -9,13 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "WeaveService.h"
 
-@class SGTabsViewController, Reachability;
-@interface SGAppDelegate : UIResponder <UIApplicationDelegate, WeaveService> {
-    Reachability *_reachability;
-}
+@class SGBrowserViewController;
+@interface SGAppDelegate : UIResponder <UIApplicationDelegate, WeaveService>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) SGTabsViewController *tabsController;
+@property (weak, nonatomic) SGBrowserViewController *browserViewController;
 
 @end
 

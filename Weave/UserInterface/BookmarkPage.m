@@ -39,9 +39,9 @@
 #import "BookmarkPage.h"
 #import "WeaveService.h"
 #import "Store.h"
+#import "SGBrowserViewController.h"
 
 @implementation BookmarkPage
-@synthesize delegate;
 
 -(void) setParent:(NSString *)parent
 {
@@ -200,7 +200,7 @@
 	if ([[bookmarkItem objectForKey:@"type"] isEqualToString:@"folder"])
 	{
 		BookmarkPage *newPage = [[BookmarkPage alloc] initWithNibName:nil bundle:nil];
-        newPage.delegate = self.delegate;
+        newPage.browser = self.browser;
 		newPage.navigationItem.title = [bookmarkItem objectForKey:@"title"];
 		[newPage setParent:[bookmarkItem objectForKey:@"id"]];
 
@@ -210,7 +210,7 @@
 	{
 		if ([weaveService canConnectToInternet])
 		{
-            [self.delegate handleURLInput: cell.detailTextLabel.text title: cell.textLabel.text];
+            [self.browser handleURLInput: cell.detailTextLabel.text title: cell.textLabel.text];
 		}
 		else 
 		{
