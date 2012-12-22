@@ -109,7 +109,7 @@
     
     CALayer *layer = childController.view.layer;
     layer.shadowOpacity = .5f;
-    layer.shadowOffset = CGSizeMake(10, 10);
+    layer.shadowOffset = CGSizeMake(10, 0);
     layer.shadowPath = [UIBezierPath bezierPathWithRect:childController.view.bounds].CGPath;
     
     [self.scrollView addSubview:childController.view];
