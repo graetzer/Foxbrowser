@@ -10,6 +10,7 @@
 
 #import "SGTabsViewController.h"
 #import "SGPageViewController.h"
+#import "SGNavViewController.h"
 
 #import "Reachability.h"
 #import "Stockboy.h"
@@ -132,10 +133,7 @@ id<WeaveService> weaveService;
         
         //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
         // afterwards, they will be taken to the login page, one way or ther other
-        WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
-        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
-        navController.modalPresentationStyle = UIModalPresentationFormSheet;
-        [self.window.rootViewController presentViewController:navController animated:YES completion:NULL];
+        [self login];
     } else {
         //show the main page, and start up the Stockboy to get fresh data
         [Stockboy restock];
@@ -191,8 +189,9 @@ id<WeaveService> weaveService;
 - (void) login {
     // Present the WelcomePage with the TabBarController as it's parent
     WelcomePage* welcomePage = [WelcomePage new];
-    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
+    UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
     navController.modalPresentationStyle = UIModalPresentationFormSheet;
+    navController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     [self.browserViewController presentViewController:navController animated:YES completion:NULL];
 }
 

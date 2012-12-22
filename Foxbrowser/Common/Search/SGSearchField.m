@@ -11,6 +11,7 @@
 @implementation SGSearchField {
     UIToolbar *_inputAccessory;
 }
+@synthesize state = _state;
 
 - (id)initWithDelegate:(id<UITextFieldDelegate>)delegate {
     if (self = [super initWithFrame:CGRectMake(0, 0, 200., 30.)]) {
@@ -21,11 +22,27 @@
         self.autocapitalizationType = UITextAutocapitalizationTypeNone;
         self.autocorrectionType = UITextAutocorrectionTypeNo;
         self.borderStyle = UITextBorderStyleRoundedRect;
-        self.clearButtonMode = UITextFieldViewModeAlways;
+        self.clearButtonMode = UITextFieldViewModeWhileEditing;
         self.textColor = [UIColor darkTextColor];
         
         self.leftView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"magnify"]];
         self.leftViewMode = UITextFieldViewModeAlways;
+        self.rightViewMode = UITextFieldViewModeUnlessEditing;
+        
+        CGRect btnRect = CGRectMake(0, 0, 22, 22);
+        _reloadItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.reloadItem.frame = btnRect;
+        self.reloadItem.backgroundColor = [UIColor clearColor];
+        self.reloadItem.showsTouchWhenHighlighted = YES;
+        [self.reloadItem setImage:[UIImage imageNamed:@"reload"] forState:UIControlStateNormal];
+        
+        _stopItem = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.stopItem.frame = btnRect;
+        self.stopItem.backgroundColor = [UIColor clearColor];
+        self.stopItem.showsTouchWhenHighlighted = YES;
+        [self.stopItem setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
+        
+        self.state = SGSearchFieldStateDisabled;
     }
     return self;
 }
@@ -61,6 +78,28 @@
 
 - (IBAction)addText:(UIBarButtonItem *)sender {
     [self insertText:sender.title];
+}
+
+- (void)setState:(SGSearchFieldState)state {
+    if (_state == state)
+        return;
+    
+    _state = state;
+    switch (state) {
+        case SGSearchFieldStateDisabled:
+            self.reloadItem.enabled = NO;
+            self.rightView = self.reloadItem;
+            break;
+            
+        case SGSearchFieldStateReload:
+            self.reloadItem.enabled = YES;
+            self.rightView = self.reloadItem;
+            break;
+            
+        case SGSearchFieldStateStop:
+            self.rightView = self.stopItem;
+            break;
+    }
 }
 
 @end

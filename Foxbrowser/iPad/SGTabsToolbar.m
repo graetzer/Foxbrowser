@@ -37,9 +37,6 @@
 @property (nonatomic, strong) UIButton *backItem;
 @property (nonatomic, strong) UIButton *bookmarksItem;
 @property (nonatomic, strong) UIButton *systemItem;
-@property (nonatomic, strong) UIButton *reloadItem;
-@property (nonatomic, strong) UIButton *stopItem;
-
 
 @end
 
@@ -95,25 +92,9 @@
         [self addSubview:self.progressView];
         
         self.searchField = [[SGSearchField alloc] initWithDelegate:self];
+        [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.searchField];
-        
-        self.reloadItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.reloadItem.frame = btnRect;
-        self.reloadItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        self.reloadItem.backgroundColor = [UIColor clearColor];
-        self.reloadItem.showsTouchWhenHighlighted = YES;
-        [self.reloadItem setImage:[UIImage imageNamed:@"reload"] forState:UIControlStateNormal];
-        [self.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.reloadItem];
-        
-        self.stopItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.stopItem.frame = btnRect;
-        self.stopItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        self.stopItem.backgroundColor = [UIColor clearColor];
-        self.stopItem.showsTouchWhenHighlighted = YES;
-        [self.stopItem setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
-        [self.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.stopItem];
         
         self.searchController = [[SGSearchController alloc] initWithStyle:UITableViewStylePlain];
         self.searchController.delegate = self;
@@ -158,14 +139,10 @@
     self.systemItem.frame = btnR;
     
     CGRect org = self.searchField.frame;
-    org.size.width = self.bounds.size.width - (btnR.origin.x + 3*length + 3*diff);
-    org.origin.x = self.bounds.size.width - 2*diff - length - org.size.width;
+    org.size.width = self.bounds.size.width - (btnR.origin.x + 2*length + 3*diff);
+    org.origin.x = self.bounds.size.width - 2*diff - org.size.width;
     org.origin.y = (self.bounds.size.height - org.size.height)/2;
     self.searchField.frame = org;
-    
-    btnR.origin.x = self.bounds.size.width - length - diff;
-    self.reloadItem.frame = btnR;
-    self.stopItem.frame = btnR;
     
     btnR.origin.x = org.origin.x - diff - length;
     self.progressView.frame = btnR;
@@ -299,31 +276,25 @@
 }
 
 - (void)updateChrome {
-    if (![self.searchField isFirstResponder]) {
+    if (![self.searchField isFirstResponder])
             self.searchField.text = [self.browser URL].absoluteString;
-    }
+        
     self.forwardItem.enabled = [self.browser canGoForward];
     self.backItem.enabled = [self.browser canGoBack];
     
-    if ([self.browser respondsToSelector:@selector(canStopOrReload)]) {
-        BOOL canStopOrReload = [self.browser canStopOrReload];
-        if (canStopOrReload) {
-            if ([self.browser isLoading]) {
-                self.reloadItem.hidden = YES;
-                self.stopItem.hidden = NO;
-                self.progressView.hidden = NO;
-            } else {
-                self.reloadItem.hidden = NO;
-                self.reloadItem.enabled = YES;
-                self.stopItem.hidden = YES;
-                self.progressView.hidden = YES;
-            }
+
+    BOOL canStopOrReload = [self.browser canStopOrReload];
+    if (canStopOrReload) {
+        if ([self.browser isLoading]) {
+            self.searchField.state = SGSearchFieldStateStop;
+            self.progressView.hidden = NO;
         } else {
-            self.reloadItem.hidden = NO;
-            self.reloadItem.enabled = NO;
-            self.stopItem.hidden = YES;
+            self.searchField.state = SGSearchFieldStateReload;
             self.progressView.hidden = YES;
         }
+    } else {
+        self.searchField.state = SGSearchFieldStateDisabled;
+        self.progressView.hidden = YES;
     }
 }
 

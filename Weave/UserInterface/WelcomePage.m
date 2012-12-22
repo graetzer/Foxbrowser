@@ -75,6 +75,10 @@ JPAKEReporter* gSharedReporter = nil;
     return NO;
 }
 
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationPortrait;
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad || toInterfaceOrientation == UIInterfaceOrientationPortrait;
 }
@@ -118,7 +122,8 @@ JPAKEReporter* gSharedReporter = nil;
 
 - (void) easySetupViewControllerDidRequestManualSetup: (EasySetupViewController*) vc
 {
-	ManualSetupViewController* manualSetupViewController = [ManualSetupViewController new];
+	ManualSetupViewController* manualSetupViewController = [[ManualSetupViewController alloc] initWithNibName:
+                                                            NSStringFromClass([ManualSetupViewController class]) bundle:nil];
 	if (manualSetupViewController != nil) {
 		manualSetupViewController.delegate = self;
 		[self.navigationController pushViewController:manualSetupViewController animated:YES];

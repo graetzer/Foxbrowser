@@ -7,6 +7,7 @@
 //
 
 #import "SGPageToolbar.h"
+#import "SGPageViewController.h"
 #import "SGTabDefines.h"
 #import "SGSearchField.h"
 
@@ -15,28 +16,46 @@
     BOOL _searchBarVisible;
 }
 
-- (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
+- (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser;
 {
     self = [super initWithFrame:frame];
     if (self) {
+        _browser = browser;
         _bottomColor = kTabColor;
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
         _searchField = [[SGSearchField alloc] initWithDelegate:self];
+        [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_searchField];
+        
+        _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _tabsButton.frame = CGRectMake(0, 0, 40, 25);
+        _tabsButton.backgroundColor = [UIColor clearColor];
+        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-default"] forState:UIControlStateNormal];
+        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-pressed"] forState:UIControlStateHighlighted];
+        [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
+        [self addSubview:_tabsButton];
         
         _searchController = [SGSearchController new];
         _searchController.delegate = self;
-        
-        _browser = browser;
     }
     return self;
 }
 
 - (void)layoutSubviews {
-    CGSize size = self.bounds.size;
+    const CGFloat margin = 5;
+    CGFloat width = self.bounds.size.width;
+    CGFloat height = self.bounds.size.height;
+    
+    CGSize size = _tabsButton.frame.size;
+    CGFloat tabsX = width - size.width - margin;
+    _tabsButton.frame = CGRectMake(tabsX, (height - size.height)/2,
+                                   size.width, size.height);
     
     CGSize searchSize = _searchField.bounds.size;
-    _searchField.frame = CGRectMake(30., (size.height - searchSize.height)/2, size.width - 30., searchSize.height);
+    _searchField.frame = CGRectMake(30., (height - searchSize.height)/2,
+                                    tabsX - 30 - margin, searchSize.height);
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -58,8 +77,24 @@
 }
 
 - (void)updateChrome {
-    if (![self.searchField isFirstResponder]) {
+    if (![self.searchField isFirstResponder])
         self.searchField.text = [self.browser URL].absoluteString;
+    
+    NSString *text = [NSString stringWithFormat:@"%d", self.browser.count];
+    [_tabsButton setTitle:text forState:UIControlStateNormal];
+    
+    BOOL canStopOrReload = [self.browser canStopOrReload];
+    if (canStopOrReload) {
+        if ([self.browser isLoading]) {
+            self.searchField.state = SGSearchFieldStateStop;
+            //self.progressView.hidden = NO;
+        } else {
+            self.searchField.state = SGSearchFieldStateReload;
+            //self.progressView.hidden = YES;
+        }
+    } else {
+        self.searchField.state = SGSearchFieldStateDisabled;
+        //self.progressView.hidden = YES;
     }
 }
 

@@ -126,7 +126,6 @@
 		F46A63BB167D16630004BE43 /* UIViewController+SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63BA167D16630004BE43 /* UIViewController+SGBrowserViewController.m */; };
 		F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */; };
 		F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */; };
-		F476627415C8654E00F5E1E5 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F476627215C8654E00F5E1E5 /* ManualSetupViewController.xib */; };
 		F485A5F815B786FA00C7304E /* SettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BF6F2715B716B9005FD2B6 /* SettingsController.m */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
 		F49E24F7160B5AB500CA95A6 /* left@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F49E24F6160B5AB500CA95A6 /* left@2x.png */; };
@@ -150,6 +149,8 @@
 		F4CE241915B616340025EC07 /* BookmarkPage.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFD915A6446B00EACFBD /* BookmarkPage.m */; };
 		F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */; };
 		F4E2F99815AF82C000A56DCB /* WeaveService.m in Sources */ = {isa = PBXBuildFile; fileRef = F4E2F99715AF82C000A56DCB /* WeaveService.m */; };
+		F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EDAB16168400FF00EFD266 /* SGNavViewController.m */; };
+		F4EDAB1A1684062A00EFD266 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */; };
 		F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FCC8F815B77D4800207BEA /* Twitter.framework */; };
 		F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */; };
 		F4FD2B6D15AE030F005DBAB4 /* WelcomePage.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFED15A6446B00EACFBD /* WelcomePage.m */; };
@@ -464,7 +465,6 @@
 		F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGProgressCircleView.m; sourceTree = "<group>"; };
 		F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
 		F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Scaling.m"; sourceTree = "<group>"; };
-		F476627315C8654E00F5E1E5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = Foxbrowser/en.lproj/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
 		F49E24F6160B5AB500CA95A6 /* left@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "left@2x.png"; sourceTree = "<group>"; };
@@ -510,6 +510,9 @@
 		F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageToolbar.m; sourceTree = "<group>"; };
 		F4DACE8615AC86C400131DED /* WeaveService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeaveService.h; sourceTree = "<group>"; };
 		F4E2F99715AF82C000A56DCB /* WeaveService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WeaveService.m; sourceTree = "<group>"; };
+		F4EDAB15168400FF00EFD266 /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
+		F4EDAB16168400FF00EFD266 /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
+		F4EDAB191684062A00EFD266 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = Foxbrowser/en.lproj/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
 		F4F8F74D1659A46700F8CEF9 /* NSObject+Subscripts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Subscripts.h"; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1051,6 +1054,8 @@
 				F46A63B7167CF35F0004BE43 /* SGBrowserViewController.m */,
 				F46A63B9167D16620004BE43 /* UIViewController+SGBrowserViewController.h */,
 				F46A63BA167D16630004BE43 /* UIViewController+SGBrowserViewController.m */,
+				F4EDAB15168400FF00EFD266 /* SGNavViewController.h */,
+				F4EDAB16168400FF00EFD266 /* SGNavViewController.m */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1109,7 +1114,7 @@
 				F4FD2B7215AE0D18005DBAB4 /* AccountHelp.xib */,
 				F4FD2B7415AE0D18005DBAB4 /* EasySetupViewController.xib */,
 				F4FD2B7815AE0D18005DBAB4 /* WelcomePage.xib */,
-				F476627215C8654E00F5E1E5 /* ManualSetupViewController.xib */,
+				F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */,
 			);
 			name = Xib;
 			sourceTree = "<group>";
@@ -1289,7 +1294,6 @@
 				F4BF6F3B15B72F5F005FD2B6 /* AboutScreen.xib in Resources */,
 				F44DE37615B8268D00D21E89 /* left.png in Resources */,
 				F44DE37815B8274200D21E89 /* right.png in Resources */,
-				F476627415C8654E00F5E1E5 /* ManualSetupViewController.xib in Resources */,
 				F44F863915C9D64B003D1C31 /* Default-Portrait~ipad.png in Resources */,
 				F44F863C15C9D667003D1C31 /* Default-Portrait@2x~ipad.png in Resources */,
 				F44F863E15C9D66B003D1C31 /* Default-Landscape~ipad.png in Resources */,
@@ -1308,6 +1312,7 @@
 				F4C3906C161093D500349AA4 /* Settings.bundle in Resources */,
 				F40DFBA91611D0CB005CE2F3 /* plus@2x.png in Resources */,
 				F40DFBAB1611D1F5005CE2F3 /* stop@2x.png in Resources */,
+				F4EDAB1A1684062A00EFD266 /* ManualSetupViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1396,20 +1401,13 @@
 				F46A63B8167CF35F0004BE43 /* SGBrowserViewController.m in Sources */,
 				F46A63BB167D16630004BE43 /* UIViewController+SGBrowserViewController.m in Sources */,
 				F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */,
+				F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		F476627215C8654E00F5E1E5 /* ManualSetupViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F476627315C8654E00F5E1E5 /* en */,
-			);
-			name = ManualSetupViewController.xib;
-			sourceTree = "<group>";
-		};
 		F4BF6F1015B715AA005FD2B6 /* LogoutController.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1444,6 +1442,14 @@
 				F4BF6F4215B72F7D005FD2B6 /* zh-Hant */,
 			);
 			name = AboutScreen.xib;
+			sourceTree = "<group>";
+		};
+		F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F4EDAB191684062A00EFD266 /* en */,
+			);
+			name = ManualSetupViewController.xib;
 			sourceTree = "<group>";
 		};
 		F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */ = {

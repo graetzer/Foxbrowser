@@ -10,15 +10,15 @@
 
 #import "SGSearchController.h"
 
-@class SGSearchField, SGSearchController, SGBrowserViewController;
+@class SGSearchField, SGSearchController, SGPageViewController;
 
 @interface SGPageToolbar : UIView <UITextFieldDelegate, SGSearchDelegate>
 @property (readonly, nonatomic) SGSearchField *searchField;
 @property (readonly, nonatomic) SGSearchController *searchController;
+@property (readonly, nonatomic) UIButton *tabsButton;
 
-@property (weak, nonatomic) SGBrowserViewController *browser;
-
-- (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
+@property (weak, nonatomic) SGPageViewController *browser;
+- (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser;
 
 - (void)updateChrome;
 @end

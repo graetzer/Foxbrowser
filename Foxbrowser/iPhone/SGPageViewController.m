@@ -9,16 +9,15 @@
 #import "SGPageViewController.h"
 #import "SGPageToolbar.h"
 
-@interface SGPageViewController ()
-
-@end
-
-@implementation SGPageViewController
+@implementation SGPageViewController {
+    NSMutableArray *_viewControllers;
+}
 
 - (void)loadView {
     CGRect frame = [UIScreen mainScreen].bounds;
     self.view = [[UIView alloc] initWithFrame:frame];
     
+    _viewControllers = [NSMutableArray arrayWithCapacity:10];
     _pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, frame.size.height - 25. - 30,
                                                                    frame.size.width, 25.)];
     [self.view addSubview:_pageControl];
@@ -26,7 +25,7 @@
     _toolbar = [[SGPageToolbar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44.) browser:self];
     [self.view addSubview:_toolbar];
     
-    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 44., frame.size.width, frame.size.height-44.)];
+    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 45., frame.size.width, frame.size.height-45.)];
     [self.view addSubview:_scrollView];
 }
 
@@ -68,8 +67,8 @@
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration {
-    for (NSUInteger i = 0; i < self.childViewControllers.count; i++) {
-        UIViewController *viewController = self.childViewControllers[i];
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+        UIViewController *viewController = _viewControllers[i];
         
         viewController.view.transform = CGAffineTransformIdentity;
         viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
@@ -79,7 +78,7 @@
     }
     
     // go to the right page
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * self.childViewControllers.count, 1);
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * _viewControllers.count, 1);
     [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
                              animated:NO];
 }
@@ -88,11 +87,19 @@
     return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
+    return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
+}
+
 #pragma mark - Methods
 
 - (void)addViewController:(UIViewController *)childController; {
-    NSUInteger index = self.childViewControllers.count;
+    NSUInteger index = _viewControllers.count;
+    [_viewControllers addObject:childController];
     [self addChildViewController:childController];
+    
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+        [childController beginAppearanceTransition:YES animated:NO];
     
     childController.view.transform = CGAffineTransformIdentity;
     childController.view.frame = CGRectMake(self.scrollView.frame.size.width * index,
@@ -108,13 +115,15 @@
     [self.scrollView addSubview:childController.view];
     
     self.pageControl.numberOfPages = index+1;
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * self.childViewControllers.count, 1);
-    
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * _viewControllers.count, 1);
+        
     [childController didMoveToParentViewController:self];
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+        [childController endAppearanceTransition];
 }
 
 - (void)showViewController:(UIViewController *)viewController {
-    NSUInteger index = [self.childViewControllers indexOfObject:viewController];
+    NSUInteger index = [_viewControllers indexOfObject:viewController];
     if (index != NSNotFound) {
         self.pageControl.currentPage = index;
         [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*index, 0)
@@ -125,7 +134,10 @@
 - (void)removeViewController:(UIViewController *)childController withIndex:(NSUInteger)index {
     [childController willMoveToParentViewController:nil];
     
-    NSUInteger count = self.childViewControllers.count-1;
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+        [childController beginAppearanceTransition:NO animated:NO];
+    
+    NSUInteger count = _viewControllers.count-1;
     if (count == index && index != 0) {
         self.pageControl.currentPage = index-1;
         [self updatePage];
@@ -134,31 +146,53 @@
     self.pageControl.numberOfPages = count;
     self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * count, 1);
     
-    
     [childController.view removeFromSuperview];
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
+        [childController endAppearanceTransition];
+    
     [childController removeFromParentViewController];
 }
 
 - (void)removeViewController:(UIViewController *)childController {
-    [self removeViewController:childController withIndex:[self.childViewControllers indexOfObject:childController]];
+    [self removeViewController:childController withIndex:[_viewControllers indexOfObject:childController]];
 }
 
 - (void)removeIndex:(NSUInteger)index {
-    [self removeViewController:self.childViewControllers[index] withIndex:index];
+    [self removeViewController:_viewControllers[index] withIndex:index];
 }
 
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
-    [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
+    if (![_viewControllers containsObject:viewController]) {
+        [self addChildViewController:viewController];
+        
+        UIViewController *old = [self selectedViewController];
+        NSUInteger index = [self selected];
+        
+        viewController.view.frame = old.view.frame;
+        
+        [old willMoveToParentViewController:nil];
+        [self transitionFromViewController:old
+                          toViewController:viewController
+                                  duration:0
+                                   options:UIViewAnimationOptionAllowAnimatedContent
+                                animations:NULL
+                                completion:^(BOOL finished){
+                                    [old removeFromParentViewController];
+                                    [_viewControllers replaceObjectAtIndex:index withObject:viewController];
+                                    
+                                    [viewController didMoveToParentViewController:self];
+                                    [self updateChrome];
+                                }];
+    }
 }
 
 - (void)updateChrome {
-    //[NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
     [self.toolbar updateChrome];
 };
 
 - (UIViewController *)selectedViewController {
-    return self.childViewControllers[self.pageControl.currentPage];
+    return _viewControllers[self.pageControl.currentPage];
 }
 
 - (NSUInteger)selected {
@@ -180,12 +214,12 @@
 }
 
 - (void)arrangeChildViewControllers {
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width * self.childViewControllers.count, 1);
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width * _viewControllers.count, 1);
     [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
                              animated:NO];
     
-    for (NSUInteger i = 0; i < self.childViewControllers.count; i++) {
-        UIViewController *viewController = self.childViewControllers[i];
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+        UIViewController *viewController = _viewControllers[i];
         viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
                                                 0,
                                                 self.scrollView.frame.size.width,
@@ -200,7 +234,7 @@
 
 - (void)enableScrollsToTop {
     // FIXME: this code affects all scroll view
-    for (UIViewController *viewController in self.childViewControllers) {
+    for (UIViewController *viewController in _viewControllers) {
         if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:YES];
         else
@@ -211,11 +245,11 @@
 }
 
 - (void)disableScrollsToTop {
-    for (NSUInteger i = 0; i < self.childViewControllers.count; i++) {
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
         if (i == self.pageControl.currentPage)
             continue;
         
-        UIViewController *viewController = self.childViewControllers[i];
+        UIViewController *viewController = _viewControllers[i];
         if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:NO];
         else
@@ -227,18 +261,13 @@
 
 #pragma mark UIScrollViewDelegate
 
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     [self enableScrollsToTop];
 }
 
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    CGFloat offset = self.scrollView.contentOffset.x;
-    CGFloat width = self.scrollView.frame.size.width;
-    self.pageControl.currentPage = (offset+(width/2))/width;
-    
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     [self disableScrollsToTop];
+    [self updateChrome];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -246,10 +275,15 @@
     CGFloat offset = scrollView.contentOffset.x;
     
     CGFloat width = self.scrollView.frame.size.width;
-    self.pageControl.currentPage = fabsf((offset+(width/2))/width);
+    NSUInteger nextPage = (NSUInteger)fabsf((offset+(width/2))/width);
+    if (nextPage != self.pageControl.currentPage) {
+        self.pageControl.currentPage = nextPage;
+        [self updateChrome];
+    }
     
-    for (NSUInteger i = 0; i < self.childViewControllers.count; i++) {
-        UIViewController *viewController = self.childViewControllers[i];
+    
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+        UIViewController *viewController = _viewControllers[i];
         CGFloat y = i * width;
         CGFloat value = (offset-y)/width;
         CGFloat scale = 1.f-fabs(value);
@@ -260,7 +294,7 @@
     }
     
     
-//    for (UIViewController *viewController in self.childViewControllers) {
+//    for (UIViewController *viewController in _viewControllers) {
 //        CALayer *layer = viewController.view.layer;
 //        layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
 //    }

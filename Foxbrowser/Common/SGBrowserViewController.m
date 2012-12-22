@@ -32,6 +32,10 @@
     _timer = nil;
 }
 
+- (BOOL)shouldAutorotate {
+    return self.presentedViewController ? [self.presentedViewController shouldAutorotate] : YES;
+}
+
 #pragma mark - Abstract methods
 - (void)addViewController:(UIViewController *)viewController {
     [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
@@ -65,6 +69,7 @@
     SGBlankController *latest = [SGBlankController new];
     [self addViewController:latest];
     [self showViewController:latest];
+    [self updateChrome];
 }
 
 - (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;{
@@ -78,6 +83,7 @@
         else
             [self removeIndex:1];
     }
+    [self updateChrome];
 }
 
 - (void)handleURLInput:(NSString*)input title:(NSString *)title {
