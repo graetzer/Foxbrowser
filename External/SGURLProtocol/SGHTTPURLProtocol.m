@@ -19,14 +19,13 @@ typedef enum {
         SGDeflate = 2
     } SGCompression;
 
-@interface SGHTTPURLProtocol ()
-@property (strong, nonatomic) NSInputStream *HTTPStream;
-@end
-
 @implementation SGHTTPURLProtocol {
+    NSInputStream *_HTTPStream;
     CFHTTPMessageRef _HTTPMessage;
+    
     NSInteger _authenticationAttempts;
     id<SGAuthDelegate> _authDelegate;
+    
     NSMutableData *_buffer;
     SGCompression _compression;
 }
@@ -134,19 +133,22 @@ typedef enum {
 }
 
 - (void)startLoading {
-    if (_HTTPStream) {
-        [self stopLoading];
-    }
+    [self stopLoading];
     NSAssert(_HTTPStream == nil, @"HTTPStream is not nil, connection still ongoing");
     self.URLResponse = nil;
     
     CFReadStreamRef stream = CFReadStreamCreateForHTTPRequest(NULL, _HTTPMessage);
-    // Breaks everything
-//    NSDictionary *sslSettings = @{ (id)kCFStreamSSLValidatesCertificateChain : (id)kCFBooleanFalse };
-//    CFReadStreamSetProperty(stream,
-//                            kCFStreamPropertySSLSettings,
-//                            (__bridge CFTypeRef)(sslSettings));
     CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanFalse);
+    
+    if([self.request.URL.scheme isEqualToString:@"https"]) {// TODO check against a list
+        //Hey an https request
+        CFMutableDictionaryRef pDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFDictionarySetValue(pDict, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
+        CFDictionarySetValue(pDict, kCFStreamPropertySocketSecurityLevel, kCFStreamSocketSecurityLevelSSLv3);
+        CFReadStreamSetProperty(stream, kCFStreamPropertySSLSettings, pDict);
+        CFRelease(pDict);
+    }
+
 
     _HTTPStream = (__bridge NSInputStream *)(stream);
     [_HTTPStream setDelegate:self];
@@ -155,10 +157,10 @@ typedef enum {
 }
 
 - (void)stopLoading {
-    if (_HTTPStream && _HTTPStream.streamStatus != NSStreamStatusClosed) {
-        [self.HTTPStream close];
-    }
-    self.HTTPStream = nil;
+    if (_HTTPStream && _HTTPStream.streamStatus != NSStreamStatusClosed)
+        [_HTTPStream close];
+        
+    _HTTPStream = nil;
 }
 
 #pragma mark - CFStreamDelegate

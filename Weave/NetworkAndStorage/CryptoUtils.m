@@ -1027,10 +1027,10 @@ static CryptoUtils* _cryptoManager = nil;
                              ]);
 
   if (err == errSecItemNotFound) {
-    NSLog(@"unable to delete private key, already deleted");
+    DLog(@"unable to delete private key, already deleted");
   }
   else if (err) {
-    NSLog(@"unable to delete private key, error: %ld", err);
+    DLog(@"unable to delete private key, error: %ld", err);
   }
   
   KeychainItemWrapper* creds = [[KeychainItemWrapper alloc] initWithIdentifier:CREDENTIALS_NAME accessGroup:nil];

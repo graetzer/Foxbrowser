@@ -12,9 +12,10 @@
 
 @class SGPageToolbar;
 
-@interface SGPageViewController : SGBrowserViewController <UIScrollViewDelegate>
+@interface SGPageViewController : SGBrowserViewController <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 @property (readonly, nonatomic) UIScrollView *scrollView;
 @property (readonly, nonatomic) SGPageToolbar *toolbar;
 @property (readonly, nonatomic) UIPageControl *pageControl;
+@property (assign, nonatomic) BOOL exposeMode;
 
 @end

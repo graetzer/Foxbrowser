@@ -7,6 +7,7 @@
 //
 
 #import "SGSearchField.h"
+#include "SGTabDefines.h"
 
 @implementation SGSearchField {
     UIToolbar *_inputAccessory;
@@ -51,6 +52,9 @@
     if (!_inputAccessory) {
         _inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
         _inputAccessory.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+            _inputAccessory.tintColor = kTabColor;
+        
         UIBarButtonItem *btn, *flex, *fix;
         flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                              target:nil action:nil];
@@ -66,6 +70,9 @@
                                                   style:UIBarButtonItemStyleBordered
                                                  target:self
                                                  action:@selector(addText:)];
+            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+                btn.tintColor = [UIColor lightGrayColor];
+            
             btn.width = 40.;
             [buttons addObject:btn];
             [buttons addObject:fix];

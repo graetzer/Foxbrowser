@@ -29,16 +29,28 @@
         [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_searchField];
         
+        _searchController = [SGSearchController new];
+        _searchController.delegate = self;
+        
+        CGRect btnRect = CGRectMake(0, 0, 30, 30);
+        _backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _backButton.frame = btnRect;
+        _backButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        _backButton.backgroundColor = [UIColor clearColor];
+        _backButton.showsTouchWhenHighlighted = YES;
+        [_backButton setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
+        [_backButton addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_backButton];
+        
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _tabsButton.frame = CGRectMake(0, 0, 40, 25);
         _tabsButton.backgroundColor = [UIColor clearColor];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-default"] forState:UIControlStateNormal];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-pressed"] forState:UIControlStateHighlighted];
         [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
+        [_tabsButton addTarget:self action:@selector(pressedTabsButton:)
+              forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
-        
-        _searchController = [SGSearchController new];
-        _searchController.delegate = self;
     }
     return self;
 }
@@ -48,14 +60,19 @@
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     
+    CGFloat posX = margin;
+    _backButton.frame = CGRectMake(posX, (height - _backButton.frame.size.height)/2,
+                                   _backButton.frame.size.width, _backButton.frame.size.height);
+    posX += _backButton.frame.size.width + margin;
+    
     CGSize size = _tabsButton.frame.size;
     CGFloat tabsX = width - size.width - margin;
     _tabsButton.frame = CGRectMake(tabsX, (height - size.height)/2,
                                    size.width, size.height);
     
     CGSize searchSize = _searchField.bounds.size;
-    _searchField.frame = CGRectMake(30., (height - searchSize.height)/2,
-                                    tabsX - 30 - margin, searchSize.height);
+    _searchField.frame = CGRectMake(posX, (height - searchSize.height)/2,
+                                    tabsX - posX - margin, searchSize.height);
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -83,6 +100,9 @@
     NSString *text = [NSString stringWithFormat:@"%d", self.browser.count];
     [_tabsButton setTitle:text forState:UIControlStateNormal];
     
+    //self.forwardItem.enabled = [self.browser canGoForward];
+    self.backButton.enabled = [self.browser canGoBack];
+    
     BOOL canStopOrReload = [self.browser canStopOrReload];
     if (canStopOrReload) {
         if ([self.browser isLoading]) {
@@ -98,10 +118,13 @@
     }
 }
 
+#pragma mark - IBAction
+
+- (IBAction)pressedTabsButton:(id)sender {
+    self.browser.exposeMode = YES;
+}
+
 #pragma mark - UITextFieldDelegate
-//- (void)textFieldDidBeginEditing:(UITextField *)textField {
-//    [self presentSearchController];
-//}
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     NSString *searchText = [textField.text stringByReplacingCharactersInRange:range withString:string];

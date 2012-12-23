@@ -9,9 +9,12 @@
 #import "SGPageViewController.h"
 #import "SGPageToolbar.h"
 
+#define SG_EXPOSED_SCALE (0.8f)
+
 @implementation SGPageViewController {
     NSMutableArray *_viewControllers;
 }
+@synthesize exposeMode = _exposeMode;
 
 - (void)loadView {
     CGRect frame = [UIScreen mainScreen].bounds;
@@ -41,7 +44,7 @@
     self.scrollView.scrollsToTop = NO;
     self.scrollView.autoresizingMask = (UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight);
     
-    self.pageControl.autoresizingMask = (UIViewAutoresizingFlexibleWidth);
+    self.pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [self.pageControl addTarget:self action:@selector(updatePage) forControlEvents:UIControlEventValueChanged];
     
     [self addSavedTabs];
@@ -75,6 +78,11 @@
                                                0,
                                                self.scrollView.frame.size.width,
                                                self.scrollView.frame.size.height);
+        if (self.exposeMode) {
+            viewController.view.transform = CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE);
+        }
+        viewController.view.layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
+
     }
     
     // go to the right page
@@ -233,14 +241,9 @@
 }
 
 - (void)enableScrollsToTop {
-    // FIXME: this code affects all scroll view
     for (UIViewController *viewController in _viewControllers) {
         if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:YES];
-        else
-            for (UIView *subview in [viewController.view subviews])
-                if ([subview respondsToSelector:@selector(scrollsToTop)])
-                    [(UIScrollView *)subview setScrollsToTop:YES];
     }
 }
 
@@ -252,10 +255,32 @@
         UIViewController *viewController = _viewControllers[i];
         if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:NO];
-        else
-            for (UIView *subview in [viewController.view subviews])
-                if ([subview respondsToSelector:@selector(scrollsToTop)])
-                    [(UIScrollView *)subview setScrollsToTop:NO];
+    }
+}
+
+- (void)scalePages {
+    CGFloat offset = self.scrollView.contentOffset.x;
+    CGFloat width = self.scrollView.frame.size.width;
+    if (self.exposeMode) {
+        CGFloat scale = SG_EXPOSED_SCALE;
+        for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+            UIViewController *viewController = _viewControllers[i];
+            viewController.view.userInteractionEnabled = NO;
+            viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
+        }
+    } else {
+        for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+            UIViewController *viewController = _viewControllers[i];
+            viewController.view.userInteractionEnabled = YES;
+            
+            CGFloat y = i * width;
+            CGFloat value = (offset-y)/width;
+            CGFloat scale = 1.f-fabs(value);
+            if (scale > 1.f) scale = 1.f;
+            if (scale < SG_EXPOSED_SCALE) scale = SG_EXPOSED_SCALE;
+            
+            viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
+        }
     }
 }
 
@@ -270,35 +295,47 @@
     [self updateChrome];
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat offset = scrollView.contentOffset.x;
-    
     CGFloat width = self.scrollView.frame.size.width;
+    
     NSUInteger nextPage = (NSUInteger)fabsf((offset+(width/2))/width);
     if (nextPage != self.pageControl.currentPage) {
         self.pageControl.currentPage = nextPage;
         [self updateChrome];
     }
     
-    
-    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
-        UIViewController *viewController = _viewControllers[i];
-        CGFloat y = i * width;
-        CGFloat value = (offset-y)/width;
-        CGFloat scale = 1.f-fabs(value);
-        if (scale > 1.f) scale = 1.f;
-        if (scale < .8f) scale = .8f;
-        
-        viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
-    }
-    
-    
-//    for (UIViewController *viewController in _viewControllers) {
-//        CALayer *layer = viewController.view.layer;
-//        layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
-//    }
+    [self scalePages];
 }
 
+- (void)setExposeMode:(BOOL)exposeMode {
+    _exposeMode = exposeMode;
+    if (exposeMode) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, -self.toolbar.frame.size.height);
+            [self scalePages];
+        }];
+        UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedViewController:)];
+        [self.view addGestureRecognizer:rec];
+    } else {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, +self.toolbar.frame.size.height);
+            [self scalePages];
+        }];
+        [self scrollViewDidScroll:self.scrollView];
+    }
+
+}
+
+- (IBAction)tappedViewController:(UITapGestureRecognizer *)recognizer {
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        UIViewController *selected = [self selectedViewController];
+        CGPoint pos = [recognizer locationInView:selected.view];
+        if (CGRectContainsPoint(selected.view.bounds, pos)) {
+            self.exposeMode = NO;
+            [self.view removeGestureRecognizer:recognizer];
+        }
+    }
+}
 
 @end
