@@ -21,7 +21,7 @@
     self.view = [[UIView alloc] initWithFrame:frame];
     
     _viewControllers = [NSMutableArray arrayWithCapacity:10];
-    _pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, frame.size.height - 25. - 30,
+    _pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, frame.size.height - 25.,
                                                                    frame.size.width, 25.)];
     [self.view addSubview:_pageControl];
     

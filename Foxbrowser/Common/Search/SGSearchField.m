@@ -48,6 +48,18 @@
     return self;
 }
 
+- (void)drawTextInRect:(CGRect)rect {
+    if (self.editing)
+        [super drawTextInRect:rect];
+    else {
+        NSString *text = [self.text stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+        text = [text stringByReplacingOccurrencesOfString:@"https://" withString:@""];
+        [text drawInRect:rect withFont:self.font
+           lineBreakMode:NSLineBreakByTruncatingTail
+               alignment:self.textAlignment];
+    }
+}
+
 - (UIView *)inputAccessoryView {
     if (!_inputAccessory) {
         _inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];

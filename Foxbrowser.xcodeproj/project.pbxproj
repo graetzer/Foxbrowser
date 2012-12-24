@@ -14,6 +14,7 @@
 		F40DFBBF16125CDB005CE2F3 /* SGHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = F40DFBB916125CDB005CE2F3 /* SGHTTPURLProtocol.m */; };
 		F40DFBC016125CDB005CE2F3 /* SGHTTPURLResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = F40DFBBB16125CDB005CE2F3 /* SGHTTPURLResponse.m */; };
 		F44480B215E2B44C00006F20 /* SGCredentialsPrompt.m in Sources */ = {isa = PBXBuildFile; fileRef = F44480B115E2B44C00006F20 /* SGCredentialsPrompt.m */; };
+		F44870BC1687E0E700769EA4 /* JSTools.js in Resources */ = {isa = PBXBuildFile; fileRef = F46A6371167C300E0004BE43 /* JSTools.js */; };
 		F44DE37615B8268D00D21E89 /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = F44DE37515B8268D00D21E89 /* left.png */; };
 		F44DE37815B8274200D21E89 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = F44DE37715B8274200D21E89 /* right.png */; };
 		F44F863915C9D64B003D1C31 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = F44F863815C9D64B003D1C31 /* Default-Portrait~ipad.png */; };
@@ -1246,6 +1247,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F44870BC1687E0E700769EA4 /* JSTools.js in Resources */,
 				F467006815A64C9500EACFBD /* IFUnicodeURL-LICENSE.txt in Resources */,
 				F467007115A64C9500EACFBD /* README.txt in Resources */,
 				F46700BF15A64DFC00EACFBD /* ffhomeDB.sq3 in Resources */,
