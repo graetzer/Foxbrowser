@@ -122,8 +122,6 @@
 - (void)addViewController:(UIViewController *)viewController {
     viewController.view.frame = self.contentFrame;
     [self addChildViewController:viewController];
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-        [viewController beginAppearanceTransition:YES animated:YES];
     
     if (self.tabsView.tabs.count == 0) {
         [viewController.view setNeedsLayout];
@@ -131,8 +129,6 @@
         [self.view addSubview:viewController.view];
         self.tabsView.selected = 0;
         [viewController didMoveToParentViewController:self];
-        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-            [viewController endAppearanceTransition];
         return;
     }
     
@@ -142,8 +138,6 @@
                      }
                      completion:^(BOOL finished){
                          [viewController didMoveToParentViewController:self];
-                         if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-                             [viewController endAppearanceTransition];
                      }];
 }
 
@@ -191,9 +185,6 @@
     
     to.view.frame = self.contentFrame;
     
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-        [viewController beginAppearanceTransition:NO animated:YES];
-    
     [viewController willMoveToParentViewController:nil];
     [self transitionFromViewController:viewController
                       toViewController:to
@@ -204,9 +195,6 @@
                                 self.tabsView.selected = newIndex;
                             }
                             completion:^(BOOL finished){
-                                if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-                                    [viewController endAppearanceTransition];
-                                
                                 [viewController removeFromParentViewController];
                                 [self updateChrome];
                             }];
@@ -227,7 +215,7 @@
         
 
         UIViewController *old = [self selectedViewController];
-        NSUInteger index = [self selected];
+        NSUInteger index = [self selectedIndex];
         
         [old willMoveToParentViewController:nil];
         [self transitionFromViewController:old
@@ -253,7 +241,7 @@
     return [self.tabsView viewControllerAtIndex:self.tabsView.selected];
 }
 
-- (NSUInteger)selected {
+- (NSUInteger)selectedIndex {
     return self.tabsView.selected;
 }
 

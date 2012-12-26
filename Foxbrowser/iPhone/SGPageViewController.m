@@ -3,13 +3,30 @@
 //  SGPageController
 //
 //  Created by Simon Grätzer on 13.12.12.
-//  Copyright (c) 2012 Simon Grätzer. All rights reserved.
 //
+//
+//  Copyright (c) 2012 Simon Grätzer
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 
 #import "SGPageViewController.h"
 #import "SGPageToolbar.h"
 
 #define SG_EXPOSED_SCALE (0.8f)
+#define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE))
+#define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
 
 @implementation SGPageViewController {
     NSMutableArray *_viewControllers;
@@ -30,13 +47,18 @@
     
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 45., frame.size.width, frame.size.height-45.)];
     [self.view addSubview:_scrollView];
+    
+    _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _closeButton.frame = CGRectMake(0, 0, 30, 30);
+    [self.view addSubview:_closeButton];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
+
     self.view.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
     self.scrollView.delegate = self;
+    self.scrollView.clipsToBounds = YES;
     self.scrollView.backgroundColor = [UIColor clearColor];
     self.scrollView.pagingEnabled = YES;
     self.scrollView.showsHorizontalScrollIndicator = NO;
@@ -47,48 +69,49 @@
     self.pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [self.pageControl addTarget:self action:@selector(updatePage) forControlEvents:UIControlEventValueChanged];
     
-    [self addSavedTabs];
+    NSString *text = NSLocalizedString(@"New Tab", @"New Tab");
+    UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:20];
+    CGSize size = [text sizeWithFont:font];
     
-//    CALayer *topShadowLayer = [CALayer layer];
-//    UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(-10, -10, 10000, 13)];
-//    topShadowLayer.frame = CGRectMake(-320, 0, 10000, 20);
-//    topShadowLayer.masksToBounds = YES;
-//    topShadowLayer.shadowOffset = CGSizeMake(2.5, 2.5);
-//    topShadowLayer.shadowOpacity = 0.5;
-//    topShadowLayer.shadowPath = [path CGPath];
-//    [self.scrollView.layer addSublayer:topShadowLayer];
-//    
-//    CALayer *bottomShadowLayer = [CALayer layer];
-//    path = [UIBezierPath bezierPathWithRect:CGRectMake(10, 10, 10000, 13)];
-//    bottomShadowLayer.frame = CGRectMake(-320, self.scrollView.frame.size.height-35, 10000, 20);//TODO
-//    bottomShadowLayer.masksToBounds = YES;
-//    bottomShadowLayer.shadowOffset = CGSizeMake(-2.5, -2.5);
-//    bottomShadowLayer.shadowOpacity = 0.5;
-//    bottomShadowLayer.shadowPath = [path CGPath];
-//    [self.scrollView.layer addSublayer:bottomShadowLayer];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(10, 10, size.width, size.height);
+    button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
+    [button setTitle:text forState:UIControlStateNormal];
+    button.titleLabel.font = font;
+    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    button.backgroundColor  = [UIColor clearColor];
+    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
+    [self.view insertSubview:button belowSubview:self.toolbar];
+    
+    button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(10 + size.width, 10, 30, 30);
+    button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
+    button.backgroundColor  = [UIColor clearColor];
+    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateHighlighted];
+    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
+    [self.view insertSubview:button belowSubview:self.toolbar];
+    
+    self.closeButton.hidden = YES;
+    self.closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+    self.closeButton.backgroundColor  = [UIColor clearColor];
+    [self.closeButton setImage:[UIImage imageNamed:@"close_x"] forState:UIControlStateNormal];
+    [self.closeButton addTarget:self action:@selector(closeTabButton:) forControlEvents:UIControlEventTouchDown];
+    
+    self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    
+    [self addSavedTabs];
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration {
-    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
-        UIViewController *viewController = _viewControllers[i];
-        
-        viewController.view.transform = CGAffineTransformIdentity;
-        viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
-                                               0,
-                                               self.scrollView.frame.size.width,
-                                               self.scrollView.frame.size.height);
-        if (self.exposeMode) {
-            viewController.view.transform = CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE);
-        }
-        viewController.view.layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
+    CGPoint point = self.selectedViewController.view.frame.origin;
+    self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
+    [self arrangeChildViewControllers];
+}
 
-    }
-    
-    // go to the right page
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * _viewControllers.count, 1);
-    [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
-                             animated:NO];
+- (UIView *)rotatingHeaderView {
+    return self.toolbar;
 }
 
 - (NSUInteger)supportedInterfaceOrientations {
@@ -102,63 +125,86 @@
 #pragma mark - Methods
 
 - (void)addViewController:(UIViewController *)childController; {
-    NSUInteger index = _viewControllers.count;
-    [_viewControllers addObject:childController];
+    NSUInteger index = 0;
+    if (_viewControllers.count == 0) {
+        [_viewControllers addObject:childController];
+        self.closeButton.hidden = !self.exposeMode;
+    } else {
+        index = self.pageControl.currentPage+1;
+        [_viewControllers insertObject:childController atIndex:index];
+    }
+    
     [self addChildViewController:childController];
     
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-        [childController beginAppearanceTransition:YES animated:NO];
     
     childController.view.transform = CGAffineTransformIdentity;
     childController.view.frame = CGRectMake(self.scrollView.frame.size.width * index,
                                            0,
                                            self.scrollView.frame.size.width,
                                            self.scrollView.frame.size.height);
+    if (self.exposeMode) {
+        childController.view.userInteractionEnabled = NO;
+        childController.view.transform = SG_EXPOSED_TRANSFORM;
+    }
     
     CALayer *layer = childController.view.layer;
     layer.shadowOpacity = .5f;
-    layer.shadowOffset = CGSizeMake(10, 0);
-    layer.shadowPath = [UIBezierPath bezierPathWithRect:childController.view.bounds].CGPath;
+    layer.shadowOffset = CGSizeMake(5, 0);
     
-    [self.scrollView addSubview:childController.view];
+    NSUInteger count = _viewControllers.count;
+    self.pageControl.numberOfPages = count;
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * count, 1);
     
-    self.pageControl.numberOfPages = index+1;
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * _viewControllers.count, 1);
-        
-    [childController didMoveToParentViewController:self];
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-        [childController endAppearanceTransition];
+    [UIView animateWithDuration:0.3
+                     animations:^{
+                         for (NSUInteger i = index+1; i < count; i++) {
+                             UIViewController *vC = _viewControllers[i];
+                             vC.view.center = CGPointMake(vC.view.center.x + self.scrollView.frame.size.width,
+                                                          vC.view.center.y);
+                         }
+                         [self.scrollView addSubview:childController.view];
+                     }
+                     completion:^(BOOL done){
+                         [childController didMoveToParentViewController:self];
+                     }];
 }
 
 - (void)showViewController:(UIViewController *)viewController {
     NSUInteger index = [_viewControllers indexOfObject:viewController];
     if (index != NSNotFound) {
         self.pageControl.currentPage = index;
+        self.closeButton.hidden = YES;//Enabled again by the scrollview delegate
         [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*index, 0)
                                  animated:YES];
     }
 }
 
 - (void)removeViewController:(UIViewController *)childController withIndex:(NSUInteger)index {
+    if (!childController || index == NSNotFound)
+        return;
+    
+    self.closeButton.hidden = YES;
     [childController willMoveToParentViewController:nil];
+    [_viewControllers removeObjectAtIndex:index];
     
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-        [childController beginAppearanceTransition:NO animated:NO];
-    
-    NSUInteger count = _viewControllers.count-1;
-    if (count == index && index != 0) {
-        self.pageControl.currentPage = index-1;
-        [self updatePage];
-    }
-    
-    self.pageControl.numberOfPages = count;
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * count, 1);
-    
-    [childController.view removeFromSuperview];
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.0"))
-        [childController endAppearanceTransition];
-    
-    [childController removeFromParentViewController];
+    NSUInteger count = _viewControllers.count;
+    [UIView animateWithDuration:0.3
+                     animations:^{
+                         for (NSUInteger i = index; i < count; i++) {
+                             UIViewController *vC = _viewControllers[i];
+                             vC.view.center = CGPointMake(vC.view.center.x - self.scrollView.frame.size.width,
+                                                          vC.view.center.y);
+                         }
+                         [childController.view removeFromSuperview];
+                         self.pageControl.numberOfPages = count;
+                         self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * count, 1);
+                     }
+                     completion:^(BOOL done){
+                         [childController removeFromParentViewController];
+                         
+                         if (self.exposeMode)
+                             self.closeButton.hidden = SG_CONTAINER_EMPTY;
+                     }];
 }
 
 - (void)removeViewController:(UIViewController *)childController {
@@ -174,7 +220,7 @@
         [self addChildViewController:viewController];
         
         UIViewController *old = [self selectedViewController];
-        NSUInteger index = [self selected];
+        NSUInteger index = [self selectedIndex];
         
         viewController.view.frame = old.view.frame;
         
@@ -200,10 +246,10 @@
 };
 
 - (UIViewController *)selectedViewController {
-    return _viewControllers[self.pageControl.currentPage];
+    return _viewControllers.count > 0 ? _viewControllers[self.pageControl.currentPage] : nil;
 }
 
-- (NSUInteger)selected {
+- (NSUInteger)selectedIndex {
     return self.pageControl.currentPage;
 }
 
@@ -216,11 +262,6 @@
 }
 
 #pragma mark - Utility
-- (IBAction)updatePage {
-    [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
-                             animated:YES];
-}
-
 - (void)arrangeChildViewControllers {
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width * _viewControllers.count, 1);
     [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
@@ -228,21 +269,24 @@
     
     for (NSUInteger i = 0; i < _viewControllers.count; i++) {
         UIViewController *viewController = _viewControllers[i];
+        viewController.view.transform = CGAffineTransformIdentity;
         viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
-                                                0,
-                                                self.scrollView.frame.size.width,
-                                                self.scrollView.frame.size.height);
+                                               0,
+                                               self.scrollView.frame.size.width,
+                                               self.scrollView.frame.size.height);
+        if (self.exposeMode)
+            viewController.view.transform = SG_EXPOSED_TRANSFORM;
         
-        CALayer *layer = viewController.view.layer;
-        layer.shadowOpacity = .5f;
-        layer.shadowOffset = CGSizeMake(10, 10);
-        layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
+        viewController.view.layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
     }
+
 }
 
 - (void)enableScrollsToTop {
     for (UIViewController *viewController in _viewControllers) {
-        if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
+        if ([viewController isKindOfClass:[UIWebView class]])
+            [((UIWebView *)viewController).scrollView setScrollsToTop:YES];
+        else if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:YES];
     }
 }
@@ -253,24 +297,23 @@
             continue;
         
         UIViewController *viewController = _viewControllers[i];
-        if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
+        if ([viewController isKindOfClass:[UIWebView class]])
+            [((UIWebView *)viewController).scrollView setScrollsToTop:NO];
+        else if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:NO];
     }
 }
 
-- (void)scalePages {
+- (void)scaleChildViewControllers {
     CGFloat offset = self.scrollView.contentOffset.x;
     CGFloat width = self.scrollView.frame.size.width;
-    if (self.exposeMode) {
-        CGFloat scale = SG_EXPOSED_SCALE;
-        for (NSUInteger i = 0; i < _viewControllers.count; i++) {
-            UIViewController *viewController = _viewControllers[i];
+    
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+        UIViewController *viewController = _viewControllers[i];
+        if (self.exposeMode) {
             viewController.view.userInteractionEnabled = NO;
-            viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
-        }
-    } else {
-        for (NSUInteger i = 0; i < _viewControllers.count; i++) {
-            UIViewController *viewController = _viewControllers[i];
+            viewController.view.transform = SG_EXPOSED_TRANSFORM;
+        } else {
             viewController.view.userInteractionEnabled = YES;
             
             CGFloat y = i * width;
@@ -280,6 +323,7 @@
             if (scale < SG_EXPOSED_SCALE) scale = SG_EXPOSED_SCALE;
             
             viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
+        
         }
     }
 }
@@ -287,17 +331,30 @@
 #pragma mark UIScrollViewDelegate
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    [self enableScrollsToTop];
+    if (self.exposeMode)
+        self.closeButton.hidden = YES;
+    else
+        [self disableScrollsToTop];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    [self disableScrollsToTop];
+    if (self.exposeMode)
+        self.closeButton.hidden = SG_CONTAINER_EMPTY;
+    else
+        [self enableScrollsToTop];
+    
+    [self arrangeChildViewControllers];
     [self updateChrome];
+}
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
+    if (self.exposeMode)
+        self.closeButton.hidden = SG_CONTAINER_EMPTY;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat offset = scrollView.contentOffset.x;
-    CGFloat width = self.scrollView.frame.size.width;
+    CGFloat width = scrollView.frame.size.width;
     
     NSUInteger nextPage = (NSUInteger)fabsf((offset+(width/2))/width);
     if (nextPage != self.pageControl.currentPage) {
@@ -305,37 +362,58 @@
         [self updateChrome];
     }
     
-    [self scalePages];
+    [self scaleChildViewControllers];
 }
 
 - (void)setExposeMode:(BOOL)exposeMode {
     _exposeMode = exposeMode;
     if (exposeMode) {
-        [UIView animateWithDuration:0.3 animations:^{
-            self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, -self.toolbar.frame.size.height);
-            [self scalePages];
-        }];
+        [self disableScrollsToTop];
+        [UIView animateWithDuration:0.3
+                         animations:^{
+                             self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, -self.toolbar.frame.size.height);
+                             [self scaleChildViewControllers];
+                         }
+                         completion:^(BOOL finished) {
+                             CGPoint point = self.selectedViewController.view.frame.origin;
+                             self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
+                             self.closeButton.hidden = SG_CONTAINER_EMPTY;
+                         }];
         UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedViewController:)];
         [self.view addGestureRecognizer:rec];
     } else {
-        [UIView animateWithDuration:0.3 animations:^{
-            self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, +self.toolbar.frame.size.height);
-            [self scalePages];
-        }];
-        [self scrollViewDidScroll:self.scrollView];
+        [self enableScrollsToTop];
+        self.closeButton.hidden = YES;
+        [UIView animateWithDuration:0.3
+                         animations:^{
+                             self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0,
+                                                               +self.toolbar.frame.size.height);
+                             [self scaleChildViewControllers];
+                         }
+         ];
     }
+}
 
+#pragma mark - IBAction
+
+- (IBAction)updatePage {
+    [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
+                             animated:YES];
 }
 
 - (IBAction)tappedViewController:(UITapGestureRecognizer *)recognizer {
     if (recognizer.state == UIGestureRecognizerStateEnded) {
-        UIViewController *selected = [self selectedViewController];
-        CGPoint pos = [recognizer locationInView:selected.view];
-        if (CGRectContainsPoint(selected.view.bounds, pos)) {
+        UIView *view = [self selectedViewController].view;
+        CGPoint pos = [recognizer locationInView:view];
+        if (CGRectContainsPoint(view.bounds, pos)) {
             self.exposeMode = NO;
             [self.view removeGestureRecognizer:recognizer];
         }
     }
+}
+
+- (IBAction)closeTabButton:(UIButton *)button {
+    [self removeViewController:self.selectedViewController];
 }
 
 @end

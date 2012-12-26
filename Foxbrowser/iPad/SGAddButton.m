@@ -21,7 +21,7 @@
         self.backgroundColor = [UIColor clearColor];
         
         self.button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [self.button setImage:[UIImage imageNamed:@"plus"] forState:UIControlStateNormal];
+        [self.button setImage:[UIImage imageNamed:@"plus-gray"] forState:UIControlStateNormal];
         self.button.showsTouchWhenHighlighted = YES;
         self.button.frame = CGRectMake(kCornerRadius, 0, self.bounds.size.width - kCornerRadius, self.bounds.size.height);
         [self addSubview:self.button];
