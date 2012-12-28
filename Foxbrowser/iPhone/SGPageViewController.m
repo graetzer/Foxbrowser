@@ -103,6 +103,14 @@
     [self addSavedTabs];
 }
 
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    _toolbar = nil;
+    _scrollView = nil;
+    _pageControl = nil;
+    _closeButton = nil;
+}
+
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration {
     CGPoint point = self.selectedViewController.view.frame.origin;

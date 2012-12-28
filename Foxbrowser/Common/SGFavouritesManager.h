@@ -1,8 +1,8 @@
 //
-//  UIWebView+WebViewAdditions.h
+//  SGScreenshotManager.h
 //  Foxbrowser
 //
-//  Created by simon on 03.07.12.
+//  Created by Simon Grätzer on 27.12.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -20,26 +20,22 @@
 //  limitations under the License.
 //
 
+#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-@interface UIWebView (WebViewAdditions)
-+ (NSArray *)fileTypes;
+@class SGWebViewController;
+@interface SGFavouritesManager : NSObject
++ (SGFavouritesManager *)sharedManager;
 
-- (CGSize)windowSize;
-- (CGPoint)scrollOffset;
+// Array of URL's
+- (NSArray *)favourites;
+// Returns the replacement
+- (NSURL *)blockURL:(NSURL *)url;
+- (void)resetFavourites;
 
-- (NSString *)title;
-- (NSString *)location;
-- (void)setLocationHash:(NSString *)location;
+- (NSString *)titleWithURL:(NSURL *)url;
+- (UIImage *)imageWithURL:(NSURL *)url;
 
-- (void)loadJSTools;
-- (void)disableContextMenu;
-- (void)modifyLinkTargets;
-- (void)modifyOpen;
-- (void)clearContent;
-- (void)enableDoNotTrack;
-
-- (NSDictionary *)tagsForPosition:(CGPoint)pt;
-
+- (void)webViewDidFinishLoad:(SGWebViewController *)webController;
 @end

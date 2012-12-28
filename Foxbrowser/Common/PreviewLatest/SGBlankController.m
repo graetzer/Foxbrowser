@@ -38,6 +38,10 @@
     return YES;
 }
 
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
+}
+
 - (void)loadView {
     self.view = [[SGBlankView alloc] initWithFrame:CGRectZero];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -105,24 +109,16 @@
 
 #pragma mark - SGPreviewPanelDelegate
 - (void)openNewTab:(SGPreviewTile *)tile {
-    NSDictionary *item = tile.info;
-    if (item) {
-        NSString *url = [item objectForKey:@"url"];
-        if (url) {
-            SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
-            [tabsC addTabWithURL:[NSURL URLWithString:url] withTitle:tile.label.text];
-        }
+    if (tile.url) {
+        SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
+        [tabsC addTabWithURL:tile.url withTitle:tile.label.text];
     }
 }
 
 - (void)open:(SGPreviewTile *)tile {
-    NSDictionary *item = tile.info;
-    if (item) {
-        NSString *url = [item objectForKey:@"url"];
-        if (url) {
-            SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
-            [tabsC handleURLInput:url title:tile.label.text];
-        }
+    if (tile.url) {
+        SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
+        [tabsC openURL:tile.url title:tile.label.text];
     }
 }
 

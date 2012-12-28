@@ -27,7 +27,7 @@
 
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *label;
-@property (nonatomic, strong) NSDictionary *info;
+@property (nonatomic, strong) NSURL *url;
 
 - (id)initWithImage:(UIImage *)image title:(NSString *)title;
 
@@ -45,7 +45,6 @@
 @property (weak, nonatomic) id<SGPanelDelegate> delegate;
 
 + (SGPreviewPanel *)instance;
-+ (NSString *)blacklistFilePath;
 
 - (void)layout;
 - (void)refresh;

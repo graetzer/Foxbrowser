@@ -154,6 +154,7 @@
 		F4EA92E91689CAD100CA9154 /* system.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92D71689CAD100CA9154 /* system.png */; };
 		F4EA92EA1689CAD100CA9154 /* system@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92D81689CAD100CA9154 /* system@2x.png */; };
 		F4EA92EC1689F57100CA9154 /* close_x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92EB1689F57100CA9154 /* close_x.png */; };
+		F4EA92F2168CA5DC00CA9154 /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */; };
 		F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EDAB16168400FF00EFD266 /* SGNavViewController.m */; };
 		F4EDAB1A1684062A00EFD266 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */; };
 		F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FCC8F815B77D4800207BEA /* Twitter.framework */; };
@@ -518,6 +519,8 @@
 		F4EA92D71689CAD100CA9154 /* system.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = system.png; sourceTree = "<group>"; };
 		F4EA92D81689CAD100CA9154 /* system@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "system@2x.png"; sourceTree = "<group>"; };
 		F4EA92EB1689F57100CA9154 /* close_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = close_x.png; sourceTree = "<group>"; };
+		F4EA92F0168CA5DC00CA9154 /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
+		F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
 		F4EDAB15168400FF00EFD266 /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
 		F4EDAB16168400FF00EFD266 /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
 		F4EDAB191684062A00EFD266 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = Foxbrowser/en.lproj/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -1031,15 +1034,11 @@
 		F48AF7B715A3960A003A8DF0 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				F4EA92EF168CA5B900CA9154 /* Favourites */,
 				F46A63AB167CCC1E0004BE43 /* Search */,
 				F4BF6F4515B735BA005FD2B6 /* WebView */,
 				F4C1EE1F15B07F9F00FB2B97 /* Preview */,
-				F46A63B6167CF35F0004BE43 /* SGBrowserViewController.h */,
-				F46A63B7167CF35F0004BE43 /* SGBrowserViewController.m */,
-				F46A63B9167D16620004BE43 /* UIViewController+SGBrowserViewController.h */,
-				F46A63BA167D16630004BE43 /* UIViewController+SGBrowserViewController.m */,
-				F4EDAB15168400FF00EFD266 /* SGNavViewController.h */,
-				F4EDAB16168400FF00EFD266 /* SGNavViewController.m */,
+				F4EA92EE168CA45900CA9154 /* Browser */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1112,6 +1111,28 @@
 				F4EA92D81689CAD100CA9154 /* system@2x.png */,
 			);
 			path = Images;
+			sourceTree = "<group>";
+		};
+		F4EA92EE168CA45900CA9154 /* Browser */ = {
+			isa = PBXGroup;
+			children = (
+				F46A63B6167CF35F0004BE43 /* SGBrowserViewController.h */,
+				F46A63B7167CF35F0004BE43 /* SGBrowserViewController.m */,
+				F46A63B9167D16620004BE43 /* UIViewController+SGBrowserViewController.h */,
+				F46A63BA167D16630004BE43 /* UIViewController+SGBrowserViewController.m */,
+				F4EDAB15168400FF00EFD266 /* SGNavViewController.h */,
+				F4EDAB16168400FF00EFD266 /* SGNavViewController.m */,
+			);
+			name = Browser;
+			sourceTree = "<group>";
+		};
+		F4EA92EF168CA5B900CA9154 /* Favourites */ = {
+			isa = PBXGroup;
+			children = (
+				F4EA92F0168CA5DC00CA9154 /* SGFavouritesManager.h */,
+				F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */,
+			);
+			name = Favourites;
 			sourceTree = "<group>";
 		};
 		F4FD2B7115AE0D01005DBAB4 /* Xib */ = {
@@ -1416,6 +1437,7 @@
 				F46A63BB167D16630004BE43 /* UIViewController+SGBrowserViewController.m in Sources */,
 				F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */,
 				F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */,
+				F4EA92F2168CA5DC00CA9154 /* SGFavouritesManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

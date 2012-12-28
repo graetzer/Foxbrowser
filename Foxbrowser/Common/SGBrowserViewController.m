@@ -100,13 +100,13 @@
     [self updateChrome];
 }
 
-- (void)handleURLInput:(NSString*)input title:(NSString *)title {
-    NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
-    if (!title) {
-        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
-        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
-    }
+- (void)openURL:(NSURL *)url title:(NSString *)title {
+    if (!url)
+        return;
     
+    if (!title)
+        title = url.host;
+        
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
         webC.title = title;
@@ -117,6 +117,16 @@
         [webC openURL:url];
         [self swapCurrentViewControllerWith:webC];
     }
+}
+
+- (void)handleURLString:(NSString*)input title:(NSString *)title {
+    NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
+    if (!title) {
+        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
+    }
+    
+    [self openURL:url title:title];
 }
 
 - (void)reload; {

@@ -189,7 +189,7 @@
 }
 
 - (void)finishSearch:(NSString *)searchString title:(NSString *)title {
-    [self.browser handleURLInput:searchString title:title];
+    [self.browser handleURLString:searchString title:title];
     
     // Conduct the search. In this case, simply report the search term used.
     [self dismissSearchController];

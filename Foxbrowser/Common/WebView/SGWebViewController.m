@@ -29,6 +29,7 @@
 #import "WeaveService.h"
 #import "NSURL+IFUnicodeURL.h"
 #import "SGCredentialsPrompt.h"
+#import "SGFavouritesManager.h"
 
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
@@ -255,7 +256,7 @@
     didFinishSavingWithError: (NSError *) error
                  contextInfo: (void *) contextInfo {
     if (error) {
-        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil)
+        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Submit", nil)
                                    message:NSLocalizedString(@"Error Retrieving Data", nil)
                                   delegate:nil
                          cancelButtonTitle:NSLocalizedString(@"OK", nil)
@@ -316,16 +317,7 @@
     //}
     
     // Do the screenshot if needed
-    NSString *path = [UIWebView pathForURL:self.location];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    if ([fm fileExistsAtPath:path]) {
-        NSDictionary *attr = [fm attributesOfItemAtPath:path error:NULL];
-        NSDate *modDate = [attr objectForKey:NSFileModificationDate];
-        NSNumber *size = [attr objectForKey:NSFileSize];
-        if ([modDate compare:[NSDate dateWithTimeIntervalSinceNow:-60*60*24*3]] == NSOrderedAscending || [size longLongValue] == 0) {
-            [self.webView performSelector:@selector(saveScreenTo:) withObject:path afterDelay:1.5];
-        }
-    }
+    [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 
 //there are too many spurious warnings, so I'm going to just ignore or log them all for now.
@@ -412,7 +404,7 @@
     }
    
     if (![appDelegate canConnectToInternet]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil)
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Load Page", @"unable to load page")
                                                         message:NSLocalizedString(@"No internet connection available", nil)
                                                        delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
         [alert show];

@@ -32,7 +32,7 @@
 #import "Store.h"
 #import "CryptoUtils.h"
 #import "WelcomePage.h"
-#import "SGPreviewPanel.h"
+#import "SGFavouritesManager.h"
 
 
 SGAppDelegate *appDelegate;
@@ -135,8 +135,8 @@ id<WeaveService> weaveService;
 	if (userDefaults != nil)
 	{
 		NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
-        [dictionary setObject: [NSNumber numberWithBool: NO] forKey: @"useCustomServer"];
-        [dictionary setObject: [NSNumber numberWithBool: YES] forKey: kWeaveUseNativeApps];			
+        dictionary[@"useCustomServer"] = @NO;
+        dictionary[kWeaveUseNativeApps] = @YES;	
         [[NSUserDefaults standardUserDefaults] registerDefaults: dictionary];
         [[NSUserDefaults standardUserDefaults] synchronize];
 	}
@@ -225,8 +225,7 @@ id<WeaveService> weaveService;
 		[storage deleteCookie: cookie];
 	}
     
-    NSString *path = [SGPreviewPanel blacklistFilePath];
-    [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
+    [[SGFavouritesManager sharedManager] resetFavourites];
     
 	// Workaround for #602419 - If the wifi is turned off, it acts as if a blank account is signed in
 	// See a more detailed description in LogoutController

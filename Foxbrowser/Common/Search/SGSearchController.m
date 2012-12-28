@@ -308,7 +308,8 @@ static NSArray* gFreshSearchHits = nil;
         else if (substrHitCount < maxHits)
         {
             substrHitCount++;
-            [substrHits setObject:item forKey:[item objectForKey:@"url"]];
+            substrHits[item[@"url"]] = item;
+            //[substrHits setObject:item forKey:[item objectForKey:@"url"]];
         }
         
         //now bail if we already have enough word hits.  if we have a fulllist of word hits, we don't care how many substr hits we have

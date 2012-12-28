@@ -158,7 +158,7 @@
 	
 	if ([weaveService canConnectToInternet])
 	{
-        [appDelegate.browserViewController handleURLInput:cell.detailTextLabel.text title:cell.textLabel.text];
+        [appDelegate.browserViewController handleURLString:cell.detailTextLabel.text title:cell.textLabel.text];
 	}
 	else 
 	{

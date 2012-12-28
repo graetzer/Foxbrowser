@@ -143,9 +143,7 @@ static Store* _gStore = nil;
 		success = [fileManager fileExistsAtPath:databasePath];
 		if (success) 
 		{
-#ifdef DEBUG
-			NSLog(@"Existing DB found, using");
-#endif
+			DLog(@"Existing DB found, using");
 			if (sqlite3_open([databasePath UTF8String], &sqlDatabase) == SQLITE_OK)
 			{
 				[self loadTabsFromDB];
@@ -155,7 +153,7 @@ static Store* _gStore = nil;
 			} 
 			else 
 			{
-				NSLog(@"Could not open database!");
+				DLog(@"Could not open database!");
 				// TODO this should be a fatal
 				return nil;
 			}
@@ -172,10 +170,10 @@ static Store* _gStore = nil;
 				bookmarkListSortedByFrecency = [[NSMutableArray array] retain];
 				return self;
 			} else {
-				NSLog(@"Could not open database!");
+				DLog(@"Could not open database!");
 			}
 		} else {
-			NSLog(@"Could not create database!");
+			DLog(@"Could not create database!");
 			NSLog(@"%@", [error localizedDescription]);
 		}
 	}

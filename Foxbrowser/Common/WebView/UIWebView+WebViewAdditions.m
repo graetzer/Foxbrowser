@@ -100,49 +100,6 @@
     [self stringByEvaluatingJavaScriptFromString:@"document.navigator.doNotTrack = '1';"];
 }
 
-#pragma mark - Screenshot stuff
-
-- (UIImage *)screenshot {
-    UIImage *viewImage = nil;
-    UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0.0);
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    if (self.layer && ctx) {
-        [self.layer renderInContext:ctx];
-        viewImage = UIGraphicsGetImageFromCurrentImageContext();
-    }
-    UIGraphicsEndImageContext();
-    return viewImage;
-}
-
-- (void)saveScreenTo:(NSString *)path {
-    UIImage *screen = [self screenshot];
-    if (screen.size.height > screen.size.width) {
-        screen = [screen cutImageToSize:CGSizeMake(screen.size.width, screen.size.height)];
-    }
-    
-    CGFloat scale = [UIScreen mainScreen].scale;
-    screen = [screen scaleProportionalToSize:CGSizeMake(scale*kSGPanelWidth, scale*kSGPanelHeigth)];
-    if (screen) {
-        NSData *data = UIImagePNGRepresentation(screen);
-        [data writeToFile:path atomically:NO];
-        DLog(@"Write screenshot to: %@", path);
-    }
-}
-
-+ (NSString *)screenshotPath {
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-    return [path stringByAppendingPathComponent:@"Screenshots"];
-}
-
-+ (NSString *)pathForURL:(NSURL *)url {
-    NSString* path = [self screenshotPath];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL];
-    }
-    
-    return [[path stringByAppendingPathComponent:url.host] stringByAppendingPathExtension:@"png"];
-}
-
 #pragma mark - Tag stuff
 
 - (NSDictionary *)tagsForPosition:(CGPoint)pt {
@@ -158,7 +115,8 @@
         if (start.location != NSNotFound && end.location != NSNotFound) {
             NSString *tagname = [tag substringToIndex:start.location];
             NSString *urlString = [tag substringWithRange:NSMakeRange(start.location + 1, end.location - start.location - 1)];
-            [info setObject:urlString forKey:tagname];
+            
+            info[tagname] = urlString;
         }
     }
     

@@ -43,8 +43,7 @@
 #import "KeychainItemWrapper.h"
 #import "LogoutController.h"
 
-#import "SGPreviewPanel.h"
-#import "UIWebView+WebViewAdditions.h"
+#import "SGFavouritesManager.h"
 
 @implementation SettingsController
 
@@ -159,8 +158,7 @@
 }
 
 - (IBAction)resetStartscreen:(id)sender {
-    [[NSFileManager defaultManager] removeItemAtPath:[SGPreviewPanel blacklistFilePath] error:NULL];
-    [[NSFileManager defaultManager] removeItemAtPath:[UIWebView screenshotPath] error:NULL];
+    [[SGFavouritesManager sharedManager] resetFavourites];
     [weaveService refreshViews];
 }
 

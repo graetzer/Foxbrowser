@@ -217,7 +217,7 @@
 	{
 		if ([weaveService canConnectToInternet])
 		{
-            [self.browser handleURLInput: cell.detailTextLabel.text title: cell.textLabel.text];
+            [self.browser handleURLString: cell.detailTextLabel.text title: cell.textLabel.text];
 		}
 		else 
 		{

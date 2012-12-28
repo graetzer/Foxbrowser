@@ -22,7 +22,7 @@
 
 #import "SGDimensions.h"
 #import "SGPreviewPanel.h"
-#import "UIWebView+WebViewAdditions.h"
+#import "SGFavouritesManager.h"
 #import "Store.h"
 
 #define PADDING 25.
@@ -32,16 +32,6 @@ const CGFloat kSGPanelWidth = 220.;
 const CGFloat kSGPanelHeigth = 185.;
 
 @implementation SGPreviewTile
-
-/*
- Helvetica-LightOblique,
- Helvetica,
- Helvetica-Oblique,
- Helvetica-BoldOblique,
- Helvetica-Bold,
- Helvetica-Light
-
- */
 
 - (id)initWithImage:(UIImage *)image title:(NSString *)title {
     CGRect frame = CGRectMake(0, 0, kSGPanelWidth, kSGPanelHeigth);
@@ -73,12 +63,9 @@ const CGFloat kSGPanelHeigth = 185.;
 
 @end
 
-static const NSString *blockedFile = @"blocked.plist";
-
 @interface SGPreviewPanel ()
 @property (weak, nonatomic) SGPreviewTile *selected;
 @property (strong, nonatomic) NSMutableArray *tiles;
-@property (strong, nonatomic) NSMutableArray *blacklist;
 @end
 
 @implementation SGPreviewPanel
@@ -89,12 +76,6 @@ static SGPreviewPanel *_singletone;
         _singletone = [[SGPreviewPanel alloc] initWithFrame:CGRectZero];
     }
     return _singletone;
-}
-
-+ (NSString *)blacklistFilePath {
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-    path = [path stringByAppendingPathComponent:@"blacklist.plist"];
-    return path;
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -137,34 +118,35 @@ static SGPreviewPanel *_singletone;
     [self layout];
 }
 
-- (BOOL)tilesContainItem:(NSDictionary *)item {
-    NSString *url = [item objectForKey:@"url"];
-    for (SGPreviewTile *tile in self.tiles) {
-        if ([[tile.info objectForKey:@"url"] isEqualToString:url]) {
-            return YES;
+- (void)willMoveToSuperview:(UIView *)newSuperview {
+    if (newSuperview) {
+        if (self.tiles.count < TILES_MAX) {
+            [self refresh];
         }
     }
-    return NO;
 }
 
-- (void)addMissingTiles {
-    NSArray *history = [[Store getStore] getHistory];
+- (void)refresh {
+    for (SGPreviewTile *tile in self.tiles) {
+        tile.label = nil;
+        tile.imageView = nil;
+        [tile removeFromSuperview];
+    }
+    [self.tiles removeAllObjects];
+    self.tiles = [NSMutableArray arrayWithCapacity:TILES_MAX];
     
-    NSUInteger i = self.tiles.count;
-    while (self.tiles.count < TILES_MAX && i < history.count) {
-        NSDictionary *item = [history objectAtIndex:i];
-        i++;
-        
-        id url = [item objectForKey:@"url"];
-        if ([self tilesContainItem:item] || [self.blacklist containsObject:url]) {
-            continue;
-        }
-
+    SGFavouritesManager *favsMngr = [SGFavouritesManager sharedManager];
+    
+    NSArray *favs = [favsMngr favourites];
+    for (NSDictionary *item in favs) {
         NSString *title = [item objectForKey:@"title"];
         NSString *urlS = [item objectForKey:@"url"];
-        UIImage *image = [self imageForURLString:urlS];
+        NSURL *url = [NSURL URLWithString:urlS];
+        UIImage *image = [favsMngr imageWithURL:url];
+        
+        
         SGPreviewTile *tile = [[SGPreviewTile alloc] initWithImage:image title:title];
-        tile.info = item;
+        tile.url = url;
         tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
@@ -177,29 +159,6 @@ static SGPreviewPanel *_singletone;
         [self addSubview:tile];
         [self.tiles addObject:tile];
     }
-}
-
-- (void)willMoveToSuperview:(UIView *)newSuperview {
-    if (newSuperview) {
-        if (self.tiles.count < TILES_MAX) {
-            [self addMissingTiles];
-        }
-    }
-}
-
-- (void)refresh {
-    self.blacklist = [NSMutableArray arrayWithContentsOfFile:[SGPreviewPanel blacklistFilePath]];
-    if (!self.blacklist)
-        self.blacklist = [NSMutableArray new];
-    
-    for (SGPreviewTile *tile in self.tiles) {
-        tile.label = nil;
-        tile.imageView = nil;
-        [tile removeFromSuperview];
-    }
-    [self.tiles removeAllObjects];
-    self.tiles = [NSMutableArray arrayWithCapacity:TILES_MAX];
-    [self addMissingTiles];
 }
 
 #pragma mark - Tap Handling, context menu
@@ -216,7 +175,7 @@ static SGPreviewPanel *_singletone;
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             self.selected = (SGPreviewTile*)recognizer.view;
-            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:[self.selected.info objectForKey:@"url"]
+            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:self.selected.url.absoluteString
                                                                delegate:self
                                                       cancelButtonTitle:nil
                                                  destructiveButtonTitle:nil
@@ -224,7 +183,10 @@ static SGPreviewPanel *_singletone;
                                     NSLocalizedString(@"Open", @"Open a link"),
                                     NSLocalizedString(@"Open in a new Tab", nil),
                                     NSLocalizedString(@"Remove", @"Remove from page"), nil];
-            [sheet showFromRect:recognizer.view.frame inView:self animated:YES];
+            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+                [sheet showFromRect:recognizer.view.frame inView:self animated:YES];
+            else
+                [sheet showInView:self.window];
         }
     }
 }
@@ -241,8 +203,7 @@ static SGPreviewPanel *_singletone;
             
         case 2:
         {
-            NSDictionary *item = self.selected.info;
-            [self.blacklist addObject:[item objectForKey:@"url"]];
+            [[SGFavouritesManager sharedManager] blockURL:self.selected.url];
             [self.tiles removeObject:self.selected];
             
            [UIView transitionWithView:self
@@ -250,11 +211,11 @@ static SGPreviewPanel *_singletone;
                               options:UIViewAnimationOptionAllowAnimatedContent
                            animations:^{
                                [self.selected removeFromSuperview];
-                               [self addMissingTiles];
+                               [self refresh];
                                [self layoutSubviews];
                            }
                            completion:^(BOOL finished) {
-                               [self.blacklist writeToFile:[SGPreviewPanel blacklistFilePath] atomically:NO];
+                               //[self.blacklist writeToFile:[SGPreviewPanel blacklistFilePath] atomically:NO];
                            }];
         }
         default:
@@ -268,19 +229,6 @@ static SGPreviewPanel *_singletone;
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
     return YES;
-}
-
-- (UIImage *)imageForURLString:(NSString *)urlS {
-    NSURL *url = [NSURL URLWithString:urlS];
-    NSString *path = [UIWebView pathForURL:url];
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
-        return [UIImage imageWithContentsOfFile:path];
-    } else {
-        NSDictionary *attr = [NSDictionary dictionaryWithObjectsAndKeys:NSFileModificationDate, [NSDate distantPast], nil];
-        [[NSFileManager defaultManager] createFileAtPath:path contents:[NSData data] attributes:attr];
-        return nil;
-    }
 }
 
 @end

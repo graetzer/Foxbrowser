@@ -68,8 +68,11 @@
 - (NSURL *)URL;
 
 - (BOOL)canStopOrReload;
-- (void)handleURLInput:(NSString*)input title:(NSString *)title;
 - (BOOL)canRemoveTab:(UIViewController *)viewController;
+
+- (void)openURL:(NSURL *)url title:(NSString *)title;
+- (void)handleURLString:(NSString*)input title:(NSString *)title;
+
 
 - (void)addSavedTabs;
 - (void)saveCurrentTabs;

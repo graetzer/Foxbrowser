@@ -21,7 +21,7 @@
       //[[appDelegate settings] dismissModalViewControllerAnimated:NO];
 
       NSString* destString = [Stockboy getURIForKey:@"TOS URL"];
-      [appDelegate.browserViewController handleURLInput:destString title:@"Terms of Service"];
+      [appDelegate.browserViewController handleURLString:destString title:@"Terms of Service"];
       [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
   }
   else 
@@ -38,7 +38,7 @@
   if ([weaveService canConnectToInternet])
   {    
     NSString* destString = [Stockboy getURIForKey:@"PP URL"];
-      [appDelegate.browserViewController handleURLInput:destString title:@"Privacy policy"];
+      [appDelegate.browserViewController handleURLString:destString title:@"Privacy policy"];
       [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
   }
   else {
