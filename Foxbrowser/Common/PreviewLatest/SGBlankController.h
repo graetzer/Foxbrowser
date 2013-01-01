@@ -24,18 +24,11 @@
 
 #define SG_TAB_WIDTH 320.0
 
-@class SGPanelContainer, TabBrowserController, SGBottomView, SGBlankView;
+@class TabBrowserController, SGBottomView;
+
 @interface SGBlankController : UIViewController <UIScrollViewDelegate, SGPanelDelegate>
-
-@property (readonly, nonatomic) SGBlankView *blankView;
-
-@property (strong, nonatomic) TabBrowserController *tabBrowser;
-@end
-
-@interface SGBlankView : UIView <UIScrollViewDelegate>
-@property (strong, nonatomic) UIScrollView *scrollView;
-@property (strong, nonatomic) SGPreviewPanel *previewPanel;
-@property (strong, nonatomic) SGBottomView *bottomView;
-@property (strong, nonatomic) UIView *tabBrowserView;
-
+@property (weak, nonatomic) TabBrowserController *tabBrowser;
+@property (weak, nonatomic) UIScrollView *scrollView;
+@property (weak, nonatomic) SGPreviewPanel *previewPanel;
+@property (weak, nonatomic) SGBottomView *bottomView;
 @end

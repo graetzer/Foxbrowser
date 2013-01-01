@@ -23,7 +23,6 @@
 #import "UIWebView+WebViewAdditions.h"
 #import "NSURL+IFUnicodeURL.h"
 #import "UIImage+Scaling.h"
-#import "SGDimensions.h"
 
 
 @implementation UIWebView (WebViewAdditions)

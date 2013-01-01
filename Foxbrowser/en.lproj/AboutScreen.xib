@@ -44,7 +44,7 @@
 					<object class="IBUIImageView" id="775440582">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrameSize">{320, 460}</string>
+						<string key="NSFrameSize">{320, 416}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="123046572"/>
@@ -108,7 +108,7 @@
 					<object class="IBUILabel" id="820807709">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">311</int>
-						<string key="NSFrame">{{20, 123}, {280, 126}}</string>
+						<string key="NSFrame">{{20, 123}, {280, 109}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="828656073"/>
@@ -140,7 +140,7 @@
 					<object class="IBUIButton" id="828656073">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">269</int>
-						<string key="NSFrame">{{60, 258}, {200, 42}}</string>
+						<string key="NSFrame">{{60, 245}, {200, 42}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="754078539"/>
@@ -174,7 +174,7 @@
 					<object class="IBUIButton" id="754078539">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">269</int>
-						<string key="NSFrame">{{60, 314}, {200, 42}}</string>
+						<string key="NSFrame">{{60, 301}, {200, 42}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -191,12 +191,15 @@
 						<reference key="IBUIFont" ref="614189260"/>
 					</object>
 				</object>
-				<string key="NSFrame">{{0, 20}, {320, 460}}</string>
+				<string key="NSFrame">{{0, 64}, {320, 416}}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="775440582"/>
 				<reference key="IBUIBackgroundColor" ref="366106922"/>
 				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
+				<object class="IBUISimulatedNavigationBarMetrics" key="IBUISimulatedTopBarMetrics">
+					<bool key="IBUIPrompted">NO</bool>
+				</object>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
 		</object>
@@ -247,11 +250,11 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="775440582"/>
-							<reference ref="828656073"/>
-							<reference ref="754078539"/>
 							<reference ref="820807709"/>
 							<reference ref="123046572"/>
 							<reference ref="975072903"/>
+							<reference ref="828656073"/>
+							<reference ref="754078539"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>

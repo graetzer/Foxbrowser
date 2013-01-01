@@ -20,7 +20,7 @@ The Firefox Home codebase doesn't allow changes to the sync data yet, currently 
 If you visit a site that's not already in the history, it's added locally.
 
 #### Licence
-   Copyright 2012 Simon Peter Grätzer
+   Copyright 2012-2013 Simon Peter Grätzer
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

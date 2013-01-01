@@ -23,8 +23,9 @@
 
 #import "SGPageViewController.h"
 #import "SGPageToolbar.h"
+#import "SGSearchField.h"
 
-#define SG_EXPOSED_SCALE (0.8f)
+#define SG_EXPOSED_SCALE (0.78f)
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE))
 #define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
 
@@ -73,8 +74,18 @@
     UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:20];
     CGSize size = [text sizeWithFont:font];
     
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(10, 10, size.width, size.height);
+    UIButton *button  = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(5, 10, 30, 30);
+    button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
+    button.backgroundColor  = [UIColor clearColor];
+    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateHighlighted];
+    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
+    [self.view insertSubview:button belowSubview:self.toolbar];
+    
+    
+    button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(5 +30, 10, size.width, size.height);
     button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
     [button setTitle:text forState:UIControlStateNormal];
     button.titleLabel.font = font;
@@ -83,14 +94,16 @@
     [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
     [self.view insertSubview:button belowSubview:self.toolbar];
     
-    button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(10 + size.width, 10, 30, 30);
-    button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
-    button.backgroundColor  = [UIColor clearColor];
-    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
-    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateHighlighted];
-    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
-    [self.view insertSubview:button belowSubview:self.toolbar];
+
+    
+    font = [UIFont fontWithName:@"HelveticaNeue" size:16];
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 45, self.view.bounds.size.width, font.lineHeight)];
+    _titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    _titleLabel.textAlignment = NSTextAlignmentCenter;
+    _titleLabel.backgroundColor = [UIColor clearColor];
+    _titleLabel.textColor = [UIColor whiteColor];
+    _titleLabel.lineBreakMode = UILineBreakModeTailTruncation;
+    [self.view insertSubview:_titleLabel belowSubview:self.scrollView];
     
     self.closeButton.hidden = YES;
     self.closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
@@ -144,20 +157,16 @@
     
     [self addChildViewController:childController];
     
-    
+    childController.view.clipsToBounds = YES;
     childController.view.transform = CGAffineTransformIdentity;
     childController.view.frame = CGRectMake(self.scrollView.frame.size.width * index,
                                            0,
                                            self.scrollView.frame.size.width,
                                            self.scrollView.frame.size.height);
-    if (self.exposeMode) {
+    if (_exposeMode) {
         childController.view.userInteractionEnabled = NO;
         childController.view.transform = SG_EXPOSED_TRANSFORM;
     }
-    
-    CALayer *layer = childController.view.layer;
-    layer.shadowOpacity = .5f;
-    layer.shadowOffset = CGSizeMake(5, 0);
     
     NSUInteger count = _viewControllers.count;
     self.pageControl.numberOfPages = count;
@@ -209,6 +218,7 @@
                      }
                      completion:^(BOOL done){
                          [childController removeFromParentViewController];
+                         [self updateChrome];
                          
                          if (self.exposeMode)
                              self.closeButton.hidden = SG_CONTAINER_EMPTY;
@@ -250,6 +260,7 @@
 
 - (void)updateChrome {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
+    self.titleLabel.text = self.selectedViewController.title;
     [self.toolbar updateChrome];
 };
 
@@ -271,10 +282,6 @@
 
 #pragma mark - Utility
 - (void)arrangeChildViewControllers {
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width * _viewControllers.count, 1);
-    [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*self.pageControl.currentPage, 0)
-                             animated:NO];
-    
     for (NSUInteger i = 0; i < _viewControllers.count; i++) {
         UIViewController *viewController = _viewControllers[i];
         viewController.view.transform = CGAffineTransformIdentity;
@@ -282,12 +289,35 @@
                                                0,
                                                self.scrollView.frame.size.width,
                                                self.scrollView.frame.size.height);
-        if (self.exposeMode)
+        if (_exposeMode)
             viewController.view.transform = SG_EXPOSED_TRANSFORM;
-        
-        viewController.view.layer.shadowPath = [UIBezierPath bezierPathWithRect:viewController.view.bounds].CGPath;
     }
+    
+    self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width * _viewControllers.count, 1);
+    self.scrollView.contentOffset = CGPointMake(self.view.bounds.size.width*self.pageControl.currentPage, 0);
+}
 
+- (void)scaleChildViewControllers {
+    CGFloat offset = self.scrollView.contentOffset.x;
+    CGFloat width = self.scrollView.frame.size.width;
+    
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+        UIViewController *viewController = _viewControllers[i];
+        if (_exposeMode) {
+            viewController.view.userInteractionEnabled = NO;
+            viewController.view.transform = SG_EXPOSED_TRANSFORM;
+        } else {
+            viewController.view.userInteractionEnabled = YES;
+            
+            CGFloat y = i * width;
+            CGFloat value = (offset-y)/width;
+            CGFloat scale = 1.f-fabs(value);
+            if (scale > 1.f) scale = 1.f;
+            if (scale < SG_EXPOSED_SCALE) scale = SG_EXPOSED_SCALE;
+            
+            viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
+        }
+    }
 }
 
 - (void)enableScrollsToTop {
@@ -309,30 +339,6 @@
             [((UIWebView *)viewController).scrollView setScrollsToTop:NO];
         else if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
             [(UIScrollView *)viewController.view setScrollsToTop:NO];
-    }
-}
-
-- (void)scaleChildViewControllers {
-    CGFloat offset = self.scrollView.contentOffset.x;
-    CGFloat width = self.scrollView.frame.size.width;
-    
-    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
-        UIViewController *viewController = _viewControllers[i];
-        if (self.exposeMode) {
-            viewController.view.userInteractionEnabled = NO;
-            viewController.view.transform = SG_EXPOSED_TRANSFORM;
-        } else {
-            viewController.view.userInteractionEnabled = YES;
-            
-            CGFloat y = i * width;
-            CGFloat value = (offset-y)/width;
-            CGFloat scale = 1.f-fabs(value);
-            if (scale > 1.f) scale = 1.f;
-            if (scale < SG_EXPOSED_SCALE) scale = SG_EXPOSED_SCALE;
-            
-            viewController.view.transform = CGAffineTransformMakeScale(scale, scale);
-        
-        }
     }
 }
 
@@ -376,19 +382,25 @@
 - (void)setExposeMode:(BOOL)exposeMode {
     _exposeMode = exposeMode;
     if (exposeMode) {
+        [self.toolbar.searchField resignFirstResponder];
         [self disableScrollsToTop];
+        
         [UIView animateWithDuration:0.3
                          animations:^{
                              self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, -self.toolbar.frame.size.height);
                              [self scaleChildViewControllers];
                          }
                          completion:^(BOOL finished) {
+                             UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedViewController:)];
+                             [self.view addGestureRecognizer:rec];
+                             
+                             [self arrangeChildViewControllers];
+                             
                              CGPoint point = self.selectedViewController.view.frame.origin;
                              self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
                              self.closeButton.hidden = SG_CONTAINER_EMPTY;
                          }];
-        UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedViewController:)];
-        [self.view addGestureRecognizer:rec];
+
     } else {
         [self enableScrollsToTop];
         self.closeButton.hidden = YES;

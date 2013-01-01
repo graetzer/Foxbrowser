@@ -25,6 +25,10 @@
 #import "SGTabDefines.h"
 #import "SGSearchField.h"
 
+#import "SettingsController.h"
+#import "WelcomePage.h"
+#import "SGNavViewController.h"
+
 @implementation SGPageToolbar {
     UIColor *_bottomColor;
     BOOL _searchBarVisible;
@@ -38,14 +42,6 @@
         _bottomColor = kTabColor;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
-        _searchField = [[SGSearchField alloc] initWithDelegate:self];
-        [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
-        [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_searchField];
-        
-        _searchController = [SGSearchController new];
-        _searchController.delegate = self;
-        
         CGRect btnRect = CGRectMake(0, 0, 30, 30);
         _backButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _backButton.frame = btnRect;
@@ -56,8 +52,27 @@
         [_backButton addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_backButton];
         
+        _forwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _forwardButton.frame = btnRect;
+        _forwardButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        _forwardButton.backgroundColor = [UIColor clearColor];
+        _forwardButton.showsTouchWhenHighlighted = YES;
+        [_forwardButton setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
+        [_forwardButton addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
+        _forwardButton.hidden = !self.browser.canGoForward;
+        [self addSubview:_forwardButton];
+        
+        _systemButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _systemButton.frame = btnRect;
+        _systemButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        _systemButton.backgroundColor = [UIColor clearColor];
+        _systemButton.showsTouchWhenHighlighted = YES;
+        [_systemButton setImage:[UIImage imageNamed:@"system"] forState:UIControlStateNormal];
+        [_systemButton addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_systemButton];
+        
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _tabsButton.frame = CGRectMake(0, 0, 40, 25);
+        _tabsButton.frame = CGRectMake(0, 0, 35, 25);
         _tabsButton.backgroundColor = [UIColor clearColor];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-default"] forState:UIControlStateNormal];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-pressed"] forState:UIControlStateHighlighted];
@@ -65,6 +80,14 @@
         [_tabsButton addTarget:self action:@selector(pressedTabsButton:)
               forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
+        
+        _searchField = [[SGSearchField alloc] initWithDelegate:self];
+        [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_searchField];
+        
+        _searchController = [SGSearchController new];
+        _searchController.delegate = self;
     }
     return self;
 }
@@ -79,14 +102,26 @@
                                    _backButton.frame.size.width, _backButton.frame.size.height);
     posX += _backButton.frame.size.width + margin;
     
-    CGSize size = _tabsButton.frame.size;
-    CGFloat tabsX = width - size.width - margin;
-    _tabsButton.frame = CGRectMake(tabsX, (height - size.height)/2,
-                                   size.width, size.height);
+    _forwardButton.frame = CGRectMake(posX, (height - _forwardButton.frame.size.height)/2,
+                                      _forwardButton.frame.size.width, _forwardButton.frame.size.height);
     
-    CGSize searchSize = _searchField.bounds.size;
-    _searchField.frame = CGRectMake(posX, (height - searchSize.height)/2,
-                                    tabsX - posX - margin, searchSize.height);
+    if (!_forwardButton.hidden)
+        posX += _forwardButton.frame.size.width + margin;
+    
+    CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _systemButton.frame.size.width - 3*margin;
+    _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height)/2,
+                                    searchWidth, _searchField.frame.size.height);
+    posX += _searchField.frame.size.width + margin;
+    
+    _systemButton.frame = CGRectMake(posX, (height - _systemButton.frame.size.height)/2,
+                                    _systemButton.frame.size.width, _systemButton.frame.size.height);
+    
+    posX += _systemButton.frame.size.width + margin;
+
+    _tabsButton.frame = CGRectMake(posX, (height - _tabsButton.frame.size.height)/2,
+                                   _tabsButton.frame.size.width, _tabsButton.frame.size.height);
+    
+
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -114,11 +149,15 @@
     NSString *text = [NSString stringWithFormat:@"%d", self.browser.count];
     [_tabsButton setTitle:text forState:UIControlStateNormal];
     
-    //self.forwardItem.enabled = [self.browser canGoForward];
-    self.backButton.enabled = [self.browser canGoBack];
+    self.backButton.enabled = self.browser.canGoBack;
+    _forwardButton.hidden = !self.browser.canGoForward;
+//    BOOL hidden = !self.browser.canGoForward;
+//    if (_forwardButton.hidden != hidden) {
+//        <#statements#>
+//    }
+//    _forwardButton.hidden = 
     
-    BOOL canStopOrReload = [self.browser canStopOrReload];
-    if (canStopOrReload) {
+    if (self.browser.canStopOrReload) {
         if ([self.browser isLoading]) {
             self.searchField.state = SGSearchFieldStateStop;
             //self.progressView.hidden = NO;
@@ -136,6 +175,81 @@
 
 - (IBAction)pressedTabsButton:(id)sender {
     self.browser.exposeMode = YES;
+}
+
+- (IBAction)showOptions:(UIButton *)sender {
+    
+    //BOOL privateMode = [[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode];
+    self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                   delegate:self
+                                          cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
+                                     destructiveButtonTitle:nil
+                                          otherButtonTitles:
+                        NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
+                        NSLocalizedString(@"Email URL", nil),
+                        NSLocalizedString(@"Tweet", @"Tweet the current url"),
+                        //!privateMode ? NSLocalizedString(@"Enable Private Browsing", nil) : NSLocalizedString(@"Disable Private Browsing", nil) ,
+                        NSLocalizedString(@"Settings", nil), nil];
+    [self.actionSheet showInView:self];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    NSURL *url = [self.browser URL];
+    
+    switch (buttonIndex) {
+        case 0: // Open in mobile safari
+            [[UIApplication sharedApplication] openURL:url];
+            break;
+        case 1: // Send a mail
+            if ([MFMailComposeViewController canSendMail]) {
+                MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
+                mail.mailComposeDelegate = self;
+                [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
+                NSString *text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Here is that site we talked about:", nil), url.absoluteString];
+                [mail setMessageBody:text isHTML:NO];
+                [self.browser presentModalViewController:mail animated:YES];
+            }
+            break;
+            
+        case 2: // Send a tweet
+            if ([TWTweetComposeViewController canSendTweet]) {
+                TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
+                [tw addURL:url];
+                [self.browser presentModalViewController:tw animated:YES];
+            }
+            break;
+            
+        case 3: // Show settings or welcome page
+        {
+            BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
+            if (!showedFirstRunPage)
+            {
+                WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
+                UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
+                navController.modalPresentationStyle = UIModalPresentationFormSheet;
+                [self.browser presentViewController:navController animated:YES completion:NULL];
+            }
+            else
+            {
+                SettingsController *settings = [SettingsController new];
+                UINavigationController *nav = [[SGNavViewController alloc] initWithRootViewController:settings];
+                nav.modalPresentationStyle = UIModalPresentationFormSheet;
+                [self.browser presentModalViewController:nav animated:YES];
+            }
+            
+        }
+            
+            break;
+            
+        default:
+            break;
+    }
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller
+          didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
+    // Remove the mail view
+    [self.browser dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - UITextFieldDelegate

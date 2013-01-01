@@ -27,14 +27,51 @@
 #import "SGBottomView.h"
 
 @implementation SGBlankController
-@dynamic blankView;
 
-- (SGBlankView *)blankView {
-    return (SGBlankView *)self.view;
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.title = NSLocalizedString(@"New Tab", @"New Tab");
+    
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+    scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    scrollView.canCancelContentTouches = NO;
+    scrollView.bounces = NO;
+    scrollView.backgroundColor = [UIColor whiteColor];
+    scrollView.delegate = self;
+    [self.view addSubview:scrollView];
+    self.scrollView = scrollView;
+    
+    NSDictionary *buttons = @{NSLocalizedString(@"Most popular", @"Most popular websites") : [UIImage imageNamed:@"pictures"],
+    NSLocalizedString(@"Other devices", @"Tabs of other devices") : [UIImage imageNamed:@"cloud-down"]};
+    
+    SGBottomView *bottomView = [[SGBottomView alloc] initWithPairs:buttons];
+    CGRect rect = bottomView.frame;
+    rect.origin.y = self.view.bounds.size.height - bottomView.frame.size.height;
+    rect.size.width = self.view.frame.size.width;
+    bottomView.frame = rect;
+    bottomView.container = self;
+    [self.view addSubview:bottomView];
+    _bottomView = bottomView;
+    
+    TabBrowserController *tabBrowser = [[TabBrowserController alloc] initWithStyle:UITableViewStylePlain];
+    [self addChildViewController:tabBrowser];
+    tabBrowser.view.frame = CGRectMake(self.view.bounds.size.width, 0, SG_TAB_WIDTH, self.view.bounds.size.height);
+    tabBrowser.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
+    [self.scrollView addSubview:tabBrowser.view];
+    [tabBrowser didMoveToParentViewController:self];
+    self.tabBrowser = tabBrowser;
+    
+    CGRect panelRect = CGRectMake(0, 0, self.view.bounds.size.width,
+                                  self.view.bounds.size.height - bottomView.frame.size.height);
+    SGPreviewPanel *previewPanel = [[SGPreviewPanel alloc] initWithFrame:panelRect];
+    previewPanel.delegate = self;
+    
+    [scrollView addSubview:previewPanel];
+    _previewPanel = previewPanel;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
 }
 
@@ -42,44 +79,11 @@
     return UIInterfaceOrientationMaskAll;
 }
 
-- (void)loadView {
-    self.view = [[SGBlankView alloc] initWithFrame:CGRectZero];
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-}
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    
-    self.title = NSLocalizedString(@"New Tab", @"New Tab");
-    
-    self.tabBrowser = [[TabBrowserController alloc] initWithStyle:UITableViewStylePlain];
-    [self addChildViewController:self.tabBrowser];
-    self.blankView.tabBrowserView = self.tabBrowser.view;
-    [self.blankView.scrollView addSubview:self.tabBrowser.view];
-    [self.tabBrowser didMoveToParentViewController:self];
-    
-    //[self layoutAllViews];
-}
-
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    //[self layoutAllViews];
-    //[self.blankView.previewPanel layout];
-}
-
 - (UIView *)rotatingFooterView {
-    return self.blankView.bottomView;
+    return self.bottomView;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    self.blankView.previewPanel = [SGPreviewPanel instance];
-    self.blankView.previewPanel.delegate = self;
-    CGRect previewFrame = self.view.bounds;
-    previewFrame.size.height -= 60.;
-    self.blankView.previewPanel.frame = previewFrame;
-    [self.blankView.scrollView addSubview:self.blankView.previewPanel];
-    
-   // [self layoutAllViews];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(refresh)
                                                  name:kWeaveDataRefreshNotification
@@ -104,68 +108,32 @@
 }
 
 - (void)refresh {
-    [self.blankView.previewPanel refresh];
+    [self.previewPanel refresh];
 }
 
 #pragma mark - SGPreviewPanelDelegate
 - (void)openNewTab:(SGPreviewTile *)tile {
-    if (tile.url) {
-        SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
-        [tabsC addTabWithURL:tile.url withTitle:tile.label.text];
-    }
+    if (tile.url)
+        [self.browserViewController addTabWithURL:tile.url withTitle:tile.label.text];
 }
 
 - (void)open:(SGPreviewTile *)tile {
-    if (tile.url) {
-        SGTabsViewController *tabsC = (SGTabsViewController *)self.parentViewController;
-        [tabsC openURL:tile.url title:tile.label.text];
-    }
+    if (tile.url)
+        [self.browserViewController openURL:tile.url title:tile.label.text];
 }
 
-@end
-
-@implementation SGBlankView
-
-#define SG_BOTTOM_BAR_HEIGHT 60.
-
-- (id)initWithFrame:(CGRect)frame {
-    frame = CGRectMake(0, 80, 768., 925.);//TODO a proper calculation?
-    
-    if (self = [super initWithFrame:frame]) {
-        frame.size.height -= SG_BOTTOM_BAR_HEIGHT;
-        self.scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        self.scrollView.canCancelContentTouches = NO;
-        self.scrollView.bounces = NO;
-        self.scrollView.backgroundColor = [UIColor whiteColor];
-        self.scrollView.delegate = self;
-        [self addSubview:self.scrollView];
-        
-        CGRect bottomFrame = CGRectMake(0, frame.size.height, frame.size.width, SG_BOTTOM_BAR_HEIGHT);
-        self.bottomView = [[SGBottomView alloc] initWithFrame:bottomFrame];
-        self.bottomView.container = self;
-        [self addSubview:self.bottomView];
-    }
-    
-    return self;
-}
+#pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     self.bottomView.markerPosititon = scrollView.contentOffset.x/SG_TAB_WIDTH;
 }
 
-- (void)layoutSubviews {
-    CGSize scrollSize = self.scrollView.frame.size;
-//    if (scrollSize.width < scrollSize.height) {
-//        // The parent view is not yet properly sized
-//        CGFloat width = scrollSize.width;
-//        scrollSize.width = scrollSize.height;
-//        scrollSize.height = width;
-//    }
-    
-    CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
-    self.tabBrowserView.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
-    self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
-}
+//- (void)layoutSubviews {
+//    CGSize scrollSize = self.scrollView.frame.size;
+//    
+//    CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
+//    self.tabBrowserView.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
+//    self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
+//}
 
 @end

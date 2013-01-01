@@ -22,26 +22,37 @@
 #import "SGBottomView.h"
 #import "SGBlankController.h"
 
-@implementation SGBottomView
+@implementation SGBottomView {
+    UIView *_groupView;
+    UIView *_marker;
+}
 @dynamic markerPosititon;
 
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
+- (id)initWithPairs:(NSDictionary *)pairs {
+    
+    NSString *fontName = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? @"HelveticaNeue" : @"HelveticaNeue-Light";
+    CGFloat fontSize = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 10. : 16.;
+    CGFloat height = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 40. : 60.;
+    CGFloat margin = height/12;
+    
+    CGRect frame = CGRectMake(0, 0, 320., height);
+    if (self = [super initWithFrame:frame]) {
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         self.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1.0];
         
         UIImageView *logoView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
         
         logoView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
-        logoView.frame = CGRectMake(10., (frame.size.height - 50.)/2, 50., 50.);
+        logoView.frame = CGRectMake(margin, margin,
+                                    frame.size.height - 2*margin, frame.size.height - 2*margin);
         [self addSubview:logoView];
         
         NSString *text = @"Foxbrowser";
-        UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Light" size:20.];
+        UIFont *font = [UIFont fontWithName:fontName size:fontSize+3];
         CGSize size = [text sizeWithFont:font];
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(70., (frame.size.height - size.height)/2, size.width, size.height)];
+        UILabel *label = [[UILabel alloc] initWithFrame:
+                          CGRectMake(CGRectGetMaxX(logoView.frame) + margin, (frame.size.height - size.height)/2,
+                                     size.width, size.height)];
         label.autoresizingMask =  UIViewAutoresizingFlexibleRightMargin;
         label.backgroundColor = [UIColor clearColor];
         label.font = font;
@@ -49,53 +60,70 @@
         label.text = text;
         [self addSubview:label];
         
-        font = [UIFont fontWithName:@"HelveticaNeue-Light" size:17.];
-        text = NSLocalizedString(@"Most popular", @"Most popular websites");
-        size = [text sizeWithFont:font];
-        NSString *text2 = NSLocalizedString(@"Other devices", @"Tabs of other devices");
-        CGSize size2 = [text2 sizeWithFont:font];
-        CGFloat labelWidth = MAX(size.width, size2.width);
         
-        CGRect gRect = CGRectMake(frame.size.width/2 - labelWidth, 0, 2*labelWidth + 40, frame.size.height);
-        UIView *group = [[UIView alloc] initWithFrame:gRect];
-        group.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        group.backgroundColor = [UIColor clearColor];
-        [self addSubview:group];
+        if (pairs.count == 0)
+            return self;
         
-        label = [[UILabel alloc] initWithFrame:CGRectMake(10., (gRect.size.height - size.height)/2, labelWidth, size.height)];
-        label.backgroundColor = [UIColor clearColor];
-        label.font = font;
-        label.text = text;
-        label.textAlignment = UITextAlignmentCenter;
-        [group addSubview:label];
+        font = [UIFont fontWithName:fontName size:fontSize];
+        NSArray *sortedNames = [pairs.allKeys sortedArrayUsingComparator:^(id a, id b){
+            return [a length] > [b length] ? NSOrderedAscending : NSOrderedDescending;
+        }];
         
-        label = [[UILabel alloc] initWithFrame:CGRectMake(gRect.size.width/2 + 10.,
-                                                                   (gRect.size.height - size2.height)/2, labelWidth, size2.height)];
-        label.backgroundColor = [UIColor clearColor];
-        label.font = font;
-        label.text = text2;
-        label.textAlignment = UITextAlignmentCenter;
-        [group addSubview:label];
+        // Use the largest string as the size for everything
+        size = [sortedNames[0] sizeWithFont:font];
+        size.width += 10;
         
-       
-        CGRect f = CGRectMake(0, 0, labelWidth + 20., gRect.size.height);
+        CGFloat groupWidth = size.width*pairs.count;
+        CGRect gRect;
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+            gRect = CGRectMake(frame.size.width - groupWidth, 0, groupWidth, frame.size.height);
+        else
+            gRect = CGRectMake((frame.size.width - groupWidth)/2, 0, groupWidth, frame.size.height);
+        
+        _groupView = [[UIView alloc] initWithFrame:gRect];
+        _groupView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        _groupView.backgroundColor = [UIColor clearColor];
+        [self addSubview:_groupView];
+        
+        CGFloat posX = 0.;
+        for (NSString *name in pairs) {
+            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(posX, gRect.size.height - size.height,
+                                                              size.width, size.height)];
+            label.backgroundColor = [UIColor clearColor];
+            label.font = font;
+            label.text = name;
+            label.textAlignment = UITextAlignmentCenter;
+            [_groupView addSubview:label];
+            
+            UIImageView *imageV = [[UIImageView alloc] initWithImage:pairs[name]];
+            
+            imageV.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+            CGFloat length = height - size.height;
+            imageV.frame = CGRectMake(posX + (size.width - length)/2, 0,
+                                      length, length);
+            [_groupView addSubview:imageV];
+
+            posX += size.width;
+        }
+        
+        CGRect f = CGRectMake(0, 0, size.width, gRect.size.height);
         _marker = [[UIView alloc] initWithFrame:f];
         _marker.backgroundColor = [UIColor colorWithRed:0.1 green:0.2 blue:0.9 alpha:0.4];
         _marker.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        [group addSubview:_marker];
+        [_groupView addSubview:_marker];
         
-        UITapGestureRecognizer *tapG = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-        [group addGestureRecognizer:tapG];
-        
-        [self addSubview:group];
+        UITapGestureRecognizer *tapG = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                               action:@selector(handleTap:)];
+        [_groupView addGestureRecognizer:tapG];
+        [self addSubview:_groupView];
     }
     return self;
 }
 
 - (void)setMarkerPosititon:(CGFloat)posititon {
-    CGFloat width = self.marker.bounds.size.width;
+    CGFloat width = _marker.bounds.size.width;
     CGRect newF = CGRectMake(width*posititon, 0, width, self.bounds.size.height);
-    self.marker.frame = newF;
+    _marker.frame = newF;
 }
 
 - (void)drawRect:(CGRect)rect

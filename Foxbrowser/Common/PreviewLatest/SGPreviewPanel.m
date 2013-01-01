@@ -20,43 +20,41 @@
 //  limitations under the License.
 //
 
-#import "SGDimensions.h"
 #import "SGPreviewPanel.h"
 #import "SGFavouritesManager.h"
 #import "Store.h"
 
-#define PADDING 25.
 #define TILES_MAX 8
-
-const CGFloat kSGPanelWidth = 220.;
-const CGFloat kSGPanelHeigth = 185.;
 
 @implementation SGPreviewTile
 
-- (id)initWithImage:(UIImage *)image title:(NSString *)title {
-    CGRect frame = CGRectMake(0, 0, kSGPanelWidth, kSGPanelHeigth);
-    
-    if (self = [super initWithFrame:frame]) {
-        UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Light" size:16.0];
-        CGSize size = [title sizeWithFont:font forWidth:frame.size.width lineBreakMode:UILineBreakModeTailTruncation];
-        CGRect lFrame = CGRectMake(0, frame.size.height - size.height, size.width, size.height);
-        self.label = [[UILabel alloc] initWithFrame:lFrame];
-        self.label.backgroundColor = [UIColor clearColor];
-        self.label.font = font;
-        self.label.textColor = [UIColor darkTextColor];
-        self.label.text = title;
-        [self addSubview:self.label];
-        
-        lFrame = CGRectMake(0, 0, frame.size.width, frame.size.height - size.height - 10.);
-        self.imageView = [[UIImageView alloc] initWithFrame:lFrame];
-        self.imageView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
-        self.imageView.image = image;
-        self.imageView.layer.borderColor = [UIColor grayColor].CGColor;
-        self.imageView.layer.borderWidth = 1.f;
-        [self addSubview:self.imageView];
-        
-        self.opaque = YES;
+- (id)initWithURL:(NSURL *)url {
+    UIFont *font;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        font = [UIFont fontWithName:@"HelveticaNeue" size:12];
+    else
+        font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15];
 
+    
+    SGFavouritesManager *fm = [SGFavouritesManager sharedManager];
+    CGSize size = [fm imageSize];
+    if (self = [super initWithFrame:CGRectMake(0, 0, size.width, size.height + 5 + font.lineHeight)]) {
+        _url = url;
+        
+        _label = [[UILabel alloc] initWithFrame:CGRectMake(0, size.height + 5, size.width, font.lineHeight)];
+        _label.backgroundColor = [UIColor clearColor];
+        _label.font = font;
+        _label.textColor = [UIColor darkTextColor];
+        _label.text = [fm titleWithURL:url];
+        [self addSubview:_label];
+        
+        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+        _imageView.contentMode = UIViewContentModeCenter;
+        _imageView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
+        _imageView.image = [fm imageWithURL:url];
+        _imageView.layer.borderColor = [UIColor grayColor].CGColor;
+        _imageView.layer.borderWidth = 1.f;
+        [self addSubview:_imageView];
     }
     return self;
 }
@@ -70,14 +68,6 @@ const CGFloat kSGPanelHeigth = 185.;
 
 @implementation SGPreviewPanel
 
-static SGPreviewPanel *_singletone;
-+ (SGPreviewPanel *)instance {
-    if (!_singletone) {
-        _singletone = [[SGPreviewPanel alloc] initWithFrame:CGRectZero];
-    }
-    return _singletone;
-}
-
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
@@ -88,27 +78,28 @@ static SGPreviewPanel *_singletone;
 }
 
 - (void)layout {
-    UIInterfaceOrientation orientation;
-    // Some bug related to whatever
+    NSUInteger columns, lines;
     if (self.bounds.size.width > self.bounds.size.height) {
-        orientation = UIInterfaceOrientationLandscapeLeft;
+        columns = self.tiles.count/2;
+        lines = 2;
     } else {
-        orientation = UIInterfaceOrientationPortrait;
+        columns = 2;
+        lines = self.tiles.count/2;
     }
     
-    NSUInteger columns = UIInterfaceOrientationIsPortrait(orientation) ? 2 : 4;
-    NSUInteger lines = UIInterfaceOrientationIsPortrait(orientation) ? 4 : 2;
+    SGPreviewTile *tile = self.tiles[0];
+    CGSize tileSize = tile.frame.size;
     
-    CGFloat startX = (self.bounds.size.width - columns*(kSGPanelWidth + PADDING) + PADDING)/2;
-    CGFloat startY = (self.bounds.size.height - lines*(kSGPanelHeigth + PADDING) + PADDING)/2;
+    CGFloat paddingX = (self.bounds.size.width - columns*tileSize.width)/(columns + 1);
+    CGFloat paddingY = (self.bounds.size.height - lines*tileSize.height)/(lines + 1);
     
     NSUInteger i = 0;
     for (SGPreviewTile *tile in self.tiles) {
         NSUInteger line = i / columns;
         NSUInteger column = i % columns;
         CGRect frame = tile.frame;
-        frame.origin.x = column*(kSGPanelWidth + PADDING) + startX;
-        frame.origin.y = line*(kSGPanelHeigth + PADDING) + startY;
+        frame.origin.x = column*(tileSize.width + paddingX) + paddingX;
+        frame.origin.y = line*(tileSize.height + paddingY) + paddingY;
         tile.frame = frame;
         i++;
     }
@@ -128,8 +119,6 @@ static SGPreviewPanel *_singletone;
 
 - (void)refresh {
     for (SGPreviewTile *tile in self.tiles) {
-        tile.label = nil;
-        tile.imageView = nil;
         [tile removeFromSuperview];
     }
     [self.tiles removeAllObjects];
@@ -138,27 +127,25 @@ static SGPreviewPanel *_singletone;
     SGFavouritesManager *favsMngr = [SGFavouritesManager sharedManager];
     
     NSArray *favs = [favsMngr favourites];
-    for (NSDictionary *item in favs) {
-        NSString *title = [item objectForKey:@"title"];
-        NSString *urlS = [item objectForKey:@"url"];
-        NSURL *url = [NSURL URLWithString:urlS];
-        UIImage *image = [favsMngr imageWithURL:url];
-        
-        
-        SGPreviewTile *tile = [[SGPreviewTile alloc] initWithImage:image title:title];
-        tile.url = url;
-        tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
-        
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-        tap.delegate  = self;
-        [tile addGestureRecognizer:tap];
-        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-        longPress.delegate = self;
-        [tile addGestureRecognizer:longPress];
-        
-        [self addSubview:tile];
-        [self.tiles addObject:tile];
+    for (NSURL *url in favs) {
+        [self addTileWithURL:url];
     }
+}
+
+- (void)addTileWithURL:(NSURL *)url {
+    SGPreviewTile *tile = [[SGPreviewTile alloc] initWithURL:url];
+    tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    tap.delegate  = self;
+    [tile addGestureRecognizer:tap];
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
+                                                                                            action:@selector(handleLongPress:)];
+    longPress.delegate = self;
+    [tile addGestureRecognizer:longPress];
+    
+    [self addSubview:tile];
+    [self.tiles addObject:tile];
 }
 
 #pragma mark - Tap Handling, context menu
@@ -177,12 +164,11 @@ static SGPreviewPanel *_singletone;
             self.selected = (SGPreviewTile*)recognizer.view;
             UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:self.selected.url.absoluteString
                                                                delegate:self
-                                                      cancelButtonTitle:nil
-                                                 destructiveButtonTitle:nil
+                                                      cancelButtonTitle:UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? NSLocalizedString(@"Cancel", @"cancel") : nil
+                                                 destructiveButtonTitle:NSLocalizedString(@"Remove", @"Remove from page")
                                                       otherButtonTitles:
                                     NSLocalizedString(@"Open", @"Open a link"),
-                                    NSLocalizedString(@"Open in a new Tab", nil),
-                                    NSLocalizedString(@"Remove", @"Remove from page"), nil];
+                                    NSLocalizedString(@"Open in a new Tab", nil),nil];
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
                 [sheet showFromRect:recognizer.view.frame inView:self animated:YES];
             else
@@ -193,17 +179,17 @@ static SGPreviewPanel *_singletone;
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     switch (buttonIndex) {
-        case 0:
+        case 1:
             [self.delegate open:self.selected];
             break;
             
-        case 1:
+        case 2:
             [self.delegate openNewTab:self.selected];
             break;
             
-        case 2:
+        case 0:
         {
-            [[SGFavouritesManager sharedManager] blockURL:self.selected.url];
+            NSURL *next = [[SGFavouritesManager sharedManager] blockURL:self.selected.url];
             [self.tiles removeObject:self.selected];
             
            [UIView transitionWithView:self
@@ -211,8 +197,8 @@ static SGPreviewPanel *_singletone;
                               options:UIViewAnimationOptionAllowAnimatedContent
                            animations:^{
                                [self.selected removeFromSuperview];
-                               [self refresh];
-                               [self layoutSubviews];
+                               [self addTileWithURL:next];
+                               [self layout];
                            }
                            completion:^(BOOL finished) {
                                //[self.blacklist writeToFile:[SGPreviewPanel blacklistFilePath] atomically:NO];

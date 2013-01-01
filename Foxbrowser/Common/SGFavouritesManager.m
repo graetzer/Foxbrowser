@@ -24,11 +24,12 @@
 #import "UIImage+Scaling.h"
 #import "SGWebViewController.h"
 #import "Store.h"
-
-#define TILES_MAX 8
+#import "WeaveService.h"
 
 @implementation SGFavouritesManager {
     NSMutableDictionary *_favourites;
+    NSCache *_imageCache;
+    UIImage *_default;
     
     NSMutableArray *_blocked;
 }
@@ -44,19 +45,32 @@
 
 - (id)init {
     if (self = [super init]) {
+        _favourites = [NSMutableDictionary dictionaryWithCapacity:[self maxFavs]];
+        _imageCache = [NSCache new];
+        _default = [UIImage imageNamed:@"logo"];
         _blocked = [NSMutableArray arrayWithContentsOfFile:[self blacklistFilePath]];
         if (!_blocked)
             _blocked = [NSMutableArray arrayWithCapacity:10];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(refresh)
+                                                     name:kWeaveDataRefreshNotification
+                                                   object:nil];
     }
     return self;
 }
 
 #pragma mark Favourites stuff
 - (NSArray *)favourites {
-    if (!_favourites) {
+    if (_favourites.count < [self maxFavs]) {
         [self fillFavourites];
     }
     return _favourites.allKeys;
+}
+
+- (void)refresh {
+    [_favourites removeAllObjects];
+    [self fillFavourites];
 }
 
 - (NSURL *)blockURL:(NSURL *)url {
@@ -64,7 +78,9 @@
     [_favourites removeObjectForKey:url];
     [_blocked writeToFile:[self blacklistFilePath] atomically:NO];
     
-    return nil;
+    [self fillFavourites];
+    
+    return [_favourites.allKeys lastObject];
 }
 
 - (void)resetFavourites {
@@ -73,10 +89,17 @@
     [fm removeItemAtPath:[self screenshotPath] error:NULL];
 }
 
+- (CGSize)imageSize {
+    CGSize size = [UIScreen mainScreen].bounds.size;
+    CGFloat scale = 0.23;
+    return size.height > size.width ? CGSizeMake(size.height*scale, size.width*scale) :
+    CGSizeMake(size.width*scale, size.height*scale);
+}
+
 #pragma mark Screenshot stuff
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController; {
     NSURL *url = webController.location;
-    if (![_favourites objectForKey:url])
+    if (![self.favourites containsObject:url])
         return;
     
     NSString *path = [self pathForURL:url];
@@ -97,7 +120,8 @@
             screen = [screen cutImageToSize:CGSizeMake(screen.size.width, screen.size.height)];
         
         CGFloat scale = [UIScreen mainScreen].scale;
-        screen = [screen scaleProportionalToSize:CGSizeMake(scale*kSGPanelWidth, scale*kSGPanelHeigth)];
+        CGSize size = CGSizeApplyAffineTransform(self.imageSize, CGAffineTransformMakeScale(scale, scale));
+        screen = [screen scaleProportionalToSize:size];
         if (screen) {
             NSData *data = UIImagePNGRepresentation(screen);
             [data writeToFile:path atomically:NO];
@@ -107,16 +131,21 @@
 }
 
 - (UIImage *)imageWithURL:(NSURL *)url {
-    NSString *path = [self pathForURL:url];
-    NSFileManager *fm = [NSFileManager defaultManager];
+    UIImage *image = [_imageCache objectForKey:url];
     
-    if ([fm fileExistsAtPath:path]) {
-        return [UIImage imageWithContentsOfFile:path];
-    } else {
-        NSDictionary *attr = @{NSFileModificationDate : [NSDate distantPast]};
-        [fm createFileAtPath:path contents:[NSData data] attributes:attr];
-        return nil;
+    if (!image) {
+        NSString *path = [self pathForURL:url];
+        NSFileManager *fm = [NSFileManager defaultManager];
+        
+        if ([fm fileExistsAtPath:path]) {
+            image = [UIImage imageWithContentsOfFile:path];
+            if (image) {
+                [_imageCache setObject:image forKey:url];
+                return image;
+            }
+        }
     }
+    return nil;
 }
 
 - (NSString *)titleWithURL:(NSURL *)url {
@@ -125,11 +154,15 @@
 
 #pragma mark  - Utility
 
+- (NSUInteger)maxFavs {
+    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 6 : 8;
+}
+
 - (void)fillFavourites {
     NSArray *history = [[Store getStore] getHistory];
     
     NSUInteger i = _favourites.count;
-    while (_favourites.count < TILES_MAX && i < history.count) {
+    while (_favourites.count < [self maxFavs] && i < history.count) {
         NSDictionary *item = history[i];
         i++;
         

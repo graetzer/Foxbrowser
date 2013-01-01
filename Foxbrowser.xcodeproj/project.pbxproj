@@ -155,6 +155,10 @@
 		F4EA92EA1689CAD100CA9154 /* system@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92D81689CAD100CA9154 /* system@2x.png */; };
 		F4EA92EC1689F57100CA9154 /* close_x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92EB1689F57100CA9154 /* close_x.png */; };
 		F4EA92F2168CA5DC00CA9154 /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */; };
+		F4EA92FE1691AEA700CA9154 /* pictures.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92FC1691AEA700CA9154 /* pictures.png */; };
+		F4EA92FF1691AEA700CA9154 /* pictures@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92FD1691AEA700CA9154 /* pictures@2x.png */; };
+		F4EA93031691B1B200CA9154 /* cloud-down.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA93011691B1B200CA9154 /* cloud-down.png */; };
+		F4EA93041691B1B200CA9154 /* cloud-down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA93021691B1B200CA9154 /* cloud-down@2x.png */; };
 		F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EDAB16168400FF00EFD266 /* SGNavViewController.m */; };
 		F4EDAB1A1684062A00EFD266 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */; };
 		F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FCC8F815B77D4800207BEA /* Twitter.framework */; };
@@ -176,7 +180,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F4024D7A15D0533900DA334C /* SGDimensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGDimensions.h; sourceTree = "<group>"; };
 		F40DFBB416125CDB005CE2F3 /* NSData+Compress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Compress.h"; sourceTree = "<group>"; };
 		F40DFBB516125CDB005CE2F3 /* NSData+Compress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Compress.m"; sourceTree = "<group>"; };
 		F40DFBB616125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGHTTPAuthenticationChallenge.h; sourceTree = "<group>"; };
@@ -521,6 +524,10 @@
 		F4EA92EB1689F57100CA9154 /* close_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = close_x.png; sourceTree = "<group>"; };
 		F4EA92F0168CA5DC00CA9154 /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
 		F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
+		F4EA92FC1691AEA700CA9154 /* pictures.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pictures.png; sourceTree = "<group>"; };
+		F4EA92FD1691AEA700CA9154 /* pictures@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pictures@2x.png"; sourceTree = "<group>"; };
+		F4EA93011691B1B200CA9154 /* cloud-down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cloud-down.png"; sourceTree = "<group>"; };
+		F4EA93021691B1B200CA9154 /* cloud-down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cloud-down@2x.png"; sourceTree = "<group>"; };
 		F4EDAB15168400FF00EFD266 /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
 		F4EDAB16168400FF00EFD266 /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
 		F4EDAB191684062A00EFD266 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = Foxbrowser/en.lproj/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -1075,7 +1082,6 @@
 		F4C1EE1F15B07F9F00FB2B97 /* Preview */ = {
 			isa = PBXGroup;
 			children = (
-				F4024D7A15D0533900DA334C /* SGDimensions.h */,
 				F4C1EE2015B07F9F00FB2B97 /* SGBlankController.h */,
 				F4C1EE2115B07F9F00FB2B97 /* SGBlankController.m */,
 				F4C1EE2315B07FCB00FB2B97 /* SGPreviewPanel.h */,
@@ -1090,6 +1096,10 @@
 		F4EA92C61689CAD100CA9154 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				F4EA93011691B1B200CA9154 /* cloud-down.png */,
+				F4EA93021691B1B200CA9154 /* cloud-down@2x.png */,
+				F4EA92FC1691AEA700CA9154 /* pictures.png */,
+				F4EA92FD1691AEA700CA9154 /* pictures@2x.png */,
 				F4EA92EB1689F57100CA9154 /* close_x.png */,
 				F4EA92C71689CAD100CA9154 /* bookmark.png */,
 				F4EA92C81689CAD100CA9154 /* bookmark@2x.png */,
@@ -1348,6 +1358,10 @@
 				F4EA92E91689CAD100CA9154 /* system.png in Resources */,
 				F4EA92EA1689CAD100CA9154 /* system@2x.png in Resources */,
 				F4EA92EC1689F57100CA9154 /* close_x.png in Resources */,
+				F4EA92FE1691AEA700CA9154 /* pictures.png in Resources */,
+				F4EA92FF1691AEA700CA9154 /* pictures@2x.png in Resources */,
+				F4EA93031691B1B200CA9154 /* cloud-down.png in Resources */,
+				F4EA93041691B1B200CA9154 /* cloud-down@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1619,7 +1633,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";

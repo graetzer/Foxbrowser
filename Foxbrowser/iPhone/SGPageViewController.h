@@ -31,6 +31,7 @@
 @property (readonly, nonatomic) UIScrollView *scrollView;
 @property (readonly, nonatomic) UIPageControl *pageControl;
 @property (readonly, nonatomic) UIButton *closeButton;
+@property (readonly, nonatomic) UILabel *titleLabel;
 @property (assign, nonatomic) BOOL exposeMode;
 
 @end

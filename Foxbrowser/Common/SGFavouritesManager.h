@@ -30,12 +30,17 @@
 
 // Array of URL's
 - (NSArray *)favourites;
+- (void)refresh;
+
 // Returns the replacement
 - (NSURL *)blockURL:(NSURL *)url;
-- (void)resetFavourites;
 
 - (NSString *)titleWithURL:(NSURL *)url;
 - (UIImage *)imageWithURL:(NSURL *)url;
 
+- (void)resetFavourites;
+- (CGSize)imageSize;
+
+// Call this after each webView call
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController;
 @end

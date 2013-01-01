@@ -25,11 +25,11 @@
 
 @interface SGPreviewTile : UIView
 
-@property (nonatomic, strong) UIImageView *imageView;
-@property (nonatomic, strong) UILabel *label;
-@property (nonatomic, strong) NSURL *url;
+@property (readonly, nonatomic) UIImageView *imageView;
+@property (readonly, nonatomic) UILabel *label;
+@property (readonly, nonatomic) NSURL *url;
 
-- (id)initWithImage:(UIImage *)image title:(NSString *)title;
+- (id)initWithURL:(NSURL *)url;
 
 @end
 
@@ -43,8 +43,6 @@
 @interface SGPreviewPanel : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
 
 @property (weak, nonatomic) id<SGPanelDelegate> delegate;
-
-+ (SGPreviewPanel *)instance;
 
 - (void)layout;
 - (void)refresh;
