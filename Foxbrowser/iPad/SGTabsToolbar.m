@@ -96,7 +96,7 @@
         [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:self.searchField];
         
-        self.searchController = [[SGSearchController alloc] initWithStyle:UITableViewStylePlain];
+        self.searchController = [[SGSearchViewController alloc] initWithStyle:UITableViewStylePlain];
         self.searchController.delegate = self;
                 
         [self updateChrome];

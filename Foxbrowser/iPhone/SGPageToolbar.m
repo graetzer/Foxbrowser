@@ -72,13 +72,14 @@
         [self addSubview:_systemButton];
         
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _tabsButton.frame = CGRectMake(0, 0, 35, 25);
+        _tabsButton.frame = CGRectMake(0, 0, 35, 35);
         _tabsButton.backgroundColor = [UIColor clearColor];
+        _tabsButton.showsTouchWhenHighlighted = YES;
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-default"] forState:UIControlStateNormal];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-pressed"] forState:UIControlStateHighlighted];
         [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
-        [_tabsButton addTarget:self action:@selector(pressedTabsButton:)
-              forControlEvents:UIControlEventTouchUpInside];
+        //[_tabsButton setTitleColor:UIColorFromHEX(0x444444) forState:UIControlStateNormal];
+        [_tabsButton addTarget:self action:@selector(pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
         
         _searchField = [[SGSearchField alloc] initWithDelegate:self];
@@ -86,7 +87,9 @@
         [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_searchField];
         
-        _searchController = [SGSearchController new];
+        _searchController = [SGSearchViewController new];
+        _searchController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+
         _searchController.delegate = self;
     }
     return self;
@@ -289,10 +292,14 @@
 
 - (void)presentSearchController {
     _searchBarVisible = YES;
+    self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
+                                         self.frame.size.width, self.superview.bounds.size.height - self.frame.size.height);
+    [self.superview addSubview:self.searchController.view];
 }
 
 - (void)dismissSearchController {
     _searchBarVisible = NO;
+    [self.searchController.view removeFromSuperview];
 }
 
 #pragma mark - SGSearchControllerDelegate
@@ -302,7 +309,8 @@
 }
 
 - (void)finishSearch:(NSString *)searchString title:(NSString *)title {
-    [self.browser handleURLString:searchString title:title];
+    if (searchString.length > 0)
+        [self.browser handleURLString:searchString title:title];
     
     // Conduct the search. In this case, simply report the search term used.
     [self dismissSearchController];

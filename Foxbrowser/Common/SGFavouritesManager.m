@@ -29,8 +29,6 @@
 @implementation SGFavouritesManager {
     NSMutableDictionary *_favourites;
     NSCache *_imageCache;
-    UIImage *_default;
-    
     NSMutableArray *_blocked;
 }
 
@@ -47,7 +45,6 @@
     if (self = [super init]) {
         _favourites = [NSMutableDictionary dictionaryWithCapacity:[self maxFavs]];
         _imageCache = [NSCache new];
-        _default = [UIImage imageNamed:@"logo"];
         _blocked = [NSMutableArray arrayWithContentsOfFile:[self blacklistFilePath]];
         if (!_blocked)
             _blocked = [NSMutableArray arrayWithCapacity:10];
@@ -74,7 +71,7 @@
 }
 
 - (NSURL *)blockURL:(NSURL *)url {
-    [_blocked addObject:url.absoluteString];
+    [_blocked addObject:url];
     [_favourites removeObjectForKey:url];
     [_blocked writeToFile:[self blacklistFilePath] atomically:NO];
     
@@ -96,10 +93,14 @@
     CGSizeMake(size.width*scale, size.height*scale);
 }
 
+- (NSUInteger)maxFavs {
+    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 6 : 8;
+}
+
 #pragma mark Screenshot stuff
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController; {
     NSURL *url = webController.location;
-    if (![self.favourites containsObject:url])
+    if (![self containsHost:url.host])
         return;
     
     NSString *path = [self pathForURL:url];
@@ -119,9 +120,9 @@
         if (screen.size.height > screen.size.width)
             screen = [screen cutImageToSize:CGSizeMake(screen.size.width, screen.size.height)];
         
-        CGFloat scale = [UIScreen mainScreen].scale;
-        CGSize size = CGSizeApplyAffineTransform(self.imageSize, CGAffineTransformMakeScale(scale, scale));
-        screen = [screen scaleProportionalToSize:size];
+        //CGFloat scale = [UIScreen mainScreen].scale;
+        //CGSize size = CGSizeApplyAffineTransform(self.imageSize, CGAffineTransformMakeScale(scale, scale));
+        screen = [screen scaleProportionalToSize:self.imageSize];
         if (screen) {
             NSData *data = UIImagePNGRepresentation(screen);
             [data writeToFile:path atomically:NO];
@@ -145,7 +146,7 @@
             }
         }
     }
-    return nil;
+    return image;//[UIImage imageNamed:@"logo"];
 }
 
 - (NSString *)titleWithURL:(NSURL *)url {
@@ -154,8 +155,12 @@
 
 #pragma mark  - Utility
 
-- (NSUInteger)maxFavs {
-    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 6 : 8;
+- (BOOL)containsHost:(NSString *)host {
+    for (NSURL *url in _favourites)
+        if ([url.host isEqualToString:host])
+            return YES;
+    
+    return NO;
 }
 
 - (void)fillFavourites {
@@ -169,7 +174,7 @@
         NSString *urlS = [item objectForKey:@"url"];
         NSURL *url = [NSURL URLWithString:urlS];
         
-        if (_favourites[url] || [_blocked containsObject:urlS])
+        if (_favourites[url] || [_blocked containsObject:url])
             continue;
         
         _favourites[url] = [item objectForKey:@"title"];

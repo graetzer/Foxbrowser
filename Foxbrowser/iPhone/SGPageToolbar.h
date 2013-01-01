@@ -22,13 +22,13 @@
 
 #import <UIKit/UIKit.h>
 #import <MessageUI/MessageUI.h>
-#import "SGSearchController.h"
+#import "SGSearchViewController.h"
 
-@class SGSearchField, SGSearchController, SGPageViewController;
+@class SGSearchField, SGSearchViewController, SGPageViewController;
 
 @interface SGPageToolbar : UIView <UITextFieldDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate,SGSearchDelegate>
 @property (readonly, nonatomic) SGSearchField *searchField;
-@property (readonly, nonatomic) SGSearchController *searchController;
+@property (readonly, nonatomic) SGSearchViewController *searchController;
 
 @property (readonly, nonatomic) UIButton *backButton;
 @property (readonly, nonatomic) UIButton *forwardButton;

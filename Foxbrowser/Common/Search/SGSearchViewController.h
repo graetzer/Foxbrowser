@@ -30,7 +30,7 @@
 
 @end
 
-@interface SGSearchController : UITableViewController 
+@interface SGSearchViewController : UITableViewController 
 
 @property (nonatomic, weak) id<SGSearchDelegate> delegate;
 @property (nonatomic, retain) NSArray *searchHits;

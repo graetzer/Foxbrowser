@@ -24,10 +24,10 @@
 #import <MessageUI/MessageUI.h>
 #import <Twitter/Twitter.h>
 
-#import "SGSearchController.h"
+#import "SGSearchViewController.h"
 
 
-@class SGSearchController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
+@class SGSearchViewController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
 
 @interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
 UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGSearchDelegate> {
@@ -37,7 +37,7 @@ UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGSearchDelegate> {
 @property (nonatomic, weak, readonly) SGBrowserViewController *browser;
 
 @property (nonatomic, strong) SGSearchField *searchField;
-@property (nonatomic, strong) SGSearchController *searchController;
+@property (nonatomic, strong) SGSearchViewController *searchController;
 
 @property (nonatomic, strong) SGProgressCircleView *progressView;
 

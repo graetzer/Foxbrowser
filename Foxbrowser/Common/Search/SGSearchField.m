@@ -77,8 +77,10 @@
     if (!_inputAccessory) {
         _inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
         _inputAccessory.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+            _inputAccessory.translucent = YES;
             _inputAccessory.tintColor = kTabColor;
+        }
         
         UIBarButtonItem *btn, *flex, *fix;
         flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace

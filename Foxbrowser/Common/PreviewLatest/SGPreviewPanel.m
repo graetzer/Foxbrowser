@@ -24,8 +24,6 @@
 #import "SGFavouritesManager.h"
 #import "Store.h"
 
-#define TILES_MAX 8
-
 @implementation SGPreviewTile
 
 - (id)initWithURL:(NSURL *)url {
@@ -49,7 +47,7 @@
         [self addSubview:_label];
         
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-        _imageView.contentMode = UIViewContentModeCenter;
+        //_imageView.contentMode = UIViewContentModeCenter;
         _imageView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
         _imageView.image = [fm imageWithURL:url];
         _imageView.layer.borderColor = [UIColor grayColor].CGColor;
@@ -73,11 +71,15 @@
         self.backgroundColor = [UIColor clearColor];
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self refresh];
+        [self layout];
     }
     return self;
 }
 
 - (void)layout {
+    if (self.tiles.count == 0)
+        return;
+    
     NSUInteger columns, lines;
     if (self.bounds.size.width > self.bounds.size.height) {
         columns = self.tiles.count/2;
@@ -109,9 +111,9 @@
     [self layout];
 }
 
-- (void)willMoveToSuperview:(UIView *)newSuperview {
-    if (newSuperview) {
-        if (self.tiles.count < TILES_MAX) {
+- (void)willMoveToWindow:(UIWindow *)newWindow {
+    if (newWindow) {
+        if (self.tiles.count < [SGFavouritesManager sharedManager].maxFavs) {
             [self refresh];
         }
     }
@@ -122,9 +124,9 @@
         [tile removeFromSuperview];
     }
     [self.tiles removeAllObjects];
-    self.tiles = [NSMutableArray arrayWithCapacity:TILES_MAX];
     
     SGFavouritesManager *favsMngr = [SGFavouritesManager sharedManager];
+    self.tiles = [NSMutableArray arrayWithCapacity:favsMngr.maxFavs];
     
     NSArray *favs = [favsMngr favourites];
     for (NSURL *url in favs) {

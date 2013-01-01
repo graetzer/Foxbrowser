@@ -75,27 +75,17 @@
     CGSize size = [text sizeWithFont:font];
     
     UIButton *button  = [UIButton buttonWithType:UIButtonTypeCustom];
-    CGFloat lenght = 30;
-    button.frame = CGRectMake(5, 10 + (size.height - lenght)/2, lenght, lenght);
+    button.frame = CGRectMake(5, 5, 40 + size.width, size.height);
     button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
     button.backgroundColor  = [UIColor clearColor];
-    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
-    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateHighlighted];
-    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
-    [self.view insertSubview:button belowSubview:self.toolbar];
-    
-    
-    button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(5 + lenght, 10, size.width, size.height);
-    button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
-    [button setTitle:text forState:UIControlStateNormal];
     button.titleLabel.font = font;
+    button.showsTouchWhenHighlighted = YES;
+    [button setTitle:text forState:UIControlStateNormal];
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    button.backgroundColor  = [UIColor clearColor];
+    [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
+    button.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 0);
     [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
     [self.view insertSubview:button belowSubview:self.toolbar];
-    
-
     
     font = [UIFont fontWithName:@"HelveticaNeue" size:16];
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 45, self.view.bounds.size.width - 5, font.lineHeight)];
@@ -103,14 +93,14 @@
     _titleLabel.textAlignment = NSTextAlignmentCenter;
     _titleLabel.backgroundColor = [UIColor clearColor];
     _titleLabel.textColor = [UIColor whiteColor];
-    _titleLabel.lineBreakMode = UILineBreakModeTailTruncation;
+    _titleLabel.lineBreakMode = UILineBreakModeMiddleTruncation;
     [self.view insertSubview:_titleLabel belowSubview:self.scrollView];
     
-    self.closeButton.hidden = YES;
-    self.closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-    self.closeButton.backgroundColor  = [UIColor clearColor];
-    [self.closeButton setImage:[UIImage imageNamed:@"close_x"] forState:UIControlStateNormal];
-    [self.closeButton addTarget:self action:@selector(closeTabButton:) forControlEvents:UIControlEventTouchDown];
+    _closeButton.hidden = YES;
+    _closeButton.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+    _closeButton.backgroundColor  = [UIColor clearColor];
+    [_closeButton setImage:[UIImage imageNamed:@"close_x"] forState:UIControlStateNormal];
+    [_closeButton addTarget:self action:@selector(closeTabButton:) forControlEvents:UIControlEventTouchDown];
     
     self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     

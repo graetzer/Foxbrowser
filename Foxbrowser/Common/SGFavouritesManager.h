@@ -40,6 +40,7 @@
 
 - (void)resetFavourites;
 - (CGSize)imageSize;
+- (NSUInteger)maxFavs;
 
 // Call this after each webView call
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController;

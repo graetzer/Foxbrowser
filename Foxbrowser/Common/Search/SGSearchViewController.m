@@ -20,17 +20,17 @@
 //  limitations under the License.
 //
 
-#import "SGSearchController.h"
+#import "SGSearchViewController.h"
 #import "Store.h"
 #import "Stockboy.h"
 #import "WeaveService.h"
 
 
-@interface SGSearchController ()
+@interface SGSearchViewController ()
 
 @end
 
-@implementation SGSearchController {
+@implementation SGSearchViewController {
     NSString* gLastSearchString;
 }
 @synthesize delegate;
