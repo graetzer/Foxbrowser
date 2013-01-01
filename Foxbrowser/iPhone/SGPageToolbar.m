@@ -150,12 +150,11 @@
     [_tabsButton setTitle:text forState:UIControlStateNormal];
     
     self.backButton.enabled = self.browser.canGoBack;
-    _forwardButton.hidden = !self.browser.canGoForward;
-//    BOOL hidden = !self.browser.canGoForward;
-//    if (_forwardButton.hidden != hidden) {
-//        <#statements#>
-//    }
-//    _forwardButton.hidden = 
+    if (_forwardButton.hidden == self.browser.canGoForward)
+        [UIView animateWithDuration:0.2 animations:^{
+            _forwardButton.hidden = !self.browser.canGoForward;
+            [self layoutSubviews];
+        }];
     
     if (self.browser.canStopOrReload) {
         if ([self.browser isLoading]) {

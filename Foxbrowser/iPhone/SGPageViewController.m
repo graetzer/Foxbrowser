@@ -25,7 +25,7 @@
 #import "SGPageToolbar.h"
 #import "SGSearchField.h"
 
-#define SG_EXPOSED_SCALE (0.78f)
+#define SG_EXPOSED_SCALE (0.76f)
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE))
 #define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
 
@@ -50,7 +50,7 @@
     [self.view addSubview:_scrollView];
     
     _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _closeButton.frame = CGRectMake(0, 0, 30, 30);
+    _closeButton.frame = CGRectMake(0, 0, 35, 35);
     [self.view addSubview:_closeButton];
 }
 
@@ -75,7 +75,8 @@
     CGSize size = [text sizeWithFont:font];
     
     UIButton *button  = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(5, 10, 30, 30);
+    CGFloat lenght = 30;
+    button.frame = CGRectMake(5, 10 + (size.height - lenght)/2, lenght, lenght);
     button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
     button.backgroundColor  = [UIColor clearColor];
     [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
@@ -85,7 +86,7 @@
     
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(5 +30, 10, size.width, size.height);
+    button.frame = CGRectMake(5 + lenght, 10, size.width, size.height);
     button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
     [button setTitle:text forState:UIControlStateNormal];
     button.titleLabel.font = font;
@@ -97,7 +98,7 @@
 
     
     font = [UIFont fontWithName:@"HelveticaNeue" size:16];
-    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 45, self.view.bounds.size.width, font.lineHeight)];
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 45, self.view.bounds.size.width - 5, font.lineHeight)];
     _titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     _titleLabel.textAlignment = NSTextAlignmentCenter;
     _titleLabel.backgroundColor = [UIColor clearColor];
@@ -126,9 +127,9 @@
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration {
+    [self arrangeChildViewControllers];
     CGPoint point = self.selectedViewController.view.frame.origin;
     self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
-    [self arrangeChildViewControllers];
 }
 
 - (UIView *)rotatingHeaderView {
