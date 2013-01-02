@@ -27,6 +27,6 @@
 @property (assign, nonatomic) CGFloat markerPosititon;
 @property (weak, nonatomic) SGBlankController *container;
 
-- (id)initWithPairs:(NSDictionary *)pairs;
+- (id)initWithTitles:(NSArray *)titles images:(NSArray *)images;
 
 @end

@@ -119,25 +119,25 @@
 
 #pragma mark - Tab stuff
 
-- (void)addViewController:(UIViewController *)viewController {
-    viewController.view.frame = self.contentFrame;
-    [self addChildViewController:viewController];
+- (void)addViewController:(UIViewController *)childController {
+    childController.view.frame = self.contentFrame;
+    [self addChildViewController:childController];
     
     if (self.tabsView.tabs.count == 0) {
-        [viewController.view setNeedsLayout];
-        [self.tabsView addTab:viewController];
-        [self.view addSubview:viewController.view];
+        [childController.view setNeedsLayout];
+        [self.tabsView addTab:childController];
+        [self.view addSubview:childController.view];
         self.tabsView.selected = 0;
-        [viewController didMoveToParentViewController:self];
+        [childController didMoveToParentViewController:self];
         return;
     }
     
     [UIView animateWithDuration:kAddTabDuration
                      animations:^{
-                         [self.tabsView addTab:viewController];
+                         [self.tabsView addTab:childController];
                      }
                      completion:^(BOOL finished){
-                         [viewController didMoveToParentViewController:self];
+                         [childController didMoveToParentViewController:self];
                      }];
 }
 

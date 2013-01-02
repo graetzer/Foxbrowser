@@ -25,6 +25,7 @@
 #import "SGTabDefines.h"
 #import "SGSearchField.h"
 
+#import "BookmarkPage.h"
 #import "SettingsController.h"
 #import "WelcomePage.h"
 #import "SGNavViewController.h"
@@ -74,11 +75,12 @@
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _tabsButton.frame = CGRectMake(0, 0, 35, 35);
         _tabsButton.backgroundColor = [UIColor clearColor];
-        _tabsButton.showsTouchWhenHighlighted = YES;
-        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-default"] forState:UIControlStateNormal];
-        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"button-small-pressed"] forState:UIControlStateHighlighted];
+        _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(5, 5, 0, 0);
+        _tabsButton.titleLabel.font = [UIFont systemFontOfSize:12.5];
+        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose"] forState:UIControlStateNormal];
+        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose-pressed"] forState:UIControlStateHighlighted];
         [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
-        //[_tabsButton setTitleColor:UIColorFromHEX(0x444444) forState:UIControlStateNormal];
+        [_tabsButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
         [_tabsButton addTarget:self action:@selector(pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
         
@@ -187,6 +189,7 @@
                                           cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
                                      destructiveButtonTitle:nil
                                           otherButtonTitles:
+                        NSLocalizedString(@"Bookmarks", @"Bookmarks"),
                         NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                         NSLocalizedString(@"Email URL", nil),
                         NSLocalizedString(@"Tweet", @"Tweet the current url"),
@@ -199,10 +202,20 @@
     NSURL *url = [self.browser URL];
     
     switch (buttonIndex) {
-        case 0: // Open in mobile safari
+        case 0: {
+            [self dismissSearchController];
+            if (!self.bookmarks) {
+                BookmarkPage *bookmarksPage = [BookmarkPage new];
+                bookmarksPage.browser = self.browser;
+                self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
+            }
+            [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
+            break;
+        }
+        case 1: // Open in mobile safari
             [[UIApplication sharedApplication] openURL:url];
             break;
-        case 1: // Send a mail
+        case 2: // Send a mail
             if ([MFMailComposeViewController canSendMail]) {
                 MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
                 mail.mailComposeDelegate = self;
@@ -213,7 +226,7 @@
             }
             break;
             
-        case 2: // Send a tweet
+        case 3: // Send a tweet
             if ([TWTweetComposeViewController canSendTweet]) {
                 TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
                 [tw addURL:url];
@@ -221,24 +234,20 @@
             }
             break;
             
-        case 3: // Show settings or welcome page
+        case 4: // Show settings or welcome page
         {
             BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
-            if (!showedFirstRunPage)
-            {
+            if (!showedFirstRunPage) {
                 WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
                 UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
                 navController.modalPresentationStyle = UIModalPresentationFormSheet;
                 [self.browser presentViewController:navController animated:YES completion:NULL];
-            }
-            else
-            {
+            } else {
                 SettingsController *settings = [SettingsController new];
                 UINavigationController *nav = [[SGNavViewController alloc] initWithRootViewController:settings];
                 nav.modalPresentationStyle = UIModalPresentationFormSheet;
                 [self.browser presentModalViewController:nav animated:YES];
             }
-            
         }
             
             break;

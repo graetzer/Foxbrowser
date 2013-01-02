@@ -54,6 +54,11 @@
   self.view.autoresizesSubviews = YES;
   self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   self.contentSizeForViewInPopover = CGSizeMake(320., 660.);
+    
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                                              target:self action:@selector(dismiss:)];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -76,17 +81,20 @@
 }
 
 - (BOOL)shouldAutorotate {
-    return NO;
+    return YES;
 }
 
-- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-    return UIInterfaceOrientationPortrait;
+- (NSUInteger)supportedInterfaceOrientations {
+    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? UIInterfaceOrientationMaskAll : UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad || toInterfaceOrientation == UIInterfaceOrientationPortrait;
 }
 
+- (IBAction)dismiss:(id)sender {
+    [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
+}
 
 #pragma mark Table view methods
 
@@ -218,6 +226,8 @@
 		if ([weaveService canConnectToInternet])
 		{
             [self.browser handleURLString: cell.detailTextLabel.text title: cell.textLabel.text];
+            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+                [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
 		}
 		else 
 		{

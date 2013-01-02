@@ -24,6 +24,7 @@
 #import "SGPageViewController.h"
 #import "SGPageToolbar.h"
 #import "SGSearchField.h"
+#import "SGWebViewController.h"
 
 #define SG_EXPOSED_SCALE (0.76f)
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE))
@@ -118,6 +119,10 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration {
     [self arrangeChildViewControllers];
+    
+    self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width * _viewControllers.count, 1);
+    self.scrollView.contentOffset = CGPointMake(self.view.bounds.size.width*self.pageControl.currentPage, 0);
+    
     CGPoint point = self.selectedViewController.view.frame.origin;
     self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
 }
@@ -136,8 +141,8 @@
 
 #pragma mark - Methods
 
-- (void)addViewController:(UIViewController *)childController; {
-    NSUInteger index = 0;
+- (void)addViewController:(UIViewController *)childController {
+    NSInteger index = 0;
     if (_viewControllers.count == 0) {
         [_viewControllers addObject:childController];
         self.closeButton.hidden = !self.exposeMode;
@@ -163,24 +168,20 @@
     self.pageControl.numberOfPages = count;
     self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * count, 1);
     
-    [UIView animateWithDuration:0.3
-                     animations:^{
-                         for (NSUInteger i = index+1; i < count; i++) {
-                             UIViewController *vC = _viewControllers[i];
-                             vC.view.center = CGPointMake(vC.view.center.x + self.scrollView.frame.size.width,
-                                                          vC.view.center.y);
-                         }
-                         [self.scrollView addSubview:childController.view];
-                     }
-                     completion:^(BOOL done){
-                         [childController didMoveToParentViewController:self];
-                     }];
+    for (NSUInteger i = index+1; i < count; i++) {
+        UIViewController *vC = _viewControllers[i];
+        vC.view.center = CGPointMake(vC.view.center.x + self.scrollView.frame.size.width,
+                                     vC.view.center.y);
+    }
+    [childController didMoveToParentViewController:self];
+    [self arrangeChildViewControllers];
 }
 
 - (void)showViewController:(UIViewController *)viewController {
     NSUInteger index = [_viewControllers indexOfObject:viewController];
     if (index != NSNotFound) {
         self.pageControl.currentPage = index;
+        
         self.closeButton.hidden = YES;//Enabled again by the scrollview delegate
         [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*index, 0)
                                  animated:YES];
@@ -209,6 +210,7 @@
                      }
                      completion:^(BOOL done){
                          [childController removeFromParentViewController];
+                         [self arrangeChildViewControllers];
                          [self updateChrome];
                          
                          if (self.exposeMode)
@@ -242,8 +244,8 @@
                                 completion:^(BOOL finished){
                                     [old removeFromParentViewController];
                                     [_viewControllers replaceObjectAtIndex:index withObject:viewController];
-                                    
                                     [viewController didMoveToParentViewController:self];
+                                    [self arrangeChildViewControllers];
                                     [self updateChrome];
                                 }];
     }
@@ -272,8 +274,11 @@
 }
 
 #pragma mark - Utility
+
 - (void)arrangeChildViewControllers {
-    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+    NSInteger current = self.pageControl.currentPage;
+    
+    for (NSInteger i = 0; i < _viewControllers.count; i++) {
         UIViewController *viewController = _viewControllers[i];
         viewController.view.transform = CGAffineTransformIdentity;
         viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
@@ -282,10 +287,13 @@
                                                self.scrollView.frame.size.height);
         if (_exposeMode)
             viewController.view.transform = SG_EXPOSED_TRANSFORM;
+        
+        if (current - 1  <= i && i <= current + 1) {
+            if (!viewController.view.superview)
+                [self.scrollView addSubview:viewController.view];
+        } else if (viewController.view.superview)
+            [viewController.view removeFromSuperview];
     }
-    
-    self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width * _viewControllers.count, 1);
-    self.scrollView.contentOffset = CGPointMake(self.view.bounds.size.width*self.pageControl.currentPage, 0);
 }
 
 - (void)scaleChildViewControllers {
@@ -312,11 +320,8 @@
 }
 
 - (void)enableScrollsToTop {
-    for (UIViewController *viewController in _viewControllers) {
-        if ([viewController isKindOfClass:[UIWebView class]])
-            [((UIWebView *)viewController).scrollView setScrollsToTop:YES];
-        else if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
-            [(UIScrollView *)viewController.view setScrollsToTop:YES];
+    if ([self.selectedViewController isKindOfClass:[SGWebViewController class]]) {
+        [((SGWebViewController *)self.selectedViewController).webView.scrollView setScrollsToTop:YES];
     }
 }
 
@@ -326,10 +331,9 @@
             continue;
         
         UIViewController *viewController = _viewControllers[i];
-        if ([viewController isKindOfClass:[UIWebView class]])
-            [((UIWebView *)viewController).scrollView setScrollsToTop:NO];
-        else if ([viewController.view respondsToSelector:@selector(scrollsToTop)])
-            [(UIScrollView *)viewController.view setScrollsToTop:NO];
+        if ([viewController isKindOfClass:[SGWebViewController class]]) {
+            [((SGWebViewController *)viewController).webView.scrollView setScrollsToTop:NO];
+        }
     }
 }
 
@@ -355,15 +359,18 @@
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
     if (self.exposeMode)
         self.closeButton.hidden = SG_CONTAINER_EMPTY;
+    
+    [self arrangeChildViewControllers];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat offset = scrollView.contentOffset.x;
     CGFloat width = scrollView.frame.size.width;
     
-    NSUInteger nextPage = (NSUInteger)fabsf((offset+(width/2))/width);
+    NSInteger nextPage = (NSInteger)fabsf((offset+(width/2))/width);
     if (nextPage != self.pageControl.currentPage) {
         self.pageControl.currentPage = nextPage;
+        [self arrangeChildViewControllers];
         [self updateChrome];
     }
     

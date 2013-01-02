@@ -28,7 +28,7 @@
 }
 @dynamic markerPosititon;
 
-- (id)initWithPairs:(NSDictionary *)pairs {
+- (id)initWithTitles:(NSArray *)titles images:(NSArray *)images {
     
     NSString *fontName = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? @"HelveticaNeue" : @"HelveticaNeue-Light";
     CGFloat fontSize = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 10. : 16.;
@@ -61,11 +61,11 @@
         [self addSubview:label];
         
         
-        if (pairs.count == 0)
+        if (titles.count == 0)
             return self;
         
         font = [UIFont fontWithName:fontName size:fontSize];
-        NSArray *sortedNames = [pairs.allKeys sortedArrayUsingComparator:^(id a, id b){
+        NSArray *sortedNames = [titles sortedArrayUsingComparator:^(id a, id b){
             return [a length] > [b length] ? NSOrderedAscending : NSOrderedDescending;
         }];
         
@@ -73,7 +73,7 @@
         size = [sortedNames[0] sizeWithFont:font];
         size.width += 10;
         
-        CGFloat groupWidth = size.width*pairs.count;
+        CGFloat groupWidth = size.width*titles.count;
         CGRect gRect;
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
             gRect = CGRectMake(frame.size.width - groupWidth, 0, groupWidth, frame.size.height);
@@ -86,22 +86,25 @@
         [self addSubview:_groupView];
         
         CGFloat posX = 0.;
-        for (NSString *name in pairs) {
+        for (NSUInteger i = 0; i < titles.count; i++) {
+            NSString *title = titles[i];
             UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(posX, gRect.size.height - size.height,
                                                               size.width, size.height)];
             label.backgroundColor = [UIColor clearColor];
             label.font = font;
-            label.text = name;
+            label.text = title;
             label.textAlignment = UITextAlignmentCenter;
             [_groupView addSubview:label];
             
-            UIImageView *imageV = [[UIImageView alloc] initWithImage:pairs[name]];
-            
-            imageV.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
-            CGFloat length = height - size.height;
-            imageV.frame = CGRectMake(posX + (size.width - length)/2, 0,
-                                      length, length);
-            [_groupView addSubview:imageV];
+            if (i < images.count) {
+                UIImageView *imageV = [[UIImageView alloc] initWithImage:images[i]];
+                
+                imageV.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+                CGFloat length = height - size.height;
+                imageV.frame = CGRectMake(posX + (size.width - length)/2, 0,
+                                          length, length);
+                [_groupView addSubview:imageV];
+            }
 
             posX += size.width;
         }

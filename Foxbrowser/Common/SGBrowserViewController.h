@@ -28,7 +28,7 @@
 // =========== Abstract =============
 
 /// Adds a tab, don't add the same instance twice!
-- (void)addViewController:(UIViewController *)viewController;
+- (void)addViewController:(UIViewController *)childController;
 
 /// Bring a tab to the frontpage
 - (void)showViewController:(UIViewController *)viewController;

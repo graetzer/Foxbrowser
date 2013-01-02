@@ -89,7 +89,7 @@
                                                             target:nil action:nil];
         fix.width = 10;
         
-        NSArray *titles = @[@":", @"/", @"-", @".com", @".net"];
+        NSArray *titles = @[@":", @".", @"-", @"/", @".com"];
         NSMutableArray *buttons = [NSMutableArray arrayWithCapacity:titles.count];
         [buttons addObject:flex];
         for (NSString *title in titles) {

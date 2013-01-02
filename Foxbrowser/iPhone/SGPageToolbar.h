@@ -35,6 +35,8 @@
 @property (readonly, nonatomic) UIButton *systemButton;
 @property (readonly, nonatomic) UIButton *tabsButton;
 
+@property (strong, nonatomic) UINavigationController *bookmarks;
+
 @property (strong, nonatomic) UIActionSheet *actionSheet;
 
 @property (weak, nonatomic) SGPageViewController *browser;

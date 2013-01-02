@@ -51,7 +51,7 @@
 }
 
 #pragma mark - Abstract methods
-- (void)addViewController:(UIViewController *)viewController {
+- (void)addViewController:(UIViewController *)childController {
     [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
 }
 - (void)showViewController:(UIViewController *)viewController {
@@ -90,6 +90,7 @@
     SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
     webC.title = title;
     [webC openURL:url];
+    
     [self addViewController:webC];
     if (self.count >= self.maxCount) {
         if ([self selectedIndex] != 0)

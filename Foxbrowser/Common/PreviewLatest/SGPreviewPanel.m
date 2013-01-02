@@ -80,30 +80,24 @@
     if (self.tiles.count == 0)
         return;
     
-    NSUInteger columns, lines;
-    if (self.bounds.size.width > self.bounds.size.height) {
-        columns = self.tiles.count/2;
-        lines = 2;
-    } else {
-        columns = 2;
-        lines = self.tiles.count/2;
-    }
-    
     SGPreviewTile *tile = self.tiles[0];
     CGSize tileSize = tile.frame.size;
+    
+    NSUInteger columns = self.bounds.size.width/tileSize.width;
+    NSUInteger lines = self.tiles.count/columns + 1;
     
     CGFloat paddingX = (self.bounds.size.width - columns*tileSize.width)/(columns + 1);
     CGFloat paddingY = (self.bounds.size.height - lines*tileSize.height)/(lines + 1);
     
-    NSUInteger i = 0;
-    for (SGPreviewTile *tile in self.tiles) {
+    for (NSUInteger i = 0; i < self.tiles.count; i++) {
         NSUInteger line = i / columns;
         NSUInteger column = i % columns;
+        
+        SGPreviewTile *tile = self.tiles[i];
         CGRect frame = tile.frame;
         frame.origin.x = column*(tileSize.width + paddingX) + paddingX;
         frame.origin.y = line*(tileSize.height + paddingY) + paddingY;
         tile.frame = frame;
-        i++;
     }
 }
 

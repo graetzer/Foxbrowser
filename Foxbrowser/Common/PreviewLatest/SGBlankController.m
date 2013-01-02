@@ -42,10 +42,11 @@
     [self.view addSubview:scrollView];
     self.scrollView = scrollView;
     
-    NSDictionary *buttons = @{NSLocalizedString(@"Most popular", @"Most popular websites") : [UIImage imageNamed:@"pictures"],
-    NSLocalizedString(@"Other devices", @"Tabs of other devices") : [UIImage imageNamed:@"cloud-down"]};
+    NSArray *titles = @[NSLocalizedString(@"Most popular", @"Most popular websites"),
+    NSLocalizedString(@"Other devices", @"Tabs of other devices")];
+    NSArray *images = @[[UIImage imageNamed:@"pictures"], [UIImage imageNamed:@"monitor"]];
     
-    SGBottomView *bottomView = [[SGBottomView alloc] initWithPairs:buttons];
+    SGBottomView *bottomView = [[SGBottomView alloc] initWithTitles:titles images:images];
     CGRect rect = bottomView.frame;
     rect.origin.y = self.view.bounds.size.height - bottomView.frame.size.height;
     rect.size.width = self.view.frame.size.width;
