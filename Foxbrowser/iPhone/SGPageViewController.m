@@ -146,6 +146,7 @@
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    [self arrangeChildViewControllers];
     self.scrollView.delegate = self;
 }
 
@@ -324,16 +325,16 @@
     for (NSInteger i = 0; i < _viewControllers.count; i++) {
         UIViewController *viewController = _viewControllers[i];
         if (current - 1  <= i && i <= current + 1) {
-            if (!viewController.view.superview) {
-                viewController.view.transform = CGAffineTransformIdentity;
-                viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
-                                                       0,
-                                                       self.scrollView.frame.size.width,
-                                                       self.scrollView.frame.size.height);
-                if (_exposeMode)
-                    viewController.view.transform = SG_EXPOSED_TRANSFORM;
+            viewController.view.transform = CGAffineTransformIdentity;
+            viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
+                                                   0,
+                                                   self.scrollView.frame.size.width,
+                                                   self.scrollView.frame.size.height);
+            if (_exposeMode)
+                viewController.view.transform = SG_EXPOSED_TRANSFORM;
+            
+            if (!viewController.view.superview)
                 [self.scrollView addSubview:viewController.view];
-            }
         } else if (viewController.view.superview)
             [viewController.view removeFromSuperview];
     }
