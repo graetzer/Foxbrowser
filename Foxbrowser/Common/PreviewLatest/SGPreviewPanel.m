@@ -83,12 +83,13 @@
     SGPreviewTile *tile = self.tiles[0];
     CGSize tileSize = tile.frame.size;
     
-    NSUInteger columns = self.bounds.size.width/tileSize.width;
-    NSUInteger lines = self.tiles.count/columns + 1;
+    //NSUInteger columns = self.bounds.size.width/tileSize.width;
+    NSUInteger lines = self.bounds.size.height/tileSize.height;
+    NSUInteger columns = self.tiles.count / lines;
     
     CGFloat paddingX = (self.bounds.size.width - columns*tileSize.width)/(columns + 1);
     CGFloat paddingY = (self.bounds.size.height - lines*tileSize.height)/(lines + 1);
-    
+
     for (NSUInteger i = 0; i < self.tiles.count; i++) {
         NSUInteger line = i / columns;
         NSUInteger column = i % columns;

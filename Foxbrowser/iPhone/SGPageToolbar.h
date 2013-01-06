@@ -32,7 +32,7 @@
 
 @property (readonly, nonatomic) UIButton *backButton;
 @property (readonly, nonatomic) UIButton *forwardButton;
-@property (readonly, nonatomic) UIButton *systemButton;
+@property (readonly, nonatomic) UIButton *optionsButton;
 @property (readonly, nonatomic) UIButton *tabsButton;
 
 @property (strong, nonatomic) UINavigationController *bookmarks;

@@ -35,6 +35,7 @@
     
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    scrollView.scrollsToTop = NO;
     scrollView.canCancelContentTouches = NO;
     scrollView.bounces = NO;
     scrollView.backgroundColor = [UIColor whiteColor];

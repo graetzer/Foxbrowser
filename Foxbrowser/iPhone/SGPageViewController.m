@@ -23,6 +23,7 @@
 
 #import "SGPageViewController.h"
 #import "SGPageToolbar.h"
+#import "SGPageScrollView.h"
 #import "SGSearchField.h"
 #import "SGWebViewController.h"
 
@@ -47,7 +48,7 @@
     _toolbar = [[SGPageToolbar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44.) browser:self];
     [self.view addSubview:_toolbar];
     
-    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 45., frame.size.width, frame.size.height-45.)];
+    _scrollView = [[SGPageScrollView alloc] initWithFrame:CGRectMake(0, 45., frame.size.width, frame.size.height-45.)];
     [self.view addSubview:_scrollView];
     
     _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -60,14 +61,7 @@
 
     self.view.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
     self.scrollView.delegate = self;
-    self.scrollView.clipsToBounds = YES;
-    self.scrollView.backgroundColor = [UIColor clearColor];
-    self.scrollView.pagingEnabled = YES;
-    self.scrollView.showsHorizontalScrollIndicator = NO;
-    self.scrollView.showsVerticalScrollIndicator = NO;
-    self.scrollView.scrollsToTop = NO;
-    self.scrollView.autoresizingMask = (UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight);
-    
+
     self.pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [self.pageControl addTarget:self action:@selector(updatePage) forControlEvents:UIControlEventValueChanged];
     
@@ -76,7 +70,7 @@
     CGSize size = [text sizeWithFont:font];
     
     UIButton *button  = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(5, 5, 40 + size.width, size.height);
+    button.frame = CGRectMake(5, 10, 40 + size.width, size.height);
     button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
     button.backgroundColor  = [UIColor clearColor];
     button.titleLabel.font = font;
@@ -85,8 +79,30 @@
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
     button.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 0);
-    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchDown];
+    [button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
     [self.view insertSubview:button belowSubview:self.toolbar];
+    
+    button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(self.view.bounds.size.width - 80, 4.5, 36, 36);
+    button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    button.backgroundColor = [UIColor clearColor];
+    [button setImage:[UIImage imageNamed:@"grip-white"] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"grip-white-pressed"] forState:UIControlStateHighlighted];
+    [button addTarget:self.toolbar action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view insertSubview:button belowSubview:self.toolbar];
+    
+    _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _tabsButton.frame = CGRectMake(self.view.bounds.size.width - 40, 4.5, 36, 36);
+    _tabsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    _tabsButton.backgroundColor = [UIColor clearColor];
+    _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(5, 5, 0, 0);
+    _tabsButton.titleLabel.font = [UIFont systemFontOfSize:12.5];
+    [_tabsButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
+    [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose-white"] forState:UIControlStateNormal];
+    [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose-white-pressed"] forState:UIControlStateHighlighted];
+    [_tabsButton addTarget:self action:@selector(pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view insertSubview:_tabsButton belowSubview:self.toolbar];
     
     font = [UIFont fontWithName:@"HelveticaNeue" size:16];
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 45, self.view.bounds.size.width - 5, font.lineHeight)];
@@ -116,15 +132,21 @@
     _closeButton = nil;
 }
 
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    self.scrollView.delegate = nil;
+}
+
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration {
     [self arrangeChildViewControllers];
     
-    self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width * _viewControllers.count, 1);
-    self.scrollView.contentOffset = CGPointMake(self.view.bounds.size.width*self.pageControl.currentPage, 0);
-    
-    CGPoint point = self.selectedViewController.view.frame.origin;
-    self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width * _viewControllers.count, 1);
+    self.scrollView.contentOffset = CGPointMake(self.scrollView.bounds.size.width * self.pageControl.currentPage, 0);
+    [self setCloseButtonHidden:NO];
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    self.scrollView.delegate = self;
 }
 
 - (UIView *)rotatingHeaderView {
@@ -175,6 +197,9 @@
     }
     [childController didMoveToParentViewController:self];
     [self arrangeChildViewControllers];
+    
+    if (_viewControllers.count > 1 && [childController isKindOfClass:[SGWebViewController class]])
+        [((SGWebViewController *)childController).webView.scrollView setScrollsToTop:NO];
 }
 
 - (void)showViewController:(UIViewController *)viewController {
@@ -182,9 +207,13 @@
     if (index != NSNotFound) {
         self.pageControl.currentPage = index;
         
-        self.closeButton.hidden = YES;//Enabled again by the scrollview delegate
+        // self.count != 1 as a workaround when there is just 1 view and no scrolling animation
+        [self setCloseButtonHidden:self.count != 1];
         [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width*index, 0)
                                  animated:YES];
+        
+        if (!_exposeMode)
+            [self enableScrollsToTop];
     }
 }
 
@@ -192,7 +221,7 @@
     if (!childController || index == NSNotFound)
         return;
     
-    self.closeButton.hidden = YES;
+    [self setCloseButtonHidden:YES];
     [childController willMoveToParentViewController:nil];
     [_viewControllers removeObjectAtIndex:index];
     
@@ -213,8 +242,10 @@
                          [self arrangeChildViewControllers];
                          [self updateChrome];
                          
-                         if (self.exposeMode)
+                         if (_exposeMode)
                              self.closeButton.hidden = SG_CONTAINER_EMPTY;
+                         else
+                             [self enableScrollsToTop];
                      }];
 }
 
@@ -227,10 +258,13 @@
 }
 
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
-    if (![_viewControllers containsObject:viewController]) {
+    UIViewController *old = [self selectedViewController];
+    
+    if (!old)
+        [self addViewController:viewController];
+    else if (![_viewControllers containsObject:viewController]) {
         [self addChildViewController:viewController];
         
-        UIViewController *old = [self selectedViewController];
         NSUInteger index = [self selectedIndex];
         
         viewController.view.frame = old.view.frame;
@@ -247,13 +281,22 @@
                                     [viewController didMoveToParentViewController:self];
                                     [self arrangeChildViewControllers];
                                     [self updateChrome];
+                                    
+                                    if (!_exposeMode)
+                                        [self enableScrollsToTop];
                                 }];
     }
 }
 
 - (void)updateChrome {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
+    
     self.titleLabel.text = self.selectedViewController.title;
+    
+    _tabsButton.enabled = !SG_CONTAINER_EMPTY;
+    NSString *text = [NSString stringWithFormat:@"%d", self.count];
+    [_tabsButton setTitle:text forState:UIControlStateNormal];
+    
     [self.toolbar updateChrome];
 };
 
@@ -266,7 +309,7 @@
 }
 
 - (NSUInteger)count {
-    return self.pageControl.numberOfPages;
+    return _viewControllers.count;
 }
 
 - (NSUInteger)maxCount {
@@ -280,17 +323,17 @@
     
     for (NSInteger i = 0; i < _viewControllers.count; i++) {
         UIViewController *viewController = _viewControllers[i];
-        viewController.view.transform = CGAffineTransformIdentity;
-        viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
-                                               0,
-                                               self.scrollView.frame.size.width,
-                                               self.scrollView.frame.size.height);
-        if (_exposeMode)
-            viewController.view.transform = SG_EXPOSED_TRANSFORM;
-        
         if (current - 1  <= i && i <= current + 1) {
-            if (!viewController.view.superview)
+            if (!viewController.view.superview) {
+                viewController.view.transform = CGAffineTransformIdentity;
+                viewController.view.frame = CGRectMake(self.scrollView.frame.size.width * i,
+                                                       0,
+                                                       self.scrollView.frame.size.width,
+                                                       self.scrollView.frame.size.height);
+                if (_exposeMode)
+                    viewController.view.transform = SG_EXPOSED_TRANSFORM;
                 [self.scrollView addSubview:viewController.view];
+            }
         } else if (viewController.view.superview)
             [viewController.view removeFromSuperview];
     }
@@ -319,37 +362,45 @@
     }
 }
 
+- (void)setCloseButtonHidden:(BOOL)hidden {
+    if (self.count > 0) {
+        CGPoint point = self.selectedViewController.view.frame.origin;
+        self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
+        self.closeButton.hidden = !_exposeMode  || SG_CONTAINER_EMPTY || hidden;
+    } else
+        self.closeButton.hidden = YES;
+}
+
+// Setting the currently selecte view as the one which receives the scrolls to top gesture
 - (void)enableScrollsToTop {
-    if ([self.selectedViewController isKindOfClass:[SGWebViewController class]]) {
-        [((SGWebViewController *)self.selectedViewController).webView.scrollView setScrollsToTop:YES];
+    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
+        BOOL enable = i == self.pageControl.currentPage;
+        UIViewController *viewController = _viewControllers[i];
+        if ([viewController isKindOfClass:[SGWebViewController class]])
+            [((SGWebViewController *)viewController).webView.scrollView setScrollsToTop:enable];
     }
 }
 
+// Disabling the gesture for everyone
 - (void)disableScrollsToTop {
-    for (NSUInteger i = 0; i < _viewControllers.count; i++) {
-        if (i == self.pageControl.currentPage)
-            continue;
-        
-        UIViewController *viewController = _viewControllers[i];
-        if ([viewController isKindOfClass:[SGWebViewController class]]) {
+    for (UIViewController *viewController in _viewControllers) {
+        if ([viewController isKindOfClass:[SGWebViewController class]])
             [((SGWebViewController *)viewController).webView.scrollView setScrollsToTop:NO];
-        }
     }
 }
 
 #pragma mark UIScrollViewDelegate
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    if (self.exposeMode)
-        self.closeButton.hidden = YES;
-    else
+    if (!_exposeMode)
         [self disableScrollsToTop];
+    
+    [self setCloseButtonHidden:YES];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    if (self.exposeMode)
-        self.closeButton.hidden = SG_CONTAINER_EMPTY;
-    else
+    [self setCloseButtonHidden:NO];
+    if (!_exposeMode)
         [self enableScrollsToTop];
     
     [self arrangeChildViewControllers];
@@ -357,9 +408,7 @@
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
-    if (self.exposeMode)
-        self.closeButton.hidden = SG_CONTAINER_EMPTY;
-    
+    [self setCloseButtonHidden:NO];
     [self arrangeChildViewControllers];
 }
 
@@ -385,18 +434,16 @@
         
         [UIView animateWithDuration:0.3
                          animations:^{
-                             self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0, -self.toolbar.frame.size.height);
+                             self.toolbar.frame = CGRectMake(0, -self.toolbar.frame.size.height,
+                                                             self.view.bounds.size.width, self.toolbar.frame.size.height);
                              [self scaleChildViewControllers];
                          }
                          completion:^(BOOL finished) {
-                             UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedViewController:)];
+                             UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                                   action:@selector(tappedViewController:)];
                              [self.view addGestureRecognizer:rec];
-                             
                              [self arrangeChildViewControllers];
-                             
-                             CGPoint point = self.selectedViewController.view.frame.origin;
-                             self.closeButton.center = [self.view convertPoint:point fromView:self.scrollView];
-                             self.closeButton.hidden = SG_CONTAINER_EMPTY;
+                             [self setCloseButtonHidden:NO];
                          }];
 
     } else {
@@ -404,8 +451,7 @@
         self.closeButton.hidden = YES;
         [UIView animateWithDuration:0.3
                          animations:^{
-                             self.toolbar.frame = CGRectOffset(self.toolbar.frame, 0,
-                                                               +self.toolbar.frame.size.height);
+                             self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.toolbar.frame.size.height);
                              [self scaleChildViewControllers];
                          }
          ];
@@ -428,6 +474,11 @@
             [self.view removeGestureRecognizer:recognizer];
         }
     }
+}
+
+- (IBAction)pressedTabsButton:(id)sender {
+    if (!SG_CONTAINER_EMPTY)
+        self.exposeMode = NO;
 }
 
 - (IBAction)closeTabButton:(UIButton *)button {

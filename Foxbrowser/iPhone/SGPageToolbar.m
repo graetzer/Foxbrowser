@@ -63,14 +63,15 @@
         _forwardButton.hidden = !self.browser.canGoForward;
         [self addSubview:_forwardButton];
         
-        _systemButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _systemButton.frame = btnRect;
-        _systemButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        _systemButton.backgroundColor = [UIColor clearColor];
-        _systemButton.showsTouchWhenHighlighted = YES;
-        [_systemButton setImage:[UIImage imageNamed:@"system"] forState:UIControlStateNormal];
-        [_systemButton addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_systemButton];
+        _optionsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _optionsButton.frame = btnRect;
+        _optionsButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        _optionsButton.backgroundColor = [UIColor clearColor];
+        _optionsButton.showsTouchWhenHighlighted = YES;
+        [_optionsButton setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
+        [_optionsButton setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
+        [_optionsButton addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_optionsButton];
         
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _tabsButton.frame = CGRectMake(0, 0, 35, 35);
@@ -113,15 +114,15 @@
     if (!_forwardButton.hidden)
         posX += _forwardButton.frame.size.width + margin;
     
-    CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _systemButton.frame.size.width - 3*margin;
+    CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
     _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height)/2,
                                     searchWidth, _searchField.frame.size.height);
     posX += _searchField.frame.size.width + margin;
     
-    _systemButton.frame = CGRectMake(posX, (height - _systemButton.frame.size.height)/2,
-                                    _systemButton.frame.size.width, _systemButton.frame.size.height);
+    _optionsButton.frame = CGRectMake(posX, (height - _optionsButton.frame.size.height)/2,
+                                    _optionsButton.frame.size.width, _optionsButton.frame.size.height);
     
-    posX += _systemButton.frame.size.width + margin;
+    posX += _optionsButton.frame.size.width + margin;
 
     _tabsButton.frame = CGRectMake(posX, (height - _tabsButton.frame.size.height)/2,
                                    _tabsButton.frame.size.width, _tabsButton.frame.size.height);
@@ -200,7 +201,6 @@
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     NSURL *url = [self.browser URL];
-    
     switch (buttonIndex) {
         case 0: {
             [self dismissSearchController];
@@ -216,18 +216,18 @@
             [[UIApplication sharedApplication] openURL:url];
             break;
         case 2: // Send a mail
-            if ([MFMailComposeViewController canSendMail]) {
+            if (url && [MFMailComposeViewController canSendMail]) {
                 MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
                 mail.mailComposeDelegate = self;
                 [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
-                NSString *text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Here is that site we talked about:", nil), url.absoluteString];
+                NSString *text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Here is that site we talked about:", nil), url];
                 [mail setMessageBody:text isHTML:NO];
                 [self.browser presentModalViewController:mail animated:YES];
             }
             break;
             
         case 3: // Send a tweet
-            if ([TWTweetComposeViewController canSendTweet]) {
+            if (url && [TWTweetComposeViewController canSendTweet]) {
                 TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
                 [tw addURL:url];
                 [self.browser presentModalViewController:tw animated:YES];

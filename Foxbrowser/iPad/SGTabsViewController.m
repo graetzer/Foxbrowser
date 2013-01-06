@@ -209,12 +209,13 @@
 }
 
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
-    if (![self.childViewControllers containsObject:viewController]) {
+    UIViewController *old = [self selectedViewController];
+    
+    if (!old)
+        [self addViewController:viewController];
+    else if (![self.childViewControllers containsObject:viewController]) {
         viewController.view.frame = self.contentFrame;
         [self addChildViewController:viewController];
-        
-
-        UIViewController *old = [self selectedViewController];
         NSUInteger index = [self selectedIndex];
         
         [old willMoveToParentViewController:nil];
@@ -238,7 +239,7 @@
 }
 
 - (UIViewController *)selectedViewController {
-    return [self.tabsView viewControllerAtIndex:self.tabsView.selected];
+    return self.count > 0 ? [self.tabsView viewControllerAtIndex:self.tabsView.selected] : nil;
 }
 
 - (NSUInteger)selectedIndex {

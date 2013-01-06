@@ -128,7 +128,20 @@
 		F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */; };
 		F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */; };
 		F485A5F815B786FA00C7304E /* SettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BF6F2715B716B9005FD2B6 /* SettingsController.m */; };
+		F488DACB1697A05F00C40773 /* grip-white-pressed.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAC71697A05F00C40773 /* grip-white-pressed.png */; };
+		F488DACC1697A05F00C40773 /* grip-white-pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAC81697A05F00C40773 /* grip-white-pressed@2x.png */; };
+		F488DACD1697A05F00C40773 /* grip-white.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAC91697A05F00C40773 /* grip-white.png */; };
+		F488DACE1697A05F00C40773 /* grip-white@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DACA1697A05F00C40773 /* grip-white@2x.png */; };
+		F488DAD31697A39500C40773 /* expose-white-pressed.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DACF1697A39500C40773 /* expose-white-pressed.png */; };
+		F488DAD41697A39500C40773 /* expose-white-pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAD01697A39500C40773 /* expose-white-pressed@2x.png */; };
+		F488DAD51697A39500C40773 /* expose-white.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAD11697A39500C40773 /* expose-white.png */; };
+		F488DAD61697A39500C40773 /* expose-white@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAD21697A39500C40773 /* expose-white@2x.png */; };
+		F488DAD91698828A00C40773 /* SGPageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F488DAD81698828A00C40773 /* SGPageScrollView.m */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
+		F4976E2616949E64004FE7F8 /* grip-pressed.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2216949E64004FE7F8 /* grip-pressed.png */; };
+		F4976E2716949E64004FE7F8 /* grip-pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2316949E64004FE7F8 /* grip-pressed@2x.png */; };
+		F4976E2816949E64004FE7F8 /* grip.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2416949E64004FE7F8 /* grip.png */; };
+		F4976E2916949E64004FE7F8 /* grip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2516949E64004FE7F8 /* grip@2x.png */; };
 		F49EE8AD15A24426001B4D5F /* SGTabView.m in Sources */ = {isa = PBXBuildFile; fileRef = F49EE8A615A24426001B4D5F /* SGTabView.m */; };
 		F49EE8AE15A24426001B4D5F /* SGTabsView.m in Sources */ = {isa = PBXBuildFile; fileRef = F49EE8A815A24426001B4D5F /* SGTabsView.m */; };
 		F49EE8AF15A24426001B4D5F /* SGTabsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F49EE8AA15A24426001B4D5F /* SGTabsViewController.m */; };
@@ -481,8 +494,22 @@
 		F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGProgressCircleView.m; sourceTree = "<group>"; };
 		F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
 		F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Scaling.m"; sourceTree = "<group>"; };
+		F488DAC71697A05F00C40773 /* grip-white-pressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white-pressed.png"; sourceTree = "<group>"; };
+		F488DAC81697A05F00C40773 /* grip-white-pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white-pressed@2x.png"; sourceTree = "<group>"; };
+		F488DAC91697A05F00C40773 /* grip-white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white.png"; sourceTree = "<group>"; };
+		F488DACA1697A05F00C40773 /* grip-white@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white@2x.png"; sourceTree = "<group>"; };
+		F488DACF1697A39500C40773 /* expose-white-pressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expose-white-pressed.png"; sourceTree = "<group>"; };
+		F488DAD01697A39500C40773 /* expose-white-pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expose-white-pressed@2x.png"; sourceTree = "<group>"; };
+		F488DAD11697A39500C40773 /* expose-white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expose-white.png"; sourceTree = "<group>"; };
+		F488DAD21697A39500C40773 /* expose-white@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expose-white@2x.png"; sourceTree = "<group>"; };
+		F488DAD71698828A00C40773 /* SGPageScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageScrollView.h; sourceTree = "<group>"; };
+		F488DAD81698828A00C40773 /* SGPageScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageScrollView.m; sourceTree = "<group>"; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
+		F4976E2216949E64004FE7F8 /* grip-pressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-pressed.png"; sourceTree = "<group>"; };
+		F4976E2316949E64004FE7F8 /* grip-pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-pressed@2x.png"; sourceTree = "<group>"; };
+		F4976E2416949E64004FE7F8 /* grip.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = grip.png; sourceTree = "<group>"; };
+		F4976E2516949E64004FE7F8 /* grip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip@2x.png"; sourceTree = "<group>"; };
 		F49EE8A415A24426001B4D5F /* SGTabDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGTabDefines.h; sourceTree = "<group>"; };
 		F49EE8A515A24426001B4D5F /* SGTabView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGTabView.h; sourceTree = "<group>"; };
 		F49EE8A615A24426001B4D5F /* SGTabView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGTabView.m; sourceTree = "<group>"; };
@@ -628,6 +655,18 @@
 		F41E7FD3169341FF0036AE81 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				F488DACF1697A39500C40773 /* expose-white-pressed.png */,
+				F488DAD01697A39500C40773 /* expose-white-pressed@2x.png */,
+				F488DAD11697A39500C40773 /* expose-white.png */,
+				F488DAD21697A39500C40773 /* expose-white@2x.png */,
+				F488DAC71697A05F00C40773 /* grip-white-pressed.png */,
+				F488DAC81697A05F00C40773 /* grip-white-pressed@2x.png */,
+				F488DAC91697A05F00C40773 /* grip-white.png */,
+				F488DACA1697A05F00C40773 /* grip-white@2x.png */,
+				F4976E2216949E64004FE7F8 /* grip-pressed.png */,
+				F4976E2316949E64004FE7F8 /* grip-pressed@2x.png */,
+				F4976E2416949E64004FE7F8 /* grip.png */,
+				F4976E2516949E64004FE7F8 /* grip@2x.png */,
 				F45A7E7616938ECE00BEAB0B /* expose-pressed.png */,
 				F45A7E7716938ECE00BEAB0B /* expose-pressed@2x.png */,
 				F45A7E7816938ECE00BEAB0B /* expose.png */,
@@ -682,12 +721,12 @@
 			children = (
 				F49EE8AB15A24426001B4D5F /* SGTabsToolbar.h */,
 				F49EE8AC15A24426001B4D5F /* SGTabsToolbar.m */,
+				F49EE8A915A24426001B4D5F /* SGTabsViewController.h */,
+				F49EE8AA15A24426001B4D5F /* SGTabsViewController.m */,
 				F49EE8A515A24426001B4D5F /* SGTabView.h */,
 				F49EE8A615A24426001B4D5F /* SGTabView.m */,
 				F49EE8A715A24426001B4D5F /* SGTabsView.h */,
 				F49EE8A815A24426001B4D5F /* SGTabsView.m */,
-				F49EE8A915A24426001B4D5F /* SGTabsViewController.h */,
-				F49EE8AA15A24426001B4D5F /* SGTabsViewController.m */,
 			);
 			name = TabsBar;
 			sourceTree = "<group>";
@@ -1061,6 +1100,8 @@
 				F46A63B4167CE08F0004BE43 /* SGPageViewController.m */,
 				F4D6B067167FBEAF00BF8D4A /* SGPageToolbar.h */,
 				F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */,
+				F488DAD71698828A00C40773 /* SGPageScrollView.h */,
+				F488DAD81698828A00C40773 /* SGPageScrollView.m */,
 			);
 			path = iPhone;
 			sourceTree = "<group>";
@@ -1402,6 +1443,18 @@
 				F45A7E7B16938ECE00BEAB0B /* expose-pressed@2x.png in Resources */,
 				F45A7E7C16938ECE00BEAB0B /* expose.png in Resources */,
 				F45A7E7D16938ECE00BEAB0B /* expose@2x.png in Resources */,
+				F4976E2616949E64004FE7F8 /* grip-pressed.png in Resources */,
+				F4976E2716949E64004FE7F8 /* grip-pressed@2x.png in Resources */,
+				F4976E2816949E64004FE7F8 /* grip.png in Resources */,
+				F4976E2916949E64004FE7F8 /* grip@2x.png in Resources */,
+				F488DACB1697A05F00C40773 /* grip-white-pressed.png in Resources */,
+				F488DACC1697A05F00C40773 /* grip-white-pressed@2x.png in Resources */,
+				F488DACD1697A05F00C40773 /* grip-white.png in Resources */,
+				F488DACE1697A05F00C40773 /* grip-white@2x.png in Resources */,
+				F488DAD31697A39500C40773 /* expose-white-pressed.png in Resources */,
+				F488DAD41697A39500C40773 /* expose-white-pressed@2x.png in Resources */,
+				F488DAD51697A39500C40773 /* expose-white.png in Resources */,
+				F488DAD61697A39500C40773 /* expose-white@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1492,6 +1545,7 @@
 				F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */,
 				F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */,
 				F4EA92F2168CA5DC00CA9154 /* SGFavouritesManager.m in Sources */,
+				F488DAD91698828A00C40773 /* SGPageScrollView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
