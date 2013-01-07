@@ -155,7 +155,6 @@ LUxvZ29zIHNpbmQKZWluZ2V0cmFnZW5lIE1hcmtlbiBkZXIgTW96aWxsYSBGb3VuZGF0aW9uLg</stri
 						<string key="NSFrame">{{60, 310}, {200, 42}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>

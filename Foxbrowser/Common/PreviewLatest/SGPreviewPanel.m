@@ -47,7 +47,7 @@
         [self addSubview:_label];
         
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-        //_imageView.contentMode = UIViewContentModeCenter;
+        _imageView.contentMode = UIViewContentModeScaleAspectFit;
         _imageView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
         _imageView.image = [fm imageWithURL:url];
         _imageView.layer.borderColor = [UIColor grayColor].CGColor;
@@ -83,9 +83,15 @@
     SGPreviewTile *tile = self.tiles[0];
     CGSize tileSize = tile.frame.size;
     
-    //NSUInteger columns = self.bounds.size.width/tileSize.width;
-    NSUInteger lines = self.bounds.size.height/tileSize.height;
-    NSUInteger columns = self.tiles.count / lines;
+    NSUInteger columns, lines;
+    if (self.bounds.size.width > self.bounds.size.height) {
+        columns = self.bounds.size.width/tileSize.width;
+        lines = MAX((self.tiles.count + (columns-1)) / columns, 1);
+    } else {
+        lines = self.bounds.size.height/tileSize.height;
+        columns = MAX((self.tiles.count + (lines-1)) / lines, 1);
+    }
+    
     
     CGFloat paddingX = (self.bounds.size.width - columns*tileSize.width)/(columns + 1);
     CGFloat paddingY = (self.bounds.size.height - lines*tileSize.height)/(lines + 1);

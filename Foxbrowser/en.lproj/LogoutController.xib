@@ -64,6 +64,7 @@
 						<string key="NSFrame">{{85, 290}, {150, 42}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -140,6 +141,7 @@
 						<string key="NSFrame">{{132, 20}, {57, 57}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="1048822037"/>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MCAwAA</bytes>
@@ -169,15 +171,16 @@
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
 			<object class="IBUIView" id="895897412">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">301</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIImageView" id="107824652">
 						<reference key="NSNextResponder" ref="895897412"/>
-						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{120, 269}, {80, 80}}</string>
+						<int key="NSvFlags">319</int>
+						<string key="NSFrame">{{120, 190}, {80, 80}}</string>
 						<reference key="NSSuperview" ref="895897412"/>
+						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="773197247"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIAutoresizesSubviews">NO</bool>
@@ -193,8 +196,9 @@
 					<object class="IBUIActivityIndicatorView" id="773197247">
 						<reference key="NSNextResponder" ref="895897412"/>
 						<int key="NSvFlags">301</int>
-						<string key="NSFrame">{{142, 291}, {37, 37}}</string>
+						<string key="NSFrame">{{142, 211}, {37, 37}}</string>
 						<reference key="NSSuperview" ref="895897412"/>
+						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -204,6 +208,8 @@
 					</object>
 				</object>
 				<string key="NSFrameSize">{320, 460}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="107824652"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
@@ -306,8 +312,8 @@
 						<reference key="object" ref="895897412"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="773197247"/>
 							<reference ref="107824652"/>
+							<reference ref="773197247"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Logout Spinner View</string>

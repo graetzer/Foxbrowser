@@ -30,7 +30,6 @@
 
 // Array of URL's
 - (NSArray *)favourites;
-- (void)refresh;
 
 // Returns the replacement
 - (NSURL *)blockURL:(NSURL *)url;

@@ -40,7 +40,9 @@
 #import "WeaveService.h"
 #import "Stockboy.h"
 
-@implementation ManualSetupViewController
+@implementation ManualSetupViewController {
+    __weak UITextField *_activeField;
+}
 
 #define UsernameTextFieldTag 1
 #define PasswordTextFieldTag 2
@@ -135,42 +137,25 @@
 
 #pragma mark - Keyboard 
 
-//- (void) keyboardDidShow: (NSNotification*) notification
-//{
-//	CGFloat keyboardHeight = 216;
-//
-//	NSValue* value = [[notification userInfo] objectForKey: UIKeyboardFrameEndUserInfoKey];
-//	if (value != nil) {
-//		CGRect frameEnd;
-//		[value getValue: &frameEnd];
-//		keyboardHeight = UIInterfaceOrientationIsPortrait([[UIDevice currentDevice] orientation]) ? frameEnd.size.height : frameEnd.size.width;
-//	}
-//
-//	CGRect frame = self.view.frame;
-//	frame.size.height -= keyboardHeight;
-//	self.view.frame = frame;
-//	
-//	if ([[self customServerTextField] isFirstResponder]) {
-//		[self.view scrollToRowAtIndexPath: [NSIndexPath indexPathForRow: 1 inSection: 1]
-//			atScrollPosition: UITableViewScrollPositionNone animated: YES];
-//	}
-//}
-//
-//- (void) keyboardDidHide: (NSNotification*) notification
-//{
-//	CGFloat keyboardHeight = 216;
-//
-//	NSValue* value = [[notification userInfo] objectForKey: UIKeyboardFrameEndUserInfoKey];
-//	if (value != nil) {
-//		CGRect frameBegin;
-//		[value getValue: &frameBegin];
-//		keyboardHeight = UIInterfaceOrientationIsPortrait([[UIDevice currentDevice] orientation]) ? frameBegin.size.height : frameBegin.size.width;
-//	}
-//
-//	CGRect frame = self.tableView.frame;
-//	frame.size.height += keyboardHeight;
-//	self.tableView.frame = frame;
-//}
+- (void) keyboardDidShow:(NSNotification*)notification
+{
+    CGSize kbSize = [notification.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+
+    // If active text field is hidden by keyboard, scroll it so it's visible
+    // Your application might not need or want this behavior.
+    CGRect aRect = self.view.frame;
+    aRect.size.height -= MIN(kbSize.height, kbSize.width);
+    if (!CGRectContainsPoint(aRect, _activeField.frame.origin) ) {
+        CGPoint scrollPoint = CGPointMake(0.0, _activeField.frame.origin.y - aRect.size.height);
+        [self.scrollView setContentOffset:scrollPoint animated:YES];
+    }
+}
+
+- (void) keyboardDidHide: (NSNotification*) notification {
+    [self.scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
+    //self.scrollView.contentInset = UIEdgeInsetsZero;
+    //self.scrollView.scrollIndicatorInsets = UIEdgeInsetsZero;
+}
 
 #pragma mark - Locales
 
@@ -212,24 +197,22 @@
     [self setCautionLabel:nil];
     [self setSpinnerView:nil];
     [self setSpinner:nil];
+    [self setScrollView:nil];
     [super viewDidUnload];
 }
 
-//- (void) viewDidAppear:(BOOL)animated
-//{
-//	[[NSNotificationCenter defaultCenter] addObserver:self selector: @selector(keyboardDidShow:)
-//		name:UIKeyboardDidShowNotification object:nil];
-//		
-//	[[NSNotificationCenter defaultCenter] addObserver:self selector: @selector(keyboardDidHide:)
-//		name:UIKeyboardWillHideNotification object:nil];
-//}
-//
-//- (void) viewDidDisappear:(BOOL)animated
-//{
-//	[[NSNotificationCenter defaultCenter] removeObserver: self];
-//}
-- (BOOL)shouldAutorotate {
-    return NO;
+- (void) viewDidAppear:(BOOL)animated
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:)
+		name:UIKeyboardDidShowNotification object:nil];
+		
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:)
+		name:UIKeyboardWillHideNotification object:nil];
+}
+
+- (void) viewDidDisappear:(BOOL)animated
+{
+	[[NSNotificationCenter defaultCenter] removeObserver: self];
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
@@ -242,8 +225,8 @@
 
 #pragma mark -
 
-- (void) textFieldDidBeginEditing:(UITextField *)textField
-{
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    _activeField = textField;
 }
 
 - (void) textFieldDidEndEditing:(UITextField *)textField
@@ -283,29 +266,7 @@
 	if (textField == [self customServerTextField]) {
 		_customServerURL = [textField.text copy];
 	}
-	
-	// Check if we are good to go
-
-	if (_username == nil || [_username length] == 0) {
-		return NO;
-	}
-
-	if (_password == nil || [_password length] == 0) {
-		return NO;
-	}
-	
-	if (_secret == nil || [_secret length] == 0) {
-		return NO;
-	}
-	
-	if (_customServerEnabled && (_customServerURL == nil || [_customServerURL length] == 0)) {
-		return NO;
-	}
-	
-	[[self usernameTextField] resignFirstResponder];
-	[[self passwordTextField] resignFirstResponder];
-	[[self syncKeyTextField] resignFirstResponder];
-	[[self customServerTextField] resignFirstResponder];
+    return YES;
 
 //	NSLog(@"LOGGING IN WITH THE FOLLOWING:");
 //	
@@ -314,20 +275,28 @@
 //	NSLog(@" _secret              = %@", _secret);
 //	NSLog(@" _customServerEnabled = %d", _customServerEnabled);
 //	NSLog(@" _customServerURL     = %@", _customServerURL);
-	
-	//do we have an internet connection?
+
+}
+
+#pragma mark -
+
+- (IBAction)login:(id)sender {
+    if (!_username.length || !_password.length || !_secret.length
+        || (_customServerEnabled && !_customServerURL.length))
+        return;
+    
+    //do we have an internet connection?
 	if (![weaveService canConnectToInternet])
 	{
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Login Failure", @"unable to login")
-			message: NSLocalizedString(@"No internet connection available", "no internet connection") delegate: self
-				cancelButtonTitle: NSLocalizedString(@"OK", @"ok") otherButtonTitles: nil];
+                                                        message: NSLocalizedString(@"No internet connection available", "no internet connection") delegate: self
+                                              cancelButtonTitle: NSLocalizedString(@"OK", @"ok") otherButtonTitles: nil];
 		[alert show];
-		return NO;    
 	}
-
+    
 	//start spinner
 	[self startLoginSpinner];
-
+    
 	// If we got a custom server then we configure it right away
 	
 	if (_customServerEnabled && [_customServerURL length] != 0) {
@@ -339,24 +308,20 @@
 		[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"customServerURL"];
 		[[NSUserDefaults standardUserDefaults] synchronize];
 	}
-
+    
 	//we require the username to be lowercase, so we do it here on the way out
 	NSDictionary* authDict = [NSDictionary dictionaryWithObjectsAndKeys:
-		[[self usernameTextField].text lowercaseString], @"user",
-		[self passwordTextField].text, @"pass",
-		[self syncKeyTextField].text, @"secret",
-		nil];
-
+                              [[self usernameTextField].text lowercaseString], @"user",
+                              [self passwordTextField].text, @"pass",
+                              [self syncKeyTextField].text, @"secret",
+                              nil];
+    
 	NSThread* authorizer = [[NSThread alloc] initWithTarget:self selector:@selector(authorize:) object:authDict];
 	[authorizer start];
-	
-	return YES;
+
 }
 
-#pragma mark -
-
-- (void) customServerSwitchChangedValue: (UISwitch*) sender
-{
+- (IBAction)customServerSwitchChangedValue: (UISwitch*)sender {
 	if (sender.on) {
 		[self customServerTextField].placeholder = NSLocalizedString(@"Required", @"Required");
 	} else {
@@ -366,7 +331,4 @@
 	_customServerEnabled = sender.on;
 }
 
-- (IBAction)login:(id)sender {
-    [self textFieldShouldReturn:nil];
-}
 @end

@@ -31,6 +31,8 @@
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(SG_EXPOSED_SCALE, SG_EXPOSED_SCALE))
 #define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
 
+#define SG_DURATION 0.25
+
 @implementation SGPageViewController {
     NSMutableArray *_viewControllers;
 }
@@ -227,7 +229,7 @@
     [_viewControllers removeObjectAtIndex:index];
     
     NSUInteger count = _viewControllers.count;
-    [UIView animateWithDuration:0.3
+    [UIView animateWithDuration:SG_DURATION
                      animations:^{
                          for (NSUInteger i = index; i < count; i++) {
                              UIViewController *vC = _viewControllers[i];
@@ -433,7 +435,7 @@
         [self.toolbar.searchField resignFirstResponder];
         [self disableScrollsToTop];
         
-        [UIView animateWithDuration:0.3
+        [UIView animateWithDuration:SG_DURATION
                          animations:^{
                              self.toolbar.frame = CGRectMake(0, -self.toolbar.frame.size.height,
                                                              self.view.bounds.size.width, self.toolbar.frame.size.height);
@@ -450,7 +452,7 @@
     } else {
         [self enableScrollsToTop];
         self.closeButton.hidden = YES;
-        [UIView animateWithDuration:0.3
+        [UIView animateWithDuration:SG_DURATION
                          animations:^{
                              self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.toolbar.frame.size.height);
                              [self scaleChildViewControllers];

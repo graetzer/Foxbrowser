@@ -58,6 +58,8 @@
 
 @property (nonatomic,assign) id<ManualSetupViewControllerDelegate> delegate;
 
+@property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
+
 @property (weak, nonatomic) IBOutlet UIView *spinnerView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
 
@@ -79,6 +81,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *cautionLabel;
 
 - (IBAction)login:(id)sender;
+- (IBAction)customServerSwitchChangedValue: (UISwitch*)sender;
 
 @end
 

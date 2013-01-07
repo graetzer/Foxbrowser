@@ -32,7 +32,7 @@
     
     NSString *fontName = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? @"HelveticaNeue" : @"HelveticaNeue-Light";
     CGFloat fontSize = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 10. : 16.;
-    CGFloat height = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 40. : 60.;
+    CGFloat height = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 40. : 55.;
     CGFloat margin = height/12;
     
     CGRect frame = CGRectMake(0, 0, 320., height);

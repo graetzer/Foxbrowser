@@ -138,6 +138,10 @@
 		F488DAD61697A39500C40773 /* expose-white@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAD21697A39500C40773 /* expose-white@2x.png */; };
 		F488DAD91698828A00C40773 /* SGPageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F488DAD81698828A00C40773 /* SGPageScrollView.m */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
+		F4904F5D169B24DF00B19748 /* dialpad.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5B169B24DF00B19748 /* dialpad.png */; };
+		F4904F5E169B24DF00B19748 /* dialpad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5C169B24DF00B19748 /* dialpad@2x.png */; };
+		F4904F60169B65F600B19748 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5F169B65F600B19748 /* Default-568h@2x.png */; };
+		F4904F63169B700300B19748 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4904F62169B700200B19748 /* ManualSetupViewController.xib */; };
 		F4976E2616949E64004FE7F8 /* grip-pressed.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2216949E64004FE7F8 /* grip-pressed.png */; };
 		F4976E2716949E64004FE7F8 /* grip-pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2316949E64004FE7F8 /* grip-pressed@2x.png */; };
 		F4976E2816949E64004FE7F8 /* grip.png in Resources */ = {isa = PBXBuildFile; fileRef = F4976E2416949E64004FE7F8 /* grip.png */; };
@@ -178,10 +182,7 @@
 		F4EA92E91689CAD100CA9154 /* system.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92D71689CAD100CA9154 /* system.png */; };
 		F4EA92EA1689CAD100CA9154 /* system@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92D81689CAD100CA9154 /* system@2x.png */; };
 		F4EA92F2168CA5DC00CA9154 /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */; };
-		F4EA92FE1691AEA700CA9154 /* pictures.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92FC1691AEA700CA9154 /* pictures.png */; };
-		F4EA92FF1691AEA700CA9154 /* pictures@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92FD1691AEA700CA9154 /* pictures@2x.png */; };
 		F4EDAB17168400FF00EFD266 /* SGNavViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4EDAB16168400FF00EFD266 /* SGNavViewController.m */; };
-		F4EDAB1A1684062A00EFD266 /* ManualSetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */; };
 		F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FCC8F815B77D4800207BEA /* Twitter.framework */; };
 		F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */; };
 		F4FD2B6D15AE030F005DBAB4 /* WelcomePage.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFED15A6446B00EACFBD /* WelcomePage.m */; };
@@ -506,6 +507,10 @@
 		F488DAD81698828A00C40773 /* SGPageScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageScrollView.m; sourceTree = "<group>"; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
+		F4904F5B169B24DF00B19748 /* dialpad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dialpad.png; sourceTree = "<group>"; };
+		F4904F5C169B24DF00B19748 /* dialpad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dialpad@2x.png"; sourceTree = "<group>"; };
+		F4904F5F169B65F600B19748 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
+		F4904F62169B700200B19748 /* ManualSetupViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ManualSetupViewController.xib; path = Foxbrowser/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
 		F4976E2216949E64004FE7F8 /* grip-pressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-pressed.png"; sourceTree = "<group>"; };
 		F4976E2316949E64004FE7F8 /* grip-pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-pressed@2x.png"; sourceTree = "<group>"; };
 		F4976E2416949E64004FE7F8 /* grip.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = grip.png; sourceTree = "<group>"; };
@@ -569,11 +574,8 @@
 		F4EA92D81689CAD100CA9154 /* system@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "system@2x.png"; sourceTree = "<group>"; };
 		F4EA92F0168CA5DC00CA9154 /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
 		F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
-		F4EA92FC1691AEA700CA9154 /* pictures.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pictures.png; sourceTree = "<group>"; };
-		F4EA92FD1691AEA700CA9154 /* pictures@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pictures@2x.png"; sourceTree = "<group>"; };
 		F4EDAB15168400FF00EFD266 /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
 		F4EDAB16168400FF00EFD266 /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
-		F4EDAB191684062A00EFD266 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = Foxbrowser/en.lproj/ManualSetupViewController.xib; sourceTree = SOURCE_ROOT; };
 		F4F8F74D1659A46700F8CEF9 /* NSObject+Subscripts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Subscripts.h"; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1112,7 +1114,7 @@
 				F4EA92EF168CA5B900CA9154 /* Favourites */,
 				F46A63AB167CCC1E0004BE43 /* Search */,
 				F4BF6F4515B735BA005FD2B6 /* WebView */,
-				F4C1EE1F15B07F9F00FB2B97 /* Preview */,
+				F4C1EE1F15B07F9F00FB2B97 /* Blank */,
 				F4EA92EE168CA45900CA9154 /* Browser */,
 			);
 			path = Common;
@@ -1147,7 +1149,7 @@
 			path = WebView;
 			sourceTree = "<group>";
 		};
-		F4C1EE1F15B07F9F00FB2B97 /* Preview */ = {
+		F4C1EE1F15B07F9F00FB2B97 /* Blank */ = {
 			isa = PBXGroup;
 			children = (
 				F4C1EE2015B07F9F00FB2B97 /* SGBlankController.h */,
@@ -1157,17 +1159,17 @@
 				F459C15D15C6AF3200740236 /* SGBottomView.h */,
 				F459C15E15C6AF3200740236 /* SGBottomView.m */,
 			);
-			name = Preview;
+			name = Blank;
 			path = PreviewLatest;
 			sourceTree = "<group>";
 		};
 		F4EA92C61689CAD100CA9154 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				F4904F5B169B24DF00B19748 /* dialpad.png */,
+				F4904F5C169B24DF00B19748 /* dialpad@2x.png */,
 				F41E7FEA16937DB90036AE81 /* monitor.png */,
 				F41E7FEB16937DB90036AE81 /* monitor@2x.png */,
-				F4EA92FC1691AEA700CA9154 /* pictures.png */,
-				F4EA92FD1691AEA700CA9154 /* pictures@2x.png */,
 				F4EA92C71689CAD100CA9154 /* bookmark.png */,
 				F4EA92C81689CAD100CA9154 /* bookmark@2x.png */,
 				F4EA92C91689CAD100CA9154 /* left.png */,
@@ -1215,13 +1217,13 @@
 		F4FD2B7115AE0D01005DBAB4 /* Xib */ = {
 			isa = PBXGroup;
 			children = (
+				F4904F62169B700200B19748 /* ManualSetupViewController.xib */,
 				F4BF6F3915B72F5F005FD2B6 /* AboutScreen.xib */,
 				F4BF6F1015B715AA005FD2B6 /* LogoutController.xib */,
 				F4BF6F1215B715AA005FD2B6 /* SettingsController.xib */,
 				F4FD2B7215AE0D18005DBAB4 /* AccountHelp.xib */,
 				F4FD2B7415AE0D18005DBAB4 /* EasySetupViewController.xib */,
 				F4FD2B7815AE0D18005DBAB4 /* WelcomePage.xib */,
-				F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */,
 			);
 			name = Xib;
 			sourceTree = "<group>";
@@ -1289,6 +1291,7 @@
 				F41E7FE1169356DC0036AE81 /* Icon@2x.png */,
 				F41E7FE2169356DC0036AE81 /* iTunesArtwork.png */,
 				F41E7FE3169356DC0036AE81 /* iTunesArtwork@2x.png */,
+				F4904F5F169B65F600B19748 /* Default-568h@2x.png */,
 				F44F863F15C9D66D003D1C31 /* Default-Landscape@2x~ipad.png */,
 				F44F863D15C9D66B003D1C31 /* Default-Landscape~ipad.png */,
 				F44F863B15C9D667003D1C31 /* Default-Portrait@2x~ipad.png */,
@@ -1409,7 +1412,6 @@
 				F44F863E15C9D66B003D1C31 /* Default-Landscape~ipad.png in Resources */,
 				F44F864015C9D66D003D1C31 /* Default-Landscape@2x~ipad.png in Resources */,
 				F4C3906C161093D500349AA4 /* Settings.bundle in Resources */,
-				F4EDAB1A1684062A00EFD266 /* ManualSetupViewController.xib in Resources */,
 				F4EA92D91689CAD100CA9154 /* bookmark.png in Resources */,
 				F4EA92DA1689CAD100CA9154 /* bookmark@2x.png in Resources */,
 				F4EA92DB1689CAD100CA9154 /* left.png in Resources */,
@@ -1428,8 +1430,6 @@
 				F4EA92E81689CAD100CA9154 /* stop@2x.png in Resources */,
 				F4EA92E91689CAD100CA9154 /* system.png in Resources */,
 				F4EA92EA1689CAD100CA9154 /* system@2x.png in Resources */,
-				F4EA92FE1691AEA700CA9154 /* pictures.png in Resources */,
-				F4EA92FF1691AEA700CA9154 /* pictures@2x.png in Resources */,
 				F41E7FD7169341FF0036AE81 /* close_x.png in Resources */,
 				F41E7FE4169356DC0036AE81 /* Icon-72.png in Resources */,
 				F41E7FE5169356DC0036AE81 /* Icon-72@2x.png in Resources */,
@@ -1455,6 +1455,10 @@
 				F488DAD41697A39500C40773 /* expose-white-pressed@2x.png in Resources */,
 				F488DAD51697A39500C40773 /* expose-white.png in Resources */,
 				F488DAD61697A39500C40773 /* expose-white@2x.png in Resources */,
+				F4904F5D169B24DF00B19748 /* dialpad.png in Resources */,
+				F4904F5E169B24DF00B19748 /* dialpad@2x.png in Resources */,
+				F4904F60169B65F600B19748 /* Default-568h@2x.png in Resources */,
+				F4904F63169B700300B19748 /* ManualSetupViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1586,14 +1590,6 @@
 				F4BF6F4215B72F7D005FD2B6 /* zh-Hant */,
 			);
 			name = AboutScreen.xib;
-			sourceTree = "<group>";
-		};
-		F4EDAB181684062A00EFD266 /* ManualSetupViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4EDAB191684062A00EFD266 /* en */,
-			);
-			name = ManualSetupViewController.xib;
 			sourceTree = "<group>";
 		};
 		F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */ = {

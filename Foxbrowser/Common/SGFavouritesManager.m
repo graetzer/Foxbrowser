@@ -76,7 +76,6 @@
     [_blocked writeToFile:[self blacklistFilePath] atomically:NO];
     
     [self fillFavourites];
-    
     return [_favourites.allKeys lastObject];
 }
 
@@ -84,6 +83,8 @@
     NSFileManager *fm = [NSFileManager defaultManager];
     [fm removeItemAtPath:[self blacklistFilePath] error:NULL];
     [fm removeItemAtPath:[self screenshotPath] error:NULL];
+    [_imageCache removeAllObjects];
+    
 }
 
 - (CGSize)imageSize {
@@ -174,12 +175,11 @@
         NSString *urlS = [item objectForKey:@"url"];
         NSURL *url = [NSURL URLWithString:urlS];
         
-        if (_favourites[url] || [_blocked containsObject:url])
+        if ([self containsHost:url.host] || [_blocked containsObject:url])
             continue;
         
         _favourites[url] = [item objectForKey:@"title"];
     }
-
 }
 
 - (UIImage *)imageWithView:(UIView *)view {

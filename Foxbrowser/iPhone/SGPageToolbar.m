@@ -191,9 +191,9 @@
                                      destructiveButtonTitle:nil
                                           otherButtonTitles:
                         NSLocalizedString(@"Bookmarks", @"Bookmarks"),
-                        NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                        NSLocalizedString(@"Email URL", nil),
                         NSLocalizedString(@"Tweet", @"Tweet the current url"),
+                        NSLocalizedString(@"Email URL", nil),
+                        NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                         //!privateMode ? NSLocalizedString(@"Enable Private Browsing", nil) : NSLocalizedString(@"Disable Private Browsing", nil) ,
                         NSLocalizedString(@"Settings", nil), nil];
     [self.actionSheet showInView:self];
@@ -212,9 +212,15 @@
             [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
             break;
         }
-        case 1: // Open in mobile safari
-            [[UIApplication sharedApplication] openURL:url];
+            
+        case 1: // Send a tweet
+            if (url && [TWTweetComposeViewController canSendTweet]) {
+                TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
+                [tw addURL:url];
+                [self.browser presentModalViewController:tw animated:YES];
+            }
             break;
+            
         case 2: // Send a mail
             if (url && [MFMailComposeViewController canSendMail]) {
                 MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
@@ -226,12 +232,8 @@
             }
             break;
             
-        case 3: // Send a tweet
-            if (url && [TWTweetComposeViewController canSendTweet]) {
-                TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
-                [tw addURL:url];
-                [self.browser presentModalViewController:tw animated:YES];
-            }
+        case 3: // Open in mobile safari
+            [[UIApplication sharedApplication] openURL:url];
             break;
             
         case 4: // Show settings or welcome page

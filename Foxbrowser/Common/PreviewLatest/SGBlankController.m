@@ -32,20 +32,11 @@
     [super viewDidLoad];
     
     self.title = NSLocalizedString(@"Untitled", @"Untitled tab");
-    
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
-    scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    scrollView.scrollsToTop = NO;
-    scrollView.canCancelContentTouches = NO;
-    scrollView.bounces = NO;
-    scrollView.backgroundColor = [UIColor whiteColor];
-    scrollView.delegate = self;
-    [self.view addSubview:scrollView];
-    self.scrollView = scrollView;
+    self.view.backgroundColor = [UIColor whiteColor];
     
     NSArray *titles = @[NSLocalizedString(@"Most popular", @"Most popular websites"),
     NSLocalizedString(@"Other devices", @"Tabs of other devices")];
-    NSArray *images = @[[UIImage imageNamed:@"pictures"], [UIImage imageNamed:@"monitor"]];
+    NSArray *images = @[[UIImage imageNamed:@"dialpad"], [UIImage imageNamed:@"monitor"]];
     
     SGBottomView *bottomView = [[SGBottomView alloc] initWithTitles:titles images:images];
     CGRect rect = bottomView.frame;
@@ -56,6 +47,27 @@
     [self.view addSubview:bottomView];
     _bottomView = bottomView;
     
+    CGRect scrollFrame = CGRectMake(0, 0, self.view.bounds.size.width,
+                                  self.view.bounds.size.height - bottomView.frame.size.height);
+    
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:scrollFrame];
+    scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    scrollView.backgroundColor = [UIColor clearColor];
+    scrollView.scrollsToTop = NO;
+    scrollView.bounces = NO;
+    scrollView.decelerationRate = UIScrollViewDecelerationRateFast;
+    scrollView.showsHorizontalScrollIndicator = NO;
+    scrollView.showsVerticalScrollIndicator = NO;
+    scrollView.delegate = self;
+    [self.view addSubview:scrollView];
+    self.scrollView = scrollView;
+    
+    SGPreviewPanel *previewPanel = [[SGPreviewPanel alloc] initWithFrame:scrollFrame];
+    previewPanel.delegate = self;
+    
+    [scrollView addSubview:previewPanel];
+    _previewPanel = previewPanel;
+    
     TabBrowserController *tabBrowser = [[TabBrowserController alloc] initWithStyle:UITableViewStylePlain];
     [self addChildViewController:tabBrowser];
     tabBrowser.view.frame = CGRectMake(self.view.bounds.size.width, 0, SG_TAB_WIDTH, self.view.bounds.size.height);
@@ -63,14 +75,6 @@
     [self.scrollView addSubview:tabBrowser.view];
     [tabBrowser didMoveToParentViewController:self];
     self.tabBrowser = tabBrowser;
-    
-    CGRect panelRect = CGRectMake(0, 0, self.view.bounds.size.width,
-                                  self.view.bounds.size.height - bottomView.frame.size.height);
-    SGPreviewPanel *previewPanel = [[SGPreviewPanel alloc] initWithFrame:panelRect];
-    previewPanel.delegate = self;
-    
-    [scrollView addSubview:previewPanel];
-    _previewPanel = previewPanel;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -83,6 +87,10 @@
 
 - (UIView *)rotatingFooterView {
     return self.bottomView;
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -98,6 +106,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
     [self.browserViewController updateChrome];
 }
 
@@ -130,12 +139,16 @@
     self.bottomView.markerPosititon = scrollView.contentOffset.x/SG_TAB_WIDTH;
 }
 
-//- (void)layoutSubviews {
-//    CGSize scrollSize = self.scrollView.frame.size;
-//    
-//    CGSize tabSize = CGSizeMake(SG_TAB_WIDTH, scrollSize.height);
-//    self.tabBrowserView.frame = CGRectMake(scrollSize.width, 0, tabSize.width, scrollSize.height);
-//    self.scrollView.contentSize = CGSizeMake(scrollSize.width + tabSize.width, scrollSize.height);
-//}
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    if (!decelerate)
+        [self scrollViewDidEndDecelerating:scrollView];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    if (scrollView.contentOffset.x > SG_TAB_WIDTH/2)
+        [scrollView setContentOffset:CGPointMake(SG_TAB_WIDTH, 0) animated:YES];
+    else
+        [scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
+}
 
 @end
