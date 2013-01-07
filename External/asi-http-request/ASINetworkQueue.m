@@ -47,8 +47,10 @@
 	[super setSuspended:suspend];
 }
 
-- (void)reset
-{
+- (void)reset {
+    for (ASIHTTPRequest *req in self.operations)
+        [req setDelegate:nil];
+        
 	[self cancelAllOperations];
 	[self setDelegate:nil];
 	[self setDownloadProgressDelegate:nil];

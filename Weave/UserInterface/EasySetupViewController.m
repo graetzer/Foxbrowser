@@ -175,11 +175,16 @@
 		}
 		_manualSetupButton.frame = frame;
 	}
-
-	_client = [[JPAKEClient alloc] initWithServer: _server delegate: self reporter: _reporter];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    self.activityIndicator.hidden = NO;
+    [self.activityIndicator startAnimating];
+    _passwordLabel1.text = nil;
+    _passwordLabel2.text = nil;
+    _passwordLabel3.text = nil;
+    
+    _client = [[JPAKEClient alloc] initWithServer: _server delegate: self reporter: _reporter];
     [_client start];
 }
 
@@ -190,6 +195,8 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [_client cancel];
+    [_client release];
+    _client = nil;
 }
 
 - (void) viewDidDisappear:(BOOL)animated

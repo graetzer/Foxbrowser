@@ -146,7 +146,8 @@
     CGRect aRect = self.view.frame;
     aRect.size.height -= MIN(kbSize.height, kbSize.width);
     if (!CGRectContainsPoint(aRect, _activeField.frame.origin) ) {
-        CGPoint scrollPoint = CGPointMake(0.0, _activeField.frame.origin.y - aRect.size.height);
+        CGPoint scrollPoint = CGPointMake(0.0, _activeField.frame.origin.y -
+                                          aRect.size.height + _activeField.frame.size.height);
         [self.scrollView setContentOffset:scrollPoint animated:YES];
     }
 }
@@ -248,24 +249,8 @@
 	}
 }
 
-- (BOOL) textFieldShouldReturn: (UITextField*) textField 
-{
-	// Update the data model
-	if (textField == [self usernameTextField]) {
-		_username = [textField.text copy];
-	}
-	
-	if (textField == [self passwordTextField]) {
-		_password = [textField.text copy];
-	}
-	
-	if (textField == [self syncKeyTextField]) {
-		_secret = [textField.text copy];
-	}
-	
-	if (textField == [self customServerTextField]) {
-		_customServerURL = [textField.text copy];
-	}
+- (BOOL) textFieldShouldReturn: (UITextField*) textField {
+    [textField resignFirstResponder];
     return YES;
 
 //	NSLog(@"LOGGING IN WITH THE FOLLOWING:");
