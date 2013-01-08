@@ -71,10 +71,6 @@ JPAKEReporter* gSharedReporter = nil;
     self.helpButton = nil;
 }
 
-- (BOOL)shouldAutorotate {
-    return NO;
-}
-
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
     return UIInterfaceOrientationPortrait;
 }

@@ -56,10 +56,6 @@
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
 }
 
-- (BOOL)shouldAutorotate {
-    return NO;
-}
-
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
     return UIInterfaceOrientationPortrait;
 }

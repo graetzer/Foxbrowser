@@ -80,10 +80,6 @@
   [self.tableView reloadData];
 }
 
-- (BOOL)shouldAutorotate {
-    return YES;
-}
-
 - (NSUInteger)supportedInterfaceOrientations {
     return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? UIInterfaceOrientationMaskAll : UIInterfaceOrientationMaskAllButUpsideDown;
 }
