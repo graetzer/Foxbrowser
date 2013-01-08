@@ -23,7 +23,7 @@
 
 #import <UIKit/UIKit.h>
 
-/// Workaround to prevent iOS 6 to rotate the modal view cotrollers
+/// Workaround to support rotations
 @interface SGNavViewController : UINavigationController
 
 @end

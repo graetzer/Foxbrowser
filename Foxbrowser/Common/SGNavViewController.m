@@ -23,10 +23,19 @@
 
 #import "SGNavViewController.h"
 
+#define SG_SCROLL_ID 1337321
+
 @implementation SGNavViewController
 
 - (BOOL)shouldAutorotate {
-    return [self.topViewController shouldAutorotate];
+    return NO;
 }
 
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationPortrait;
+}
 @end
