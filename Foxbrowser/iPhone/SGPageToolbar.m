@@ -63,18 +63,21 @@
         _forwardButton.hidden = !self.browser.canGoForward;
         [self addSubview:_forwardButton];
         
+        btnRect = CGRectMake(0, (frame.size.height - 36)/2, 36, 36);
+        btnRect.origin.x = frame.size.width - 80;
         _optionsButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _optionsButton.frame = btnRect;
-        _optionsButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        _optionsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         _optionsButton.backgroundColor = [UIColor clearColor];
-        _optionsButton.showsTouchWhenHighlighted = YES;
         [_optionsButton setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
         [_optionsButton setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
         [_optionsButton addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_optionsButton];
         
+        btnRect.origin.x = frame.size.width - 40;
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _tabsButton.frame = CGRectMake(0, 0, 35, 35);
+        _tabsButton.frame = btnRect;
+        _tabsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         _tabsButton.backgroundColor = [UIColor clearColor];
         _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(5, 5, 0, 0);
         _tabsButton.titleLabel.font = [UIFont systemFontOfSize:12.5];
@@ -84,6 +87,19 @@
         [_tabsButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
         [_tabsButton addTarget:self action:@selector(pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
+        
+        btnRect = CGRectMake(0, (frame.size.height - 30)/2, 77, 30);
+        btnRect.origin.x = frame.size.width - 80;
+        _cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _cancelButton.frame = btnRect;
+        _cancelButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+        _cancelButton.backgroundColor = [UIColor clearColor];
+        _cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15];
+        [_cancelButton setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
+        [_cancelButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
+        [_cancelButton addTarget:self action:@selector(cancelSearchButton:) forControlEvents:UIControlEventTouchUpInside];
+        _cancelButton.hidden = YES;
+        [self addSubview:_cancelButton];
         
         _searchField = [[SGSearchField alloc] initWithDelegate:self];
         [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
@@ -117,17 +133,6 @@
     CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
     _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height)/2,
                                     searchWidth, _searchField.frame.size.height);
-    posX += _searchField.frame.size.width + margin;
-    
-    _optionsButton.frame = CGRectMake(posX, (height - _optionsButton.frame.size.height)/2,
-                                    _optionsButton.frame.size.width, _optionsButton.frame.size.height);
-    
-    posX += _optionsButton.frame.size.width + margin;
-
-    _tabsButton.frame = CGRectMake(posX, (height - _tabsButton.frame.size.height)/2,
-                                   _tabsButton.frame.size.width, _tabsButton.frame.size.height);
-    
-
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -178,12 +183,16 @@
 
 #pragma mark - IBAction
 
+- (IBAction)cancelSearchButton:(id)sender {
+    [self dismissSearchController];
+    [self.searchField resignFirstResponder];
+}
+
 - (IBAction)pressedTabsButton:(id)sender {
     self.browser.exposeMode = YES;
 }
 
 - (IBAction)showOptions:(UIButton *)sender {
-    
     //BOOL privateMode = [[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode];
     self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
                                                    delegate:self
@@ -251,10 +260,6 @@
                 [self.browser presentModalViewController:nav animated:YES];
             }
         }
-            
-            break;
-            
-        default:
             break;
     }
 }
@@ -267,13 +272,12 @@
 
 #pragma mark - UITextFieldDelegate
 
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    [self presentSearchController];
+}
+
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     NSString *searchText = [textField.text stringByReplacingCharactersInRange:range withString:string];
-    if (searchText.length > 0 && !_searchBarVisible) {
-        [self presentSearchController];
-    } else if (searchText.length == 0 && _searchBarVisible) {
-        [self dismissSearchController];
-    }
     
     // When the search string changes, filter the recents list accordingly.
     if (_searchBarVisible) // TODO
@@ -286,10 +290,7 @@
     // If the user finishes editing text in the search bar by, for example:
     // tapping away rather than selecting from the recents list, then just dismiss the popover
     [self dismissSearchController];
-    
-    if ([self.browser respondsToSelector:@selector(URL)]) {
-        self.searchField.text = [self.browser URL].absoluteString;
-    }
+    self.searchField.text = [self.browser URL].absoluteString;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -302,15 +303,39 @@
 #pragma mark - SGSearchController
 
 - (void)presentSearchController {
-    _searchBarVisible = YES;
-    self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
-                                         self.frame.size.width, self.superview.bounds.size.height - self.frame.size.height);
-    [self.superview addSubview:self.searchController.view];
+    if (!_searchBarVisible) {
+        self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
+                                                      self.frame.size.width, self.superview.bounds.size.height - self.frame.size.height);
+        [UIView animateWithDuration:0.25
+                         animations:^{
+                             _cancelButton.alpha = 1.0;
+                             _optionsButton.alpha = 0;
+                             _tabsButton.alpha = 0;
+                             [self.superview addSubview:self.searchController.view];
+                         } completion:^(BOOL finished){
+                             _searchBarVisible = YES;
+                             _optionsButton.hidden = YES;
+                             _tabsButton.hidden = YES;
+                             _cancelButton.hidden = NO;
+                         }];
+    }
 }
 
 - (void)dismissSearchController {
-    _searchBarVisible = NO;
-    [self.searchController.view removeFromSuperview];
+    if (_searchBarVisible) {
+        [UIView animateWithDuration:0.25
+                         animations:^{
+                             _optionsButton.alpha = 1.0;
+                             _tabsButton.alpha = 1.0;
+                             _cancelButton.alpha = 0;
+                             [self.searchController.view removeFromSuperview];
+                         } completion:^(BOOL finished){
+                             _optionsButton.hidden = NO;
+                             _tabsButton.hidden = NO;
+                             _cancelButton.hidden = YES;
+                             _searchBarVisible = NO;
+                         }];
+    }
 }
 
 #pragma mark - SGSearchControllerDelegate

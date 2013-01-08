@@ -34,11 +34,10 @@
 @property (readonly, nonatomic) UIButton *forwardButton;
 @property (readonly, nonatomic) UIButton *optionsButton;
 @property (readonly, nonatomic) UIButton *tabsButton;
+@property (readonly, nonatomic) UIButton *cancelButton;
 
 @property (strong, nonatomic) UINavigationController *bookmarks;
-
 @property (strong, nonatomic) UIActionSheet *actionSheet;
-
 @property (weak, nonatomic) SGPageViewController *browser;
 
 - (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser;

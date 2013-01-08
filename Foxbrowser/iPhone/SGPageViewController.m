@@ -85,7 +85,7 @@
     [self.view insertSubview:button belowSubview:self.toolbar];
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(self.view.bounds.size.width - 80, 4.5, 36, 36);
+    button.frame = CGRectMake(self.view.bounds.size.width - 80, 4, 36, 36);
     button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     button.backgroundColor = [UIColor clearColor];
     [button setImage:[UIImage imageNamed:@"grip-white"] forState:UIControlStateNormal];
@@ -94,7 +94,7 @@
     [self.view insertSubview:button belowSubview:self.toolbar];
     
     _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _tabsButton.frame = CGRectMake(self.view.bounds.size.width - 40, 4.5, 36, 36);
+    _tabsButton.frame = CGRectMake(self.view.bounds.size.width - 40, 4, 36, 36);
     _tabsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     _tabsButton.backgroundColor = [UIColor clearColor];
     _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(5, 5, 0, 0);
