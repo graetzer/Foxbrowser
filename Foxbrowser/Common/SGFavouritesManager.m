@@ -71,12 +71,11 @@
 }
 
 - (NSURL *)blockURL:(NSURL *)url {
-    [_blocked addObject:url];
-    [_favourites removeObjectForKey:url];
+    [_blocked addObject:url.absoluteString];
     [_blocked writeToFile:[self blacklistFilePath] atomically:NO];
+    [_favourites removeObjectForKey:url];
     
-    [self fillFavourites];
-    return [_favourites.allKeys lastObject];
+    return [self fillFavourites];
 }
 
 - (void)resetFavourites {
@@ -95,7 +94,9 @@
 }
 
 - (NSUInteger)maxFavs {
-    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 6 : 8;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        return [UIScreen mainScreen].bounds.size.height >= 568 ? 8 : 6;
+    return 8;//on the iPad always 8
 }
 
 #pragma mark Screenshot stuff
@@ -164,22 +165,24 @@
     return NO;
 }
 
-- (void)fillFavourites {
+- (NSURL *)fillFavourites {
     NSArray *history = [[Store getStore] getHistory];
     
+    NSURL *url;
     NSUInteger i = _favourites.count;
     while (_favourites.count < [self maxFavs] && i < history.count) {
         NSDictionary *item = history[i];
         i++;
         
         NSString *urlS = [item objectForKey:@"url"];
-        NSURL *url = [NSURL URLWithString:urlS];
+        url = [NSURL URLWithString:urlS];
         
-        if ([self containsHost:url.host] || [_blocked containsObject:url])
+        if ([self containsHost:url.host] || [_blocked containsObject:url.absoluteString])
             continue;
         
         _favourites[url] = [item objectForKey:@"title"];
     }
+    return url;
 }
 
 - (UIImage *)imageWithView:(UIView *)view {

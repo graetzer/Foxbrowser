@@ -497,8 +497,8 @@
 		F46C5D1E169CCF4B00D9B717 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = SOURCE_ROOT; };
 		F476626B15C82BE600F5E1E5 /* SGProgressCircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGProgressCircleView.h; sourceTree = "<group>"; };
 		F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGProgressCircleView.m; sourceTree = "<group>"; };
-		F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
-		F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Scaling.m"; sourceTree = "<group>"; };
+		F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+Scaling.h"; path = "WebView/UIImage+Scaling.h"; sourceTree = "<group>"; };
+		F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+Scaling.m"; path = "WebView/UIImage+Scaling.m"; sourceTree = "<group>"; };
 		F488DAC71697A05F00C40773 /* grip-white-pressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white-pressed.png"; sourceTree = "<group>"; };
 		F488DAC81697A05F00C40773 /* grip-white-pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white-pressed@2x.png"; sourceTree = "<group>"; };
 		F488DAC91697A05F00C40773 /* grip-white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-white.png"; sourceTree = "<group>"; };
@@ -1145,8 +1145,6 @@
 				F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */,
 				F49EE8B615A246AE001B4D5F /* SGWebViewController.h */,
 				F49EE8B715A246AE001B4D5F /* SGWebViewController.m */,
-				F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */,
-				F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */,
 				F44480B015E2B44C00006F20 /* SGCredentialsPrompt.h */,
 				F44480B115E2B44C00006F20 /* SGCredentialsPrompt.m */,
 			);
@@ -1214,6 +1212,8 @@
 			children = (
 				F4EA92F0168CA5DC00CA9154 /* SGFavouritesManager.h */,
 				F4EA92F1168CA5DC00CA9154 /* SGFavouritesManager.m */,
+				F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */,
+				F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */,
 			);
 			name = Favourites;
 			sourceTree = "<group>";
@@ -1707,8 +1707,8 @@
 		F4FE2C5E159B6C58001B04D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1730,8 +1730,8 @@
 		F4FE2C5F159B6C58001B04D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
