@@ -1,6 +1,6 @@
 # Foxbrowser
 
-The purpose of the project is to provide a full Firefox Sync powered replacement for Mobile Safari on the iPad. 
+The purpose of the project is to provide a full Firefox Sync powered replacement for Mobile Safari on iOs devices. 
 The backend code is forked from Firefox Home for iOS, on top of that I created an entirely new UI.
 
 - Safari style UI (Might change in future releases)

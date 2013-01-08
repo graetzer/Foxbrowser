@@ -88,7 +88,7 @@
         [_tabsButton addTarget:self action:@selector(pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
         
-        btnRect = CGRectMake(0, (frame.size.height - 30)/2, 77, 30);
+        btnRect = CGRectMake(0, (frame.size.height - 36)/2, 77, 36);
         btnRect.origin.x = frame.size.width - 80;
         _cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _cancelButton.frame = btnRect;

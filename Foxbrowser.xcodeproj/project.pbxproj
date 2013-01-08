@@ -125,6 +125,8 @@
 		F46A63B5167CE08F0004BE43 /* SGPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63B4167CE08F0004BE43 /* SGPageViewController.m */; };
 		F46A63B8167CF35F0004BE43 /* SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63B7167CF35F0004BE43 /* SGBrowserViewController.m */; };
 		F46A63BB167D16630004BE43 /* UIViewController+SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63BA167D16630004BE43 /* UIViewController+SGBrowserViewController.m */; };
+		F46C5D1F169CCF4B00D9B717 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = F46C5D1D169CCF4B00D9B717 /* Default.png */; };
+		F46C5D20169CCF4B00D9B717 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F46C5D1E169CCF4B00D9B717 /* Default@2x.png */; };
 		F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */; };
 		F476627115C83D7800F5E1E5 /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F476627015C83D7700F5E1E5 /* UIImage+Scaling.m */; };
 		F485A5F815B786FA00C7304E /* SettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BF6F2715B716B9005FD2B6 /* SettingsController.m */; };
@@ -491,6 +493,8 @@
 		F46A63B7167CF35F0004BE43 /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
 		F46A63B9167D16620004BE43 /* UIViewController+SGBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SGBrowserViewController.h"; sourceTree = "<group>"; };
 		F46A63BA167D16630004BE43 /* UIViewController+SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SGBrowserViewController.m"; sourceTree = "<group>"; };
+		F46C5D1D169CCF4B00D9B717 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = SOURCE_ROOT; };
+		F46C5D1E169CCF4B00D9B717 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = SOURCE_ROOT; };
 		F476626B15C82BE600F5E1E5 /* SGProgressCircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGProgressCircleView.h; sourceTree = "<group>"; };
 		F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGProgressCircleView.m; sourceTree = "<group>"; };
 		F476626F15C83D7700F5E1E5 /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
@@ -1285,6 +1289,8 @@
 		F4FE2C50159B6C58001B04D7 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				F46C5D1D169CCF4B00D9B717 /* Default.png */,
+				F46C5D1E169CCF4B00D9B717 /* Default@2x.png */,
 				F41E7FDE169356DC0036AE81 /* Icon-72.png */,
 				F41E7FDF169356DC0036AE81 /* Icon-72@2x.png */,
 				F41E7FE0169356DC0036AE81 /* Icon.png */,
@@ -1459,6 +1465,8 @@
 				F4904F5E169B24DF00B19748 /* dialpad@2x.png in Resources */,
 				F4904F60169B65F600B19748 /* Default-568h@2x.png in Resources */,
 				F4904F63169B700300B19748 /* ManualSetupViewController.xib in Resources */,
+				F46C5D1F169CCF4B00D9B717 /* Default.png in Resources */,
+				F46C5D20169CCF4B00D9B717 /* Default@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

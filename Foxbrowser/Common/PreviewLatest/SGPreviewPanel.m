@@ -46,10 +46,11 @@
         _label.text = [fm titleWithURL:url];
         [self addSubview:_label];
         
+        UIImage *image = [fm imageWithURL:url];
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
         _imageView.contentMode = UIViewContentModeScaleAspectFit;
-        _imageView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1.];
-        _imageView.image = [fm imageWithURL:url];
+        _imageView.backgroundColor = image ? [UIColor whiteColor]:[UIColor colorWithWhite:0.8 alpha:1.];
+        _imageView.image = image;
         _imageView.layer.borderColor = [UIColor grayColor].CGColor;
         _imageView.layer.borderWidth = 1.f;
         [self addSubview:_imageView];
