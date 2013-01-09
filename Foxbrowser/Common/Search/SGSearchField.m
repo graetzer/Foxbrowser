@@ -22,9 +22,7 @@
 #import "SGSearchField.h"
 #include "SGTabDefines.h"
 
-@implementation SGSearchField {
-    UIToolbar *_inputAccessory;
-}
+@implementation SGSearchField
 @synthesize state = _state;
 
 - (id)initWithDelegate:(id<UITextFieldDelegate>)delegate {
@@ -40,7 +38,8 @@
         self.textColor = [UIColor darkTextColor];
         
         self.leftView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"magnify"]];
-        self.leftViewMode = UITextFieldViewModeAlways;
+        self.leftViewMode = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ?
+            UITextFieldViewModeUnlessEditing : UITextFieldViewModeAlways;
         self.rightViewMode = UITextFieldViewModeUnlessEditing;
         
         CGRect btnRect = CGRectMake(0, 0, 22, 22);
@@ -57,6 +56,8 @@
         [self.stopItem setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
         
         self.state = SGSearchFieldStateDisabled;
+        
+        self.inputAccessoryView = [self generateInputAccessoryView];
     }
     return self;
 }
@@ -73,9 +74,8 @@
     }
 }
 
-- (UIView *)inputAccessoryView {
-    if (!_inputAccessory) {
-        _inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
+- (UIView *)generateInputAccessoryView {
+        UIToolbar *_inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
         _inputAccessory.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
             _inputAccessory.translucent = YES;
@@ -106,7 +106,6 @@
         }
         [buttons addObject:flex];
         _inputAccessory.items = buttons;
-    }
     return _inputAccessory;
 }
 
