@@ -29,6 +29,7 @@
     if (self = [super initWithFrame:CGRectMake(0, 0, 200., 30.)]) {
         self.delegate = delegate;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
         self.placeholder = NSLocalizedString(@"Enter URL or search query here", nil);
         self.keyboardType = UIKeyboardTypeASCIICapable;
         self.autocapitalizationType = UITextAutocapitalizationTypeNone;
