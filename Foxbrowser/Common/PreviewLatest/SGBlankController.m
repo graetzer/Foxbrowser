@@ -55,6 +55,7 @@
     scrollView.backgroundColor = [UIColor clearColor];
     scrollView.scrollsToTop = NO;
     scrollView.bounces = NO;
+    scrollView.pagingEnabled = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone;
     scrollView.decelerationRate = UIScrollViewDecelerationRateFast;
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.showsVerticalScrollIndicator = NO;
@@ -137,18 +138,6 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     self.bottomView.markerPosititon = scrollView.contentOffset.x/SG_TAB_WIDTH;
-}
-
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    if (!decelerate)
-        [self scrollViewDidEndDecelerating:scrollView];
-}
-
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    if (scrollView.contentOffset.x > SG_TAB_WIDTH/2)
-        [scrollView setContentOffset:CGPointMake(SG_TAB_WIDTH, 0) animated:YES];
-    else
-        [scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
 }
 
 @end

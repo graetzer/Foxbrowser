@@ -76,37 +76,37 @@
 }
 
 - (UIView *)generateInputAccessoryView {
-        UIToolbar *_inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
-        _inputAccessory.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-            _inputAccessory.translucent = YES;
-            _inputAccessory.tintColor = kTabColor;
-        }
+    UIToolbar *_inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
+    _inputAccessory.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        _inputAccessory.translucent = YES;
+        _inputAccessory.tintColor = kTabColor;
+    }
+    
+    UIBarButtonItem *btn, *flex, *fix;
+    flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                         target:nil action:nil];
+    fix = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
+                                                        target:nil action:nil];
+    fix.width = 10;
+    
+    NSArray *titles = @[@":", @".", @"-", @"/", @".com"];
+    NSMutableArray *buttons = [NSMutableArray arrayWithCapacity:titles.count];
+    [buttons addObject:flex];
+    for (NSString *title in titles) {
+        btn = [[UIBarButtonItem alloc] initWithTitle:title
+                                              style:UIBarButtonItemStyleBordered
+                                             target:self
+                                             action:@selector(addText:)];
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+            btn.tintColor = [UIColor lightGrayColor];
         
-        UIBarButtonItem *btn, *flex, *fix;
-        flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
-                                                             target:nil action:nil];
-        fix = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
-                                                            target:nil action:nil];
-        fix.width = 10;
-        
-        NSArray *titles = @[@":", @".", @"-", @"/", @".com"];
-        NSMutableArray *buttons = [NSMutableArray arrayWithCapacity:titles.count];
-        [buttons addObject:flex];
-        for (NSString *title in titles) {
-            btn = [[UIBarButtonItem alloc] initWithTitle:title
-                                                  style:UIBarButtonItemStyleBordered
-                                                 target:self
-                                                 action:@selector(addText:)];
-            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
-                btn.tintColor = [UIColor lightGrayColor];
-            
-            btn.width = 40.;
-            [buttons addObject:btn];
-            [buttons addObject:fix];
-        }
-        [buttons addObject:flex];
-        _inputAccessory.items = buttons;
+        btn.width = 40.;
+        [buttons addObject:btn];
+        [buttons addObject:fix];
+    }
+    [buttons addObject:flex];
+    _inputAccessory.items = buttons;
     return _inputAccessory;
 }
 
