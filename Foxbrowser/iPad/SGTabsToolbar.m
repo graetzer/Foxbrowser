@@ -170,83 +170,82 @@
 - (IBAction)showOptions:(UIButton *)sender {
     [self destroyPopovers];
     
-    //BOOL privateMode = [[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode];
-    self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil 
-                            delegate:self
-                            cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                            destructiveButtonTitle:nil
-                            otherButtonTitles:
-                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                            NSLocalizedString(@"Email URL", nil),
+    if (!NSClassFromString(@"SLComposeViewController")) {
+        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                       delegate:self
+                                              cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:
                             NSLocalizedString(@"Tweet", @"Tweet the current url"),
-                        //!privateMode ? NSLocalizedString(@"Enable Private Browsing", nil) : NSLocalizedString(@"Disable Private Browsing", nil) ,
+                            NSLocalizedString(@"Email URL", nil),
+                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                             NSLocalizedString(@"Settings", nil), nil];
+    } else {
+        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                       delegate:self
+                                              cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:
+                            NSLocalizedString(@"Facebook", @"Post the current url"),
+                            NSLocalizedString(@"Tweet", @"Tweet the current url"),
+                            NSLocalizedString(@"Email URL", nil),
+                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
+                            NSLocalizedString(@"Settings", nil), nil];
+    }
+    
     [self.actionSheet showFromRect:sender.frame inView:self animated:YES];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    [self destroyPopovers];
     NSURL *url = [self.browser URL];
-
-    switch (buttonIndex) {
-        case 0: // Open in mobile safari
-            [[UIApplication sharedApplication] openURL:url];
-            break;
-        case 1: // Send a mail
-            if ([MFMailComposeViewController canSendMail]) {
-                MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
-                mail.mailComposeDelegate = self;
-                [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
-                NSString *text = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Here is that site we talked about:", nil), url.absoluteString];
-                [mail setMessageBody:text isHTML:NO];
-                [self.browser presentModalViewController:mail animated:YES];
-            }
-            break;
-            
-        case 2: // Send a tweet
-            if ([TWTweetComposeViewController canSendTweet]) {
-                TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
-                [tw addURL:url];
-                [self.browser presentModalViewController:tw animated:YES];
-            }
-            break;
-        
-//        case 3: // Toggle private mode
-//            {
-//                BOOL privateMode = ![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode];
-//                [[NSUserDefaults standardUserDefaults] setBool:privateMode forKey:kWeavePrivateMode];
-//                if (privateMode) {// Enable it
-//                    
-//                } else {
-//                    
-//                }
-//                [[NSUserDefaults standardUserDefaults] synchronize];
-//            }
-//            break;
-            
-        case 3: // Show settings or welcome page
-            {
-                BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
-                if (!showedFirstRunPage)
-                {
-                    WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
-                    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
-                    navController.modalPresentationStyle = UIModalPresentationFormSheet;
-                    [self.browser presentViewController:navController animated:YES completion:NULL];
-                }
-                else
-                {
-                    SettingsController *settings = [SettingsController new];
-                    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
-                    nav.modalPresentationStyle = UIModalPresentationFormSheet;
-                    [self.browser presentModalViewController:nav animated:YES];
-                }
-                
-            }
-            
-            break;
-            
-        default:
-            break;
+    
+    if (!NSClassFromString(@"SLComposeViewController")) {
+        buttonIndex++;
+    } else if (buttonIndex == 0) {// Post on facebook
+        if (url && [SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
+            SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
+            [composeVC addURL:url];
+            [self.browser presentModalViewController:composeVC animated:YES];
+        }
+    }
+    
+    if (buttonIndex == 1) {// Send a tweet
+        if (url && [TWTweetComposeViewController canSendTweet]) {
+            TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
+            [tw addURL:url];
+            [self.browser presentModalViewController:tw animated:YES];
+        }
+    }
+    
+    if (buttonIndex == 2) {// Send a mail
+        if (url && [MFMailComposeViewController canSendMail]) {
+            MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
+            mail.mailComposeDelegate = self;
+            [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
+            NSString *text = [NSString stringWithFormat:@"%@\n %@", NSLocalizedString(@"Here is that site we talked about:", nil), url];
+            [mail setMessageBody:text isHTML:NO];
+            [self.browser presentModalViewController:mail animated:YES];
+        }
+    }
+    
+    if (buttonIndex == 3) {// Open in mobile safari
+        [[UIApplication sharedApplication] openURL:url];
+    }
+    
+    if (buttonIndex == 4) {// Show settings or welcome page
+        BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
+        if (!showedFirstRunPage) {
+            WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
+            UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
+            navController.modalPresentationStyle = UIModalPresentationFormSheet;
+            [self.browser presentViewController:navController animated:YES completion:NULL];
+        } else {
+            SettingsController *settings = [SettingsController new];
+            UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
+            nav.modalPresentationStyle = UIModalPresentationFormSheet;
+            [self.browser presentModalViewController:nav animated:YES];
+        }
     }
 }
 

@@ -8,7 +8,7 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Version 2.0</string>
+			<string>Version 2.0.1</string>
 			<key>Key</key>
 			<string></string>
 		</dict>
@@ -33,6 +33,22 @@
 				<string>http://www.google.com/search?q=%@&amp;hl=%@</string>
 				<string>http://www.bing.com/search?q=%@&amp;mkt=%@</string>
 			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Show new tabs</string>
+			<key>Key</key>
+			<string>org.graetzer.tabs.foreground</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Extended</string>
 		</dict>
 		<dict>
 			<key>DefaultValue</key>

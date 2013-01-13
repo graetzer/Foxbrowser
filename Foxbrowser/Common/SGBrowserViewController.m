@@ -90,8 +90,10 @@
     SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
     webC.title = title;
     [webC openURL:url];
-    
     [self addViewController:webC];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.tabs.foreground"])
+        [self showViewController:webC];
+    
     if (self.count >= self.maxCount) {
         if ([self selectedIndex] != 0)
             [self removeIndex:0];

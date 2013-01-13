@@ -21,6 +21,7 @@
         self.showsHorizontalScrollIndicator = NO;
         self.showsVerticalScrollIndicator = NO;
         self.scrollsToTop = NO;
+        self.delaysContentTouches = NO;
     }
     return self;
 }
