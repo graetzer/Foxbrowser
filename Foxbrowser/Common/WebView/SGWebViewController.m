@@ -410,8 +410,8 @@
         [alert show];
     } else {
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location
-                                           cachePolicy:NSURLRequestReloadRevalidatingCacheData
-                                       timeoutInterval:10.];
+                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                       timeoutInterval:60.];
         [[WeaveOperations sharedOperations] modifyRequest:request];
         [self.webView loadRequest:request];
     }
