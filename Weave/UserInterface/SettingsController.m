@@ -206,7 +206,7 @@
 
 - (IBAction) cancel
 {
-	[self dismissModalViewControllerAnimated: YES];
+	[self dismissViewControllerAnimated: YES completion:NULL];
 }
 
 - (void)didReceiveMemoryWarning {

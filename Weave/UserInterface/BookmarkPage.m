@@ -56,8 +56,9 @@
   self.contentSizeForViewInPopover = CGSizeMake(320., 660.);
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
-                                                                                              target:self action:@selector(dismiss:)];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                                              target:self
+                                                                                               action:@selector(dismiss:)];
     }
 }
 

@@ -409,9 +409,7 @@
                                                        delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
         [alert show];
     } else {
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location
-                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
-                                       timeoutInterval:60.];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location];
         [[WeaveOperations sharedOperations] modifyRequest:request];
         [self.webView loadRequest:request];
     }

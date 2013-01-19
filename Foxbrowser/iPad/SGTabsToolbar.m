@@ -206,7 +206,7 @@
         if (url && [SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
             SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
             [composeVC addURL:url];
-            [self.browser presentModalViewController:composeVC animated:YES];
+            [self.browser presentViewController:composeVC animated:YES completion:NULL];
         }
     }
     
@@ -214,7 +214,7 @@
         if (url && [TWTweetComposeViewController canSendTweet]) {
             TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
             [tw addURL:url];
-            [self.browser presentModalViewController:tw animated:YES];
+            [self.browser presentViewController:tw animated:YES completion:NULL];
         }
     }
     
@@ -225,7 +225,7 @@
             [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
             NSString *text = [NSString stringWithFormat:@"%@\n %@", NSLocalizedString(@"Here is that site we talked about:", nil), url];
             [mail setMessageBody:text isHTML:NO];
-            [self.browser presentModalViewController:mail animated:YES];
+            [self.browser presentViewController:mail animated:YES completion:NULL];
         }
     }
     
@@ -244,7 +244,7 @@
             SettingsController *settings = [SettingsController new];
             UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
             nav.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentModalViewController:nav animated:YES];
+            [self.browser presentViewController:nav animated:YES completion:NULL];
         }
     }
 }
@@ -271,7 +271,7 @@
     }
     
     // Remove the mail view
-    [self.browser dismissModalViewControllerAnimated:YES];
+    [self.browser dismissViewControllerAnimated:YES completion:NULL];
 }
 
 - (void)updateChrome {

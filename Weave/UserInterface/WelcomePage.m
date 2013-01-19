@@ -87,7 +87,7 @@ JPAKEReporter* gSharedReporter = nil;
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
 	//[vc dismissModalViewControllerAnimated: NO];
-	[self dismissModalViewControllerAnimated: YES];
+	[self dismissViewControllerAnimated:YES completion:NULL];
 }
 
 #pragma mark -
@@ -97,8 +97,7 @@ JPAKEReporter* gSharedReporter = nil;
 	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:kWeaveShowedFirstRunPage];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
-	//[vc dismissModalViewControllerAnimated: NO];
-	[self dismissModalViewControllerAnimated: YES];
+	[self dismissViewControllerAnimated:YES completion:NULL];
 }
 
 - (void) easySetupViewControllerDidCancel: (EasySetupViewController*)vc
