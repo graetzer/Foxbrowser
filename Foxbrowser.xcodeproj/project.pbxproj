@@ -142,7 +142,6 @@
 		F488DAD91698828A00C40773 /* SGPageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F488DAD81698828A00C40773 /* SGPageScrollView.m */; };
 		F48A732516BFECF3006B25CB /* libGoogleAnalytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F48A732416BFECF3006B25CB /* libGoogleAnalytics.a */; };
 		F48A732716BFFF8B006B25CB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F48A732616BFFF8B006B25CB /* CoreData.framework */; };
-		F48A732B16C02123006B25CB /* grey_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F48A732A16C02123006B25CB /* grey_logo.png */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
 		F4904F5D169B24DF00B19748 /* dialpad.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5B169B24DF00B19748 /* dialpad.png */; };
 		F4904F5E169B24DF00B19748 /* dialpad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5C169B24DF00B19748 /* dialpad@2x.png */; };
@@ -521,7 +520,6 @@
 		F48A732316BFECF3006B25CB /* GAITransactionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAITransactionItem.h; sourceTree = "<group>"; };
 		F48A732416BFECF3006B25CB /* libGoogleAnalytics.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libGoogleAnalytics.a; sourceTree = "<group>"; };
 		F48A732616BFFF8B006B25CB /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
-		F48A732A16C02123006B25CB /* grey_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = grey_logo.png; sourceTree = "<group>"; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
 		F4904F5B169B24DF00B19748 /* dialpad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dialpad.png; sourceTree = "<group>"; };
@@ -1170,7 +1168,6 @@
 		F4BF6F4515B735BA005FD2B6 /* WebView */ = {
 			isa = PBXGroup;
 			children = (
-				F48A732A16C02123006B25CB /* grey_logo.png */,
 				F46A6371167C300E0004BE43 /* JSTools.js */,
 				F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */,
 				F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */,
@@ -1500,7 +1497,6 @@
 				F4904F63169B700300B19748 /* ManualSetupViewController.xib in Resources */,
 				F46C5D1F169CCF4B00D9B717 /* Default.png in Resources */,
 				F46C5D20169CCF4B00D9B717 /* Default@2x.png in Resources */,
-				F48A732B16C02123006B25CB /* grey_logo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

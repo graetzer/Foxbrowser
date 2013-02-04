@@ -346,15 +346,15 @@
                 return;
             }
         }
-        NSString *html = @"<html><head><title>%@</title>"
-        "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' /></head><body>"
-        "<div style='margin:100px auto;width:18em'>"
-        "<img style='display:block;margin:0 auto' src='grey_logo.png' />"
-        "<p style='color:#504f4f;font-family:HelveticaNeue;font-size:15px;text-align:center'>%@</p> </div></body></html>";//
-        NSString *errorPage = [NSString stringWithFormat:html,
-                               NSLocalizedString(@"Error Loading Page", @"error loading page"),[error localizedDescription]];
-        [self.webView loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
     }
+    NSString *html = @"<html><head><title>%@</title>"
+    "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' /></head><body>"
+    "<div style='margin:100px auto;width:18em'>"
+    "<p style='color:#c0bfbf;font:bolder 100px HelveticaNeue;text-align:center;margin:25px'>Fx</p>"
+    "<p style='color:#969595;font:bolder 17.5px HelveticaNeue;text-align:center'>%@</p> </div></body></html>";//
+    NSString *errorPage = [NSString stringWithFormat:html,
+                           NSLocalizedString(@"Error Loading Page", @"error loading page"),[error localizedDescription]];
+    [self.webView loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
 }
 
 #pragma mark - HTTP Authentication
