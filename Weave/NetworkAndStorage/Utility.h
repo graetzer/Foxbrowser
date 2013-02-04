@@ -55,8 +55,8 @@
 //used to sort weave objects by frecency
 static int compareSearchResults(id left,  id right, void* ctx)
 {
-  NSNumber *leftVal = [left objectForKey:@"sortindex"];
-  NSNumber *rightVal = [right objectForKey:@"sortindex"];
+  NSNumber *leftVal = left[@"sortindex"];
+  NSNumber *rightVal = right[@"sortindex"];
   return [rightVal compare: leftVal]; //descending
 }
 

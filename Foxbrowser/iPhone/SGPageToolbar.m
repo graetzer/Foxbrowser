@@ -307,7 +307,6 @@
 - (void)textFieldDidEndEditing:(UITextField *)textField {
     // If the user finishes editing text in the search bar by, for example:
     // tapping away rather than selecting from the recents list, then just dismiss the popover
-    [self dismissSearchController];
     self.searchField.text = [self.browser URL].absoluteString;
 }
 
@@ -354,6 +353,11 @@
                              _searchBarVisible = NO;
                          }];
     }
+}
+
+- (void)userScrolledSuggestions {
+    if ([self.searchField isFirstResponder])
+        [self.searchField resignFirstResponder];
 }
 
 #pragma mark - SGSearchControllerDelegate

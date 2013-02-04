@@ -130,8 +130,8 @@ static CryptoUtils* _cryptoManager = nil;
       if ([e.name isEqualToString:AUTH_EXCEPTION_STRING])
       {
         //ask the user what to do.  try again?  go to login screen?
-        NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                                 NSLocalizedString(@"Incorrect Password", "incorrect password"), @"message", nil];
+        NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                                 @"message": NSLocalizedString(@"Incorrect Password", "incorrect password")};
         
         [weaveService performSelectorOnMainThread:@selector(reportAuthErrorWithMessage:) withObject:errInfo waitUntilDone:NO];
       }
@@ -139,8 +139,8 @@ static CryptoUtils* _cryptoManager = nil;
       {
         
         //ask the user what to do.  try again?  go to login screen?
-        NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                                 NSLocalizedString(@"Incorrect Secret Phrase", "incorrect secret phrase"), @"message", nil];
+        NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                                 @"message": NSLocalizedString(@"Incorrect Secret Phrase", "incorrect secret phrase")};
         
         [weaveService performSelectorOnMainThread:@selector(reportAuthErrorWithMessage:) withObject:errInfo waitUntilDone:NO];
       }
@@ -150,8 +150,8 @@ static CryptoUtils* _cryptoManager = nil;
         //just alert the user to the problem, and tell them to try again later
         NSString *message = NSLocalizedString(@"Unable to contact server", "server unavailable");
         if ([e reason]) message = [e reason];
-        NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                                 message, @"message", nil];
+        NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                                 @"message": message};
         
         [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
       }
@@ -169,8 +169,8 @@ static CryptoUtils* _cryptoManager = nil;
   else //no network
   {
     //no connectivity, put up alert
-    NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                             NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+    NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                             @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
     
     [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
   }
@@ -577,11 +577,11 @@ static CryptoUtils* _cryptoManager = nil;
 
 				_defaultAESKey = [[KeychainItemWrapper alloc] initWithIdentifier: @"DefaultAESKey" accessGroup:nil];
 				[_defaultAESKey setObject: @"DefaultAESKey" forKey: (id) kSecAttrAccount];
-				[_defaultAESKey setObject: [[keys objectForKey: @"default"] objectAtIndex: 0] forKey: (id) kSecValueData];
+				[_defaultAESKey setObject: keys[@"default"][0] forKey: (id) kSecValueData];
 
 				_defaultHMACKey = [[KeychainItemWrapper alloc] initWithIdentifier: @"DefaultHMACKey" accessGroup:nil];
 				[_defaultHMACKey setObject: @"DefaultHMACKey" forKey: (id) kSecAttrAccount];
-				[_defaultHMACKey setObject: [[keys objectForKey: @"default"] objectAtIndex: 1] forKey: (id) kSecValueData];
+				[_defaultHMACKey setObject: keys[@"default"][1] forKey: (id) kSecValueData];
 				
 				// Store the passphrase in the keychain. We do not need it, but we might later and it will allow
 				// us to do migrations more easily.
@@ -631,7 +631,7 @@ static CryptoUtils* _cryptoManager = nil;
   [privKeyString release];
   if (!privKeyJSON) return nil;
 
-	return [[privKeyJSON objectForKey:@"payload"] JSONValue];  
+	return [privKeyJSON[@"payload"] JSONValue];  
 }
 
 - (NSString *)UUID {
@@ -696,7 +696,7 @@ static CryptoUtils* _cryptoManager = nil;
 
 		//if we find one that matches, and decrypts, and the ID matches, then we're golden, and we get out.
 		
-		if (clientObject && [[clientObject objectForKey:@"id"] isEqualToString:myID]) {
+		if (clientObject && [clientObject[@"id"] isEqualToString:myID]) {
 #ifdef DEBUG
 			NSLog(@"found matching mobile client record");
 #endif
@@ -709,12 +709,12 @@ static CryptoUtils* _cryptoManager = nil;
 	}
 
 	NSMutableDictionary* payload = [NSMutableDictionary dictionary];
-	[payload setObject:myID forKey:@"id"];
+	payload[@"id"] = myID;
     NSString *name = [[UIDevice currentDevice] name];
     if (!name.length)
         name = @"iPad";
-	[payload setObject:name forKey:@"name"];
-	[payload setObject:@"mobile" forKey:@"type"];
+	payload[@"name"] = name;
+	payload[@"type"] = @"mobile";
 
 	NSDictionary* encryptedPayload = nil;
 	
@@ -773,11 +773,11 @@ static CryptoUtils* _cryptoManager = nil;
 	NSString *globalString = [[[NSString alloc] initWithData:globalData encoding:NSUTF8StringEncoding] autorelease];
 	NSDictionary *globalDict = [globalString JSONValue];
 
-	NSString* payload = [globalDict objectForKey:@"payload"];
+	NSString* payload = globalDict[@"payload"];
 	NSDictionary* payloadDict = [payload JSONValue];
 
-	_syncID = [[payloadDict objectForKey: @"syncID"] retain];
-	_storageVersion = [[payloadDict objectForKey:@"storageVersion"] intValue];
+	_syncID = [payloadDict[@"syncID"] retain];
+	_storageVersion = [payloadDict[@"storageVersion"] intValue];
 	
 	return (_storageVersion != 0);
 }
@@ -817,7 +817,7 @@ static CryptoUtils* _cryptoManager = nil;
 		return nil;
 	}
 
-	NSDictionary* payload = [[json objectForKey: @"payload"] JSONValue];
+	NSDictionary* payload = [json[@"payload"] JSONValue];
 	if (payload == nil) {
 		return nil;
 	}
@@ -828,8 +828,8 @@ static CryptoUtils* _cryptoManager = nil;
 	
 	// Check the HMAC value to see if the data is authentic
 	
-	NSString* hmacReceived = [payload objectForKey: @"hmac"];
-	NSString* hmacCalculated = [[[payload objectForKey: @"ciphertext"] HMACSHA256WithKey: keys.hmacKey] base16Encoding];
+	NSString* hmacReceived = payload[@"hmac"];
+	NSString* hmacCalculated = [[payload[@"ciphertext"] HMACSHA256WithKey: keys.hmacKey] base16Encoding];
 
 	if ([hmacReceived isEqualToString: hmacCalculated] == NO) {
 		//return nil;
@@ -837,8 +837,8 @@ static CryptoUtils* _cryptoManager = nil;
 	
 	// Decrypt the payload
 	
-	NSData* iv = [[[NSData alloc] initWithBase64EncodedString: [payload objectForKey: @"IV"]] autorelease];
-	NSData* ciphertext = [[[NSData alloc] initWithBase64EncodedString: [payload objectForKey: @"ciphertext"]] autorelease];
+	NSData* iv = [[[NSData alloc] initWithBase64EncodedString: payload[@"IV"]] autorelease];
+	NSData* ciphertext = [[[NSData alloc] initWithBase64EncodedString: payload[@"ciphertext"]] autorelease];
 	NSData* plaintext = [NSData plaintextDataByAES256DecryptingCiphertextData: ciphertext key: keys.cryptoKey iv: iv padding: YES];
 	NSString* plaintextString = [[[NSString alloc] initWithData: plaintext encoding: NSUTF8StringEncoding] autorelease];
 
@@ -933,17 +933,17 @@ static CryptoUtils* _cryptoManager = nil;
 
 
 	NSMutableDictionary* payload = [NSMutableDictionary dictionary];
-	[payload setObject:[ciphertext base64Encoding] forKey:@"ciphertext"];
-	[payload setObject:[initVector base64Encoding] forKey:@"IV"];
-	[payload setObject:[HMAC base16Encoding] forKey:@"hmac"];
+	payload[@"ciphertext"] = [ciphertext base64Encoding];
+	payload[@"IV"] = [initVector base64Encoding];
+	payload[@"hmac"] = [HMAC base16Encoding];
 
 	NSString* JSONPayload = [payload JSONRepresentation];
 
 	//now we need to add 'id', 'modified', 'sortIndex' (?), and the payload to the final EDO object
 	NSMutableDictionary* EDO = [NSMutableDictionary dictionary];
-	[EDO setObject:JSONPayload forKey:@"payload"];
-	[EDO setObject:objectID forKey:@"id"];
-	[EDO setObject:[NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]] forKey:@"modified"];
+	EDO[@"payload"] = JSONPayload;
+	EDO[@"id"] = objectID;
+	EDO[@"modified"] = @([[NSDate date] timeIntervalSince1970]);
 
 	return EDO;
 }
@@ -958,25 +958,22 @@ static CryptoUtils* _cryptoManager = nil;
 	CFBooleanRef    kBoolToCF[2] = { kCFBooleanFalse, kCFBooleanTrue };
 	    
 	OSStatus err = SecItemAdd((CFDictionaryRef)
-                   [NSDictionary dictionaryWithObjectsAndKeys:
-                    (id)
-                    kSecClassKey,                       kSecClass,
-                    kSecAttrKeyTypeRSA,                 kSecAttrKeyType, 
-                    keyNameUTF8,                        kSecAttrApplicationTag,
+                   @{(id)kSecClass: (id)
+                    kSecClassKey,
+                    (id)(id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA, 
+                    (id)kSecAttrApplicationTag: keyNameUTF8,
  //                 keyAppLabel,                        kSecAttrApplicationLabel,  //this was being used incorrectly, and is unneeded, since we lookup by name
-                    kSecAttrKeyClassPrivate,            kSecAttrKeyClass, 
-                    keyData,                            kSecValueData,
-                    [NSNumber numberWithInt:KEY_SIZE],  kSecAttrKeySizeInBits,
-                    [NSNumber numberWithInt:KEY_SIZE],  kSecAttrEffectiveKeySize,
-                    kBoolToCF[YES],               kSecAttrCanDerive,
-                    kBoolToCF[NO],                kSecAttrCanEncrypt,
-                    kBoolToCF[YES],               kSecAttrCanDecrypt,
-                    kBoolToCF[NO],                kSecAttrCanVerify,
-                    kBoolToCF[YES],               kSecAttrCanSign,
-                    kBoolToCF[NO],                kSecAttrCanWrap,
-                    kBoolToCF[YES],               kSecAttrCanUnwrap,
-                    nil
-                    ],
+                    (id)(id)kSecAttrKeyClass: (id)kSecAttrKeyClassPrivate, 
+                    (id)kSecValueData: keyData,
+                    (id)kSecAttrKeySizeInBits: @KEY_SIZE,
+                    (id)kSecAttrEffectiveKeySize: @KEY_SIZE,
+                    (id)(id)kSecAttrCanDerive: (id)kBoolToCF[YES],
+                    (id)(id)kSecAttrCanEncrypt: (id)kBoolToCF[NO],
+                    (id)(id)kSecAttrCanDecrypt: (id)kBoolToCF[YES],
+                    (id)(id)kSecAttrCanVerify: (id)kBoolToCF[NO],
+                    (id)(id)kSecAttrCanSign: (id)kBoolToCF[YES],
+                    (id)(id)kSecAttrCanWrap: (id)kBoolToCF[NO],
+                    (id)(id)kSecAttrCanUnwrap: (id)kBoolToCF[YES]},
                    NULL
 	);
 
@@ -997,13 +994,10 @@ static CryptoUtils* _cryptoManager = nil;
 	SecKeyRef   keyRef = NULL;
   
 	err = SecItemCopyMatching((CFDictionaryRef)
-                            [NSDictionary dictionaryWithObjectsAndKeys:
-                             (id)
-                             kSecClassKey,           kSecClass,
-                             keyNameUTF8,             kSecAttrApplicationTag,
-                             kCFBooleanTrue,         kSecReturnRef,
-                             nil
-                             ],
+                            @{(id)kSecClass: (id)
+                             kSecClassKey,
+                             (id)kSecAttrApplicationTag: keyNameUTF8,
+                             (id)(id)kSecReturnRef: (id)kCFBooleanTrue},
                             (CFTypeRef *) &keyRef
 	);
 	assert( (err == noErr) == (keyRef != NULL) );
@@ -1019,12 +1013,9 @@ static CryptoUtils* _cryptoManager = nil;
 	assert(keyTagData != nil);
   
 	err = SecItemDelete((CFDictionaryRef)
-                            [NSDictionary dictionaryWithObjectsAndKeys:
-                             (id)
-                             kSecClassKey,           kSecClass,
-                             keyTagData,             kSecAttrApplicationTag,
-                             nil
-                             ]);
+                            @{(id)kSecClass: (id)
+                             kSecClassKey,
+                             (id)kSecAttrApplicationTag: keyTagData});
 
   if (err == errSecItemNotFound) {
     DLog(@"unable to delete private key, already deleted");
@@ -1061,7 +1052,7 @@ static CryptoUtils* _cryptoManager = nil;
 	unsigned char final[32];
 	unsigned char tsalt[50];
 	NSData *salt = [[NSData alloc] initWithBase64EncodedString:
-                  [payload objectForKey:@"salt"]];
+                  payload[@"salt"]];
 	
 	[salt getBytes: tsalt length: sizeof tsalt];
 	
@@ -1075,9 +1066,9 @@ static CryptoUtils* _cryptoManager = nil;
                          final);
 	[salt release];
 	
-	NSData *iv = [[[NSData alloc] initWithBase64EncodedString:[payload objectForKey:@"iv"]] autorelease];
+	NSData *iv = [[[NSData alloc] initWithBase64EncodedString:payload[@"iv"]] autorelease];
 	NSData *aesKey = [[[NSData alloc] initWithBytes:final length:32] autorelease];
-	NSData *rawKey = [[[NSData alloc] initWithBase64EncodedString:[payload objectForKey:@"keyData"]] autorelease];
+	NSData *rawKey = [[[NSData alloc] initWithBase64EncodedString:payload[@"keyData"]] autorelease];
 	NSData* rsaKey = [NSData plaintextDataByAES256DecryptingCiphertextData: rawKey key: aesKey iv: iv padding: YES];
 	
   if (!rsaKey || [rsaKey length] < 23) return nil;  //probably wrong password
@@ -1157,7 +1148,7 @@ static CryptoUtils* _cryptoManager = nil;
   NSData *keyRing = nil;
   NSString* keyIndex = nil;
   
-  if ((theKey = [_symmetricKeyCache objectForKey:keyUrl]) == nil) 
+  if ((theKey = _symmetricKeyCache[keyUrl]) == nil) 
   {
     NSString* symmetricKeyPath = [self cryptoKeyURLForEngine:[[[NSURL URLWithString:keyUrl] path] lastPathComponent]];
     
@@ -1176,7 +1167,7 @@ static CryptoUtils* _cryptoManager = nil;
     
     theKey = [self unpackSymmetricKey:keyRing withURL:keyIndex andPrivateKey:_privateKey];
     if (theKey != nil)
-      [_symmetricKeyCache setObject:theKey forKey:keyUrl];
+      _symmetricKeyCache[keyUrl] = theKey;
     else 
     {
       NSException *e = [NSException exceptionWithName:PASSPHRASE_EXCEPTION_STRING
@@ -1193,11 +1184,11 @@ static CryptoUtils* _cryptoManager = nil;
 	NSString* symKeyString = [[[NSString alloc] initWithData:symmetricKeyData encoding:NSUTF8StringEncoding] autorelease];
 	NSDictionary *symKeyDict = [symKeyString JSONValue];
   
-	NSDictionary *payload = [[symKeyDict objectForKey:@"payload"] JSONValue];
-	NSDictionary *keyring = [payload objectForKey:@"keyring"];
-  NSDictionary *selectedKey = [keyring objectForKey:keyURL];
+	NSDictionary *payload = [symKeyDict[@"payload"] JSONValue];
+	NSDictionary *keyring = payload[@"keyring"];
+  NSDictionary *selectedKey = keyring[keyURL];
 	
-	NSData *wrappedKey = [[NSData alloc] initWithBase64EncodedString:[selectedKey objectForKey:@"wrapped"]];
+	NSData *wrappedKey = [[NSData alloc] initWithBase64EncodedString:selectedKey[@"wrapped"]];
 	NSData *unwrappedKey = [self decryptSymmetricKey:wrappedKey withPrivateKey: privateKey];
     [wrappedKey release];
     
@@ -1247,9 +1238,9 @@ static CryptoUtils* _cryptoManager = nil;
 - (NSMutableDictionary*) decryptDataObject:(NSDictionary*)dataObject mustVerify:(BOOL)verify
 {
 	// get the payload    
-	NSDictionary *payload = [[dataObject objectForKey:@"payload"] JSONValue];
+	NSDictionary *payload = [dataObject[@"payload"] JSONValue];
 	//get the url for the symmetric key
-	NSString *symKeyUrl = [payload objectForKey:@"encryption"];
+	NSString *symKeyUrl = payload[@"encryption"];
 
 	//reject non-EDOs, and storageFormat 1 EDO's
 	if (_storageVersion == 2 && symKeyUrl == nil) {
@@ -1257,10 +1248,10 @@ static CryptoUtils* _cryptoManager = nil;
 	}
 
 	//get the IV
-	NSData *initVector = [[[NSData alloc] initWithBase64EncodedString:[payload objectForKey:@"IV"]] autorelease];
+	NSData *initVector = [[[NSData alloc] initWithBase64EncodedString:payload[@"IV"]] autorelease];
 
 	//get the ciphertext
-	NSData *ciphertext = [[[NSData alloc] initWithBase64EncodedString:[payload objectForKey:@"ciphertext"]] autorelease];
+	NSData *ciphertext = [[[NSData alloc] initWithBase64EncodedString:payload[@"ciphertext"]] autorelease];
 
 	//get the correct symmetric key
 	NSData *theKey = nil;
@@ -1301,16 +1292,16 @@ static CryptoUtils* _cryptoManager = nil;
 	}
 
 	//now do a few basic checks
-	if (![[WBO objectForKey:@"id"] isEqualToString:[dataObject objectForKey:@"id"]]) {
+	if (![WBO[@"id"] isEqualToString:dataObject[@"id"]]) {
 		NSLog(@"Ignoring record: object id does not match encryptyed object id!");
 		return nil;
 	}
 
 	//we do hmac verifications against all deleted objects
-	if ([[WBO objectForKey:@"deleted"] boolValue] == YES || verify)
+	if ([WBO[@"deleted"] boolValue] == YES || verify)
 	{
 		//get the hmac
-		NSString* originalHmac = [payload objectForKey:@"hmac"];
+		NSString* originalHmac = payload[@"hmac"];
 
 		NSData* hmacKey = nil;
 
@@ -1324,7 +1315,7 @@ static CryptoUtils* _cryptoManager = nil;
 				break;
 		}
 
-		NSData* newHmacData = [[payload objectForKey:@"ciphertext"] HMACSHA256WithKey: hmacKey];
+		NSData* newHmacData = [payload[@"ciphertext"] HMACSHA256WithKey: hmacKey];
 		NSString* newHmac = [newHmacData base16Encoding];
 		if (![originalHmac isEqualToString:newHmac]) {
 			NSLog(@"Ignoring record: hmac does not verify encrypted object!");
@@ -1388,18 +1379,18 @@ static CryptoUtils* _cryptoManager = nil;
 	NSData* HMAC = [[ciphertext base64Encoding] HMACSHA256WithKey: [[theKey base64Encoding] dataUsingEncoding: NSASCIIStringEncoding]];
 
 	NSMutableDictionary* payload = [NSMutableDictionary dictionary];
-	[payload setObject:symKeyUrl forKey:@"encryption"];
-	[payload setObject:[ciphertext base64Encoding] forKey:@"ciphertext"];
-	[payload setObject:[initVector base64Encoding] forKey:@"IV"];
-	[payload setObject:[HMAC base16Encoding] forKey:@"hmac"];
+	payload[@"encryption"] = symKeyUrl;
+	payload[@"ciphertext"] = [ciphertext base64Encoding];
+	payload[@"IV"] = [initVector base64Encoding];
+	payload[@"hmac"] = [HMAC base16Encoding];
 
 	NSString* JSONPayload = [payload JSONRepresentation];
 
 	//now we need to add 'id', 'modified', 'sortIndex' (?), and the payload to the final EDO object
 	NSMutableDictionary* EDO = [NSMutableDictionary dictionary];
-	[EDO setObject:JSONPayload forKey:@"payload"];
-	[EDO setObject:objectID forKey:@"id"];
-	[EDO setObject:[NSNumber numberWithDouble:[[NSDate date] timeIntervalSince1970]] forKey:@"modified"];
+	EDO[@"payload"] = JSONPayload;
+	EDO[@"id"] = objectID;
+	EDO[@"modified"] = @([[NSDate date] timeIntervalSince1970]);
 
 	return EDO;
 }

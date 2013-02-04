@@ -40,6 +40,8 @@
 #import "WeaveService.h"
 #import "Stockboy.h"
 
+#import "GAI.h"
+
 @implementation ManualSetupViewController {
     __weak UITextField *_activeField;
 }
@@ -84,8 +86,8 @@
         //any sort of auth failure just means we catch it here and make them reenter the password
         @try
         {
-            _newCryptoManager = [[CryptoUtils alloc ] initWithAccountName:[authDict objectForKey:@"user"]
-                                                                 password: [authDict objectForKey:@"pass"] andPassphrase:[authDict objectForKey:@"secret"]];
+            _newCryptoManager = [[CryptoUtils alloc ] initWithAccountName:authDict[@"user"]
+                                                                 password: authDict[@"pass"] andPassphrase:authDict[@"secret"]];
             if (_newCryptoManager) {
                 [self performSelectorOnMainThread:@selector(dismissLoginScreen) withObject:nil waitUntilDone:YES];
             } else  {
@@ -100,6 +102,7 @@
             // I might certainly need to do different things for different error conditions
             [self performSelectorOnMainThread:@selector(authFailed:) withObject:[e reason] waitUntilDone:YES];
             NSLog(@"Failed to initialize CryptoManager");
+            [[GAI sharedInstance].defaultTracker sendException:YES withDescription:@"Failed to initialize CryptoManager"];
         }
         
         @finally
@@ -115,6 +118,12 @@
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Login Failure", @"unable to login")
 		message:message delegate: self cancelButtonTitle: NSLocalizedString(@"OK", @"ok") otherButtonTitles: nil];
 	[alert show];
+    [CryptoUtils deletePrivateKeys];
+    
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
+                                                    withAction:@"Manual"
+                                                     withLabel:@"Fail"
+                                                     withValue:nil];
 }
   
 /**
@@ -133,6 +142,11 @@
 	[Stockboy restock];
 
 	[_delegate manualSetupViewControllerDidLogin: self];
+    
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
+                                                    withAction:@"Manual"
+                                                     withLabel:@"Success"
+                                                     withValue:nil];
 }
 
 #pragma mark - Keyboard 
@@ -209,6 +223,8 @@
 		
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:)
 		name:UIKeyboardWillHideNotification object:nil];
+    
+    [[GAI sharedInstance].defaultTracker sendView:@"ManualSetupViewController"];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
@@ -295,11 +311,9 @@
 	}
     
 	//we require the username to be lowercase, so we do it here on the way out
-	NSDictionary* authDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [[self usernameTextField].text lowercaseString], @"user",
-                              [self passwordTextField].text, @"pass",
-                              [self syncKeyTextField].text, @"secret",
-                              nil];
+	NSDictionary* authDict = @{@"user": [[self usernameTextField].text lowercaseString],
+                              @"pass": [self passwordTextField].text,
+                              @"secret": [self syncKeyTextField].text};
     
 	NSThread* authorizer = [[NSThread alloc] initWithTarget:self selector:@selector(authorize:) object:authDict];
 	[authorizer start];

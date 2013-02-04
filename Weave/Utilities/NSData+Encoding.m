@@ -66,6 +66,9 @@ static char encodingTable[64] = {
 		BOOL flendtext = NO;
 		NSData *base64Data = nil;
 		const unsigned char *base64Bytes = nil;
+        
+        // Fixeing analytics warning
+        memset(inbuf, 0, sizeof(inbuf));
 
 		// Convert the string to ASCII data.
 		base64Data = [string dataUsingEncoding:NSASCIIStringEncoding];
@@ -285,7 +288,7 @@ static char encodingTable[64] = {
 		*hex++ = hexdigits[(c ) & 0xF];
 	}
 	*hex = 0;
-	hexBytes = [NSString stringWithUTF8String:strbuf];
+	hexBytes = @(strbuf);
 	free(strbuf);
 	return hexBytes;
 }

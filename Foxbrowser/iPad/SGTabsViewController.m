@@ -228,7 +228,7 @@
                                     [old removeFromParentViewController];
                                     
                                     // Update tab content
-                                    SGTabView *tab = [self.tabsView.tabs objectAtIndex:index];
+                                    SGTabView *tab = (self.tabsView.tabs)[index];
                                     tab.viewController = viewController;
                                     tab.closeButton.hidden = ![self canRemoveTab:viewController];
                                     

@@ -100,7 +100,7 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     if (retainedTabs.count > 0) {
-        return [[retainedTabs objectAtIndex:section] objectForKey:@"client"];
+        return retainedTabs[section][@"client"];
     } else {
         return NSLocalizedString(@"No open Tabs found", @"No open Tabs found");
     }
@@ -120,7 +120,7 @@
 // Customize the number of rows in the table view.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (retainedTabs.count > 0) {
-        return [[[retainedTabs objectAtIndex:section] objectForKey:@"tabs"] count];
+        return [retainedTabs[section][@"tabs"] count];
     } else {
         return 0;
     }
@@ -139,14 +139,14 @@
     cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
   }
   
-  NSDictionary* tabItem = [[[retainedTabs objectAtIndex:indexPath.section] objectForKey:@"tabs"] objectAtIndex:indexPath.row];
+  NSDictionary* tabItem = retainedTabs[indexPath.section][@"tabs"][indexPath.row];
     
-  cell.textLabel.text = [tabItem objectForKey:@"title"];
-  cell.detailTextLabel.text = [tabItem objectForKey:@"url"];
+  cell.textLabel.text = tabItem[@"title"];
+  cell.detailTextLabel.text = tabItem[@"url"];
   cell.accessoryType = UITableViewCellAccessoryNone;
 
   //set it to the default to start
-  cell.imageView.image = [UIImage imageNamed:[tabItem objectForKey:@"icon"]];
+  cell.imageView.image = [UIImage imageNamed:tabItem[@"icon"]];
   
   return cell;
 }
@@ -163,8 +163,8 @@
 	else 
 	{
 		//no connectivity, put up alert
-		NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Load Page", @"unable to load page"), @"title", 
-			NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+		NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
+			@"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
 		[appDelegate performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];          
 	}
 

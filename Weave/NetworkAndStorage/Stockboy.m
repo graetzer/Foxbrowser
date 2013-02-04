@@ -46,6 +46,8 @@
 #import "NSString+Decoding.h"
 #import "NSString+SBJSON.h"
 
+#import "GAI.h"
+
 //we will completely refresh the top MAX_HISTORY_ITEMS only once a day.  In the interim, we tack on anything that has changed,
 // regardless of frecency rating
 #define HISTORY_FULL_REFRESH_INTERVAL (60 /*seconds*/   *   60 /*minutes*/   *  24  /*hours*/)
@@ -65,7 +67,6 @@
 
 // these should probably return something useful
 - (void) updateTabs;
-- (void) updateVersion;
 - (void) checkCryptoKeys;
 - (void) updateBookmarks;
 - (void) updateHistory;
@@ -112,7 +113,9 @@ static NSDictionary *_gNetworkPaths = nil;
   [_gSyncLock lock];
   if (!_gSyncInProgress)
   {
-    [weaveService performSelectorOnMainThread:@selector(startProgressSpinnersWithMessage:) withObject:NSLocalizedString(@"connecting", @"connecting") waitUntilDone:NO];
+    [weaveService performSelectorOnMainThread:@selector(startProgressSpinnersWithMessage:)
+                                   withObject:NSLocalizedString(@"connecting", @"connecting")
+                                waitUntilDone:NO];
     
     _gStockboy = [[Stockboy alloc] init];
     _gSyncInProgress = YES;
@@ -166,7 +169,7 @@ static NSDictionary *_gNetworkPaths = nil;
 			_gNetworkPaths = [thePaths retain];
 		}
 	}
-	return [_gNetworkPaths objectForKey:name];
+	return _gNetworkPaths[name];
 }
 
 
@@ -246,10 +249,9 @@ static NSDictionary *_gNetworkPaths = nil;
 			[self cancel];
 
 			//ask the user what to do.  try again?  go to login screen?
-			NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-				NSLocalizedString(@"Cannot Sync", @"Cannot Sync"), @"title", 
-			NSLocalizedString(@"Due to a recent update, you need to log in to Foxbrowser again.",
-				"Due to a recent update, you need to log in to Foxbrowser again."), @"message", nil];
+			NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"Cannot Sync"), 
+			@"message": NSLocalizedString(@"Due to a recent update, you need to log in to Foxbrowser again.",
+				"Due to a recent update, you need to log in to Foxbrowser again.")};
 
 			[weaveService performSelectorOnMainThread:@selector(reportAuthErrorWithMessage:) withObject:errInfo waitUntilDone:NO];
 		}
@@ -261,7 +263,6 @@ static NSDictionary *_gNetworkPaths = nil;
 			if ([[CryptoUtils getManager] storageVersion] >= 5) {
 				[self checkCryptoKeys];
 			}
-			[self updateVersion];
 			[self updateTabs];
 			[weaveService performSelectorOnMainThread:@selector(refreshViews) withObject:nil waitUntilDone:NO];
 		  }
@@ -280,48 +281,42 @@ static NSDictionary *_gNetworkPaths = nil;
 			[weaveService performSelectorOnMainThread:@selector(refreshViews) withObject:nil waitUntilDone:NO];
 		  }
 		}
-	}
-    @catch (NSException * e) 
-    {
+	} @catch (NSException * e)  {
       //only report auth and passphrase exceptions, ignore others, and just cancel the sync
       syncCompletedSuccessfully = NO;
       [self cancel];
 
-      if ([e.name isEqualToString:AUTH_EXCEPTION_STRING])
-      {
+        NSDictionary* errInfo = nil;
+        
+      if ([e.name isEqualToString:AUTH_EXCEPTION_STRING]) {
         //ask the user what to do.  try again?  go to login screen?
-        NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                                 NSLocalizedString(@"Incorrect Password", "incorrect password"), @"message", nil];
+        errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                                 @"message": NSLocalizedString(@"Incorrect Password", "incorrect password")};
         
         [weaveService performSelectorOnMainThread:@selector(reportAuthErrorWithMessage:) withObject:errInfo waitUntilDone:NO];
-      }
-      else if ([e.name isEqualToString:PASSPHRASE_EXCEPTION_STRING])
-      {
+      } else if ([e.name isEqualToString:PASSPHRASE_EXCEPTION_STRING]) {
         //ask the user what to do.  try again?  go to login screen?
-        NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                                 NSLocalizedString(@"Incorrect Secret Phrase", "incorrect secret phrase"), @"message", nil];
+        errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                                 @"message": NSLocalizedString(@"Incorrect Secret Phrase", "incorrect secret phrase")};
         
         [weaveService performSelectorOnMainThread:@selector(reportAuthErrorWithMessage:) withObject:errInfo waitUntilDone:NO];
-      }
-      else 
-      {
+      } else  {
         //some non-crypto related exception, like server unreachable, etc.
         //just alert the user to the problem, and tell them to try again later
         NSString *message = NSLocalizedString(@"Unable to contact server", "server unavailable");
         if ([e reason]) message = [e reason];
-        NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                                 message, @"message", nil];
+        errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                                 @"message": message};
         
         [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
       }
-      
+        
+      [[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Stockboy: %@ - %@", errInfo[@"title"], errInfo[@"message"]];
     }
-  }
-  else 
-  {
+  } else {
     //no connectivity, put up alert
-    NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), @"title", 
-                             NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+    NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Sync", @"unable to refresh data"), 
+                             @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
     [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
   }
   
@@ -382,7 +377,7 @@ static NSDictionary *_gNetworkPaths = nil;
 
     if (tabSet)
     {
-      [userTabSets setObject:tabSet forKey:[tabSet objectForKey:@"id"]];
+      userTabSets[tabSet[@"id"]] = tabSet;
     }
     else
     {
@@ -394,54 +389,6 @@ static NSDictionary *_gNetworkPaths = nil;
 	// Ok, now we have all the tabs, decrypted, so tell the Store to install them and flush the cache
   [[Store getStore] installTabSetDictionary:userTabSets];
   
-}
-
-/**
- * Return the version of the application that is stored in the Info.plist.
- */
-
-- (NSString*) applicationVersion
-{
-	NSString* version = @"unknown";
-	
-	NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
-	if (info != nil) {
-		version = [info objectForKey: @"CFBundleVersion"];
-	}
-	
-	return version;
-}
-
-/**
- * Ping the server with the app version. We do this once every 24 hours.
- */
-
-- (void) updateVersion
-{
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-
-	double lastServerPingTime = [defaults doubleForKey: @"LastServerPingTime"];
-	if ([[NSDate date] timeIntervalSinceDate: [NSDate dateWithTimeIntervalSince1970: lastServerPingTime]] > (24 * 60 * 60))
-	{
-		NSString* path = [NSString stringWithFormat: @"%@?client=FxHome&v=%@",
-			[Stockboy getURIForKey: @"Collections Info Path"], [self applicationVersion]];
-		NSString* url = [[CryptoUtils getManager] absoluteURL: path];
-
-		// We send the client version as part of a info/collections request. If that request does
-		// not succeed then don't record the last ping time. This means we will try again next time we
-		// sync. Which is either the next time we start the app or when the app moves from background
-		// to foreground after five minutes.
-		
-		@try {
-			NSData* data = [Fetcher getBytesFromURL: url authenticatingWith: [CryptoUtils getManager]];
-			if (data != nil) {
-				[defaults setDouble: [[NSDate date] timeIntervalSince1970] forKey: @"LastServerPingTime"];
-				[defaults synchronize];
-			}
-		} @catch (...) {
-			// Ignore whatever happened
-		}
-	}
 }
 
 // Grab the keys. This is part of a workaround for 628338 - Ignore records that do not decrypt correctly. Since we
@@ -519,21 +466,21 @@ static NSDictionary *_gNetworkPaths = nil;
 
     if (bookmarkObject)
     {
-      if ([[bookmarkObject objectForKey:@"deleted"] boolValue] == YES)
+      if ([bookmarkObject[@"deleted"] boolValue] == YES)
       {
         [bookmarksToBeDeleted addObject:bookmarkObject];
       }
       else 
       {
         //now we just need to copy the few fields we need from the metadata
-        [bookmarkObject setObject:[bookmarkEntry objectForKey:@"modified"] forKey:@"modified"];
-        if ([bookmarkEntry objectForKey:@"sortindex"])
+        bookmarkObject[@"modified"] = bookmarkEntry[@"modified"];
+        if (bookmarkEntry[@"sortindex"])
         {
-          [bookmarkObject setObject:[bookmarkEntry objectForKey:@"sortindex"] forKey:@"sortindex"];
+          bookmarkObject[@"sortindex"] = bookmarkEntry[@"sortindex"];
         }
         else 
         {
-          [bookmarkObject setObject:[NSNumber numberWithInt:0] forKey:@"sortindex"];
+          bookmarkObject[@"sortindex"] = @0;
         }
 
         
@@ -623,20 +570,20 @@ static NSDictionary *_gNetworkPaths = nil;
     
     if (historyObject)
     {
-      if ([[historyObject objectForKey:@"deleted"] boolValue] == YES)
+      if ([historyObject[@"deleted"] boolValue] == YES)
       {
         [historyItemstoBeDeleted addObject:historyObject];
       }
       else 
       {
-        [historyObject setObject:[historyEntry objectForKey:@"modified"] forKey:@"modified"];
-        if ([historyEntry objectForKey:@"sortindex"])
+        historyObject[@"modified"] = historyEntry[@"modified"];
+        if (historyEntry[@"sortindex"])
         {
-          [historyObject setObject:[historyEntry objectForKey:@"sortindex"] forKey:@"sortindex"];
+          historyObject[@"sortindex"] = historyEntry[@"sortindex"];
         }
         else 
         {
-          [historyObject setObject:[NSNumber numberWithInt:0] forKey:@"sortindex"];
+          historyObject[@"sortindex"] = @0;
         }
       
         [historyItemsToBeAdded addObject:historyObject];

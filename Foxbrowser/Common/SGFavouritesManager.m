@@ -110,7 +110,7 @@
     NSFileManager *fm = [NSFileManager defaultManager];
     if ([fm fileExistsAtPath:path]) {
         NSDictionary *attr = [fm attributesOfItemAtPath:path error:NULL];
-        NSDate *modDate = [attr objectForKey:NSFileModificationDate];
+        NSDate *modDate = attr[NSFileModificationDate];
         if ([modDate compare:[NSDate dateWithTimeIntervalSinceNow:-60*60*24*3]] == NSOrderedDescending)
             return;
     }
@@ -174,13 +174,13 @@
         NSDictionary *item = history[i];
         i++;
         
-        NSString *urlS = [item objectForKey:@"url"];
+        NSString *urlS = item[@"url"];
         url = [NSURL URLWithString:urlS];
         
         if ([self containsHost:url.host] || [_blocked containsObject:url.absoluteString])
             continue;
         
-        _favourites[url] = [item objectForKey:@"title"];
+        _favourites[url] = item[@"title"];
     }
     return url;
 }

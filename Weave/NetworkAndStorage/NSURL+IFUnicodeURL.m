@@ -24,7 +24,7 @@
 		secondPart = self;
 	}
 	
-	return [NSArray arrayWithObjects:firstPart, secondPart, nil];
+	return @[firstPart, secondPart];
 }
 
 - (NSArray *)IFUnicodeURL_splitBeforeCharactersInSet:(NSCharacterSet *)chars
@@ -36,7 +36,7 @@
 		}
 	}
 	
-	return [NSArray arrayWithObjects:[self substringToIndex:index], [self substringFromIndex:index], nil];
+	return @[[self substringToIndex:index], [self substringFromIndex:index]];
 }
 @end
 
@@ -70,37 +70,37 @@ static NSString *ConvertUnicodeURLString(NSString *str, BOOL toAscii)
 	NSArray *parts = nil;
 	
 	parts = [str IFUnicodeURL_splitAfterString:@":"];
-	hostname = [parts objectAtIndex:1];
-	[urlParts addObject:[parts objectAtIndex:0]];
+	hostname = parts[1];
+	[urlParts addObject:parts[0]];
 	
 	parts = [hostname IFUnicodeURL_splitAfterString:@"//"];
-	hostname = [parts objectAtIndex:1];
-	[urlParts addObject:[parts objectAtIndex:0]];
+	hostname = parts[1];
+	[urlParts addObject:parts[0]];
 	
 	parts = [hostname IFUnicodeURL_splitBeforeCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/?#"]];
-	hostname = [parts objectAtIndex:0];
-	[urlParts addObject:[parts objectAtIndex:1]];
+	hostname = parts[0];
+	[urlParts addObject:parts[1]];
 	
 	parts = [hostname IFUnicodeURL_splitAfterString:@"@"];
-	hostname = [parts objectAtIndex:1];
-	[urlParts addObject:[parts objectAtIndex:0]];
+	hostname = parts[1];
+	[urlParts addObject:parts[0]];
 	
 	parts = [hostname IFUnicodeURL_splitBeforeCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@":"]];
-	hostname = [parts objectAtIndex:0];
-	[urlParts addObject:[parts objectAtIndex:1]];
+	hostname = parts[0];
+	[urlParts addObject:parts[1]];
 	
 	// Now that we have isolated just the hostname, do the magic decoding...
 	hostname = ConvertUnicodeDomainString(hostname, toAscii);
 	
 	// This will try to clean up the stuff after the hostname in the URL by making sure it's all encoded properly.
 	// NSURL doesn't normally do anything like this, but I found it useful for my purposes to put it in here.
-	NSString *afterHostname = [[urlParts objectAtIndex:4] stringByAppendingString:[urlParts objectAtIndex:2]];
+	NSString *afterHostname = [urlParts[4] stringByAppendingString:urlParts[2]];
 	CFStringRef cleanedAfterHostname = CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)afterHostname, CFSTR(""), kCFStringEncodingUTF8);
 	NSString *processedAfterHostname = (NSString *)cleanedAfterHostname ?: afterHostname;
 	CFStringRef finalAfterHostname = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)processedAfterHostname, CFSTR("#[]"), NULL, kCFStringEncodingUTF8);
 	
 	// Now recreate the URL safely with the new hostname (if it was successful) instead...
-	NSArray *reconstructedArray = [NSArray arrayWithObjects:[urlParts objectAtIndex:0], [urlParts objectAtIndex:1], [urlParts objectAtIndex:3], hostname, (NSString *)finalAfterHostname, nil];
+	NSArray *reconstructedArray = @[urlParts[0], urlParts[1], urlParts[3], hostname, (NSString *)finalAfterHostname];
 	NSString *reconstructedURLString = [reconstructedArray componentsJoinedByString:@""];
 
 	if (cleanedAfterHostname) CFRelease(cleanedAfterHostname);

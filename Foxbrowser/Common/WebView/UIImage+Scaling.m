@@ -55,13 +55,10 @@
 
 - (UIImage *) scaleProportionalToSize: (CGSize)size1
 {
-    if(self.size.width>self.size.height)
-    {
+    if(self.size.width>self.size.height) {
         DLog(@"LandScape");
         size1=CGSizeMake((self.size.width/self.size.height)*size1.height,size1.height);
-    }
-    else
-    {
+    } else {
         DLog(@"Potrait");
         size1=CGSizeMake(size1.width,(self.size.height/self.size.width)*size1.width);
     }

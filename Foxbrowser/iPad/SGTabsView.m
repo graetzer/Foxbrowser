@@ -82,17 +82,17 @@
     [self addSubview:newTab];
     
     for (int i = 0; i < self.tabs.count; i++) {
-        SGTabView *tab = [self.tabs objectAtIndex:i];
+        SGTabView *tab = (self.tabs)[i];
         // By setting the real position after the view is added, we create a float from rigth transition
         tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height - kTabsBottomMargin);
         [tab setNeedsDisplay];
     }
-    [self bringSubviewToFront:[self.tabs objectAtIndex:self.selected]];
+    [self bringSubviewToFront:(self.tabs)[self.selected]];
     return self.tabs.count -1;
 }
 
 - (void)removeTab:(NSUInteger)index {
-    SGTabView *oldTab = [self.tabs objectAtIndex:index];
+    SGTabView *oldTab = (self.tabs)[index];
     if (oldTab) {
         [self.tabs removeObjectAtIndex:index];
         [oldTab removeFromSuperview];
@@ -119,7 +119,7 @@
     
     _selected = selected;
     for (int i = 0; i < self.tabs.count; i++) {
-        SGTabView *tab = [self.tabs objectAtIndex:i];
+        SGTabView *tab = (self.tabs)[i];
         if (i == selected) {
             tab.closeButton.hidden = ![self.tabsController canRemoveTab:tab.viewController];
             
@@ -147,7 +147,7 @@
 - (void)resizeTabs {
     CGFloat width = [self tabWidth:self.tabs.count];
     for (int i = 0; i < self.tabs.count; i++) {
-        SGTabView *tab = [self.tabs objectAtIndex:i];
+        SGTabView *tab = (self.tabs)[i];
         tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height - kTabsBottomMargin);
     }
 }
@@ -195,7 +195,7 @@
                 if (nextPos >= self.tabs.count)
                     return;
                 
-                SGTabView *next = [self.tabs objectAtIndex:nextPos];
+                SGTabView *next = (self.tabs)[nextPos];
                 if (next) {
                     if (_selected == panPosition)
                         _selected = nextPos;

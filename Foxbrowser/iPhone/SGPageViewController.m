@@ -280,7 +280,7 @@
                                 animations:NULL
                                 completion:^(BOOL finished){
                                     [old removeFromParentViewController];
-                                    [_viewControllers replaceObjectAtIndex:index withObject:viewController];
+                                    _viewControllers[index] = viewController;
                                     [viewController didMoveToParentViewController:self];
                                     [self arrangeChildViewControllers];
                                     [self updateChrome];

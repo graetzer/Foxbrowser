@@ -28,6 +28,9 @@
 - (void)finishSearch:(NSString *)searchString title:(NSString *)title;
 - (NSString *)text;
 
+@optional
+- (void)userScrolledSuggestions;
+
 @end
 
 @interface SGSearchViewController : UITableViewController 

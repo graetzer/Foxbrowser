@@ -40,6 +40,7 @@
 
 #import "EasySetupViewController.h"
 #import "Stockboy.h"
+#import "GAI.h"
 
 @implementation EasySetupViewController
 
@@ -84,48 +85,47 @@
 	_newCryptoManager = nil;
 
 	//any sort of auth failure just means we catch it here and make them reenter the password
-	@try
-	{
-		_newCryptoManager = [[[CryptoUtils alloc ] initWithAccountName:[authDict objectForKey:@"user"]
-			password: [authDict objectForKey:@"pass"] andPassphrase:[authDict objectForKey:@"secret"]] retain];
+	@try {
+		_newCryptoManager = [[[CryptoUtils alloc ] initWithAccountName:authDict[@"user"]
+			password: authDict[@"pass"] andPassphrase:authDict[@"secret"]] retain];
 		if (_newCryptoManager) {
 			[self performSelectorOnMainThread:@selector(dismissLoginScreen) withObject:nil waitUntilDone:YES];
 		} else  {
 			@throw [NSException exceptionWithName:@"CryptoInitException" reason:@"unspecified failure" userInfo:nil];
 		}
-	}
-	
-	@catch (NSException *e) 
-	{
+	} @catch (NSException *e)  {
 		//I don't need to take different actions for different bad outcomes, at least in this case,
 		// because they all mean "failed to log in".  So I just report them.  In other situations,
 		// I might certainly need to do different things for different error conditions
 		[self performSelectorOnMainThread:@selector(authFailed:) withObject:[e reason] waitUntilDone:YES];
+        
 		NSLog(@"Failed to initialize CryptoManager");
-	}
-	
-	@finally 
-	{
+        [[GAI sharedInstance].defaultTracker sendException:YES withDescription:@"Failed to initialize CryptoManager"];
+	} @finally  {
 		//stop the spinner, regardless
 		[self performSelectorOnMainThread:@selector(stopLoginSpinner) withObject:nil waitUntilDone:YES];
 		[pool drain];
 	}
 }
 
-- (void) authFailed:(NSString*)message
-{
+- (void) authFailed:(NSString*)message {
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Login Failure", @"unable to login")
 		message:message delegate: self cancelButtonTitle: NSLocalizedString(@"OK", @"ok") otherButtonTitles: nil];
 	[alert show];
-	[alert release];    
+	[alert release];
+    [CryptoUtils deletePrivateKeys];
+    
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
+                                                    withAction:@"EasySetup"
+                                                     withLabel:@"Fail"
+                                                    withValue:nil];
 }
-  
+
 /**
  * This is called when we have succesfully logged in. Call back to the delegate.
  */
   
-- (void) dismissLoginScreen
-{
+- (void) dismissLoginScreen {
 	[CryptoUtils assignManager:_newCryptoManager];
 
 	//The user has now logged in successfully at least once, so set the flag to prevent
@@ -136,6 +136,11 @@
 	[Stockboy restock];
 
 	[_delegate easySetupViewControllerDidLogin: self];
+    
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
+                                                    withAction:@"EasySetup"
+                                                     withLabel:@"Success"
+                                                     withValue:nil];
 }
 
 #pragma mark -
@@ -150,10 +155,8 @@
 	// I am just setting the Passcode text directly here.
 	_passcodeLabel.text = NSLocalizedString(@"Passcode", @"Passcode");
 
-
 	// Adjust the button for some specific languages
-
-	NSString* language = [[NSLocale preferredLanguages] objectAtIndex: 0];
+	NSString* language = [NSLocale preferredLanguages][0];
 	
 	NSSet* languagesThatNeedMoreSpace = [NSSet setWithObjects: @"fr", @"id", @"pt" , nil];
 	NSSet* languagesThatNeedSmallerFont = [NSSet setWithObjects: @"tr", @"ru", nil];
@@ -186,6 +189,8 @@
     
     _client = [[JPAKEClient alloc] initWithServer: _server delegate: self reporter: _reporter];
     [_client start];
+    
+    [[GAI sharedInstance].defaultTracker sendView:@"EasySetupViewController"];
 }
 
 - (void) viewDidAppear:(BOOL)animated
@@ -273,9 +278,9 @@
 	_activityIndicator.hidden = YES;
 
 	NSArray* components = [secret componentsSeparatedByString: @"-"];
-	_passwordLabel1.text = [self formatCode: [components objectAtIndex: 0]];
-	_passwordLabel2.text = [self formatCode: [components objectAtIndex: 1]];
-	_passwordLabel3.text = [self formatCode: [components objectAtIndex: 2]];
+	_passwordLabel1.text = [self formatCode: components[0]];
+	_passwordLabel2.text = [self formatCode: components[1]];
+	_passwordLabel3.text = [self formatCode: components[2]];
 }
 
 /**
@@ -301,7 +306,7 @@
 
 	// If we got a custom server then we configure it right away
 	
-	NSString* server = [payload objectForKey: @"serverURL"];
+	NSString* server = payload[@"serverURL"];
 	if (server != nil && [server length] != 0) {
 		[[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"useCustomServer"];
 		[[NSUserDefaults standardUserDefaults] setObject: server forKey: @"customServerURL"];
@@ -312,11 +317,9 @@
 		[[NSUserDefaults standardUserDefaults] synchronize];
 	}
 
-	NSDictionary* authDict = [NSDictionary dictionaryWithObjectsAndKeys:
-		[payload objectForKey: @"account"], @"user",
-		[payload objectForKey: @"password"], @"pass",
-		[payload objectForKey: @"synckey"], @"secret",
-		nil];
+	NSDictionary* authDict = @{@"user": payload[@"account"],
+		@"pass": payload[@"password"],
+		@"secret": payload[@"synckey"]};
 
 	NSThread* authorizer = [[[NSThread alloc] initWithTarget:self selector:@selector(authorize:) object:authDict] autorelease];
 	[authorizer start];

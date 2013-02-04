@@ -40,6 +40,8 @@
 #import "Utility.h"
 #import "JSON.h"
 
+#import "GAI.h"
+
 //need to include Stockboy for now, to be able to interrupt the lengthy refresh when the thread is cancelled
 #import "Stockboy.h"
 
@@ -113,7 +115,7 @@ static Store* _gStore = nil;
 
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString *documentsDir = [paths objectAtIndex:0];
+	NSString *documentsDir = paths[0];
 	NSString *databasePath = [documentsDir stringByAppendingString:DATABASE_NAME];
 
 	NSError* err = nil;
@@ -125,18 +127,14 @@ static Store* _gStore = nil;
 
 #pragma mark -
 
--(Store *) init 
-{
-	self = [super init];
-	
-	if (self) 
-	{
+- (Store *)init {
+	if (self = [super init]) {
 		BOOL success;
 		NSError *error = nil;
 						
 		NSFileManager *fileManager = [NSFileManager defaultManager];
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-		NSString *documentsDir = [paths objectAtIndex:0];
+		NSString *documentsDir = paths[0];
 		NSString *databasePath = [documentsDir stringByAppendingString:DATABASE_NAME];
 		
 		/* DB already exists */
@@ -176,6 +174,7 @@ static Store* _gStore = nil;
 			DLog(@"Could not create database!");
 			NSLog(@"%@", [error localizedDescription]);
 		}
+        [self release];
 	}
 	return NULL;
 }
@@ -402,25 +401,23 @@ static Store* _gStore = nil;
 		{
 			icon = @"tab.png";
 
-			NSString *client = [NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, TABS_CLIENT_COLUMN)];
+			NSString *client = @((char *)sqlite3_column_text(dbStatement, TABS_CLIENT_COLUMN));
 
-			NSMutableDictionary* thisClient = [temporaryTabIndex objectForKey:client];
+			NSMutableDictionary* thisClient = temporaryTabIndex[client];
 
 			if (thisClient == nil)
 			{
 				thisClient = [NSMutableDictionary dictionary];
-				[thisClient setObject:client forKey:@"client"];
-				[thisClient setObject:[NSMutableArray array] forKey:@"tabs"];
-				[temporaryTabIndex setObject:thisClient forKey:client];
+				thisClient[@"client"] = client;
+				thisClient[@"tabs"] = [NSMutableArray array];
+				temporaryTabIndex[client] = thisClient;
 			}
 
-			[[thisClient objectForKey:@"tabs"] addObject:
-				[NSDictionary dictionaryWithObjectsAndKeys:
-					[NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, TABS_TITLE_COLUMN)], @"title",
-					[NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, TABS_URL_COLUMN)], @"url",
-					[NSNumber numberWithDouble:(double)sqlite3_column_double(dbStatement, TABS_SORTINDEX_COLUMN)], @"sortindex",
-					icon, @"icon",
-					nil]];
+			[thisClient[@"tabs"] addObject:
+				@{@"title": @((char *)sqlite3_column_text(dbStatement, TABS_TITLE_COLUMN)),
+					@"url": @((char *)sqlite3_column_text(dbStatement, TABS_URL_COLUMN)),
+					@"sortindex": @((double)sqlite3_column_double(dbStatement, TABS_SORTINDEX_COLUMN)),
+					@"icon": icon}];
 		}
 
 		sqlite3_finalize(dbStatement);
@@ -431,7 +428,7 @@ static Store* _gStore = nil;
 		NSEnumerator *enumerator = [temporaryTabIndex keyEnumerator];
 
 		while ((key = [enumerator nextObject])) {
-			[newTabs addObject:[temporaryTabIndex objectForKey:key]];
+			[newTabs addObject:temporaryTabIndex[key]];
 		}
 
 		[temporaryTabIndex release];
@@ -468,11 +465,11 @@ static Store* _gStore = nil;
 			NSString *title_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_TITLE_COLUMN)];
 			NSNumber *sort_col = [[NSNumber alloc] initWithInt:sqlite3_column_int(dbStatement, HISTORY_SORTINDEX_COLUMN)];
 
-			[historyItem setObject:id_col forKey:@"id"];
-			[historyItem setObject:url_col forKey:@"url"];
-			[historyItem setObject:title_col forKey:@"title"];
-			[historyItem setObject:sort_col forKey:@"sortindex"];
-			[historyItem setObject:icon forKey:@"icon"];
+			historyItem[@"id"] = id_col;
+			historyItem[@"url"] = url_col;
+			historyItem[@"title"] = title_col;
+			historyItem[@"sortindex"] = sort_col;
+			historyItem[@"icon"] = icon;
 
 			[newHistory addObject:historyItem];
 													 
@@ -501,9 +498,9 @@ static Store* _gStore = nil;
 {
 	//this is now a one-liner, with no database calls.
 	// we can't have multiple threads hitting the database or Bad Things happen sometimes
-	NSArray* result = [hierarchicalBookmarks objectForKey:parentid];
+	NSArray* result = hierarchicalBookmarks[parentid];
 	if (!result) {
-		result = [NSArray array];
+		result = @[];
 	}
 	
 	return result;
@@ -530,15 +527,15 @@ static Store* _gStore = nil;
 	//collect up all the starts of lists
 	for (NSDictionary* item in [bookmarksKeyedById allValues])
 	{
-		NSString* predecessor = [item objectForKey:@"predecessorid"];
-		if ([bookmarksKeyedById objectForKey:predecessor] == nil)
+		NSString* predecessor = item[@"predecessorid"];
+		if (bookmarksKeyedById[predecessor] == nil)
 		{
 			//we've found an item who's predecessor isn't in our list of all items in this folder, so it must be one of the 1..n sortedlist heads
 			[listHeads addObject:item];
 		}
 		else //created a list of the rest indexed by predecessor for building the chains
 		{
-			[bookmarksKeyedByPred setObject:item forKey:predecessor];
+			bookmarksKeyedByPred[predecessor] = item;
 		}
 	}
 
@@ -549,11 +546,11 @@ static Store* _gStore = nil;
 	for (NSMutableDictionary* head in listHeads)
 	{
 		[sortedResults addObject:head];
-		NSString* nextid = [head objectForKey:@"id"];
-		while ((bookmark = [bookmarksKeyedByPred objectForKey:nextid]) != nil) 
+		NSString* nextid = head[@"id"];
+		while ((bookmark = bookmarksKeyedByPred[nextid]) != nil) 
 		{
 			[sortedResults addObject:bookmark];
-			nextid = [bookmark objectForKey:@"id"];
+			nextid = bookmark[@"id"];
 		}
 	}
 
@@ -591,7 +588,7 @@ static Store* _gStore = nil;
 			NSString* url = @"";
 			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_URL_COLUMN)) 
 			{
-				NSString* temp = [NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, BOOKMARKS_URL_COLUMN)]; 
+				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_URL_COLUMN)); 
 				if ((id)temp != [NSNull null]) url = temp;
 			}
 
@@ -601,45 +598,45 @@ static Store* _gStore = nil;
 
 			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PREDECESSORID_COLUMN)) 
 			{
-				NSString* temp = [NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, BOOKMARKS_PREDECESSORID_COLUMN)]; 
+				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PREDECESSORID_COLUMN)); 
 				if ((id)temp != [NSNull null]) predecessor = temp;
 			}
 
 			NSString* title = @"";
 			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)) 
 			{
-				NSString* temp = [NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)]; 
+				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)); 
 				if ((id)temp != [NSNull null]) title = temp;
 			}
 
 			//add the unchecked fields
-			[bmkEntry setObject:[NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, BOOKMARKS_ID_COLUMN)] forKey:@"id"];
-			[bmkEntry setObject:[NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, BOOKMARKS_PARENTID_COLUMN)] forKey:@"parentid"];
-			[bmkEntry setObject:[NSString stringWithUTF8String:(char *)sqlite3_column_text(dbStatement, BOOKMARKS_TYPE_COLUMN)] forKey:@"type"];
-			[bmkEntry setObject:[NSNumber numberWithDouble:(double)sqlite3_column_double(dbStatement, BOOKMARKS_SORTINDEX_COLUMN)] forKey:@"sortindex"];
+			bmkEntry[@"id"] = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_ID_COLUMN));
+			bmkEntry[@"parentid"] = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PARENTID_COLUMN));
+			bmkEntry[@"type"] = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TYPE_COLUMN));
+			bmkEntry[@"sortindex"] = @((double)sqlite3_column_double(dbStatement, BOOKMARKS_SORTINDEX_COLUMN));
 
 			//add the checked fields
-			[bmkEntry setObject:predecessor forKey:@"predecessorid"];
-			[bmkEntry setObject:url forKey:@"url"];
-			[bmkEntry setObject:icon forKey:@"icon"];
-			[bmkEntry setObject:title forKey:@"title"];
+			bmkEntry[@"predecessorid"] = predecessor;
+			bmkEntry[@"url"] = url;
+			bmkEntry[@"icon"] = icon;
+			bmkEntry[@"title"] = title;
 
 
 			//ok, now if it's a bookmark object, then add it to the big list used for searching
-			if ([[bmkEntry objectForKey:@"type"] isEqualToString:@"bookmark"]) {
+			if ([bmkEntry[@"type"] isEqualToString:@"bookmark"]) {
 				[newBookmarkListSortedByFrecency addObject:bmkEntry];
 			}
 
 			//and add all entries to the appropriate parent dictionary in the sorted list/tree thingie
-			NSMutableDictionary* parentList = [newHierarchicalBookmarks objectForKey:[bmkEntry objectForKey:@"parentid"]];
+			NSMutableDictionary* parentList = newHierarchicalBookmarks[bmkEntry[@"parentid"]];
 			if (parentList == nil)
 			{
 				parentList = [[NSMutableDictionary alloc] init];
-				[newHierarchicalBookmarks setObject:parentList forKey:[bmkEntry objectForKey:@"parentid"]];
+				newHierarchicalBookmarks[bmkEntry[@"parentid"]] = parentList;
 				[parentList release];
 			}
 
-			[parentList setObject:bmkEntry forKey:[bmkEntry objectForKey:@"id"]];
+			parentList[bmkEntry[@"id"]] = bmkEntry;
 			[bmkEntry release];
 		}
 
@@ -650,9 +647,9 @@ static Store* _gStore = nil;
 	//now I just need to sort the sorted list(s) by predecessor
 	for (NSString* folderid in [newHierarchicalBookmarks allKeys])
 	{
-		NSMutableDictionary* itemsInFolder = [newHierarchicalBookmarks objectForKey:folderid];
+		NSMutableDictionary* itemsInFolder = newHierarchicalBookmarks[folderid];
 		NSArray* result = [self sortFolderBookmarks:itemsInFolder];
-		[newHierarchicalBookmarks setObject:result forKey:folderid];
+		newHierarchicalBookmarks[folderid] = result;
 	}
 
 	NSMutableDictionary* tempSorted = hierarchicalBookmarks;
@@ -691,15 +688,15 @@ static Store* _gStore = nil;
 	
 	for (NSDictionary* record in addedBmarks)
 	{
-		if ([[record objectForKey: @"type"] isEqualToString: @"folder"])
+		if ([record[@"type"] isEqualToString: @"folder"])
 		{
-			NSArray* children = [record objectForKey: @"children"];
+			NSArray* children = record[@"children"];
 			if (children != nil)
 			{					
 				for (NSUInteger i = 0; i < [children count]; i++)
 				{
-					NSString* recordid = [children objectAtIndex: i];
-					id predecessorid = (i > 0) ? [children objectAtIndex: i - 1] : @"";
+					NSString* recordid = children[i];
+					id predecessorid = (i > 0) ? children[i - 1] : @"";
 					
 					const char* sql = "UPDATE bookmarks SET predecessorid = ? where id = ?";
 					sqlite3_stmt *stmnt = NULL;
@@ -751,46 +748,47 @@ static Store* _gStore = nil;
 		{
 			//LOTS of error checking
 			NSString* faviconPath = @""; //unused
-			NSString* url = [bookmark objectForKey:@"bmkUri"];
+			NSString* url = bookmark[@"bmkUri"];
 			if (url == nil || (id)url == [NSNull null]) {
 				url = @"";
 			}
 
 			//sometimes, title is empty.  if it is a folder, then we have no choice but to call it "Unnamed"
 			// if it's a bookmark, then we can name it the URL, if it has one, which is the expected case
-			NSString* title = [bookmark objectForKey:@"title"];
+			NSString* title = bookmark[@"title"];
 			if (title == nil || (id)title == [NSNull null]) {
 				title = url;
 			}
 
-			NSString* predecessorID = [bookmark objectForKey:@"predecessorid"];
+			NSString* predecessorID = bookmark[@"predecessorid"];
 			if (predecessorID == nil || (id)predecessorID == [NSNull null]) {
 				predecessorID = @"";
 			}
 
-			NSString* desc = [bookmark objectForKey:@"description"];
+			NSString* desc = bookmark[@"description"];
 			if (desc == nil || (id)desc == [NSNull null]) {
 				desc = @"";
 			}
 
-			sqlite3_bind_text(stmnt, 1, [[bookmark objectForKey:@"id"] UTF8String], -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmnt, 1, [bookmark[@"id"] UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 2, [url UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 3, [title UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 4, [faviconPath UTF8String], -1, SQLITE_TRANSIENT);
 
-			sqlite3_bind_text(stmnt, 5, [[bookmark objectForKey:@"type"] UTF8String], -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmnt, 6, [[bookmark objectForKey:@"parentid"] UTF8String], -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmnt, 5, [bookmark[@"type"] UTF8String], -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmnt, 6, [bookmark[@"parentid"] UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 7, [predecessorID UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 8, [desc UTF8String], -1, SQLITE_TRANSIENT);
-			sqlite3_bind_double(stmnt, 9, [[bookmark objectForKey:@"modified"] doubleValue]);
-			sqlite3_bind_int(stmnt, 10, [[bookmark objectForKey:@"sortindex"] intValue]);
+			sqlite3_bind_double(stmnt, 9, [bookmark[@"modified"] doubleValue]);
+			sqlite3_bind_int(stmnt, 10, [bookmark[@"sortindex"] intValue]);
 
 			stepErr = sqlite3_step(stmnt);
 		}
 
-		@catch (NSException *exception) 
-		{
+		@catch (NSException *exception) {
 			NSLog(@"Malformed bookmark data: %@, %@",[exception name], [exception reason]);
+            [[GAI sharedInstance].defaultTracker sendException:YES
+                                               withDescription:@"Malformed bookmark data: %@, %@", [exception name], [exception reason]];
 		}
 
 		@finally 
@@ -813,7 +811,7 @@ static Store* _gStore = nil;
 {
 	const char *sql;
 	sqlite3_stmt *stmnt = nil;
-	NSString* id = [bookmark objectForKey:@"id"];
+	NSString* id = bookmark[@"id"];
 
 	sql = "DELETE FROM bookmarks where id = ?";
 	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) {
@@ -893,20 +891,20 @@ static Store* _gStore = nil;
 			NSString* faviconPath = @""; //unused
 
 			//if it doesn't have a title, use the uri again
-			NSString* title = [historyItem objectForKey:@"title"];
+			NSString* title = historyItem[@"title"];
 
 			if (title == nil || (id)title == [NSNull null])
 			{
-				title = [historyItem objectForKey:@"histUri"];
+				title = historyItem[@"histUri"];
 			}
 
-			sqlite3_bind_text(stmnt, 1, [[historyItem objectForKey:@"id"] UTF8String], -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmnt, 2, [[historyItem objectForKey:@"histUri"] UTF8String], -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmnt, 1, [historyItem[@"id"] UTF8String], -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmnt, 2, [historyItem[@"histUri"] UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 3, [title UTF8String], -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(stmnt, 4, [faviconPath UTF8String], -1, SQLITE_TRANSIENT);
 
-			sqlite3_bind_double(stmnt, 5, [[historyItem objectForKey:@"modified"] doubleValue]);
-			sqlite3_bind_int(stmnt, 6, [[historyItem objectForKey:@"sortindex"] intValue]);
+			sqlite3_bind_double(stmnt, 5, [historyItem[@"modified"] doubleValue]);
+			sqlite3_bind_int(stmnt, 6, [historyItem[@"sortindex"] intValue]);
 
 			if (sqlite3_step(stmnt) == SQLITE_DONE) 
 			{
@@ -917,6 +915,8 @@ static Store* _gStore = nil;
 		@catch (NSException *exception) 
 		{
 			NSLog(@"Malformed history item data: %@, %@",[exception name], [exception reason]);
+            [[GAI sharedInstance].defaultTracker sendException:YES
+                                               withDescription:@"Malformed history item data: %@, %@", [exception name], [exception reason]];
 		}
 
 		@finally 
@@ -938,7 +938,7 @@ static Store* _gStore = nil;
 {
 	const char *sql;
 	sqlite3_stmt *stmnt = nil;
-	NSString* id = [historyItem objectForKey:@"id"];
+	NSString* id = historyItem[@"id"];
 
 	sql = "DELETE FROM history where id = ?";
 	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) {
@@ -963,8 +963,8 @@ static Store* _gStore = nil;
 - (BOOL) addTabSet:(NSDictionary *)clientTabSet withClientID:(NSString*)theID
 {	
 	//pick out the values we need, rename some of them, and store them in the database in the 'tabs' table
-	NSArray *clientTabs = [clientTabSet objectForKey:@"tabs"];
-	NSString *clientName = [clientTabSet objectForKey:@"clientName"];
+	NSArray *clientTabs = clientTabSet[@"tabs"];
+	NSString *clientName = clientTabSet[@"clientName"];
 
 	for (NSDictionary* tab in clientTabs)
 	{
@@ -981,9 +981,9 @@ static Store* _gStore = nil;
 		{    
 			@try
 			{
-				NSString *url = [[tab objectForKey:@"urlHistory"] objectAtIndex:0];
+				NSString *url = tab[@"urlHistory"][0];
 
-				NSString *title = [tab objectForKey:@"title"];
+				NSString *title = tab[@"title"];
 				if (title == nil || (id)title == [NSNull null])
 				{
 					title = url;
@@ -996,7 +996,7 @@ static Store* _gStore = nil;
 				sqlite3_bind_text(stmnt, 3, [favicon UTF8String], -1, SQLITE_TRANSIENT);
 				sqlite3_bind_text(stmnt, 4, [clientName UTF8String], -1, SQLITE_TRANSIENT);
 
-				sqlite3_bind_double(stmnt, 5, [[tab objectForKey:@"lastUsed"] doubleValue]);
+				sqlite3_bind_double(stmnt, 5, [tab[@"lastUsed"] doubleValue]);
 				sqlite3_bind_int(stmnt, 6, FAKE_TAB_FRECENCY);
 
 				if (sqlite3_step(stmnt) == SQLITE_DONE) 
@@ -1008,6 +1008,8 @@ static Store* _gStore = nil;
 			@catch (NSException *exception) 
 			{
 				NSLog(@"Malformed tab data: %@, %@",[exception name], [exception reason]);
+                [[GAI sharedInstance].defaultTracker sendException:YES
+                                                   withDescription:@"Malformed tab data: %@, %@", [exception name], [exception reason]];
 			}
 
 			@finally 
@@ -1039,7 +1041,7 @@ static Store* _gStore = nil;
 
 	for (NSString* anID in [tabSetDict allKeys]) 
 	{
-		[self addTabSet:[tabSetDict objectForKey:anID] withClientID:anID];
+		[self addTabSet:tabSetDict[anID] withClientID:anID];
 	}
 
 	[self endTransaction];

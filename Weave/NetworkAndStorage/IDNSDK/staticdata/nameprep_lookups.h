@@ -35,7 +35,6 @@ static int lookup_charmap( DWORD dwChar, const DWORD ** ppdwBlock )
 
   *ppdwBlock = 0;
 
-  ii    = 0;
   low   = -1;
   high  = CHARMAP_ENTRYCOUNT;
 
@@ -96,7 +95,6 @@ static int lookup_bidi_randalcat( DWORD dwCodepoint )
 
   if ( dwCodepoint == 0 ) return 0;
 
-  ii    = 0;
   low   = -1;
   high  = RANDALCAT_ENTRYCOUNT;
 
@@ -159,7 +157,6 @@ static int lookup_decompose( DWORD dwChar, const DWORD ** pdwzChar )
 
   *pdwzChar = 0;
 
-  ii    = 0;
   low   = -1;
   high  = DECOMPOSE_ENTRYCOUNT;
 
@@ -200,7 +197,6 @@ static int lookup_composite( QWORD qwPair, DWORD * dwCodepoint )
 
   if ( dwCodepoint == 0 ) return 0;
 
-  ii    = 0;
   low   = -1;
   high  = COMPOSE_ENTRYCOUNT;
 
@@ -240,7 +236,6 @@ static DWORD lookup_canonical( DWORD dwCodepoint )
 
   if ( dwCodepoint == 0 ) return 0;
 
-  ii    = 0;
   low   = -1;
   high  = CANONICAL_ENTRYCOUNT;
 
@@ -277,7 +272,6 @@ static int lookup_compatible( DWORD dwCodepoint )
 {
   int ii, high, low;
 
-  ii    = 0;
   low   = -1;
   high  = COMPATIBLE_ENTRYCOUNT;
 

@@ -77,9 +77,9 @@ typedef enum {
     [VariableLock lock];
     id<SGAuthDelegate> result;
 	for (int i = 0; i < Requests.count; i++) {
-        NSURLRequest *current = [Requests objectAtIndex:i];
+        NSURLRequest *current = Requests[i];
         if ([current.URL isEqual:request.URL]) {
-            result = [AuthDelegates objectAtIndex:i];
+            result = AuthDelegates[i];
             [Requests removeObjectAtIndex:i];
             [AuthDelegates removeObjectAtIndex:i];
             break;
@@ -183,7 +183,7 @@ typedef enum {
             [self handleCookiesWithURLResponse:self.URLResponse];
             
             NSUInteger code = [self.URLResponse statusCode];
-            NSString *location = [self.URLResponse.allHeaderFields objectForKey:@"Location"];
+            NSString *location = (self.URLResponse.allHeaderFields)[@"Location"];
             
             // If the response was an authentication failure, try to request fresh credentials.
             if (code == 401 || code == 407) {// The && statement is a workaround for servers who redirect with an 401 after an successful auth
@@ -254,7 +254,7 @@ typedef enum {
                 return;
             }
             
-            NSString *encoding = [self.URLResponse.allHeaderFields objectForKey:@"Content-Encoding"];
+            NSString *encoding = (self.URLResponse.allHeaderFields)[@"Content-Encoding"];
             if ([encoding isEqualToString:@"gzip"])
                 _compression = SGGzip;
             else if ([encoding isEqualToString:@"deflate"])
@@ -344,7 +344,7 @@ typedef enum {
         NSArray *cookies = [cookieStorage cookiesForURL:url];
         NSDictionary *headers = [NSHTTPCookie requestHeaderFieldsWithCookies:cookies];
         for (NSString *key in headers) {
-            NSString *val = [headers objectForKey:key];
+            NSString *val = headers[key];
             CFHTTPMessageSetHeaderFieldValue(message,
                                              (__bridge CFStringRef)key,
                                              (__bridge CFStringRef)val);
@@ -354,7 +354,7 @@ typedef enum {
     
     DLog(@"Request headers: %@", request.allHTTPHeaderFields);
     for (NSString *key in request.allHTTPHeaderFields) {
-        NSString *val = [request.allHTTPHeaderFields objectForKey:key];
+        NSString *val = (request.allHTTPHeaderFields)[key];
         CFHTTPMessageSetHeaderFieldValue(message,
                                          (__bridge CFStringRef)key,
                                          (__bridge CFStringRef)val);
@@ -369,7 +369,7 @@ typedef enum {
 }
 
 - (void)handleCookiesWithURLResponse:(NSHTTPURLResponse *)response {
-    NSString *cookieString = [response.allHeaderFields objectForKey:@"Set-Cookie"];
+    NSString *cookieString = (response.allHeaderFields)[@"Set-Cookie"];
     if (cookieString) {
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
         NSArray *cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:response.allHeaderFields

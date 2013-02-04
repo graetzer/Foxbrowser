@@ -76,7 +76,7 @@
 - (void)startAnimating {    
     CABasicAnimation* rotationAnimation;
     rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-    rotationAnimation.toValue = [NSNumber numberWithFloat: M_PI * 2.0];
+    rotationAnimation.toValue = @(M_PI * 2.0);
     rotationAnimation.duration = 1.0;
     rotationAnimation.cumulative = NO;
     rotationAnimation.repeatCount = MAXFLOAT;

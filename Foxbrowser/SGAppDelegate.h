@@ -25,10 +25,14 @@
 #import "WeaveService.h"
 
 @class SGBrowserViewController;
+@protocol GAITracker;
+
 @interface SGAppDelegate : UIResponder <UIApplicationDelegate, WeaveService>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (weak, nonatomic) SGBrowserViewController *browserViewController;
+
+@property (strong, nonatomic) id<GAITracker> tracker;
 
 @end
 

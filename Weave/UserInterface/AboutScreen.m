@@ -27,8 +27,8 @@
   else 
   {
     //no connectivity, put up alert
-    NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Load Page", @"unable to load page"), @"title", 
-                             NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+    NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
+                             @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
     [appDelegate performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];      
   }
 }
@@ -43,8 +43,8 @@
   }
   else {
     //no connectivity, put up alert
-    NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Load Page", @"unable to load page"), @"title", 
-                             NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+    NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
+                             @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
     [appDelegate performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];      
   }  
 }

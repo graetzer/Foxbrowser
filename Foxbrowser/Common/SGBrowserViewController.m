@@ -234,7 +234,7 @@
         for (UIViewController *controller in self.childViewControllers) {
             if ([controller isKindOfClass:[SGWebViewController class]]) {
                 NSURL *url = ((SGWebViewController*)controller).location;
-                if (url != nil)
+                if (url != nil && [url.scheme hasPrefix:@"http"])
                     [latest addObject:[NSString stringWithFormat:@"%@",url]];
             }
         }

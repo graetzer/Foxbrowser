@@ -97,7 +97,7 @@
 
 	int totalTabs = 0;
 	for (NSDictionary* client in [[Store getStore] getTabs]) {
-		totalTabs += [[client objectForKey:@"tabs"] count];
+		totalTabs += [client[@"tabs"] count];
 	}
 
 	numTabs.text = [NSString stringWithFormat: @"%d", totalTabs];
@@ -106,7 +106,7 @@
 }
 
 - (void)syncStatusChanged:(NSNotification *)note {
-    NSString *message = [note.userInfo objectForKey:kWeaveMessageKey];
+    NSString *message = (note.userInfo)[kWeaveMessageKey];
     if (message.length) {
         if (self.spinner.hidden)
             [self startSpinnerWithMessage:message];

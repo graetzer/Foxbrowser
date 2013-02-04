@@ -51,21 +51,18 @@ static NSArray* gFreshSearchHits = nil;
     [gRefreshThread cancel];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad || (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 #pragma mark Table view methods
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView 
-{
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     searchHits = gFreshSearchHits;
     return 2;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section 
-{
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     //first section is normal sync results, the final section has magic "goto" behavior
     if (section == 0)
     {
@@ -80,8 +77,7 @@ static NSArray* gFreshSearchHits = nil;
 
 // Display the strings in displayedRecentSearches.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 1 && gLastSearchString != nil) //special goto cell, which goes to a website directly, independent of your synced items
-    {
+    if (indexPath.section == 1 && gLastSearchString != nil) {//special goto cell, which goes to a website directly, independent of your synced items
         static NSString *CellIdentifier = @"GOTO_CELL";
         
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -98,9 +94,7 @@ static NSArray* gFreshSearchHits = nil;
         cell.accessoryType = UITableViewCellAccessoryNone;
         
         return cell;
-    }
-    else //regular title/url cell
-    {
+    } else { //regular title/url cell
         //NOTE: I'm now sharing the table cell cache between all my tables to save memory
         static NSString *CellIdentifier = @"URL_CELL";
         
@@ -120,12 +114,12 @@ static NSArray* gFreshSearchHits = nil;
                     cell.textLabel.textColor = [UIColor blackColor];
                     cell.textLabel.textAlignment = UITextAlignmentLeft;
                     
-                    NSDictionary* matchItem = [searchHits objectAtIndex:[indexPath row]];
+                    NSDictionary* matchItem = searchHits[[indexPath row]];
                     // Set up the cell...
-                    cell.textLabel.text = [matchItem objectForKey:@"title"];
-                    cell.detailTextLabel.text = [matchItem objectForKey:@"url"];
+                    cell.textLabel.text = matchItem[@"title"];
+                    cell.detailTextLabel.text = matchItem[@"url"];
                     //the item tells us which icon to use
-                    cell.imageView.image = [UIImage imageNamed:[matchItem objectForKey:@"icon"]];
+                    cell.imageView.image = [UIImage imageNamed:matchItem[@"icon"]];
                 }
                 else //empty list, means no matches
                 {
@@ -145,9 +139,8 @@ static NSArray* gFreshSearchHits = nil;
             }
             
         }
-        @catch (NSException * e) 
-        {
-            NSLog(@"item to display missing from searchhits");
+        @catch (NSException * e) {
+            DLog(@"item to display missing from searchhits");
             cell.textLabel.textColor = [UIColor blackColor];
             cell.textLabel.text = nil;
             cell.detailTextLabel.text = nil;
@@ -161,23 +154,18 @@ static NSArray* gFreshSearchHits = nil;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	if (gRefreshThread != nil)
-	{
+	if (gRefreshThread != nil) {
 		[gRefreshThread cancel];
 		gRefreshThread = nil;
 	}
     
 	UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
     
-	if (!([searchHits count] == 0 && gLastSearchString.length == 0))
-	{
+	if (!([searchHits count] == 0 && gLastSearchString.length == 0)) {
 		NSString* destination = nil;        
-		if (indexPath.section == 1)
-		{
-            destination = [[WeaveOperations sharedOperations] searchURL:gLastSearchString];
-		}
-		else 
-		{
+		if (indexPath.section == 1) {
+            destination = [[WeaveOperations sharedOperations] queryURLForTerm:gLastSearchString];
+		} else  {
 			destination = cell.detailTextLabel.text;
 		}
 		[self.delegate finishSearch:destination title:cell.textLabel.text];
@@ -186,12 +174,16 @@ static NSArray* gFreshSearchHits = nil;
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    if ([self.delegate respondsToSelector:@selector(userScrolledSuggestions)])
+     [self.delegate performSelector:@selector(userScrolledSuggestions)];
+}
+
 #pragma mark - Heavy search tasks, copied from Weave
 - (void)filterResultsUsingString:(NSString*)query
 {
     //if there is a thread running, we need to stop it. it will autorelease
-    if (gRefreshThread != nil)
-    {
+    if (gRefreshThread != nil) {
         [gRefreshThread cancel];
         gRefreshThread = nil;
     }
@@ -212,28 +204,19 @@ static NSArray* gFreshSearchHits = nil;
 - (void) threadRefreshHits:(NSString*)searchText
 {
     @autoreleasepool {
-        @try 
-        {
+        @try {
             [self refreshHits:searchText];
-            if ([[NSThread currentThread] isCancelled])  //we might be cancelled, because a better search came along, so don't display our results
-            {
+            if ([[NSThread currentThread] isCancelled]) {//we might be cancelled, because a better search came along, so don't display our results
                 DLog(@"search thread was cancelled and replaced");
-            }
-            else
-            {
+            } else {
                 if (self.tableView) {// View might as well be gone
                     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
                 }
             }
         }
-        @catch (NSException *e) 
-        {
-            ELog(@"Failed to update search results");
+        @catch (NSException *e) {
+            DLog(@"Failed to update search results");
         }
-//        @finally 
-//        {
-//            gRefreshThread = nil;
-//        }
     }
 }
 
@@ -269,8 +252,8 @@ static NSArray* gFreshSearchHits = nil;
         // it obviously can't have them as the start of words
         for (NSString* term in terms) 
         {
-            titleRange = [[item objectForKey:@"title"] rangeOfString:term options:NSCaseInsensitiveSearch];
-            urlRange = [[item objectForKey:@"url"] rangeOfString:term options:NSCaseInsensitiveSearch];
+            titleRange = [item[@"title"] rangeOfString:term options:NSCaseInsensitiveSearch];
+            urlRange = [item[@"url"] rangeOfString:term options:NSCaseInsensitiveSearch];
             if (titleRange.location == NSNotFound && urlRange.location == NSNotFound)
             {
                 skip = YES;
@@ -285,14 +268,10 @@ static NSArray* gFreshSearchHits = nil;
         
         BOOL isSuperDeluxeSparkleHit = YES;  //flips to NO if all the predicates don't match
         
-        for (NSPredicate* pred in predicateList)
-        {
-            @try 
-            {
-                isSuperDeluxeSparkleHit = isSuperDeluxeSparkleHit && ([pred evaluateWithObject:[item objectForKey:@"title"]] || [pred evaluateWithObject:[item objectForKey:@"url"]]);
-            }
-            @catch (NSException * e) 
-            {
+        for (NSPredicate* pred in predicateList) {
+            @try  {
+                isSuperDeluxeSparkleHit = isSuperDeluxeSparkleHit && ([pred evaluateWithObject:item[@"title"]] || [pred evaluateWithObject:item[@"url"]]);
+            } @catch (NSException * e)  {
                 isSuperDeluxeSparkleHit = NO;
                 break; //just get out
             }
@@ -300,13 +279,10 @@ static NSArray* gFreshSearchHits = nil;
             if (!isSuperDeluxeSparkleHit) break;  //don't check any more predicates
         }
         
-        if (isSuperDeluxeSparkleHit)
-        {
+        if (isSuperDeluxeSparkleHit) {
             wordHitCount++;
-            [wordHits setObject:item forKey:[item objectForKey:@"url"]];
-        }
-        else if (substrHitCount < maxHits)
-        {
+            wordHits[item[@"url"]] = item;
+        } else if (substrHitCount < maxHits) {
             substrHitCount++;
             substrHits[item[@"url"]] = item;
             //[substrHits setObject:item forKey:[item objectForKey:@"url"]];
@@ -385,7 +361,7 @@ static NSArray* gFreshSearchHits = nil;
     NSArray* tabs = [[Store getStore] getTabs];
     for (NSDictionary* client in tabs)
     {
-        [self searchWeaveObjects:[client objectForKey:@"tabs"] 
+        [self searchWeaveObjects:client[@"tabs"] 
                  withSearchTerms:searchTokens
                    andPredicates:predicates 
                   wordHitResults:newWordHits 

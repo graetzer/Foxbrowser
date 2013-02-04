@@ -146,14 +146,14 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 - (NSDictionary*) messageWithType: (NSString*) type payload: (id) payload
 {
-	return [NSDictionary dictionaryWithObjectsAndKeys: type, @"type", payload, @"payload", nil];
+	return @{@"type": type, @"payload": payload};
 }
 
 #pragma mark -
 
 - (NSError*) errorWithCode: (NSInteger) code localizedDescriptionKey: (NSString*) localizedDescriptionKey
 {
-	NSDictionary* userInfo = [NSDictionary dictionaryWithObject: localizedDescriptionKey forKey: @"NSLocalizedDescriptionKey"];
+	NSDictionary* userInfo = @{@"NSLocalizedDescriptionKey": localizedDescriptionKey};
 	return [NSError errorWithDomain: JPAKEClientErrorDomain code: code userInfo: userInfo];
 }
 
@@ -243,12 +243,12 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 		return NO;
 	}
 	
-	NSString* type = [message objectForKey: @"type"];
+	NSString* type = message[@"type"];
 	if (type == nil || [type isKindOfClass: [NSString class]] == NO) {
 		return NO;
 	}
 	
-	if ([message objectForKey: @"payload"] == nil) {
+	if (message[@"payload"] == nil) {
 		return NO;
 	}
 	
@@ -264,7 +264,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	
 	// Check if the message is of the correct type
 	
-	NSString* type = [message objectForKey: @"type"];
+	NSString* type = message[@"type"];
 	if ([type isEqualToString: @"sender1"] == NO) {
 		[self reportWrongMessageError];
 		return NO;
@@ -272,20 +272,20 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	
 	// Check for the existence of a payload dictionary
 	
-	NSDictionary* payload = [message objectForKey: @"payload"];
+	NSDictionary* payload = message[@"payload"];
 	if (payload == nil || [payload isKindOfClass: [NSDictionary class]] == NO) {
 		return NO;
 	}
 	
 	// Check if the payload has the two zkp dictionaries
 	
-	NSDictionary* zkp_x1 = [payload objectForKey: @"zkp_x1"];
+	NSDictionary* zkp_x1 = payload[@"zkp_x1"];
 	if (zkp_x1 == nil || [zkp_x1 isKindOfClass: [NSDictionary class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	NSDictionary* zkp_x2 = [payload objectForKey: @"zkp_x1"];
+	NSDictionary* zkp_x2 = payload[@"zkp_x1"];
 	if (zkp_x2 == nil || [zkp_x2 isKindOfClass: [NSDictionary class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
@@ -293,32 +293,32 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	
 	// Check for the presence of the numbers .. we just check if they are strings
 
-	if ([[payload objectForKey: @"gx1"] isKindOfClass: [NSString class]] == NO) {
+	if ([payload[@"gx1"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[payload objectForKey: @"gx2"] isKindOfClass: [NSString class]] == NO) {
+	if ([payload[@"gx2"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[zkp_x1 objectForKey: @"gr"] isKindOfClass: [NSString class]] == NO) {
+	if ([zkp_x1[@"gr"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[zkp_x1 objectForKey: @"b"] isKindOfClass: [NSString class]] == NO) {
+	if ([zkp_x1[@"b"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[zkp_x2 objectForKey: @"gr"] isKindOfClass: [NSString class]] == NO) {
+	if ([zkp_x2[@"gr"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[zkp_x2 objectForKey: @"b"] isKindOfClass: [NSString class]] == NO) {
+	if ([zkp_x2[@"b"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
@@ -335,7 +335,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Check if the message is of the correct type
 	
-	NSString* type = [message objectForKey: @"type"];
+	NSString* type = message[@"type"];
 	if ([type isEqualToString: @"sender2"] == NO) {
 		[self reportWrongMessageError];
 		return NO;
@@ -343,7 +343,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Check for the existence of a payload dictionary
 	
-	NSDictionary* payload = [message objectForKey: @"payload"];
+	NSDictionary* payload = message[@"payload"];
 	if (payload == nil || [payload isKindOfClass: [NSDictionary class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
@@ -351,7 +351,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	
 	// Check if the payload has the zkp dictionary
 	
-	NSDictionary* zkp_A = [payload objectForKey: @"zkp_A"];	
+	NSDictionary* zkp_A = payload[@"zkp_A"];	
 	if (zkp_A == nil || [zkp_A isKindOfClass: [NSDictionary class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
@@ -359,17 +359,17 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	
 	// Check for the presence of the numbers .. we just check if they are strings
 
-	if ([[payload objectForKey: @"A"] isKindOfClass: [NSString class]] == NO) {
+	if ([payload[@"A"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[zkp_A objectForKey: @"gr"] isKindOfClass: [NSString class]] == NO) {
+	if ([zkp_A[@"gr"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
 
-	if ([[zkp_A objectForKey: @"b"] isKindOfClass: [NSString class]] == NO) {
+	if ([zkp_A[@"b"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}
@@ -386,7 +386,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Check if the message is of the correct type
 	
-	NSString* type = [message objectForKey: @"type"];
+	NSString* type = message[@"type"];
 	if ([type isEqualToString: @"sender3"] == NO) {
 		[self reportWrongMessageError];
 		return NO;
@@ -394,7 +394,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	
 	// Check for the existence of a payload dictionary
 	
-	NSDictionary* payload = [message objectForKey: @"payload"];
+	NSDictionary* payload = message[@"payload"];
 	if (payload == nil || [payload isKindOfClass: [NSDictionary class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
@@ -402,17 +402,17 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Check if the crypto fields are there
 	
-	if ([[payload objectForKey: @"ciphertext"] isKindOfClass: [NSString class]] == NO) {
+	if ([payload[@"ciphertext"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}	
 
-	if ([[payload objectForKey: @"IV"] isKindOfClass: [NSString class]] == NO) {
+	if ([payload[@"IV"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}	
 
-	if ([[payload objectForKey: @"hmac"] isKindOfClass: [NSString class]] == NO) {
+	if ([payload[@"hmac"] isKindOfClass: [NSString class]] == NO) {
 		[self reportInvalidMessageError];
 		return NO;
 	}	
@@ -492,7 +492,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	//
 
-	NSData* iv = [[[NSData alloc] initWithBase64EncodedString: [payload objectForKey: @"IV"]] autorelease];
+	NSData* iv = [[[NSData alloc] initWithBase64EncodedString: payload[@"IV"]] autorelease];
 	if (iv == nil || [iv length] != 16) {
 		if (error != NULL) {
 			[self reportInvalidMessageError];
@@ -501,7 +501,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 		return nil;
 	}
 	
-	NSData* ciphertext = [[[NSData alloc] initWithBase64EncodedString: [payload objectForKey: @"ciphertext"]] autorelease];
+	NSData* ciphertext = [[[NSData alloc] initWithBase64EncodedString: payload[@"ciphertext"]] autorelease];
 	if (ciphertext == nil || [ciphertext length] == 0) {
 		if (error != NULL) {
 			[self reportInvalidMessageError];
@@ -510,7 +510,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 		return nil;
 	}
 	
-	NSData* hmac = [[[NSData alloc] initWithBase16EncodedString: [payload objectForKey: @"hmac"]] autorelease];
+	NSData* hmac = [[[NSData alloc] initWithBase16EncodedString: payload[@"hmac"]] autorelease];
 	if (hmac == nil || [hmac length] != 32) {
 		if (error != NULL) {
 			[self reportInvalidMessageError];
@@ -519,7 +519,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 		return nil;
 	}
 
-	NSData* cipherTextData = [[payload objectForKey: @"ciphertext"] dataUsingEncoding: NSASCIIStringEncoding];
+	NSData* cipherTextData = [payload[@"ciphertext"] dataUsingEncoding: NSASCIIStringEncoding];
 
 	NSData* hmacValue = [cipherTextData HMACSHA256WithKey: keys.hmacKey];
 	if (hmacValue == nil || [hmac isEqualToData: hmacValue] == NO) {
@@ -580,7 +580,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 				[_delegate client: self didFailWithError: [self invalidServerResponseError]];
 			} else {
 				NSError* error = nil;
-				NSString* json = [self decryptPayload: [message objectForKey: @"payload"] withKey: _key error: &error];
+				NSString* json = [self decryptPayload: message[@"payload"] withKey: _key error: &error];
 				if (error != nil) {
 					[_delegate client: self didFailWithError: error];
 				} else {
@@ -646,7 +646,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Remember the etag
 	[_etag release];
-	_etag = [[[request responseHeaders] objectForKey: @"Etag"] retain];
+	_etag = [[request responseHeaders][@"Etag"] retain];
 
 	// Poll for the desktop's message three
 	_pollRetryCount = 0;
@@ -682,7 +682,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 	NSData* knownValue = [@"0123456789ABCDEF" dataUsingEncoding: NSASCIIStringEncoding];
 	NSData* iv = [NSData randomDataWithLength: kCCBlockSizeAES128];
 	NSData* ciphertext = [NSData ciphertextDataByAES256EncrypingPlaintextData: knownValue key: keys.cryptoKey iv: iv padding: YES];
-	NSDictionary* payload = [NSDictionary dictionaryWithObjectsAndKeys: [ciphertext base64Encoding], @"ciphertext", [iv base64Encoding], @"IV", nil];
+	NSDictionary* payload = @{@"ciphertext": [ciphertext base64Encoding], @"IV": [iv base64Encoding]};
 	
 	NSDictionary* message = [self messageWithType: @"receiver3" payload: payload];
 	NSString* json = [message JSONRepresentation];
@@ -733,7 +733,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 				[_delegate client: self didFailWithError: [self invalidServerResponseError]];
 				return;
 			}
-			NSDictionary* payload = [message objectForKey: @"payload"];
+			NSDictionary* payload = message[@"payload"];
 			_key = [[_party generateKeyFromMessageTwo: payload] retain];
 
 			//NSLog(@"MOO _key = %@", _key);
@@ -741,9 +741,9 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 			if (_key == nil) {
 				[_delegate client: self didFailWithError: [self errorWithCode: -1 localizedDescriptionKey: @""]]; // TODO: What to report here?
 			} else {
-				if ([[request responseHeaders] objectForKey: @"Etag"]) {
+				if ([request responseHeaders][@"Etag"]) {
 					[_etag release];
-					_etag = [[[request responseHeaders] objectForKey: @"Etag"] retain];
+					_etag = [[request responseHeaders][@"Etag"] retain];
 				}
 				[self putMobileMessageThree];
 			}
@@ -803,7 +803,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Remember the etag
 	[_etag release];
-	_etag = [[[request responseHeaders] objectForKey: @"Etag"] retain];
+	_etag = [[request responseHeaders][@"Etag"] retain];
 
 	// Poll for the desktop's message two
 	_pollRetryCount = 0;
@@ -873,11 +873,11 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 				[self reportInvalidMessageError];
 				[_delegate client: self didFailWithError: [self invalidServerResponseError]];
 			} else {
-				if ([[request responseHeaders] objectForKey: @"Etag"]) {
+				if ([request responseHeaders][@"Etag"]) {
 					[_etag release];
-					_etag = [[[request responseHeaders] objectForKey: @"Etag"] retain];
+					_etag = [[request responseHeaders][@"Etag"] retain];
 				}
-				NSDictionary* payload = [message objectForKey: @"payload"];
+				NSDictionary* payload = message[@"payload"];
 				[self putMobileMessageTwo: payload];
 			}
 			break;
@@ -941,7 +941,7 @@ NSString* JPAKEClientErrorDomain = @"JPAKEClientErrorDomain";
 
 	// Remember the etag
 	[_etag release];
-	_etag = [[[request responseHeaders] objectForKey: @"Etag"] retain];
+	_etag = [[request responseHeaders][@"Etag"] retain];
 	
 	// We have generated a secret and uploaded our message one. So now periodically poll to see if the other side has uploaded their message one.
 	_pollRetryCount = 0;

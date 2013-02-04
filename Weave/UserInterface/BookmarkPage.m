@@ -123,16 +123,16 @@
   {
     switch (section) {
       case 0:
-        if ([[topLevelBookmarks objectAtIndex:0] count]) return NSLocalizedString(@"Bookmarks Toolbar", @"bookmarks toolbar");
+        if ([topLevelBookmarks[0] count]) return NSLocalizedString(@"Bookmarks Toolbar", @"bookmarks toolbar");
         return nil;
       case 1:
-        if ([[topLevelBookmarks objectAtIndex:1] count]) return NSLocalizedString(@"Bookmarks Menu", @"bookmarks menu");
+        if ([topLevelBookmarks[1] count]) return NSLocalizedString(@"Bookmarks Menu", @"bookmarks menu");
         return nil;
       case 2:
-        if ([[topLevelBookmarks objectAtIndex:2] count]) return NSLocalizedString(@"Mobile Bookmarks", @"mobile bookmarks");
+        if ([topLevelBookmarks[2] count]) return NSLocalizedString(@"Mobile Bookmarks", @"mobile bookmarks");
         return nil;        
       case 3:
-        if ([[topLevelBookmarks objectAtIndex:3] count]) return NSLocalizedString(@"Unsorted Bookmarks", @"unsorted bookmarks");
+        if ([topLevelBookmarks[3] count]) return NSLocalizedString(@"Unsorted Bookmarks", @"unsorted bookmarks");
         return nil;
         
       default:
@@ -148,7 +148,7 @@
 {
   if (parentid == nil)
   {
-    return [[topLevelBookmarks objectAtIndex:section] count];
+    return [topLevelBookmarks[section] count];
 
   }
   else {
@@ -172,18 +172,18 @@
   NSDictionary* bookmarkItem = nil;
   if (parentid == nil)
   {
-    bookmarkItem = [[topLevelBookmarks objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    bookmarkItem = topLevelBookmarks[indexPath.section][indexPath.row];
   }
   else 
   {
-    bookmarkItem = [bookmarks objectAtIndex:indexPath.row];
+    bookmarkItem = bookmarks[indexPath.row];
   }
   
-  cell.textLabel.text = [bookmarkItem objectForKey:@"title"];
-  cell.detailTextLabel.text = [bookmarkItem objectForKey:@"url"]?[bookmarkItem objectForKey:@"url"]:nil;
+  cell.textLabel.text = bookmarkItem[@"title"];
+  cell.detailTextLabel.text = bookmarkItem[@"url"]?bookmarkItem[@"url"]:nil;
   cell.accessoryType = UITableViewCellAccessoryNone;
 
-  if ([[bookmarkItem objectForKey:@"type"] isEqualToString:@"folder"])
+  if ([bookmarkItem[@"type"] isEqualToString:@"folder"])
   {
     cell.imageView.image = [UIImage imageNamed:@"folder.png"];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -191,7 +191,7 @@
   else 
   {
     //default
-    cell.imageView.image = [UIImage imageNamed:[bookmarkItem objectForKey:@"icon"]];
+    cell.imageView.image = [UIImage imageNamed:bookmarkItem[@"icon"]];
   }
   
   return cell;
@@ -202,19 +202,19 @@
 {
 	NSDictionary* bookmarkItem = nil;
 	if (parentid == nil) {
-		bookmarkItem = [[topLevelBookmarks objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+		bookmarkItem = topLevelBookmarks[indexPath.section][indexPath.row];
 	} else  {
-		bookmarkItem = [bookmarks objectAtIndex:indexPath.row];
+		bookmarkItem = bookmarks[indexPath.row];
 	}
 
 	UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
 
-	if ([[bookmarkItem objectForKey:@"type"] isEqualToString:@"folder"])
+	if ([bookmarkItem[@"type"] isEqualToString:@"folder"])
 	{
 		BookmarkPage *newPage = [[BookmarkPage alloc] initWithNibName:nil bundle:nil];
         newPage.browser = self.browser;
-		newPage.navigationItem.title = [bookmarkItem objectForKey:@"title"];
-		[newPage setParent:[bookmarkItem objectForKey:@"id"]];
+		newPage.navigationItem.title = bookmarkItem[@"title"];
+		[newPage setParent:bookmarkItem[@"id"]];
 
 		[self.navigationController pushViewController: newPage animated:YES];
 	}
@@ -229,8 +229,8 @@
 		else 
 		{
 			//no connectivity, put up alert
-			NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Load Page", @"unable to load page"), @"title", 
-				NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+			NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
+				@"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
 			[weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];      
 		}
 	}

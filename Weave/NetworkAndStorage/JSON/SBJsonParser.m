@@ -165,7 +165,7 @@ static char ctrl[0x22];
 {
     if (!strncmp(c, "rue", 3)) {
         c += 3;
-        *o = [NSNumber numberWithBool:YES];
+        *o = @YES;
         return YES;
     }
     [self addErrorWithCode:EPARSE description:@"Expected 'true'"];
@@ -176,7 +176,7 @@ static char ctrl[0x22];
 {
     if (!strncmp(c, "alse", 4)) {
         c += 4;
-        *o = [NSNumber numberWithBool:NO];
+        *o = @NO;
         return YES;
     }
     [self addErrorWithCode:EPARSE description: @"Expected 'false'"];
@@ -267,7 +267,7 @@ static char ctrl[0x22];
             return NO;
         }
         
-        [*o setObject:v forKey:k];
+        (*o)[k] = v;
         
         skipWhitespace(c);
         if (*c == ',' && c++) {

@@ -140,6 +140,9 @@
 		F488DAD51697A39500C40773 /* expose-white.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAD11697A39500C40773 /* expose-white.png */; };
 		F488DAD61697A39500C40773 /* expose-white@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F488DAD21697A39500C40773 /* expose-white@2x.png */; };
 		F488DAD91698828A00C40773 /* SGPageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F488DAD81698828A00C40773 /* SGPageScrollView.m */; };
+		F48A732516BFECF3006B25CB /* libGoogleAnalytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F48A732416BFECF3006B25CB /* libGoogleAnalytics.a */; };
+		F48A732716BFFF8B006B25CB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F48A732616BFFF8B006B25CB /* CoreData.framework */; };
+		F48A732B16C02123006B25CB /* grey_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = F48A732A16C02123006B25CB /* grey_logo.png */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
 		F4904F5D169B24DF00B19748 /* dialpad.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5B169B24DF00B19748 /* dialpad.png */; };
 		F4904F5E169B24DF00B19748 /* dialpad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5C169B24DF00B19748 /* dialpad@2x.png */; };
@@ -511,6 +514,14 @@
 		F488DAD21697A39500C40773 /* expose-white@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "expose-white@2x.png"; sourceTree = "<group>"; };
 		F488DAD71698828A00C40773 /* SGPageScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageScrollView.h; sourceTree = "<group>"; };
 		F488DAD81698828A00C40773 /* SGPageScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageScrollView.m; sourceTree = "<group>"; };
+		F48A731F16BFECF3006B25CB /* GAI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAI.h; sourceTree = "<group>"; };
+		F48A732016BFECF3006B25CB /* GAITrackedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAITrackedViewController.h; sourceTree = "<group>"; };
+		F48A732116BFECF3006B25CB /* GAITracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAITracker.h; sourceTree = "<group>"; };
+		F48A732216BFECF3006B25CB /* GAITransaction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAITransaction.h; sourceTree = "<group>"; };
+		F48A732316BFECF3006B25CB /* GAITransactionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAITransactionItem.h; sourceTree = "<group>"; };
+		F48A732416BFECF3006B25CB /* libGoogleAnalytics.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libGoogleAnalytics.a; sourceTree = "<group>"; };
+		F48A732616BFFF8B006B25CB /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F48A732A16C02123006B25CB /* grey_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = grey_logo.png; sourceTree = "<group>"; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
 		F4904F5B169B24DF00B19748 /* dialpad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dialpad.png; sourceTree = "<group>"; };
@@ -623,6 +634,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F48A732716BFFF8B006B25CB /* CoreData.framework in Frameworks */,
 				F446638816A2E31F00047704 /* Social.framework in Frameworks */,
 				F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */,
 				F455171415A47D9100E0B54E /* MessageUI.framework in Frameworks */,
@@ -639,6 +651,7 @@
 				F4FE2C4E159B6C58001B04D7 /* CoreGraphics.framework in Frameworks */,
 				F467FFBD15A6446300EACFBD /* libcrypto.a in Frameworks */,
 				F467FFBE15A6446300EACFBD /* libssl.a in Frameworks */,
+				F48A732516BFECF3006B25CB /* libGoogleAnalytics.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -688,6 +701,7 @@
 		F45516E315A47B8A00E0B54E /* External */ = {
 			isa = PBXGroup;
 			children = (
+				F48A731E16BFECF3006B25CB /* Analytics */,
 				F46A638F167C31F80004BE43 /* Reachability */,
 				F40DFBB316125CDB005CE2F3 /* SGURLProtocol */,
 				F467FF1F15A6446200EACFBD /* ios-jpake */,
@@ -1115,6 +1129,19 @@
 			path = iPhone;
 			sourceTree = "<group>";
 		};
+		F48A731E16BFECF3006B25CB /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				F48A731F16BFECF3006B25CB /* GAI.h */,
+				F48A732016BFECF3006B25CB /* GAITrackedViewController.h */,
+				F48A732116BFECF3006B25CB /* GAITracker.h */,
+				F48A732216BFECF3006B25CB /* GAITransaction.h */,
+				F48A732316BFECF3006B25CB /* GAITransactionItem.h */,
+				F48A732416BFECF3006B25CB /* libGoogleAnalytics.a */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
 		F48AF7B715A3960A003A8DF0 /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -1143,6 +1170,7 @@
 		F4BF6F4515B735BA005FD2B6 /* WebView */ = {
 			isa = PBXGroup;
 			children = (
+				F48A732A16C02123006B25CB /* grey_logo.png */,
 				F46A6371167C300E0004BE43 /* JSTools.js */,
 				F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */,
 				F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */,
@@ -1257,6 +1285,7 @@
 		F4FE2C48159B6C58001B04D7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F48A732616BFFF8B006B25CB /* CoreData.framework */,
 				F46700FD15A651FA00EACFBD /* libicucore.dylib */,
 				F455171715A47D9E00E0B54E /* libz.dylib */,
 				F467007A15A64CD500EACFBD /* libsqlite3.dylib */,
@@ -1471,6 +1500,7 @@
 				F4904F63169B700300B19748 /* ManualSetupViewController.xib in Resources */,
 				F46C5D1F169CCF4B00D9B717 /* Default.png in Resources */,
 				F46C5D20169CCF4B00D9B717 /* Default@2x.png in Resources */,
+				F48A732B16C02123006B25CB /* grey_logo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1721,6 +1751,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/External/ios-openssl/lib\"",
+					"\"$(SRCROOT)/External/Analytics\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1744,6 +1775,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/External/ios-openssl/lib\"",
+					"\"$(SRCROOT)/External/Analytics\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";

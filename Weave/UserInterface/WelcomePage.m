@@ -39,6 +39,7 @@
 #import "AccountHelp.h"
 #import "WeaveService.h"
 #import "JPAKEReporter.h"
+#import "GAI.h"
 
 JPAKEReporter* gSharedReporter = nil;
 
@@ -49,21 +50,22 @@ JPAKEReporter* gSharedReporter = nil;
 
 #pragma mark -
 
-- (void) viewDidLoad
-{
+- (void) viewDidLoad {
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"cancel")
                                                                             style:UIBarButtonItemStyleDone
                                                                            target:self
                                                                            action:@selector(cancel:)];
     
-	NSString* language = [[NSLocale preferredLanguages] objectAtIndex: 0];
+	NSString* language = [NSLocale preferredLanguages][0];
 	if ([language isEqualToString: @"ru"] || [language isEqualToString: @"id"]) {
 		_setupButton.titleLabel.font = [UIFont fontWithName: _setupButton.titleLabel.font.fontName
 			size: _setupButton.titleLabel.font.pointSize - 2.0];
 		_helpButton.titleLabel.font = [UIFont fontWithName: _helpButton.titleLabel.font.fontName
 			size: _helpButton.titleLabel.font.pointSize - 2.0];
 	}
+    
+    [[GAI sharedInstance].defaultTracker sendView:@"WelcomePage"];
 }
 
 - (void)viewDidUnload {

@@ -24,19 +24,19 @@
 {
     _headerFields = (__bridge NSDictionary *)CFHTTPMessageCopyAllHeaderFields(message);
     
-    NSArray *input = [[_headerFields objectForKey:@"Content-Type"] componentsSeparatedByString:@";"];
+    NSArray *input = [_headerFields[@"Content-Type"] componentsSeparatedByString:@";"];
     NSString *MIMEType = @"text/html";
     if (input.count >= 1) {
-        MIMEType = [input objectAtIndex:0];
+        MIMEType = input[0];
     }
     
-    long long contentLength = [[_headerFields objectForKey:@"Content-Length"] longLongValue];
+    long long contentLength = [_headerFields[@"Content-Length"] longLongValue];
     if (contentLength <= 0)
         contentLength = NSURLResponseUnknownLength;
     
     NSString *encoding = @"UTF-8";
     if (input.count >= 2) {
-        NSString *sendEncoding = [[input objectAtIndex:1] stringByReplacingOccurrencesOfString:@"charset=" withString:@""];
+        NSString *sendEncoding = [input[1] stringByReplacingOccurrencesOfString:@"charset=" withString:@""];
         sendEncoding = [sendEncoding stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if (sendEncoding.length)
             encoding = sendEncoding;

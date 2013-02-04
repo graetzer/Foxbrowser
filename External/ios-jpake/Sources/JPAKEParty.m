@@ -52,7 +52,7 @@ static NSString* BIGNUM2NSString(const BIGNUM* bn)
 
 	const char* s = BN_bn2hex(bn);
 	if (s != nil) {
-		result = [[NSString stringWithCString: s encoding: NSASCIIStringEncoding] lowercaseString];
+		result = [@(s) lowercaseString];
 		OPENSSL_free((void*) s);
 	}
 	
@@ -198,24 +198,18 @@ static BIGNUM* HashPassword(NSString* password, BIGNUM* q)
 
 	JPAKE_STEP1_generate(&step1, _ctx);
 	
-	NSDictionary* zkp_x1 = [NSDictionary dictionaryWithObjectsAndKeys:
-		BIGNUM2NSString(step1.p1.zkpx.gr), @"gr",
-		BIGNUM2NSString(step1.p1.zkpx.b), @"b",
-		_signerIdentity, @"id",
-		nil];
+	NSDictionary* zkp_x1 = @{@"gr": BIGNUM2NSString(step1.p1.zkpx.gr),
+		@"b": BIGNUM2NSString(step1.p1.zkpx.b),
+		@"id": _signerIdentity};
 
-	NSDictionary* zkp_x2 = [NSDictionary dictionaryWithObjectsAndKeys:
-		BIGNUM2NSString(step1.p2.zkpx.gr), @"gr",
-		BIGNUM2NSString(step1.p2.zkpx.b), @"b",
-		_signerIdentity, @"id",
-		nil];
+	NSDictionary* zkp_x2 = @{@"gr": BIGNUM2NSString(step1.p2.zkpx.gr),
+		@"b": BIGNUM2NSString(step1.p2.zkpx.b),
+		@"id": _signerIdentity};
 	
-	NSDictionary* result = [NSDictionary dictionaryWithObjectsAndKeys:
-		BIGNUM2NSString(step1.p1.gx), @"gx1",
-		BIGNUM2NSString(step1.p2.gx), @"gx2",
-		zkp_x1, @"zkp_x1",
-		zkp_x2, @"zkp_x2",
-		nil];
+	NSDictionary* result = @{@"gx1": BIGNUM2NSString(step1.p1.gx),
+		@"gx2": BIGNUM2NSString(step1.p2.gx),
+		@"zkp_x1": zkp_x1,
+		@"zkp_x2": zkp_x2};
 		
 	JPAKE_STEP1_release(&step1);
 	
@@ -227,12 +221,12 @@ static BIGNUM* HashPassword(NSString* password, BIGNUM* q)
 	JPAKE_STEP1 step1;
 	JPAKE_STEP1_init(&step1);
 	
-	NSString2BIGNUM([one objectForKey: @"gx1"], &step1.p1.gx);
-	NSString2BIGNUM([[one objectForKey: @"zkp_x1"] objectForKey: @"b"], &step1.p1.zkpx.b);
-	NSString2BIGNUM([[one objectForKey: @"zkp_x1"] objectForKey: @"gr"], &step1.p1.zkpx.gr);
-	NSString2BIGNUM([one objectForKey: @"gx2"], &step1.p2.gx);
-	NSString2BIGNUM([[one objectForKey: @"zkp_x2"] objectForKey: @"b"], &step1.p2.zkpx.b);
-	NSString2BIGNUM([[one objectForKey: @"zkp_x2"] objectForKey: @"gr"], &step1.p2.zkpx.gr);
+	NSString2BIGNUM(one[@"gx1"], &step1.p1.gx);
+	NSString2BIGNUM(one[@"zkp_x1"][@"b"], &step1.p1.zkpx.b);
+	NSString2BIGNUM(one[@"zkp_x1"][@"gr"], &step1.p1.zkpx.gr);
+	NSString2BIGNUM(one[@"gx2"], &step1.p2.gx);
+	NSString2BIGNUM(one[@"zkp_x2"][@"b"], &step1.p2.zkpx.b);
+	NSString2BIGNUM(one[@"zkp_x2"][@"gr"], &step1.p2.zkpx.gr);
 	
 	NSDictionary* result = nil;
 	
@@ -243,16 +237,12 @@ static BIGNUM* HashPassword(NSString* password, BIGNUM* q)
 		
 		JPAKE_STEP2_generate(&step2, _ctx);
 		
-		NSDictionary* zkp_A = [NSDictionary dictionaryWithObjectsAndKeys:
-			BIGNUM2NSString(step2.zkpx.gr), @"gr",
-			BIGNUM2NSString(step2.zkpx.b), @"b",
-			_signerIdentity, @"id",
-			nil];
+		NSDictionary* zkp_A = @{@"gr": BIGNUM2NSString(step2.zkpx.gr),
+			@"b": BIGNUM2NSString(step2.zkpx.b),
+			@"id": _signerIdentity};
 	
-		result = [NSDictionary dictionaryWithObjectsAndKeys:
-			BIGNUM2NSString(step2.gx), @"A",
-			zkp_A, @"zkp_A",
-			nil];
+		result = @{@"A": BIGNUM2NSString(step2.gx),
+			@"zkp_A": zkp_A};
 			
 		JPAKE_STEP2_release(&step2);
 	}
@@ -267,9 +257,9 @@ static BIGNUM* HashPassword(NSString* password, BIGNUM* q)
 	JPAKE_STEP2 step2;
 	JPAKE_STEP2_init(&step2);
 	
-	NSString2BIGNUM([two objectForKey: @"A"], &step2.gx);
-	NSString2BIGNUM([[two objectForKey: @"zkp_A"] objectForKey: @"b"], &step2.zkpx.b);
-	NSString2BIGNUM([[two objectForKey: @"zkp_A"] objectForKey: @"gr"], &step2.zkpx.gr);
+	NSString2BIGNUM(two[@"A"], &step2.gx);
+	NSString2BIGNUM(two[@"zkp_A"][@"b"], &step2.zkpx.b);
+	NSString2BIGNUM(two[@"zkp_A"][@"gr"], &step2.zkpx.gr);
 
 	NSData* result = nil;
 
@@ -317,7 +307,7 @@ static BIGNUM* HashPassword(NSString* password, BIGNUM* q)
 
 	const char* s = BN_bn2dec(_secret);
 	if (s != nil) {
-		result = [NSString stringWithCString: s encoding: NSASCIIStringEncoding];
+		result = @(s);
 		OPENSSL_free((void*) s);
 	}
 	

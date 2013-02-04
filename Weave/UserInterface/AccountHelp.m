@@ -91,18 +91,18 @@
     
     if ([response statusCode] == 201)
     {
-      errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Thank you!", @"thank you for submitting"), @"title", 
-                 NSLocalizedString(@"Instructions are on the way", @"we will send instructions"), @"message", nil];
+      errInfo = @{@"title": NSLocalizedString(@"Thank you!", @"thank you for submitting"), 
+                 @"message": NSLocalizedString(@"Instructions are on the way", @"we will send instructions")};
     }
     else if ([response statusCode] == 409)
     {
-      errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Duplicate", @"duplicate email address"), @"title", 
-                 NSLocalizedString(@"That email address has already been submitted", @"the email address already exists in our database"), @"message", nil];
+      errInfo = @{@"title": NSLocalizedString(@"Duplicate", @"duplicate email address"), 
+                 @"message": NSLocalizedString(@"That email address has already been submitted", @"the email address already exists in our database")};
     }    
     else 
     {
       NSString* errMsg = [NSString stringWithFormat:NSLocalizedString(@"Unable to submit your email, please try again later (%d)", @"unable to submit email"), [response statusCode]]; 
-      errInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Problem", @"title", errMsg, @"message", nil];
+      errInfo = @{@"title": @"Problem", @"message": errMsg};
     }
     
     [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
@@ -111,8 +111,8 @@
   else 
   {
     //no connectivity, put up alert
-    NSDictionary* errInfo = [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Cannot Submit", @"cannot submit email"), @"title", 
-                             NSLocalizedString(@"No internet connection available", "no internet connection"), @"message", nil];
+    NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Submit", @"cannot submit email"), 
+                             @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
     [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
   }
 

@@ -106,8 +106,8 @@
         // items which may be included by the same application.
         genericPasswordQuery = [[NSMutableDictionary alloc] init];
         
-		[genericPasswordQuery setObject:(__bridge id)kSecClassGenericPassword forKey:(__bridge id)kSecClass];
-        [genericPasswordQuery setObject:identifier forKey:(__bridge id)kSecAttrGeneric];
+		genericPasswordQuery[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
+        genericPasswordQuery[(__bridge id)kSecAttrGeneric] = identifier;
 		
 		// The keychain access group attribute determines if this item can be shared
 		// amongst multiple apps whose code signing entitlements contain the same keychain access group.
@@ -123,13 +123,13 @@
 			// If a SecItem contains an access group attribute, SecItemAdd and SecItemUpdate on the
 			// simulator will return -25243 (errSecNoAccessForItem).
 #else
-			[genericPasswordQuery setObject:accessGroup forKey:(__bridge id)kSecAttrAccessGroup];
+			genericPasswordQuery[(__bridge id)kSecAttrAccessGroup] = accessGroup;
 #endif
 		}
 		
 		// Use the proper search constants, return only the attributes of the first match.
-        [genericPasswordQuery setObject:(__bridge id)kSecMatchLimitOne forKey:(__bridge id)kSecMatchLimit];
-        [genericPasswordQuery setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnAttributes];
+        genericPasswordQuery[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
+        genericPasswordQuery[(__bridge id)kSecReturnAttributes] = (__bridge id)kCFBooleanTrue;
         
         NSDictionary *tempQuery = [NSDictionary dictionaryWithDictionary:genericPasswordQuery];
         
@@ -141,7 +141,7 @@
             [self resetKeychainItem];
 			
 			// Add the generic attribute and the keychain access group.
-			[keychainItemData setObject:identifier forKey:(__bridge id)kSecAttrGeneric];
+			keychainItemData[(__bridge id)kSecAttrGeneric] = identifier;
 			if (accessGroup != nil)
 			{
 #if TARGET_IPHONE_SIMULATOR
@@ -154,7 +154,7 @@
 				// If a SecItem contains an access group attribute, SecItemAdd and SecItemUpdate on the
 				// simulator will return -25243 (errSecNoAccessForItem).
 #else
-				[keychainItemData setObject:accessGroup forKey:(__bridge id)kSecAttrAccessGroup];
+				keychainItemData[(__bridge id)kSecAttrAccessGroup] = accessGroup;
 #endif
 			}
 		}
@@ -172,17 +172,17 @@
 - (void)setObject:(id)inObject forKey:(id)key
 {
     if (inObject == nil) return;
-    id currentObject = [keychainItemData objectForKey:key];
+    id currentObject = keychainItemData[key];
     if (![currentObject isEqual:inObject])
     {
-        [keychainItemData setObject:inObject forKey:key];
+        keychainItemData[key] = inObject;
         [self writeToKeychain];
     }
 }
 
 - (id)objectForKey:(id)key
 {
-    return [keychainItemData objectForKey:key];
+    return keychainItemData[key];
 }
 
 - (void)resetKeychainItem
@@ -200,12 +200,12 @@
     }
     
     // Default attributes for keychain item.
-    [keychainItemData setObject:@"" forKey:(__bridge id)kSecAttrAccount];
-    [keychainItemData setObject:@"" forKey:(__bridge id)kSecAttrLabel];
-    [keychainItemData setObject:@"" forKey:(__bridge id)kSecAttrDescription];
+    keychainItemData[(__bridge id)kSecAttrAccount] = @"";
+    keychainItemData[(__bridge id)kSecAttrLabel] = @"";
+    keychainItemData[(__bridge id)kSecAttrDescription] = @"";
     
 	// Default data for keychain item.
-    [keychainItemData setObject:@"" forKey:(__bridge id)kSecValueData];
+    keychainItemData[(__bridge id)kSecValueData] = @"";
 }
 
 - (NSMutableDictionary *)dictionaryToSecItemFormat:(NSDictionary *)dictionaryToConvert
@@ -217,12 +217,12 @@
     NSMutableDictionary *returnDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionaryToConvert];
     
     // Add the Generic Password keychain item class attribute.
-    [returnDictionary setObject:(__bridge id)kSecClassGenericPassword forKey:(__bridge id)kSecClass];
+    returnDictionary[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
     
     // Convert the NSString to NSData to meet the requirements for the value type kSecValueData.
 	// This is where to store sensitive data that should be encrypted.
-    NSString *passwordString = [dictionaryToConvert objectForKey:(__bridge id)kSecValueData];
-    [returnDictionary setObject:[passwordString dataUsingEncoding:NSUTF8StringEncoding] forKey:(__bridge id)kSecValueData];
+    NSString *passwordString = dictionaryToConvert[(__bridge id)kSecValueData];
+    returnDictionary[(__bridge id)kSecValueData] = [passwordString dataUsingEncoding:NSUTF8StringEncoding];
     
     return returnDictionary;
 }
@@ -236,8 +236,8 @@
     NSMutableDictionary *returnDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionaryToConvert];
     
     // Add the proper search key and class attribute.
-    [returnDictionary setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnData];
-    [returnDictionary setObject:(__bridge id)kSecClassGenericPassword forKey:(__bridge id)kSecClass];
+    returnDictionary[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
+    returnDictionary[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
     
     // Acquire the password data from the attributes.
     CFDataRef passwordData = NULL;
@@ -249,7 +249,7 @@
         // Add the password to the dictionary, converting from NSData to NSString.
         NSString *password = [[NSString alloc] initWithBytes:[(__bridge NSData *)passwordData bytes] length:[(__bridge NSData *)passwordData length]
                                                     encoding:NSUTF8StringEncoding];
-        [returnDictionary setObject:password forKey:(__bridge id)kSecValueData];
+        returnDictionary[(__bridge id)kSecValueData] = password;
     }
     else
     {
@@ -272,7 +272,7 @@
         // First we need the attributes from the Keychain.
         updateItem = [NSMutableDictionary dictionaryWithDictionary:(__bridge NSDictionary *)attributes];
         // Second we need to add the appropriate search key/values.
-        [updateItem setObject:[genericPasswordQuery objectForKey:(__bridge id)kSecClass] forKey:(__bridge id)kSecClass];
+        updateItem[(__bridge id)kSecClass] = genericPasswordQuery[(__bridge id)kSecClass];
         
         // Lastly, we need to set up the updated attribute list being careful to remove the class.
         NSMutableDictionary *tempCheck = [self dictionaryToSecItemFormat:keychainItemData];

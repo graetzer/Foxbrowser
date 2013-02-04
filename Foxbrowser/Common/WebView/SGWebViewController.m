@@ -155,8 +155,8 @@
     UIActionSheet *sheet;
     self.selected = [self.webView tagsForPosition:pt];
     
-    NSString *link = [self.selected objectForKey:@"A"];
-    NSString *imageSrc = [self.selected objectForKey:@"IMG"];
+    NSString *link = (self.selected)[@"A"];
+    NSString *imageSrc = (self.selected)[@"IMG"];
     
     NSString *prefix = @"newtab:";
     if ([link hasPrefix:prefix]) {
@@ -203,10 +203,14 @@
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    NSString *link = [self.selected objectForKey:@"A"];
-    NSString *imageSrc = [self.selected objectForKey:@"IMG"];
+    NSString *link = (self.selected)[@"A"];
+    NSString *imageSrc = (self.selected)[@"IMG"];
     
-    NSString *prefix = @"newtab:";
+    NSString *prefix = @"javascript:";
+    if ([link hasPrefix:prefix])
+        return;
+    
+    prefix = @"newtab:";
     if ([link hasPrefix:prefix]) {
         link = [link substringFromIndex:prefix.length];
         link = [link stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -300,15 +304,15 @@
     [webView disableContextMenu];
     [webView modifyLinkTargets];
     [webView modifyOpen];
+    
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
         [webView enableDoNotTrack];
         
     self.title = [webView title];
     
     NSString *webLoc = [self.webView location];
-    if (webLoc.length) {
+    if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
         self.location = [NSURL URLWithUnicodeString:webLoc];
-    }
     [self.browserViewController updateChrome];
     
     // Private mode
@@ -321,17 +325,16 @@
 }
 
 //there are too many spurious warnings, so I'm going to just ignore or log them all for now.
-- (void)webView:(UIWebView *)theWebView didFailLoadWithError:(NSError *)error
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
 {
     self.loading = NO;
     [self.browserViewController updateChrome];
     
-    NSLog(@"Error code: %d", error.code);
+    DLog(@"WebView error code: %d", error.code);
     //ignore these
     if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"]) return;
     
-    if ([error.domain isEqualToString:@"NSURLErrorDomain"])
-    {
+    if ([error.domain isEqualToString:@"NSURLErrorDomain"]) {
         DLog(@"Webview error code: %i", error.code);
         // Host not found, try adding www. in front?
         if (error.code == -1003 && [self.location.host rangeOfString:@"www"].location == NSNotFound) {
@@ -343,12 +346,14 @@
                 return;
             }
         }
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error Loading Page", @"error loading page")
-                                                        message:[error localizedDescription]
-                                                       delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles: nil];
-        [alert show];
-        return;
+        NSString *html = @"<html><head><title>%@</title>"
+        "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' /></head><body>"
+        "<div style='margin:100px auto;width:18em'>"
+        "<img style='display:block;margin:0 auto' src='grey_logo.png' />"
+        "<p style='color:#504f4f;font-family:HelveticaNeue;font-size:15px;text-align:center'>%@</p> </div></body></html>";//
+        NSString *errorPage = [NSString stringWithFormat:html,
+                               NSLocalizedString(@"Error Loading Page", @"error loading page"),[error localizedDescription]];
+        [self.webView loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
     }
 }
 

@@ -11,6 +11,7 @@
 #import "Store.h"
 #import "UIWebView+WebViewAdditions.h"
 #import "NSURL+IFUnicodeURL.h"
+#import "GAI.h"
 
 NSString *kWeaveDataRefreshNotification = @"kWeaveDataRefreshNotification";
 NSString *kWeaveBackgroundedAtTime= @"backgroundedAtTime";
@@ -57,7 +58,7 @@ NSString *kWeavePrivateMode = @"privateMode";
             destination = [NSString stringWithFormat:@"http://%@", input];
         }
     } else  {
-        destination = [[WeaveOperations sharedOperations] searchURL:input];
+        destination = [[WeaveOperations sharedOperations] queryURLForTerm:input];
     }
     return [NSURL URLWithUnicodeString:destination];// TODO 
 }
@@ -70,11 +71,15 @@ NSString *kWeavePrivateMode = @"privateMode";
                                                                kCFStringEncodingUTF8);
 }
 
-- (NSString *)searchURL:(NSString *)string {
+- (NSString *)queryURLForTerm:(NSString *)string {
     NSString *url = [[NSUserDefaults standardUserDefaults] stringForKey:@"org.graetzer.search"];
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"UI Event - Toolbar"
+                                                    withAction:@"Search"
+                                                     withLabel:url
+                                                     withValue:nil];
     
     NSArray *locales = [NSLocale preferredLanguages];
-    NSString *locale = locales.count > 0 ? [locales objectAtIndex:0]: @"en";
+    NSString *locale = locales.count > 0 ? locales[0]: @"en";
     return [NSString stringWithFormat:url, [self urlEncode:string], locale];
 }
 
@@ -125,18 +130,18 @@ NSString *kWeavePrivateMode = @"privateMode";
         // Check if this history entry already exists
         NSDictionary *existing = nil;
         for (NSDictionary *entry in [[Store getStore] getHistory]) {
-            if ([urlText isEqualToString:[entry objectForKey:@"url"]]) {
+            if ([urlText isEqualToString:entry[@"url"]]) {
                 existing = entry;
             }
         }
         
         NSDictionary *historyEntry = nil;
         if (existing) {// There is a differnce between the two dictionary formats
-            int sortIndex = [[existing objectForKey:@"sortindex"] intValue];
+            int sortIndex = [existing[@"sortindex"] intValue];
             
-            historyEntry = @{ @"id" : [existing objectForKey:@"id"],
-            @"histUri" : [existing objectForKey:@"url"],
-            @"title" : [existing objectForKey:@"title"],
+            historyEntry = @{ @"id" : existing[@"id"],
+            @"histUri" : existing[@"url"],
+            @"title" : existing[@"title"],
             @"modified" : @([[NSDate date] timeIntervalSince1970]),
             @"sortindex" : @(sortIndex + 100)};
         } else {
@@ -168,13 +173,11 @@ BOOL IsNativeAppURLWithoutChoice(NSURL* url)
         // Basic case where it is a link to one of the native apps that is the only handler.
         
         static NSSet* nativeSchemes = nil;
-        if (nativeSchemes == nil)
-        {
+        if (nativeSchemes == nil) {
             nativeSchemes = [NSSet setWithObjects: @"mailto", @"tel", @"sms", @"itms", nil];
         }
         
-        if ([nativeSchemes containsObject: [url scheme]])
-        {
+        if ([nativeSchemes containsObject: [url scheme]]) {
             return YES;
         }
         

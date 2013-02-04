@@ -27,6 +27,8 @@
 #import "SGPageViewController.h"
 #import "SGNavViewController.h"
 
+#import "GAI.h"
+
 #import "Reachability.h"
 #import "Stockboy.h"
 #import "Store.h"
@@ -50,7 +52,6 @@ id<WeaveService> weaveService;
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
-    
     SGBrowserViewController *browser = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [SGPageViewController new] : [SGTabsViewController new];
     self.browserViewController = browser;
     self.window.rootViewController = browser;
@@ -60,11 +61,36 @@ id<WeaveService> weaveService;
     // Weave stuff. 0.5 delay as a workaround so that modal views work
     [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
     
+    
+    [GAI sharedInstance].trackUncaughtExceptions = YES;
+    // Optional: set Google Analytics dispatch interval to e.g. 20 seconds.
+    [GAI sharedInstance].dispatchInterval = 60*5;
+#ifdef DEBUG
+    // Optional: set debug to YES for extra debugging information.
+    [GAI sharedInstance].debug =  YES;
+#endif
+    // Create tracker instance.
+    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
+    self.tracker.anonymize = YES;
+    
     return YES;
 }
 
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    if ([url.scheme isEqualToString: @"http"] || [url.scheme isEqualToString: @"https"]) {
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication
+         annotation:(id)annotation {
+    
+    NSString *urlS = url.resourceSpecifier;
+    if ([url.scheme isEqualToString:@"foxbrowser"]) {
+        urlS = [NSString stringWithFormat:@"http:%@", urlS];
+        [self.browserViewController addTabWithURL:[NSURL URLWithString:urlS] withTitle:url.host];
+        return YES;
+    } else if ([url.scheme isEqualToString:@"foxbrowsers"]) {
+        urlS = [NSString stringWithFormat:@"https:%@", urlS];
+        [self.browserViewController addTabWithURL:[NSURL URLWithString:urlS] withTitle:url.host];
+        return YES;
+    } else if ([url.scheme hasPrefix:@"http"] || [url.scheme hasPrefix:@"https"]) {
         [self.browserViewController addTabWithURL:url withTitle:sourceApplication];
         return YES;
     }
@@ -72,11 +98,13 @@ id<WeaveService> weaveService;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
+    [self stopProgressSpinners];
+    [Stockboy cancel];
+    
     [self.browserViewController saveCurrentTabs];
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
-{
+- (void)applicationDidEnterBackground:(UIApplication *)application {
     //stop timers, threads, spinner animations, etc.
     // note the time we were suspended, so we can decide whether to do a refresh when we are resumed
     [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970] forKey:kWeaveBackgroundedAtTime];
@@ -84,12 +112,13 @@ id<WeaveService> weaveService;
     [Stockboy cancel];
     
     [self.browserViewController saveCurrentTabs];
+    
+    [[GAI sharedInstance] dispatch];
 }
 
 #define FIVE_MINUTES_ELAPSED (60 * 5)
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
+- (void)applicationWillEnterForeground:(UIApplication *)application {
 	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"needsFullReset"]) {
 		[self eraseAllUserData];
 		return;
@@ -98,29 +127,25 @@ id<WeaveService> weaveService;
     //check to see if we were suspended for 5 minutes or more, and refresh if true
     double slept = [[NSUserDefaults standardUserDefaults] doubleForKey:kWeaveBackgroundedAtTime];
     double now =[[NSDate date] timeIntervalSince1970];
-    
-    if ((now - slept) >= FIVE_MINUTES_ELAPSED)
-    {
+    if ((now - slept) >= FIVE_MINUTES_ELAPSED) {
         [Stockboy restock];
     }
     
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.analytics"];
 }
 
 #pragma mark - WeaveService
 
-- (void)evaluateDefaultSettings
-{
+- (void)evaluateDefaultSettings {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"Settings" ofType:@"bundle"];
     id mutable = [NSMutableDictionary dictionary];
     id settings = [NSDictionary dictionaryWithContentsOfFile: [path stringByAppendingPathComponent:@"Root.plist"]];
-    id specifiers = [settings objectForKey: @"PreferenceSpecifiers"];
+    id specifiers = settings[@"PreferenceSpecifiers"];
     for (id prefItem in specifiers) {
-        id key = [prefItem objectForKey: @"Key"];
-        id value = [prefItem objectForKey: @"DefaultValue"];
+        id key = prefItem[@"Key"];
+        id value = prefItem[@"DefaultValue"];
         if ( key && value ) {
-            [mutable setObject: value
-                        forKey: key];
+            mutable[key] = value;
         }
     }
     NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
@@ -132,20 +157,16 @@ id<WeaveService> weaveService;
     [Stockboy prepare];
     
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-	if (userDefaults != nil)
-	{
+	if (userDefaults != nil) {
 		NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
         dictionary[@"useCustomServer"] = @NO;
         dictionary[kWeaveUseNativeApps] = @YES;	
-        [[NSUserDefaults standardUserDefaults] registerDefaults: dictionary];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [userDefaults registerDefaults: dictionary];
+        [userDefaults synchronize];
 	}
     
     BOOL showedFirstRunPage = [userDefaults boolForKey:kWeaveShowedFirstRunPage];
     if (!showedFirstRunPage) {
-        // Workaround for the bug where the credentials seem to be not saved
-        [CryptoUtils deletePrivateKeys];
-        
         //now show them the first launch page, which asks them if they have an account, or need to find out how to get one
         // afterwards, they will be taken to the login page, one way or ther other
         [self login];
@@ -158,19 +179,17 @@ id<WeaveService> weaveService;
 //put up an alert explaining what just went wrong
 - (void) reportErrorWithInfo: (NSDictionary*)errInfo; {
 #ifdef DEBUG
-    NSLog(@"Error: %@", [errInfo objectForKey:@"message"]);
+    NSLog(@"Error: %@", errInfo[@"message"]);
 #endif
-    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:[errInfo objectForKey:@"title"] message:[errInfo objectForKey:@"message"] delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles:nil];
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:errInfo[@"title"] message:errInfo[@"message"] delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles:nil];
     [alert show];
 }
 
 //put up an alert view specific to authentication issues, allowing the user to either ignore the problem, or sign out
 - (void) reportAuthErrorWithMessage: (NSDictionary*)errInfo; {
-#ifdef DEBUG
-    NSLog(@"Error: %@", [errInfo objectForKey:@"message"]);
-#endif
-    UIAlertView* alert = [[UIAlertView alloc] initWithTitle: [errInfo objectForKey:@"title"]
-                                                    message:[errInfo objectForKey:@"message"] delegate:self
+    DLog(@"Error: %@", errInfo[@"message"]);
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle: errInfo[@"title"]
+                                                    message:errInfo[@"message"] delegate:self
                                           cancelButtonTitle:NSLocalizedString(@"Not Now", @"Not Now")
                                           otherButtonTitles:NSLocalizedString(@"Sign In", @"re-authenticate"), nil];
 	[alert show];
@@ -183,18 +202,18 @@ id<WeaveService> weaveService;
 - (void) startProgressSpinnersWithMessage:(NSString*)msg
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName: kWeaveSyncStatusChangedNotification
-                                                        object: nil userInfo: [NSDictionary dictionaryWithObject: msg forKey: kWeaveMessageKey]];
+                                                        object: nil userInfo: @{kWeaveMessageKey: msg}];
 }
 
 - (void) changeProgressSpinnersMessage:(NSString*)msg
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName: kWeaveSyncStatusChangedNotification
-                                                        object: nil userInfo: [NSDictionary dictionaryWithObject: msg forKey: kWeaveMessageKey]];
+                                                        object: nil userInfo: @{kWeaveMessageKey: msg}];
 }
 
 - (void) stopProgressSpinners; {
     [[NSNotificationCenter defaultCenter] postNotificationName: kWeaveSyncStatusChangedNotification
-                                                        object: nil userInfo: [NSDictionary dictionaryWithObject: @"" forKey: kWeaveMessageKey]];
+                                                        object: nil userInfo: @{kWeaveMessageKey: @""}];
 }
 
 - (void) refreshViews; {
@@ -202,6 +221,9 @@ id<WeaveService> weaveService;
 }
 
 - (void) login {
+    // Workaround for the bug where the credentials seem to be not saved
+    [CryptoUtils deletePrivateKeys];
+    
     // Present the WelcomePage with the TabBarController as it's parent
     WelcomePage* welcomePage = [WelcomePage new];
     UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
