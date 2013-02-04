@@ -47,5 +47,6 @@
 
 - (IBAction) presentEasySetupViewController;
 - (IBAction) presentAccountHelpViewController;
+- (IBAction)cancel:(id)sender;
 
 @end

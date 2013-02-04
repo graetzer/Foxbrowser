@@ -298,16 +298,10 @@
     NSString *searchText = [textField.text stringByReplacingCharactersInRange:range withString:string];
     
     // When the search string changes, filter the recents list accordingly.
-    if (_searchBarVisible) // TODO
+    if (_searchBarVisible && searchText.length) // TODO
         [self.searchController filterResultsUsingString:searchText];
     
     return YES;
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    // If the user finishes editing text in the search bar by, for example:
-    // tapping away rather than selecting from the recents list, then just dismiss the popover
-    self.searchField.text = [self.browser URL].absoluteString;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -340,6 +334,9 @@
 
 - (void)dismissSearchController {
     if (_searchBarVisible) {
+        // If the user finishes editing text in the search bar by, for example:
+        // tapping away rather than selecting from the recents list, then just dismiss the popover
+        self.searchField.text = [self.browser URL].absoluteString;
         [UIView animateWithDuration:0.25
                          animations:^{
                              _optionsButton.alpha = 1.0;

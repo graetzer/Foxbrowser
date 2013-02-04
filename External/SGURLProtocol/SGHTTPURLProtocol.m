@@ -121,6 +121,7 @@ typedef enum {
         _HTTPMessage = [self newMessageWithURLRequest:request];
         _authenticationAttempts = -1;
         _authDelegate = [SGHTTPURLProtocol authDelegateForRequest:request];
+        _buffer = nil;
     }
     return self;
 }
@@ -243,9 +244,8 @@ typedef enum {
                 }
             } else if (code == 304) { // Handle cached stuff
                 NSCachedURLResponse *cached = self.cachedResponse;
-                if (!cached) {
+                if (!cached)
                     cached = [[NSURLCache sharedURLCache] cachedResponseForRequest:self.request];
-                }
                 
                 [self.client URLProtocol:self cachedResponseIsValid:cached];
                 [self.client URLProtocol:self didLoadData:[cached data]];
@@ -262,48 +262,41 @@ typedef enum {
             else
                 _compression = SGIdentity;
             
-            if (_compression != SGIdentity && !_buffer) {
+            if (!_buffer) {
                 long long capacity = self.URLResponse.expectedContentLength;
-                if (capacity <= 0)
-                    capacity = 1024*1024;
+                if (capacity == NSURLResponseUnknownLength || capacity == 0)
+                    capacity = 1024*1024;//10M buffer
                 _buffer = [[NSMutableData alloc] initWithCapacity:capacity];
             }
-
             [self.client URLProtocol:self didReceiveResponse:self.URLResponse cacheStoragePolicy:NSURLCacheStorageAllowed];
         }
     }
     
     // Next course of action depends on what happened to the stream
-    switch (streamEvent)
-    {
-        case NSStreamEventHasBytesAvailable:
-        {
-            
-            while ([theStream hasBytesAvailable])
-            {
+    switch (streamEvent) {
+        case NSStreamEventHasBytesAvailable: {
+            while ([theStream hasBytesAvailable]) {
                 uint8_t buf[1024];
                 NSUInteger len = [theStream read:buf maxLength:1024];
-                
-                if (_buffer)
-                    [_buffer appendBytes:(const void *)buf length:len];
-                else
-                    [self.client URLProtocol:self didLoadData:[NSData dataWithBytes:buf length:len]];
+                [_buffer appendBytes:(const void *)buf length:len];
             }
             break;
         }
             
-        case NSStreamEventEndEncountered:{   // Report the end of the stream to the delegate            
+        case NSStreamEventEndEncountered: {   // Report the end of the stream to the delegate            
             if (_compression == SGGzip)
                 [self.client URLProtocol:self didLoadData:[_buffer gzipInflate]];
             else if (_compression == SGDeflate)
                 [self.client URLProtocol:self didLoadData:[_buffer zlibInflate]];
+            else
+                [self.client URLProtocol:self didLoadData:_buffer];
             
             [self.client URLProtocolDidFinishLoading:self];
             _buffer = nil;
             break;
         }
             
-        case NSStreamEventErrorOccurred:{    // Report an error in the stream as the operation failing
+        case NSStreamEventErrorOccurred: {    // Report an error in the stream as the operation failing
             ELog(@"An stream error occured")
             [self.client URLProtocol:self didFailWithError:[theStream streamError]];
             _buffer = nil;

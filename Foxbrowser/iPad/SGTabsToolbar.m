@@ -329,6 +329,11 @@
     [self createPopover];
 }
 
+- (BOOL)textFieldShouldClear:(UITextField *)textField {
+    [self.popoverController dismissPopoverAnimated:YES];
+    return YES;
+}
+
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
     NSString *searchText = [textField.text stringByReplacingCharactersInRange:range withString:string];
     if (searchText.length > 0 && !self.popoverController.isPopoverVisible) {
