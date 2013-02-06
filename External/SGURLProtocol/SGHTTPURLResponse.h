@@ -10,13 +10,9 @@
 #import <CFNetwork/CFNetwork.h>
 
 @interface SGHTTPURLResponse : NSHTTPURLResponse
-{
-@private
-    NSInteger       _statusCode;
-    __strong NSDictionary    *_headerFields;
-}
 
 - (id)initWithURL:(NSURL *)URL HTTPMessage:(CFHTTPMessageRef)message;
+
 @end
 
 @interface NSHTTPURLResponse (SGHTTPConnectionAdditions)

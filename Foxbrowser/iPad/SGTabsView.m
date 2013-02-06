@@ -61,6 +61,7 @@
     // Float the subview in from rigth
     CGRect frame = CGRectMake(self.bounds.size.width, 0, width, self.bounds.size.height - kTabsBottomMargin);
     SGTabView *newTab = [[SGTabView alloc] initWithFrame:frame viewController:viewController];
+    newTab.closeButton.hidden = YES;
     
     // Setup gesture recognizers
     UITapGestureRecognizer *tapG = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
@@ -87,7 +88,7 @@
         tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height - kTabsBottomMargin);
         [tab setNeedsDisplay];
     }
-    [self bringSubviewToFront:(self.tabs)[self.selected]];
+    [self bringSubviewToFront:self.tabs[self.selected]];
     return self.tabs.count -1;
 }
 
@@ -122,7 +123,6 @@
         SGTabView *tab = (self.tabs)[i];
         if (i == selected) {
             tab.closeButton.hidden = ![self.tabsController canRemoveTab:tab.viewController];
-            
             tab.selected = YES;
             [tab setNeedsLayout];
             [self bringSubviewToFront:tab];

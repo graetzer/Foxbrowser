@@ -91,17 +91,15 @@ typedef enum {
 
 #pragma mark - NSURLProtocol
 + (BOOL)canInitWithRequest:(NSURLRequest *)request{
-    NSString *scheme = [[[request URL] scheme] lowercaseString];
+    NSString *scheme = [request.URL.scheme lowercaseString];
     return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
 }
 
-+ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
-{
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
     
     NSURL *url = request.URL;
 	NSString *frag = url.fragment;
-	if(frag.length > 0)
-    { // map different fragments to same base file
+	if(frag.length > 0) { // map different fragments to same base file
         NSMutableURLRequest *mutable = [request mutableCopy];
         NSString *s = [url absoluteString];
         s  =[s substringToIndex:s.length - frag.length];// remove fragment
@@ -118,17 +116,16 @@ typedef enum {
                 cachedResponse:cachedResponse
                         client:client]) {
         _compression = SGIdentity;
-        _HTTPMessage = [self newMessageWithURLRequest:request];
         _authenticationAttempts = -1;
         _authDelegate = [SGHTTPURLProtocol authDelegateForRequest:request];
-        _buffer = nil;
     }
     return self;
 }
 
 - (void)dealloc {
     [self stopLoading];
-    CFRelease(_HTTPMessage);
+    if (_HTTPMessage)
+        CFRelease(_HTTPMessage);
     NSAssert(!_HTTPStream, @"Deallocating HTTP connection while stream still exists");
     NSAssert(!_authChallenge, @"HTTP connection deallocated mid-authentication");
 }
@@ -138,10 +135,23 @@ typedef enum {
     NSAssert(_HTTPStream == nil, @"HTTPStream is not nil, connection still ongoing");
     self.URLResponse = nil;
     
-    CFReadStreamRef stream = CFReadStreamCreateForHTTPRequest(NULL, _HTTPMessage);
-    CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanFalse);
+    _HTTPMessage = [self newMessageWithURLRequest:self.request];
     
-    if([self.request.URL.scheme isEqualToString:@"https"]) {// TODO check against a list
+    NSInputStream *bodyStream = self.request.HTTPBodyStream;
+    CFReadStreamRef stream;
+    if (bodyStream)
+        stream = CFReadStreamCreateForStreamedHTTPRequest(NULL, _HTTPMessage, (__bridge CFReadStreamRef)bodyStream);
+    else
+        stream = CFReadStreamCreateForHTTPRequest(NULL, _HTTPMessage);
+    
+    if (stream == NULL) {
+        ELog(@"Could not create stream");
+        
+        return;
+    }
+    
+    CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanFalse);
+    if([[self.request.URL.scheme lowercaseString] isEqualToString:@"https"]) {// TODO check against a list
         //Hey an https request
         CFMutableDictionaryRef pDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFDictionarySetValue(pDict, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
@@ -150,8 +160,7 @@ typedef enum {
         CFRelease(pDict);
     }
 
-
-    _HTTPStream = (__bridge NSInputStream *)(stream);
+    _HTTPStream = (NSInputStream *)CFBridgingRelease(stream);
     [_HTTPStream setDelegate:self];
     [_HTTPStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     [_HTTPStream open];
@@ -165,23 +174,23 @@ typedef enum {
 }
 
 #pragma mark - CFStreamDelegate
-- (void)stream:(NSInputStream *)theStream handleEvent:(NSStreamEvent)streamEvent
-{
+- (void)stream:(NSInputStream *)theStream handleEvent:(NSStreamEvent)streamEvent {
     //NSParameterAssert(theStream == _HTTPStream);
     if (theStream != _HTTPStream) {
+        DLog(@"Not my stream!");
         return;
     }
     
     // Handle the response as soon as it's available
-    if (!self.URLResponse)
-    {
+    if (!self.URLResponse) {
         CFHTTPMessageRef response = (__bridge CFHTTPMessageRef)[theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPResponseHeader];
-        if (response && CFHTTPMessageIsHeaderComplete(response))
-        {
+        if (response && CFHTTPMessageIsHeaderComplete(response)) {
             // Construct a NSURLResponse object from the HTTP message
             NSURL *URL = [theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPFinalURL];
             self.URLResponse = [NSHTTPURLResponse responseWithURL:URL HTTPMessage:response];
-            [self handleCookiesWithURLResponse:self.URLResponse];
+            
+            if ([self.request HTTPShouldHandleCookies])
+                [self handleCookiesWithURLResponse:self.URLResponse];
             
             NSUInteger code = [self.URLResponse statusCode];
             NSString *location = (self.URLResponse.allHeaderFields)[@"Location"];
@@ -254,7 +263,8 @@ typedef enum {
                 return;
             }
             
-            NSString *encoding = (self.URLResponse.allHeaderFields)[@"Content-Encoding"];
+            // So no redirect, no auth. Now we care about the body
+            NSString *encoding = self.URLResponse.allHeaderFields[@"Content-Encoding"];
             if ([encoding isEqualToString:@"gzip"])
                 _compression = SGGzip;
             else if ([encoding isEqualToString:@"deflate"])
@@ -262,12 +272,13 @@ typedef enum {
             else
                 _compression = SGIdentity;
             
-            if (!_buffer) {
+            if (!_buffer && _compression != SGIdentity) {
                 long long capacity = self.URLResponse.expectedContentLength;
                 if (capacity == NSURLResponseUnknownLength || capacity == 0)
                     capacity = 1024*1024;//10M buffer
                 _buffer = [[NSMutableData alloc] initWithCapacity:capacity];
             }
+            
             [self.client URLProtocol:self didReceiveResponse:self.URLResponse cacheStoragePolicy:NSURLCacheStorageAllowed];
         }
     }
@@ -278,7 +289,10 @@ typedef enum {
             while ([theStream hasBytesAvailable]) {
                 uint8_t buf[1024];
                 NSUInteger len = [theStream read:buf maxLength:1024];
-                [_buffer appendBytes:(const void *)buf length:len];
+                if (_buffer && len > 0)
+                    [_buffer appendBytes:(const void *)buf length:len];
+                else if (len > 0)
+                    [self.client URLProtocol:self didLoadData:[NSData dataWithBytes:buf length:len]];
             }
             break;
         }
@@ -288,8 +302,8 @@ typedef enum {
                 [self.client URLProtocol:self didLoadData:[_buffer gzipInflate]];
             else if (_compression == SGDeflate)
                 [self.client URLProtocol:self didLoadData:[_buffer zlibInflate]];
-            else
-                [self.client URLProtocol:self didLoadData:_buffer];
+//            else
+//                [self.client URLProtocol:self didLoadData:_buffer];
             
             [self.client URLProtocolDidFinishLoading:self];
             _buffer = nil;
@@ -311,8 +325,7 @@ typedef enum {
 
 #pragma mark - Helper
 
-- (NSUInteger)lengthOfDataSent
-{
+- (NSUInteger)lengthOfDataSent {
     return [[_HTTPStream propertyForKey:(NSString *)kCFStreamPropertyHTTPRequestBytesWrittenCount] unsignedIntValue];
 }
 
@@ -352,12 +365,10 @@ typedef enum {
                                          (__bridge CFStringRef)key,
                                          (__bridge CFStringRef)val);
     }
-        
-    NSData *body = [request HTTPBody];
-    if (body)
-    {
-        CFHTTPMessageSetBody(message, (__bridge CFDataRef)body);
-    }
+    
+    if (request.HTTPBody)
+        CFHTTPMessageSetBody(message, (__bridge CFDataRef)request.HTTPBody);
+    
     return message;
 }
 
@@ -373,7 +384,7 @@ typedef enum {
     }
 }
 
-#pragma mark - Authentication
+#pragma mark - NSURLAuthenticationChallengeSender
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
@@ -391,8 +402,7 @@ typedef enum {
     [self cancelAuthenticationChallenge:challenge];
 }
 
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     NSParameterAssert(challenge == [self authChallenge]);
     self.authChallenge = nil;
     

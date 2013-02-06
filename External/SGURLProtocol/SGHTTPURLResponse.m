@@ -11,17 +11,18 @@
 
 @implementation NSHTTPURLResponse (SGHTTPConnectionAdditions)
 
-+ (NSHTTPURLResponse *)responseWithURL:(NSURL *)URL HTTPMessage:(CFHTTPMessageRef)message
-{
++ (NSHTTPURLResponse *)responseWithURL:(NSURL *)URL HTTPMessage:(CFHTTPMessageRef)message {
     return [[SGHTTPURLResponse alloc] initWithURL:URL HTTPMessage:message];
 }
 
 @end
 
-@implementation SGHTTPURLResponse
+@implementation SGHTTPURLResponse {
+    NSInteger              _statusCode;
+    __strong NSDictionary* _headerFields;
+}
 
-- (id)initWithURL:(NSURL *)URL HTTPMessage:(CFHTTPMessageRef)message
-{
+- (id)initWithURL:(NSURL *)URL HTTPMessage:(CFHTTPMessageRef)message {
     _headerFields = (__bridge NSDictionary *)CFHTTPMessageCopyAllHeaderFields(message);
     
     NSArray *input = [_headerFields[@"Content-Type"] componentsSeparatedByString:@";"];
@@ -42,9 +43,13 @@
             encoding = sendEncoding;
     }
     
-    if (self = [super initWithURL:URL MIMEType:MIMEType expectedContentLength:contentLength textEncodingName:encoding])
-    {
+    if (self = [super initWithURL:URL
+                         MIMEType:MIMEType
+            expectedContentLength:contentLength
+                 textEncodingName:encoding]) {
+        
         _statusCode = CFHTTPMessageGetResponseStatusCode(message);
+        DLog(@"Response for URL: %@", URL);
         DLog(@"Status code: %i", _statusCode);
         DLog(@"Response headers: %@", _headerFields);
     }
