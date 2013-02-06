@@ -25,6 +25,7 @@
 #import "SGWebViewController.h"
 #import "Store.h"
 #import "WeaveService.h"
+#import "NSURL+IFUnicodeURL.h"
 
 @implementation SGFavouritesManager {
     NSMutableDictionary *_favourites;
@@ -175,9 +176,9 @@
         i++;
         
         NSString *urlS = item[@"url"];
-        url = [NSURL URLWithString:urlS];
+        url = [NSURL URLWithUnicodeString:urlS];
         
-        if ([self containsHost:url.host] || [_blocked containsObject:url.absoluteString])
+        if (!url || [self containsHost:url.host] || [_blocked containsObject:url.absoluteString])
             continue;
         
         _favourites[url] = item[@"title"];
