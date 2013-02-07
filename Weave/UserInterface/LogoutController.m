@@ -128,9 +128,6 @@
 }
 
 - (void)viewDidLoad {
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] 
-                                              initWithBarButtonSystemItem:UIBarButtonSystemItemCancel 
-                                              target:self action:@selector(cancel)];
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
 }
 

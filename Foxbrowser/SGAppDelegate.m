@@ -27,8 +27,6 @@
 #import "SGPageViewController.h"
 #import "SGNavViewController.h"
 
-#import "GAI.h"
-
 #import "Reachability.h"
 #import "Stockboy.h"
 #import "Store.h"
@@ -36,6 +34,8 @@
 #import "WelcomePage.h"
 #import "SGFavouritesManager.h"
 
+#import "GAI.h"
+#import "Appirater.h"
 
 SGAppDelegate *appDelegate;
 id<WeaveService> weaveService;
@@ -62,18 +62,44 @@ id<WeaveService> weaveService;
     [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
     
     
+    //-------------- Marketing stuff -------------------------
+    
+    
     [GAI sharedInstance].trackUncaughtExceptions = YES;
-    // Optional: set Google Analytics dispatch interval to e.g. 20 seconds.
     [GAI sharedInstance].dispatchInterval = 60*5;
-#ifdef DEBUG
-    // Optional: set debug to YES for extra debugging information.
-    [GAI sharedInstance].debug =  YES;
-#endif
-    // Create tracker instance.
     self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
     self.tracker.anonymize = YES;
     
+#ifdef DEBUG
+    [GAI sharedInstance].debug =  YES;
+#endif
+    
+    [Appirater setAppId:@"550365886"];
+    [Appirater setDelegate:self];
+    [Appirater setDaysUntilPrompt:1];
+    [Appirater setUsesUntilPrompt:5];
+    [Appirater setTimeBeforeReminding:2];
+    
+    [Appirater appLaunched:YES];
     return YES;
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	if ([defaults boolForKey: @"needsFullReset"]) {
+		[self eraseAllUserData];
+		return;
+	}
+    //check to see if we were suspended for 5 minutes or more, and refresh if true
+    double slept = [defaults doubleForKey:kWeaveBackgroundedAtTime];
+    double now =[[NSDate date] timeIntervalSince1970];
+    if ((now - slept) >= 60 * 5) {
+        [Stockboy restock];
+    }
+    
+    //
+    [GAI sharedInstance].optOut = [defaults boolForKey:@"org.graetzer.analytics"];
+    [Appirater appEnteredForeground:YES];
 }
 
 - (BOOL)application:(UIApplication *)application
@@ -110,28 +136,9 @@ id<WeaveService> weaveService;
     [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970] forKey:kWeaveBackgroundedAtTime];
     [self stopProgressSpinners];
     [Stockboy cancel];
-    
     [self.browserViewController saveCurrentTabs];
     
     [[GAI sharedInstance] dispatch];
-}
-
-#define FIVE_MINUTES_ELAPSED (60 * 5)
-
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"needsFullReset"]) {
-		[self eraseAllUserData];
-		return;
-	}
-    
-    //check to see if we were suspended for 5 minutes or more, and refresh if true
-    double slept = [[NSUserDefaults standardUserDefaults] doubleForKey:kWeaveBackgroundedAtTime];
-    double now =[[NSDate date] timeIntervalSince1970];
-    if ((now - slept) >= FIVE_MINUTES_ELAPSED) {
-        [Stockboy restock];
-    }
-    
-    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.analytics"];
 }
 
 #pragma mark - WeaveService
@@ -265,5 +272,26 @@ id<WeaveService> weaveService;
     [self refreshViews];  //make them all ditch their data
 }
 
+#pragma mark - AppiraterDelegate
+- (void)appiraterDidDeclineToRate:(Appirater *)appirater {
+    [self.tracker sendEventWithCategory:@"Rating"
+                             withAction:@"Decline"
+                              withLabel:nil
+                              withValue:nil];
+}
+
+- (void)appiraterDidOptToRate:(Appirater *)appirater {
+    [self.tracker sendEventWithCategory:@"Rating"
+                             withAction:@"Rate"
+                              withLabel:nil
+                              withValue:nil];
+}
+
+- (void)appiraterDidOptToRemindLater:(Appirater *)appirater {
+    [self.tracker sendEventWithCategory:@"Rating"
+                             withAction:@"Remind Later"
+                              withLabel:nil
+                              withValue:nil];
+}
 
 @end

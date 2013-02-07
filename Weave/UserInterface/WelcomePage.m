@@ -53,7 +53,7 @@ JPAKEReporter* gSharedReporter = nil;
 - (void) viewDidLoad {
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"cancel")
-                                                                            style:UIBarButtonItemStyleDone
+                                                                            style:UIBarButtonItemStyleBordered
                                                                            target:self
                                                                            action:@selector(cancel:)];
     

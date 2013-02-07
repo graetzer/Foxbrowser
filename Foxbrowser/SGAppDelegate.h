@@ -23,11 +23,12 @@
 
 #import <UIKit/UIKit.h>
 #import "WeaveService.h"
+#import "AppiraterDelegate.h"
 
 @class SGBrowserViewController;
-@protocol GAITracker;
+@protocol GAITracker, AppiraterDelegate;
 
-@interface SGAppDelegate : UIResponder <UIApplicationDelegate, WeaveService>
+@interface SGAppDelegate : UIResponder <UIApplicationDelegate, WeaveService, AppiraterDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (weak, nonatomic) SGBrowserViewController *browserViewController;

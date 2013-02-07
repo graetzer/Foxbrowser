@@ -73,7 +73,7 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (NSString *)queryURLForTerm:(NSString *)string {
     NSString *url = [[NSUserDefaults standardUserDefaults] stringForKey:@"org.graetzer.search"];
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"UI Event - Toolbar"
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Toolbar"
                                                     withAction:@"Search"
                                                      withLabel:url
                                                      withValue:nil];
