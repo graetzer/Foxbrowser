@@ -93,7 +93,6 @@
         [self.webView stopLoading];
         [self.webView clearContent];
         [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
-        self.webView.delegate = nil;
         
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
             [SGHTTPURLProtocol removeAuthDelegate:self];
@@ -110,20 +109,14 @@
     self.webView.delegate = nil;
 }
 
-- (void)viewDidUnload
-{
-    [self setWebView:nil];
-    [super viewDidUnload];
-}
-
 - (void)viewWillAppear:(BOOL)animated {
     if (!self.webView.request) {
         [self openURL:nil];
     }
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
+- (void)dealloc {
+    self.webView.delegate = nil;
 }
 
 #pragma mark - UILongPressGesture

@@ -41,12 +41,12 @@
      viewController:(UIViewController *)controller {
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
-        self.tabColor = kTabColor;
-        self.tabDarkerColor = kTabDarkerColor;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         self.exclusiveTouch = YES;
-        _cap = 2*kCornerRadius/frame.size.width;
-        self.contentStretch = CGRectMake(_cap, 0., 1.-_cap, 1.);
+        self.contentMode = UIViewContentModeRedraw;
+        
+        self.tabColor = kTabColor;
+        self.tabDarkerColor = kTabDarkerColor;
         
         self.titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
         self.titleLabel.textAlignment = UITextAlignmentCenter;
