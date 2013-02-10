@@ -35,8 +35,7 @@
     BOOL _searchBarVisible;
 }
 
-- (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser;
-{
+- (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser {
     self = [super initWithFrame:frame];
     if (self) {
         _browser = browser;
@@ -120,15 +119,18 @@
     CGFloat height = self.bounds.size.height;
     
     CGFloat posX = margin;
-    _backButton.frame = CGRectMake(posX, (height - _backButton.frame.size.height)/2,
-                                   _backButton.frame.size.width, _backButton.frame.size.height);
-    posX += _backButton.frame.size.width + margin;
     
-    _forwardButton.frame = CGRectMake(posX, (height - _forwardButton.frame.size.height)/2,
-                                      _forwardButton.frame.size.width, _forwardButton.frame.size.height);
-    
-    if (!_forwardButton.hidden)
-        posX += _forwardButton.frame.size.width + margin;
+    if (!_searchBarVisible) {
+        _backButton.frame = CGRectMake(posX, (height - _backButton.frame.size.height)/2,
+                                       _backButton.frame.size.width, _backButton.frame.size.height);
+        
+        posX += _backButton.frame.size.width + margin;
+        _forwardButton.frame = CGRectMake(posX, (height - _forwardButton.frame.size.height)/2,
+                                          _forwardButton.frame.size.width, _forwardButton.frame.size.height);
+        
+        if (!_forwardButton.hidden)
+            posX += _forwardButton.frame.size.width + margin;
+    }
     
     CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
     _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height)/2,
@@ -315,16 +317,17 @@
 
 - (void)presentSearchController {
     if (!_searchBarVisible) {
+        _searchBarVisible = YES;
         self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
                                                       self.frame.size.width, self.superview.bounds.size.height - self.frame.size.height);
         [UIView animateWithDuration:0.25
                          animations:^{
+                             [self layoutSubviews];
                              _cancelButton.alpha = 1.0;
                              _optionsButton.alpha = 0;
                              _tabsButton.alpha = 0;
                              [self.superview addSubview:self.searchController.view];
                          } completion:^(BOOL finished){
-                             _searchBarVisible = YES;
                              _optionsButton.hidden = YES;
                              _tabsButton.hidden = YES;
                              _cancelButton.hidden = NO;
@@ -334,11 +337,13 @@
 
 - (void)dismissSearchController {
     if (_searchBarVisible) {
+        _searchBarVisible = NO;
         // If the user finishes editing text in the search bar by, for example:
         // tapping away rather than selecting from the recents list, then just dismiss the popover
         self.searchField.text = [self.browser URL].absoluteString;
         [UIView animateWithDuration:0.25
                          animations:^{
+                             [self layoutSubviews];
                              _optionsButton.alpha = 1.0;
                              _tabsButton.alpha = 1.0;
                              _cancelButton.alpha = 0;
@@ -347,7 +352,6 @@
                              _optionsButton.hidden = NO;
                              _tabsButton.hidden = NO;
                              _cancelButton.hidden = YES;
-                             _searchBarVisible = NO;
                          }];
     }
 }
