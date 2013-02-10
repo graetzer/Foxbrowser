@@ -261,7 +261,7 @@
     }
     
     if (navigationType != UIWebViewNavigationTypeOther) {
-        self.location = request.URL;
+        self.location = request.mainDocumentURL;
         [self.browserViewController updateChrome];
         return [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
     }
@@ -285,6 +285,7 @@
         
     self.title = [webView title];
     
+    DLog(@"%@", webView.request.mainDocumentURL);
     NSString *webLoc = [self.webView location];
     if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
         self.location = [NSURL URLWithUnicodeString:webLoc];
@@ -349,7 +350,6 @@
         [alert show];
     } else {
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location];
-        [[WeaveOperations sharedOperations] modifyRequest:request];
         [self.webView loadRequest:request];
     }
 }

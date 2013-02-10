@@ -25,6 +25,7 @@
 #import "SGWebViewController.h"
 #import "SGCredentialsPrompt.h"
 
+#define HTTP_AGENT5 @"Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3"
 
 @implementation SGBrowserViewController {
     NSTimer *_timer;
@@ -42,6 +43,16 @@
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
         [SGHTTPURLProtocol registerProtocol];
         [SGHTTPURLProtocol setAuthDelegate:self];
+        
+        if ([[UIDevice currentDevice].systemVersion doubleValue] < 6) {
+            [SGHTTPURLProtocol setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
+        }
+        
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
+            [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
+            [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"DNT"];
+            [SGHTTPURLProtocol setValue:@"do-not-track" forHTTPHeaderField:@"X-Tracking-Choice"];
+        }
     }
 }
 
