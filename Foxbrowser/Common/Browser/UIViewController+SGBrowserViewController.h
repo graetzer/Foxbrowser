@@ -1,8 +1,8 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  UIViewController+SGBrowserViewController.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by Simon Grätzer on 15.12.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -19,20 +19,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-
-
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
 
-@class SGTabsViewController;
+@class SGBrowserViewController;
 
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
-
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
-
-- (void)openURL:(NSURL *)url;
-- (void)reload;
+@interface UIViewController (SGBrowserViewController)
+- (SGBrowserViewController *)browserViewController;
 @end

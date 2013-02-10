@@ -1,11 +1,11 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  SGNavViewController.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by Simon Grätzer on 21.12.12.
 //
 //
-//  Copyright (c) 2012 Simon Peter Grätzer
+//  Copyright (c) 2012 Simon Grätzer
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -22,17 +22,8 @@
 
 
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
 
-@class SGTabsViewController;
+/// Workaround to support rotations
+@interface SGNavViewController : UINavigationController
 
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
-
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
-
-- (void)openURL:(NSURL *)url;
-- (void)reload;
 @end

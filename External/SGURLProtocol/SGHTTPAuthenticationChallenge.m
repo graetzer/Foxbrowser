@@ -15,8 +15,7 @@
 - (id)initWithResponse:(CFHTTPMessageRef)response
   previousFailureCount:(NSInteger)failureCount
        failureResponse:(NSHTTPURLResponse *)URLResponse
-                sender:(id <NSURLAuthenticationChallengeSender>)sender
-{
+                sender:(id <NSURLAuthenticationChallengeSender>)sender {
     NSParameterAssert(response);
     
     // Try to create an authentication object from the response

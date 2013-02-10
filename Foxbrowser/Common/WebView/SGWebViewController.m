@@ -28,17 +28,13 @@
 #import "SGAppDelegate.h"
 #import "WeaveService.h"
 #import "NSURL+IFUnicodeURL.h"
-#import "SGCredentialsPrompt.h"
 #import "SGFavouritesManager.h"
 
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
-@property (strong, atomic) SGCredentialsPrompt *credentialsPrompt;
 @end
 
-@implementation SGWebViewController {
-    int _dialogResult;
-}
+@implementation SGWebViewController
 
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
@@ -73,9 +69,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"])
-        [SGHTTPURLProtocol registerProtocol];
         
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -93,11 +86,6 @@
         [self.webView stopLoading];
         [self.webView clearContent];
         [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
-        
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
-            [SGHTTPURLProtocol removeAuthDelegate:self];
-            [SGHTTPURLProtocol unregisterProtocol];
-        }
     }
 }
 
@@ -272,16 +260,10 @@
         return NO;
     }
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"])
-        [SGHTTPURLProtocol setAuthDelegate:self forRequest:request];
-    
     if (navigationType != UIWebViewNavigationTypeOther) {
         self.location = request.URL;
         [self.browserViewController updateChrome];
-        
-        WeaveOperations *op = [WeaveOperations sharedOperations];
-        [op modifyRequest:request];
-        return [op handleURLInternal:request.URL];
+        return [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
     }
     return YES;
 }
@@ -349,47 +331,6 @@
                            NSLocalizedString(@"Error Loading Page", @"error loading page"),[error localizedDescription]];
     [self.webView loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
 }
-
-#pragma mark - HTTP Authentication
-
-- (void)URLProtocol:(NSURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    if (!self.credentialsPrompt) {
-        // The protocol states you shall execute the response on the same thread.
-        // So show the prompt on the main thread and wait until the result is finished
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            _dialogResult = -1;
-            self.credentialsPrompt = [[SGCredentialsPrompt alloc] initWithChallenge:challenge delegate:self];
-            [self.credentialsPrompt show];
-        });
-        
-        NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-        while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
-            LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-        
-        SGCredentialsPrompt *creds = self.credentialsPrompt;
-        if (_dialogResult == 1) {
-            NSURLCredential *credential = [NSURLCredential credentialWithUser:creds.usernameField.text
-                                                                     password:creds.passwordField.text
-                                                                  persistence:creds.persistence];
-            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
-                                                         forProtectionSpace:creds.challenge.protectionSpace];
-            [creds.challenge.sender useCredential:credential
-                       forAuthenticationChallenge:creds.challenge];
-        } else {
-            DLog(@"Cancel authenctication");
-            [creds.challenge.sender
-             cancelAuthenticationChallenge:creds.challenge];
-        }
-        self.credentialsPrompt = nil;
-    } else {
-        DLog(@"Called while showing other credential");
-    }
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    _dialogResult = buttonIndex;
-}
-
 
 #pragma mark - Networking
  

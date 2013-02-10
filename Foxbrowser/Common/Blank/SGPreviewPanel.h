@@ -1,8 +1,8 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  SGPreviewPanel.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by simon on 13.07.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -20,19 +20,30 @@
 //  limitations under the License.
 //
 
-
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
+#import <QuartzCore/QuartzCore.h>
 
-@class SGTabsViewController;
+@interface SGPreviewTile : UIView
 
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
+@property (readonly, nonatomic) UIImageView *imageView;
+@property (readonly, nonatomic) UILabel *label;
+@property (readonly, nonatomic) NSURL *url;
 
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
+- (id)initWithURL:(NSURL *)url;
 
-- (void)openURL:(NSURL *)url;
-- (void)reload;
+@end
+
+@protocol SGPanelDelegate <NSObject>
+
+- (void)openNewTab:(SGPreviewTile *)tile;
+- (void)open:(SGPreviewTile *)tile;
+
+@end
+
+@interface SGPreviewPanel : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
+
+@property (weak, nonatomic) id<SGPanelDelegate> delegate;
+
+- (void)layout;
+- (void)refresh;
 @end

@@ -4,14 +4,7 @@
 <dict>
 	<key>PreferenceSpecifiers</key>
 	<array>
-		<dict>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-			<key>Title</key>
-			<string>Version 2.0.3</string>
-			<key>Key</key>
-			<string></string>
-		</dict>
+
 		<dict>
 			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
@@ -44,33 +37,7 @@
 			<key>DefaultValue</key>
 			<true/>
 		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-			<key>Title</key>
-			<string>Extended</string>
-		</dict>
-		<dict>
-			<key>DefaultValue</key>
-			<false/>
-			<key>Key</key>
-			<string>org.graetzer.track</string>
-			<key>Title</key>
-			<string>Do Not Track Header</string>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>DefaultValue</key>
-			<false/>
-			<key>Title</key>
-			<string>HTTP Authentication (Experimental)</string>
-			<key>Key</key>
-			<string>org.graetzer.httpauth</string>
-		</dict>
-		<dict>
+        <dict>
 			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
 			<key>Title</key>
@@ -89,6 +56,32 @@
 				<false/>
 				<string>YES</string>
 			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Experimental</string>
+		</dict>
+        <dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>DefaultValue</key>
+			<false/>
+			<key>Title</key>
+			<string>HTTP Authentication</string>
+			<key>Key</key>
+			<string>org.graetzer.httpauth</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<false/>
+			<key>Key</key>
+			<string>org.graetzer.track</string>
+			<key>Title</key>
+			<string>Do Not Track Header</string>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
 		</dict>
 	</array>
 	<key>StringsTable</key>

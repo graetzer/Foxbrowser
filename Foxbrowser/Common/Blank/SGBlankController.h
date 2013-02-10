@@ -1,8 +1,8 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  SGLatestViewController.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by simon on 13.07.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -19,20 +19,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-
-
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
+#import "SGPreviewPanel.h"
 
-@class SGTabsViewController;
+#define SG_TAB_WIDTH 320.0
 
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
+@class TabBrowserController, SGBottomView;
 
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
-
-- (void)openURL:(NSURL *)url;
-- (void)reload;
+@interface SGBlankController : UIViewController <UIScrollViewDelegate, SGPanelDelegate>
+@property (weak, nonatomic) TabBrowserController *tabBrowser;
+@property (weak, nonatomic) UIScrollView *scrollView;
+@property (weak, nonatomic) SGPreviewPanel *previewPanel;
+@property (weak, nonatomic) SGBottomView *bottomView;
 @end

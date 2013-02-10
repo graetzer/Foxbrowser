@@ -1,8 +1,8 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  SGScreenshotManager.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by Simon Grätzer on 27.12.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -20,19 +20,27 @@
 //  limitations under the License.
 //
 
-
+#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
+#import <QuartzCore/QuartzCore.h>
 
-@class SGTabsViewController;
+@class SGWebViewController;
+@interface SGFavouritesManager : NSObject
++ (SGFavouritesManager *)sharedManager;
 
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
+// Array of URL's
+- (NSArray *)favourites;
 
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
+// Returns the replacement
+- (NSURL *)blockURL:(NSURL *)url;
 
-- (void)openURL:(NSURL *)url;
-- (void)reload;
+- (NSString *)titleWithURL:(NSURL *)url;
+- (UIImage *)imageWithURL:(NSURL *)url;
+
+- (void)resetFavourites;
+- (CGSize)imageSize;
+- (NSUInteger)maxFavs;
+
+// Call this after each webView call
+- (void)webViewDidFinishLoad:(SGWebViewController *)webController;
 @end

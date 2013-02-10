@@ -1,8 +1,8 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  SGCredentialsPrompt.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by Simon Grätzer on 20.08.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -20,19 +20,14 @@
 //  limitations under the License.
 //
 
-
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
 
-@class SGTabsViewController;
+@interface SGCredentialsPrompt : UIAlertView <UITextFieldDelegate>
+@property (strong, nonatomic) UITextField *usernameField;
+@property (strong, nonatomic) UITextField *passwordField;
+@property (strong, nonatomic) UISegmentedControl* rememberCredentials;
+@property (strong, nonatomic) NSURLAuthenticationChallenge *challenge;
+@property (assign, nonatomic) NSURLCredentialPersistence persistence;
 
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
-
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
-
-- (void)openURL:(NSURL *)url;
-- (void)reload;
+- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge delegate:(id<UIAlertViewDelegate>)delegate;
 @end

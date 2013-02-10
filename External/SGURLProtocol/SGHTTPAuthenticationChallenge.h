@@ -9,8 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CFNetwork/CFNetwork.h>
 
-@interface SGHTTPAuthenticationChallenge : NSURLAuthenticationChallenge
-{
+@interface SGHTTPAuthenticationChallenge : NSURLAuthenticationChallenge {
     CFHTTPAuthenticationRef _HTTPAuthentication;
 }
 

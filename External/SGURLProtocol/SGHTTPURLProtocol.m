@@ -9,9 +9,9 @@
 #import "SGHTTPURLProtocol.h"
 
 static NSInteger RegisterCount = 0;
-static NSLock* VariableLock;
-static NSMutableArray *Requests;
-static NSMutableArray *AuthDelegates;
+__strong static NSLock* VariableLock;
+__strong static id<SGHTTPAuthDelegate> AuthDelegate;
+__strong static NSMutableDictionary *HTTPHeaderFields;
 
 typedef enum {
         SGIdentity = 0,
@@ -20,11 +20,13 @@ typedef enum {
     } SGCompression;
 
 @implementation SGHTTPURLProtocol {
+    //Request
     NSInputStream *_HTTPStream;
     CFHTTPMessageRef _HTTPMessage;
     
+    //Response
+    NSHTTPURLResponse *_URLResponse;
     NSInteger _authenticationAttempts;
-    id<SGAuthDelegate> _authDelegate;
     
     NSMutableData *_buffer;
     SGCompression _compression;
@@ -32,8 +34,7 @@ typedef enum {
 
 + (void)load {
     VariableLock = [[NSLock alloc] init];
-    Requests = [[NSMutableArray alloc] initWithCapacity:10];
-    AuthDelegates = [[NSMutableArray alloc] initWithCapacity:10];
+    HTTPHeaderFields = [[NSMutableDictionary alloc] initWithCapacity:10];
 }
 
 + (void)registerProtocol {
@@ -54,39 +55,16 @@ typedef enum {
 	[VariableLock unlock];
 }
 
-+ (void)setAuthDelegate:(id<SGAuthDelegate>)delegate forRequest:(NSURLRequest *)request {
++ (void)setAuthDelegate:(id<SGHTTPAuthDelegate>)delegate {
     [VariableLock lock];
-	[AuthDelegates addObject:delegate];
-    [Requests addObject:request];
+    AuthDelegate = delegate;
 	[VariableLock unlock];
 }
 
-+ (void)removeAuthDelegate:(id<SGAuthDelegate>)delegate {
++ (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field {
     [VariableLock lock];
-    
-    NSUInteger index = NSNotFound;
-    while ( (index = [AuthDelegates indexOfObject:delegate]) != NSNotFound) {
-        [AuthDelegates removeObjectAtIndex:index];
-        [Requests removeObjectAtIndex:index];
-    };
-	
+    HTTPHeaderFields[value] = field;
 	[VariableLock unlock];
-}
-
-+ (id<SGAuthDelegate>)authDelegateForRequest:(NSURLRequest *)request {
-    [VariableLock lock];
-    id<SGAuthDelegate> result;
-	for (int i = 0; i < Requests.count; i++) {
-        NSURLRequest *current = Requests[i];
-        if ([current.URL isEqual:request.URL]) {
-            result = AuthDelegates[i];
-            [Requests removeObjectAtIndex:i];
-            [AuthDelegates removeObjectAtIndex:i];
-            break;
-        }
-    }
-	[VariableLock unlock];
-    return result;
 }
 
 #pragma mark - NSURLProtocol
@@ -117,7 +95,6 @@ typedef enum {
                         client:client]) {
         _compression = SGIdentity;
         _authenticationAttempts = -1;
-        _authDelegate = [SGHTTPURLProtocol authDelegateForRequest:request];
     }
     return self;
 }
@@ -131,10 +108,9 @@ typedef enum {
 }
 
 - (void)startLoading {
-    [self stopLoading];
     NSAssert(_HTTPStream == nil, @"HTTPStream is not nil, connection still ongoing");
-    self.URLResponse = nil;
     
+    _URLResponse = nil;
     _HTTPMessage = [self newMessageWithURLRequest:self.request];
     
     NSInputStream *bodyStream = self.request.HTTPBodyStream;
@@ -146,10 +122,10 @@ typedef enum {
     
     if (stream == NULL) {
         ELog(@"Could not create stream");
-        
         return;
     }
     
+    CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPAttemptPersistentConnection, kCFBooleanTrue);
     CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanFalse);
     if([[self.request.URL.scheme lowercaseString] isEqualToString:@"https"]) {// TODO check against a list
         //Hey an https request
@@ -171,30 +147,44 @@ typedef enum {
         [_HTTPStream close];
         
     _HTTPStream = nil;
+    _URLResponse = nil;
 }
 
 #pragma mark - CFStreamDelegate
 - (void)stream:(NSInputStream *)theStream handleEvent:(NSStreamEvent)streamEvent {
     //NSParameterAssert(theStream == _HTTPStream);
     if (theStream != _HTTPStream) {
-        DLog(@"Not my stream!");
+        ELog(@"Not my stream!");
         return;
     }
     
     // Handle the response as soon as it's available
-    if (!self.URLResponse) {
+    if (!_URLResponse) {
         CFHTTPMessageRef response = (__bridge CFHTTPMessageRef)[theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPResponseHeader];
         if (response && CFHTTPMessageIsHeaderComplete(response)) {
+            
             // Construct a NSURLResponse object from the HTTP message
-            NSURL *URL = [theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPFinalURL];
-            self.URLResponse = [NSHTTPURLResponse responseWithURL:URL HTTPMessage:response];
+            //NSURL *URL = [theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPFinalURL];
+            NSURL *URL =  CFBridgingRelease(CFHTTPMessageCopyRequestURL(response));
+            NSInteger code = (NSInteger)CFHTTPMessageGetResponseStatusCode(response);
+            NSString *HTTPVersion = CFBridgingRelease(CFHTTPMessageCopyVersion(response));
+            NSDictionary *headerFields = CFBridgingRelease(CFHTTPMessageCopyAllHeaderFields(response));
+            _URLResponse = [[NSHTTPURLResponse alloc] initWithURL:URL
+                                                       statusCode:code
+                                                      HTTPVersion:HTTPVersion
+                                                     headerFields:headerFields];
+            if (!_URLResponse) {
+                ELog(@"Invalid HTTP response");
+                [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http"
+                                                                                   code:200
+                                                                               userInfo:@{NSLocalizedDescriptionKey:@"Invalid HTTP response"}]];
+                return;
+            }
             
             if ([self.request HTTPShouldHandleCookies])
-                [self handleCookiesWithURLResponse:self.URLResponse];
+                [self handleCookiesWithURLResponse:_URLResponse];
             
-            NSUInteger code = [self.URLResponse statusCode];
-            NSString *location = (self.URLResponse.allHeaderFields)[@"Location"];
-            
+            NSString *location = (_URLResponse.allHeaderFields)[@"Location"];
             // If the response was an authentication failure, try to request fresh credentials.
             if (code == 401 || code == 407) {// The && statement is a workaround for servers who redirect with an 401 after an successful auth
                 // Cancel any further loading and ask the delegate for authentication
@@ -205,21 +195,25 @@ typedef enum {
                 _authenticationAttempts++;
                 self.authChallenge = [[SGHTTPAuthenticationChallenge alloc] initWithResponse:response
                                                                               previousFailureCount:_authenticationAttempts
-                                                                                   failureResponse:self.URLResponse
+                                                                                   failureResponse:_URLResponse
                                                                                             sender:self];
 
                 if (self.authChallenge) {
                     if (_authenticationAttempts == 0 && self.authChallenge.proposedCredential) {
                         [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
                     } else {
-                        if (_authDelegate) {
-                            [_authDelegate URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
+                        [VariableLock lock];
+                        if (AuthDelegate) {
+                            [AuthDelegate URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
+                            [VariableLock unlock];
                         } else {
+                            [VariableLock unlock];
                             [self.client URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
                         }
                     }
                     return; // Stops the delegate being sent a response received message
                 } else {
+                    ELog(@"Failed to create auth challenge");
                     [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http" code:401 userInfo:nil]];
                 }
             } else if (code == 301 ||code == 302 || code == 303) { // Workaround
@@ -235,7 +229,7 @@ typedef enum {
                     NSURLRequest *nextRequest = [NSURLRequest requestWithURL:nextURL
                                                                  cachePolicy:self.request.cachePolicy
                                                              timeoutInterval:self.request.timeoutInterval];
-                    [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:self.URLResponse];
+                    [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:_URLResponse];
                     return;
                 }
             } else if (code == 307 || code == 308) { // Redirect but keep the parameters
@@ -248,7 +242,7 @@ typedef enum {
                     
                     NSMutableURLRequest *nextRequest = [self.request mutableCopy];
                     [nextRequest setURL:nextURL];
-                    [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:self.URLResponse];
+                    [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:_URLResponse];
                     return;
                 }
             } else if (code == 304) { // Handle cached stuff
@@ -256,15 +250,17 @@ typedef enum {
                 if (!cached)
                     cached = [[NSURLCache sharedURLCache] cachedResponseForRequest:self.request];
                 
-                [self.client URLProtocol:self cachedResponseIsValid:cached];
-                [self.client URLProtocol:self didLoadData:[cached data]];
-                //actually no body expected, TODO: testing
-                [self.client URLProtocolDidFinishLoading:self];
+                if (cached) {
+                    [self.client URLProtocol:self cachedResponseIsValid:cached];
+                    [self.client URLProtocol:self didLoadData:[cached data]];
+                } else {
+                    ELog(@"No cached response existent");
+                }
                 return;
             }
             
             // So no redirect, no auth. Now we care about the body
-            NSString *encoding = self.URLResponse.allHeaderFields[@"Content-Encoding"];
+            NSString *encoding = _URLResponse.allHeaderFields[@"Content-Encoding"];
             if ([encoding isEqualToString:@"gzip"])
                 _compression = SGGzip;
             else if ([encoding isEqualToString:@"deflate"])
@@ -273,13 +269,13 @@ typedef enum {
                 _compression = SGIdentity;
             
             if (!_buffer && _compression != SGIdentity) {
-                long long capacity = self.URLResponse.expectedContentLength;
+                long long capacity = _URLResponse.expectedContentLength;
                 if (capacity == NSURLResponseUnknownLength || capacity == 0)
                     capacity = 1024*1024;//10M buffer
                 _buffer = [[NSMutableData alloc] initWithCapacity:capacity];
             }
             
-            [self.client URLProtocol:self didReceiveResponse:self.URLResponse cacheStoragePolicy:NSURLCacheStorageAllowed];
+            [self.client URLProtocol:self didReceiveResponse:_URLResponse cacheStoragePolicy:NSURLCacheStorageAllowed];
         }
     }
     
@@ -302,8 +298,6 @@ typedef enum {
                 [self.client URLProtocol:self didLoadData:[_buffer gzipInflate]];
             else if (_compression == SGDeflate)
                 [self.client URLProtocol:self didLoadData:[_buffer zlibInflate]];
-//            else
-//                [self.client URLProtocol:self didLoadData:_buffer];
             
             [self.client URLProtocolDidFinishLoading:self];
             _buffer = nil;
@@ -317,9 +311,8 @@ typedef enum {
             break;
         }
             
-        default: {
-            DLog(@"Unhandled event %i", streamEvent);
-        }
+        default:
+            break;
     }
 }
 
@@ -336,13 +329,13 @@ typedef enum {
                                               (__bridge CFURLRef)[request URL],
                                               kCFHTTPVersion1_1);
 
+    NSArray *languages = [NSLocale preferredLanguages];
+    NSString *lang = [[languages subarrayWithRange:NSMakeRange(0, MIN(3, languages.count))] componentsJoinedByString:@","];
     
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Host"), (__bridge CFStringRef)request.URL.host);
-    NSString *language = [[[NSLocale preferredLanguages] subarrayWithRange:NSMakeRange(0, 3)] componentsJoinedByString:@","];
-    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Language"), (__bridge CFStringRef)language);
+    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Language"), (__bridge CFStringRef)lang);
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Charset"), CFSTR("utf-8;q=1.0, ISO-8859-1;q=0.5"));
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Encoding"), CFSTR("gzip;q=1.0, deflate;q=0.6, identity;q=0.5, *;q=0"));
-    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Connection"), CFSTR("Keep-Alive"));
 
     if (request.HTTPShouldHandleCookies) {
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
@@ -358,9 +351,15 @@ typedef enum {
 
     }
     
-    DLog(@"Request headers: %@", request.allHTTPHeaderFields);
+    for (NSString *key in HTTPHeaderFields) {
+        NSString *val = HTTPHeaderFields[key];
+        CFHTTPMessageSetHeaderFieldValue(message,
+                                         (__bridge CFStringRef)key,
+                                         (__bridge CFStringRef)val);
+    }
+    
     for (NSString *key in request.allHTTPHeaderFields) {
-        NSString *val = (request.allHTTPHeaderFields)[key];
+        NSString *val = request.allHTTPHeaderFields[key];
         CFHTTPMessageSetHeaderFieldValue(message,
                                          (__bridge CFStringRef)key,
                                          (__bridge CFStringRef)val);

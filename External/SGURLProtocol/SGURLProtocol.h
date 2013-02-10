@@ -18,7 +18,6 @@
 #endif
 
 #import "SGHTTPURLProtocol.h"
-#import "SGHTTPURLResponse.h"
 #import "SGHTTPAuthenticationChallenge.h"
 #import "NSData+Compress.h"
 

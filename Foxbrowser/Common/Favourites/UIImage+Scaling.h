@@ -1,8 +1,8 @@
 //
-//  SGViewController.h
-//  SGTabs
+//  UIImage+Scaling.h
+//  Foxbrowser
 //
-//  Created by simon on 07.06.12.
+//  Created by Simon Grätzer on 31.07.12.
 //
 //
 //  Copyright (c) 2012 Simon Peter Grätzer
@@ -20,19 +20,10 @@
 //  limitations under the License.
 //
 
-
 #import <UIKit/UIKit.h>
-#import <Security/Security.h>
 
-@class SGTabsViewController;
-
-@interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
-
-@property (weak, nonatomic) UIWebView *webView;
-@property (strong, nonatomic) NSURL *location;
-@property (assign, nonatomic, getter = isLoading) BOOL loading;
-
-- (void)openURL:(NSURL *)url;
-- (void)reload;
+@interface UIImage (Scaling)
+- (UIImage *) scaleToSize: (CGSize)size;
+- (UIImage *) scaleProportionalToSize: (CGSize)size;
+- (UIImage *) cutImageToSize: (CGSize)size;
 @end
