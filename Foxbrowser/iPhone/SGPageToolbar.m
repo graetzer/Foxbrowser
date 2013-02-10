@@ -32,7 +32,7 @@
 
 @implementation SGPageToolbar {
     UIColor *_bottomColor;
-    BOOL _searchBarVisible;
+    BOOL _searchMaskVisible;
 }
 
 - (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser {
@@ -120,7 +120,7 @@
     
     CGFloat posX = margin;
     
-    if (!_searchBarVisible) {
+    if (!_searchMaskVisible) {
         _backButton.frame = CGRectMake(posX, (height - _backButton.frame.size.height)/2,
                                        _backButton.frame.size.width, _backButton.frame.size.height);
         
@@ -156,7 +156,7 @@
 }
 
 - (void)updateChrome {
-    if (![self.searchField isFirstResponder])
+    if (!([self.searchField isFirstResponder] || _searchMaskVisible))
         self.searchField.text = [self.browser URL].absoluteString;
     
     NSString *text = [NSString stringWithFormat:@"%d", self.browser.count];
@@ -306,7 +306,7 @@
     NSString *searchText = [textField.text stringByReplacingCharactersInRange:range withString:string];
     
     // When the search string changes, filter the recents list accordingly.
-    if (_searchBarVisible && searchText.length) // TODO
+    if (_searchMaskVisible && searchText.length) // TODO
         [self.searchController filterResultsUsingString:searchText];
     
     return YES;
@@ -322,8 +322,8 @@
 #pragma mark - SGSearchController
 
 - (void)presentSearchController {
-    if (!_searchBarVisible) {
-        _searchBarVisible = YES;
+    if (!_searchMaskVisible) {
+        _searchMaskVisible = YES;
         self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
                                                       self.frame.size.width, self.superview.bounds.size.height - self.frame.size.height);
         [UIView animateWithDuration:0.25
@@ -342,8 +342,8 @@
 }
 
 - (void)dismissSearchController {
-    if (_searchBarVisible) {
-        _searchBarVisible = NO;
+    if (_searchMaskVisible) {
+        _searchMaskVisible = NO;
         // If the user finishes editing text in the search bar by, for example:
         // tapping away rather than selecting from the recents list, then just dismiss the popover
         self.searchField.text = [self.browser URL].absoluteString;
