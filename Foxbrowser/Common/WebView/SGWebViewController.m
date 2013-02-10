@@ -34,7 +34,9 @@
 @property (strong, nonatomic) NSDictionary *selected;
 @end
 
-@implementation SGWebViewController
+@implementation SGWebViewController {
+    NSTimer *_updateTimer;
+}
 
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
@@ -101,6 +103,15 @@
     if (!self.webView.request) {
         [self openURL:nil];
     }
+    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                    target:self
+                                                  selector:@selector(prepareWebView)
+                                                  userInfo:nil repeats:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [_updateTimer invalidate];
+    _updateTimer = nil;
 }
 
 - (void)dealloc {
@@ -136,8 +147,8 @@
     UIActionSheet *sheet;
     self.selected = [self.webView tagsForPosition:pt];
     
-    NSString *link = (self.selected)[@"A"];
-    NSString *imageSrc = (self.selected)[@"IMG"];
+    NSString *link = self.selected[@"A"];
+    NSString *imageSrc = self.selected[@"IMG"];
     
     NSString *prefix = @"newtab:";
     if ([link hasPrefix:prefix]) {
@@ -274,18 +285,11 @@
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    self.loading = NO;
-    [webView loadJSTools];
-    [webView disableContextMenu];
-    [webView modifyLinkTargets];
-    [webView modifyOpen];
+    [self prepareWebView];
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
-        [webView enableDoNotTrack];
-        
     self.title = [webView title];
+    self.loading = NO;
     
-    DLog(@"%@", webView.request.mainDocumentURL);
     NSString *webLoc = [self.webView location];
     if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
         self.location = [NSURL URLWithUnicodeString:webLoc];
@@ -296,7 +300,6 @@
         [[WeaveOperations sharedOperations] addHistoryURL:self.location title:self.title];
     //}
     
-    // Do the screenshot if needed
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 
@@ -331,6 +334,17 @@
     NSString *errorPage = [NSString stringWithFormat:html,
                            NSLocalizedString(@"Error Loading Page", @"error loading page"),[error localizedDescription]];
     [self.webView loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
+}
+
+- (void)prepareWebView {
+    if (![self.webView JSToolsLoaded]) {
+        [self.webView loadJSTools];
+        [self.webView disableContextMenu];
+        [self.webView modifyLinkTargets];
+        [self.webView modifyOpen];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
+            [self.webView enableDoNotTrack];
+    }
 }
 
 #pragma mark - Networking

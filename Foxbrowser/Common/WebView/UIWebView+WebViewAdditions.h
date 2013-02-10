@@ -34,6 +34,7 @@
 - (void)setLocationHash:(NSString *)location;
 
 - (void)loadJSTools;
+- (BOOL)JSToolsLoaded;
 - (void)disableContextMenu;
 - (void)modifyLinkTargets;
 - (void)modifyOpen;
