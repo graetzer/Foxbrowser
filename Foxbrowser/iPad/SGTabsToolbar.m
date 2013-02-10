@@ -181,12 +181,14 @@
                             NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                             NSLocalizedString(@"Settings", nil), nil];
     } else {
+        NSString *social = [SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]
+        ? @"Sina Weibo" : @"Facebook";
         self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
                                                        delegate:self
                                               cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
                                          destructiveButtonTitle:nil
                                               otherButtonTitles:
-                            NSLocalizedString(@"Facebook", @"Post the current url"),
+                            social,
                             NSLocalizedString(@"Tweet", @"Tweet the current url"),
                             NSLocalizedString(@"Email URL", nil),
                             NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
@@ -202,9 +204,13 @@
     
     if (!NSClassFromString(@"SLComposeViewController")) {
         buttonIndex++;
-    } else if (buttonIndex == 0) {// Post on facebook
-        if (url && [SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
+    } else if (buttonIndex == 0 && url) {// Post on facebook
+        if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
             SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
+            [composeVC addURL:url];
+            [self.browser presentViewController:composeVC animated:YES completion:NULL];
+        } else if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]) {
+            SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];
             [composeVC addURL:url];
             [self.browser presentViewController:composeVC animated:YES completion:NULL];
         }

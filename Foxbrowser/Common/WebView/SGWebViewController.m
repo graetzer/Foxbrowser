@@ -103,15 +103,6 @@
     if (!self.webView.request) {
         [self openURL:nil];
     }
-    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
-                                                    target:self
-                                                  selector:@selector(prepareWebView)
-                                                  userInfo:nil repeats:YES];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [_updateTimer invalidate];
-    _updateTimer = nil;
 }
 
 - (void)dealloc {
@@ -282,9 +273,15 @@
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     self.loading = YES;
     [self.browserViewController updateChrome];
+    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:2
+                                                    target:self
+                                                  selector:@selector(prepareWebView)
+                                                  userInfo:nil repeats:YES];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
+    [_updateTimer invalidate];
+    _updateTimer = nil;
     [self prepareWebView];
     
     self.title = [webView title];

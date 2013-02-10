@@ -41,7 +41,7 @@
 	self.usernameField.delegate           = self;
     self.usernameField.borderStyle        = UITextBorderStyleBezel;
 	[self.usernameField  setBackgroundColor:[UIColor whiteColor]];
-	[self addSubview:self.usernameField];
+    [self addSubview:self.usernameField];
 	
 	self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(12.0, 90.0, 260.0, 25.0)];
 	self.passwordField.placeholder        = NSLocalizedString(@"Password", @"Password");
@@ -51,7 +51,7 @@
     self.passwordField.borderStyle        = UITextBorderStyleBezel;
 	[self.passwordField setSecureTextEntry:YES];
 	[self.passwordField setBackgroundColor:[UIColor whiteColor]];
-	[self addSubview:self.passwordField];
+    [self addSubview:self.passwordField];
 	
 	self.rememberCredentials                       = [[UISegmentedControl alloc] initWithItems:
                                                       @[NSLocalizedString(@"Don't save", @"Don't save"),
@@ -88,10 +88,10 @@
     }
 	
 	// Enable for IPhone
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        CGAffineTransform transform = CGAffineTransformMakeTranslation(0.0, 80.0);
-        [self setTransform:transform];
-    }
+//    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+//        CGAffineTransform transform = CGAffineTransformMakeTranslation(0.0, 80.0);
+//        [self setTransform:transform];
+//    }
     return self;
 }
 
