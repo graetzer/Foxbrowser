@@ -94,6 +94,7 @@ typedef enum {
                         client:client]) {
         _compression = SGIdentity;
         _authenticationAttempts = -1;
+        _HTTPMessage = [self newMessageWithURLRequest:self.request];
     }
     return self;
 }
@@ -109,7 +110,7 @@ typedef enum {
 - (void)startLoading {
     NSAssert(_HTTPStream == nil, @"HTTPStream is not nil, connection still ongoing");
     
-    if (self.cachedResponse) {
+    if (self.cachedResponse) {// Doesn't seem to happen
         DLog(@"Have cached response: %@", self.cachedResponse.userInfo);
 //        [self.client URLProtocol:self cachedResponseIsValid:self.cachedResponse];
 //        [self.client URLProtocol:self didReceiveResponse:self.cachedResponse.response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
@@ -119,7 +120,6 @@ typedef enum {
     }
     
     _URLResponse = nil;
-    _HTTPMessage = [self newMessageWithURLRequest:self.request];
     
     NSInputStream *bodyStream = self.request.HTTPBodyStream;
     CFReadStreamRef stream;
@@ -226,8 +226,10 @@ typedef enum {
                     return; // Stops the delegate being sent a response received message
                 } else {
                     ELog(@"Failed to create auth challenge");
-                    [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http"
-                                                                                       code:401 userInfo:nil]];
+                    NSError *error = [NSError errorWithDomain:@"org.graetzer.http"
+                                                         code:407
+                                                     userInfo:@{NSLocalizedDescriptionKey:@"Unable to create authentication challenge"}];
+                    [self.client URLProtocol:self didFailWithError:error];
                 }
             } else if (code == 301 ||code == 302 || code == 303) { // Workaround
                 // Redirect with a new GET request, assume the server processed the request

@@ -20,19 +20,16 @@
     
     // Try to create an authentication object from the response
     _HTTPAuthentication = CFHTTPAuthenticationCreateFromResponse(NULL, response);
-    if (![self CFHTTPAuthentication])
-    {
+    if (![self CFHTTPAuthentication]) {
         return nil;
     }
     
     // NSURLAuthenticationChallenge only handles user and password
-    if (!CFHTTPAuthenticationIsValid([self CFHTTPAuthentication], NULL))
-    {
+    if (!CFHTTPAuthenticationIsValid([self CFHTTPAuthentication], NULL)) {
         return nil;
     }
     
-    if (!CFHTTPAuthenticationRequiresUserNameAndPassword([self CFHTTPAuthentication]))
-    {
+    if (!CFHTTPAuthenticationRequiresUserNameAndPassword([self CFHTTPAuthentication])) {
         return nil;
     }
     
@@ -50,16 +47,13 @@
     // Fail for an unsupported authentication method
     CFStringRef authMethod = CFHTTPAuthenticationCopyMethod([self CFHTTPAuthentication]);
     NSString *authenticationMethod;
-    if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic])
-    {
+    if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic]) {
         authenticationMethod = NSURLAuthenticationMethodHTTPBasic;
     }
-    else if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest])
-    {
+    else if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest]) {
         authenticationMethod = NSURLAuthenticationMethodHTTPDigest;
     }
-    else
-    {
+    else {
         CFRelease(authMethod);
         return nil;
     }
@@ -68,7 +62,6 @@
     
     // Initialise
     CFStringRef realm = CFHTTPAuthenticationCopyRealm([self CFHTTPAuthentication]);
-    
     
     NSInteger port = 80;
     
@@ -94,7 +87,9 @@
     NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage]
                                    defaultCredentialForProtectionSpace:protectionSpace];
     
-    NSError *error = [NSError errorWithDomain:@"org.graetzer.http" code:401 userInfo:nil];
+    NSError *error = [NSError errorWithDomain:@"org.graetzer.http"
+                                         code:401
+                                     userInfo:@{NSLocalizedDescriptionKey:@"Failed to authenticate"}];
     self = [super initWithProtectionSpace:protectionSpace
                       proposedCredential:credential
                     previousFailureCount:failureCount
