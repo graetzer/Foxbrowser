@@ -273,7 +273,7 @@
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     self.loading = YES;
     [self.browserViewController updateChrome];
-    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:2
+    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:2.5
                                                     target:self
                                                   selector:@selector(prepareWebView)
                                                   userInfo:nil repeats:YES];
@@ -334,6 +334,7 @@
 }
 
 - (void)prepareWebView {
+    [self.browserViewController updateChrome];
     if (![self.webView JSToolsLoaded]) {
         [self.webView loadJSTools];
         [self.webView disableContextMenu];
