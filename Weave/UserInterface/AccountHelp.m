@@ -38,9 +38,15 @@
 #import "Stockboy.h"
 #import "WeaveService.h"
 
+#import "GAI.h"
+
 @implementation AccountHelp
 
 @synthesize emailAddr;
+
+- (void)viewWillAppear:(BOOL)animated {
+    [[GAI sharedInstance].defaultTracker sendView:@"AccountHelp"];
+}
 
 //I most likely need to do this http request in a background thread, in case the network is slow, so that I can put up a spinner
 - (IBAction) sendEmail:(id)sender
@@ -116,6 +122,7 @@
     [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
   }
 
+    [self.emailAddr resignFirstResponder];
   [self.navigationController popViewControllerAnimated:YES];
 }
 

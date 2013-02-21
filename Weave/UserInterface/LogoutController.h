@@ -46,7 +46,4 @@
 
 - (IBAction) logout:(id)sender;
 
-@property (nonatomic, retain) IBOutlet UIView *spinnerView;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* spinner;
-
 @end

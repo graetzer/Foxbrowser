@@ -238,14 +238,12 @@ typedef enum {
                 
                 NSURL *nextURL = [NSURL URLWithString:location relativeToURL:URL];
                 if (nextURL) {
-                    DLog(@"%o Redirect to %@", code, location);
-                    NSURLRequest *nextRequest = [NSURLRequest requestWithURL:nextURL
+                    DLog(@"%i Redirect to %@", code, location);
+                    NSMutableURLRequest *nextRequest = [NSMutableURLRequest requestWithURL:nextURL
                                                                  cachePolicy:self.request.cachePolicy
                                                              timeoutInterval:self.request.timeoutInterval];
+                    [nextRequest setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
                     [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:_URLResponse];
-                    [self.client URLProtocolDidFinishLoading:self];
-                    [self stopLoading];
-                    return;
                 }
             } else if (code == 307 || code == 308) { // Redirect but keep the parameters
                 NSURL *nextURL = [NSURL URLWithString:location relativeToURL:URL];
@@ -255,12 +253,9 @@ typedef enum {
                     DLog(@"%i Redirect to %@", code, location);
                     
                     NSMutableURLRequest *nextRequest = [self.request mutableCopy];
+                    [nextRequest setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
                     [nextRequest setURL:nextURL];
-                    
                     [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:_URLResponse];
-                    [self.client URLProtocolDidFinishLoading:self];
-                    [self stopLoading];
-                    return;
                 }
             } else if (code == 304) { // Handle cached stuff
                 
@@ -296,7 +291,12 @@ typedef enum {
                 _buffer = [[NSMutableData alloc] initWithCapacity:capacity];
             }
             
-            [self.client URLProtocol:self didReceiveResponse:_URLResponse cacheStoragePolicy:NSURLCacheStorageAllowed];
+            NSURLCacheStoragePolicy policy = NSURLCacheStorageAllowed;
+            if (self.request.cachePolicy == NSURLRequestUseProtocolCachePolicy
+                && [self.request.URL.scheme isEqualToString:@"https"]) {
+                policy = NSURLCacheStorageNotAllowed;
+            }
+            [self.client URLProtocol:self didReceiveResponse:_URLResponse cacheStoragePolicy:policy];
         }
     }
     
@@ -305,11 +305,13 @@ typedef enum {
         case NSStreamEventHasBytesAvailable: {
             while ([theStream hasBytesAvailable]) {
                 uint8_t buf[1024];
-                NSUInteger len = [theStream read:buf maxLength:1024];
-                if (_buffer && len > 0)
-                    [_buffer appendBytes:(const void *)buf length:len];
-                else if (len > 0)
-                    [self.client URLProtocol:self didLoadData:[NSData dataWithBytes:buf length:len]];
+                NSInteger len = [theStream read:buf maxLength:1024];
+                if (len > 0) {
+                    if (_buffer)
+                        [_buffer appendBytes:(const void *)buf length:len];
+                    else
+                        [self.client URLProtocol:self didLoadData:[NSData dataWithBytes:buf length:len]];
+                }
             }
             break;
         }
@@ -349,7 +351,7 @@ typedef enum {
                                               (__bridge CFURLRef)[request URL],
                                               kCFHTTPVersion1_1);
 
-    NSString *locale = [[NSLocale currentLocale] objectForKey:NSLocaleLanguageCode];
+    NSString *locale = [NSLocale preferredLanguages][0];
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Host"), (__bridge CFStringRef)request.URL.host);
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Language"), (__bridge CFStringRef)locale);
     CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Accept-Charset"), CFSTR("utf-8;q=1.0, ISO-8859-1;q=0.5"));
@@ -389,15 +391,15 @@ typedef enum {
 }
 
 - (void)handleCookiesWithURLResponse:(NSHTTPURLResponse *)response {
-    NSString *cookieString = (response.allHeaderFields)[@"Set-Cookie"];
-    if (cookieString) {
+//    NSString *cookieString = (response.allHeaderFields)[@"Set-Cookie"];
+//    if (cookieString) {
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
         NSArray *cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:response.allHeaderFields
                                                                   forURL:response.URL];
         [cookieStorage setCookies:cookies
                            forURL:response.URL
                   mainDocumentURL:self.request.mainDocumentURL];
-    }
+    //}
 }
 
 #pragma mark - NSURLAuthenticationChallengeSender

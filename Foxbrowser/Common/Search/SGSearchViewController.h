@@ -26,6 +26,7 @@
 @protocol SGSearchDelegate <NSObject>
 
 - (void)finishSearch:(NSString *)searchString title:(NSString *)title;
+- (void)finishPageSearch:(NSString *)searchString;
 - (NSString *)text;
 
 @optional

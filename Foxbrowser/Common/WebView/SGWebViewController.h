@@ -30,9 +30,12 @@
 UIActionSheetDelegate, UIAlertViewDelegate>
 
 @property (weak, nonatomic) UIWebView *webView;
+@property (weak, nonatomic) UIToolbar *searchToolbar;
+
 @property (strong, nonatomic) NSURL *location;
 @property (assign, nonatomic, getter = isLoading) BOOL loading;
 
 - (void)openURL:(NSURL *)url;
 - (void)reload;
+- (NSInteger)search:(NSString *)searchString;
 @end

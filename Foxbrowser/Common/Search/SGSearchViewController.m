@@ -26,10 +26,6 @@
 #import "WeaveService.h"
 
 
-@interface SGSearchViewController ()
-
-@end
-
 @implementation SGSearchViewController {
     NSString* gLastSearchString;
 }
@@ -39,8 +35,7 @@
 static NSThread* gRefreshThread = nil;
 static NSArray* gFreshSearchHits = nil;
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
 	
     self.contentSizeForViewInPopover = CGSizeMake(500., 280.);
@@ -63,11 +58,8 @@ static NSArray* gFreshSearchHits = nil;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    //first section is normal sync results, the final section has magic "goto" behavior
-    if (section == 0)
-    {
-        if (self.delegate.text.length != 0 && [searchHits count])
-        {
+    if (section == 0) {
+        if (self.delegate.text.length != 0) {
             return [searchHits count];
         }
         return 0;
@@ -77,40 +69,33 @@ static NSArray* gFreshSearchHits = nil;
 
 // Display the strings in displayedRecentSearches.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 1 && gLastSearchString != nil) {//special goto cell, which goes to a website directly, independent of your synced items
-        static NSString *CellIdentifier = @"GOTO_CELL";
+    if (indexPath.section == 1 && gLastSearchString != nil) {
+        static NSString *CellIdentifier = @"PAGE_SEARCH_CELL";
         
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        if (cell == nil) 
-        {
+        if (!cell) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+            cell.accessoryType = UITableViewCellAccessoryNone;
+            cell.textLabel.textColor = [UIColor blueColor];
+            cell.textLabel.textAlignment = UITextAlignmentLeft;
+            cell.imageView.image = [UIImage imageNamed:@"goto"];
+            cell.accessoryType = UITableViewCellAccessoryNone;
         }
-        
-        cell.accessoryType = UITableViewCellAccessoryNone;
-        cell.textLabel.textColor = [UIColor blueColor];
-        cell.textLabel.textAlignment = UITextAlignmentLeft;
-        cell.textLabel.text = [NSString stringWithFormat:@"%@", gLastSearchString];
-        cell.imageView.image = [UIImage imageNamed:@"goto"];
-        cell.accessoryType = UITableViewCellAccessoryNone;
-        
+        cell.textLabel.text = [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Find in Page", @"Search something in the webpage"), gLastSearchString];
         return cell;
     } else { //regular title/url cell
         //NOTE: I'm now sharing the table cell cache between all my tables to save memory
         static NSString *CellIdentifier = @"URL_CELL";
         
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        if (cell == nil) {
+        if (!cell) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+            cell.accessoryType = UITableViewCellAccessoryNone;
         }
         
-        cell.accessoryType = UITableViewCellAccessoryNone;
-        
-        @try 
-        {
-            if (searchHits)
-            {
-                if ([searchHits count])
-                {
+        @try {
+            if (searchHits) {
+                if ([searchHits count]) {
                     cell.textLabel.textColor = [UIColor blackColor];
                     cell.textLabel.textAlignment = UITextAlignmentLeft;
                     
@@ -120,32 +105,25 @@ static NSArray* gFreshSearchHits = nil;
                     cell.detailTextLabel.text = matchItem[@"url"];
                     //the item tells us which icon to use
                     cell.imageView.image = [UIImage imageNamed:matchItem[@"icon"]];
-                }
-                else //empty list, means no matches
-                {
+                } else {//empty list, means no matches
                     cell.textLabel.textColor = [UIColor grayColor];
                     cell.textLabel.text = NSLocalizedString(@"No Matches", @"no matching items found");
                     cell.detailTextLabel.text = nil;
                     cell.imageView.image = nil;
                 }
                 
-            }
-            else //no list at all, means searching
-            {
+            } else { //no list at all, means searching
                 cell.textLabel.textColor = [UIColor grayColor];
                 cell.textLabel.text = NSLocalizedString(@"Searching...", @"searching for matching items");
                 cell.detailTextLabel.text = nil;
                 cell.imageView.image = nil;
             }
-            
-        }
-        @catch (NSException * e) {
+        } @catch (NSException * e) {
             DLog(@"item to display missing from searchhits");
             cell.textLabel.textColor = [UIColor blackColor];
             cell.textLabel.text = nil;
             cell.detailTextLabel.text = nil;
             cell.imageView.image = nil;
-            
         }
         
         return cell;
@@ -162,13 +140,10 @@ static NSArray* gFreshSearchHits = nil;
 	UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
     
 	if (!([searchHits count] == 0 && gLastSearchString.length == 0)) {
-		NSString* destination = nil;        
-		if (indexPath.section == 1) {
-            destination = [[WeaveOperations sharedOperations] queryURLForTerm:gLastSearchString];
-		} else  {
-			destination = cell.detailTextLabel.text;
-		}
-		[self.delegate finishSearch:destination title:cell.textLabel.text];
+		if (indexPath.section == 1)
+            [self.delegate finishPageSearch:gLastSearchString];
+		else
+			[self.delegate finishSearch:cell.detailTextLabel.text title:cell.textLabel.text];
 	}
     
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -180,8 +155,7 @@ static NSArray* gFreshSearchHits = nil;
 }
 
 #pragma mark - Heavy search tasks, copied from Weave
-- (void)filterResultsUsingString:(NSString*)query
-{
+- (void)filterResultsUsingString:(NSString*)query {
     //if there is a thread running, we need to stop it. it will autorelease
     if (gRefreshThread != nil) {
         [gRefreshThread cancel];
@@ -201,8 +175,7 @@ static NSArray* gFreshSearchHits = nil;
     }
 }
 
-- (void) threadRefreshHits:(NSString*)searchText
-{
+- (void) threadRefreshHits:(NSString*)searchText {
     @autoreleasepool {
         @try {
             [self refreshHits:searchText];

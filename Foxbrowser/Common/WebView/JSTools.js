@@ -55,3 +55,7 @@ function FoxbrowserModifyOpen() {
         }
     }
 }
+
+document.body.style.webkitTouchCallout='none';
+FoxbrowserModifyLinkTargets();
+FoxbrowserModifyOpen();

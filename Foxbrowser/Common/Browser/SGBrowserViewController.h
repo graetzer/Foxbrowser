@@ -72,14 +72,14 @@
 - (BOOL)canGoBack;
 - (BOOL)canGoForward;
 
-- (NSURL *)URL;
-
 - (BOOL)canStopOrReload;
 - (BOOL)canRemoveTab:(UIViewController *)viewController;
 
+- (NSURL *)URL;
 - (void)openURL:(NSURL *)url title:(NSString *)title;
 - (void)handleURLString:(NSString*)input title:(NSString *)title;
 
+- (void)findInPage:(NSString *)searchPage;
 
 - (void)addSavedTabs;
 - (void)saveCurrentTabs;

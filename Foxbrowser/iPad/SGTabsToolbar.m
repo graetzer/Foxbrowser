@@ -389,6 +389,12 @@
     [self.searchField resignFirstResponder];
 }
 
+- (void)finishPageSearch:(NSString *)searchString {
+    [self destroyPopovers];
+    [self.searchField resignFirstResponder];
+    [self.browser findInPage:searchString];
+}
+
 #pragma mark - UIPopoverControllerDelegate
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {

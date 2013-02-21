@@ -125,35 +125,6 @@
     [self updateChrome];
 }
 
-- (void)openURL:(NSURL *)url title:(NSString *)title {
-    if (!url)
-        return;
-    
-    if (!title)
-        title = url.host;
-        
-    if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
-        SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        webC.title = title;
-        [webC openURL:url];
-    } else {
-        SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
-        webC.title = title;
-        [webC openURL:url];
-        [self swapCurrentViewControllerWith:webC];
-    }
-}
-
-- (void)handleURLString:(NSString*)input title:(NSString *)title {
-    NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
-    if (!title) {
-        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
-        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
-    }
-    
-    [self openURL:url title:title];
-}
-
 - (void)reload; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
@@ -217,6 +188,13 @@
     return NO;
 }
 
+- (BOOL)canRemoveTab:(UIViewController *)viewController {
+    if ([viewController isKindOfClass:[SGBlankController class]] && self.count == 1) {
+        return NO;
+    }
+    return YES;
+}
+
 - (NSURL *)URL {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
@@ -225,11 +203,40 @@
     return nil;
 }
 
-- (BOOL)canRemoveTab:(UIViewController *)viewController {
-    if ([viewController isKindOfClass:[SGBlankController class]] && self.count == 1) {
-        return NO;
+- (void)openURL:(NSURL *)url title:(NSString *)title {
+    if (!url)
+        return;
+    
+    if (!title)
+        title = url.host;
+    
+    if ([self.selectedViewController isKindOfClass:[SGWebViewController class]]) {
+        SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
+        webC.title = title;
+        [webC openURL:url];
+    } else {
+        SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
+        webC.title = title;
+        [webC openURL:url];
+        [self swapCurrentViewControllerWith:webC];
     }
-    return YES;
+}
+
+- (void)handleURLString:(NSString*)input title:(NSString *)title {
+    NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
+    if (!title) {
+        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
+    }
+    
+    [self openURL:url title:title];
+}
+
+- (void)findInPage:(NSString *)searchPage {
+    if ([self.selectedViewController isKindOfClass:[SGWebViewController class]]) {
+        SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
+        [webC search:searchPage];
+    }
 }
 
 - (NSString *)savedTabsCacheFile {

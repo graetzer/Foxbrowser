@@ -35,4 +35,5 @@
 @property (readonly, nonatomic) UILabel *titleLabel;
 @property (assign, nonatomic) BOOL exposeMode;
 
+- (void)setExposeMode:(BOOL)exposeMode animated:(BOOL)animated;
 @end

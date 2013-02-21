@@ -30,6 +30,8 @@
 #import "NSURL+IFUnicodeURL.h"
 #import "SGFavouritesManager.h"
 
+#import "SGTabDefines.h"
+
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
 @end
@@ -74,7 +76,7 @@
         
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.webView.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
+    self.webView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
     UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc] 
                                         initWithTarget:self action:@selector(handleLongPress:)];
     [self.webView addGestureRecognizer:gr];
@@ -84,6 +86,7 @@
 }
 
 - (void)didMoveToParentViewController:(UIViewController *)parent {
+    [super didMoveToParentViewController:parent];
     if (!parent) {// View is removed
         [self.webView stopLoading];
         [self.webView clearContent];
@@ -271,6 +274,7 @@
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
+    [self dismissSearchToolbar];
     self.loading = YES;
     [self.browserViewController updateChrome];
     _updateTimer = [NSTimer scheduledTimerWithTimeInterval:2.5
@@ -286,12 +290,11 @@
     
     self.title = [webView title];
     self.loading = NO;
-    
     NSString *webLoc = [self.webView location];
     if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
         self.location = [NSURL URLWithUnicodeString:webLoc];
-    [self.browserViewController updateChrome];
     
+    [self.browserViewController updateChrome];
     // Private mode
     //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
         [[WeaveOperations sharedOperations] addHistoryURL:self.location title:self.title];
@@ -301,8 +304,7 @@
 }
 
 //there are too many spurious warnings, so I'm going to just ignore or log them all for now.
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
-{
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     self.loading = NO;
     [self.browserViewController updateChrome];
     
@@ -311,7 +313,6 @@
     if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"]) return;
     
     if ([error.domain isEqualToString:@"NSURLErrorDomain"]) {
-        DLog(@"Webview error code: %i", error.code);
         // Host not found, try adding www. in front?
         if (error.code == -1003 && [self.location.host rangeOfString:@"www"].location == NSNotFound) {
             NSMutableString *url = [self.location.absoluteString mutableCopy];
@@ -323,23 +324,24 @@
             }
         }
     }
-    NSString *html = @"<html><head><title>%@</title>"
-    "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' /></head><body>"
-    "<div style='margin:100px auto;width:18em'>"
-    "<p style='color:#c0bfbf;font:bolder 100px HelveticaNeue;text-align:center;margin:25px'>Fx</p>"
-    "<p style='color:#969595;font:bolder 17.5px HelveticaNeue;text-align:center'>%@</p> </div></body></html>";//
-    NSString *errorPage = [NSString stringWithFormat:html,
-                           NSLocalizedString(@"Error Loading Page", @"error loading page"),[error localizedDescription]];
-    [self.webView loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
+    
+    NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
+    if ([self.webView isEmpty]) {
+        [self.webView showPlaceholder:error.localizedDescription title:title];
+    } else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+                                                        message:error.localizedDescription
+                                                       delegate:nil
+                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
+                                              otherButtonTitles: nil];
+        [alert show];
+    }
 }
 
 - (void)prepareWebView {
     [self.browserViewController updateChrome];
     if (![self.webView JSToolsLoaded]) {
         [self.webView loadJSTools];
-        [self.webView disableContextMenu];
-        [self.webView modifyLinkTargets];
-        [self.webView modifyOpen];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
             [self.webView enableDoNotTrack];
     }
@@ -348,14 +350,14 @@
 #pragma mark - Networking
  
 - (void)openURL:(NSURL *)url {
-    if (url) {
+    if (url)
         self.location = url;
-    }
-    if (![self isViewLoaded]) {
+    
+    if (![self isViewLoaded])
         return;
-    }
-   
-    if (![appDelegate canConnectToInternet]) {
+    
+    // In case the webView is empty, show the error on the site
+    if (![appDelegate canConnectToInternet] && ![self.webView isEmpty]) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Load Page", @"unable to load page")
                                                         message:NSLocalizedString(@"No internet connection available", nil)
                                                        delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
@@ -368,6 +370,89 @@
 
 - (void)reload {
     [self openURL:nil];
+}
+
+#pragma mark - Search on page
+- (NSInteger)search:(NSString *)searchString {
+    if (self.searchToolbar)
+        [self.searchToolbar removeFromSuperview];
+    
+    NSInteger count = [self.webView highlightOccurencesOfString:searchString];
+    DLog(@"Found the string %@ %i times", searchString, count);
+    
+    __strong UIToolbar *searchToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 44,
+                                                                       self.view.bounds.size.width, 44)];
+    searchToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    searchToolbar.translucent = YES;
+    
+    UIImage *arrow = [UIImage imageNamed:@"left"];
+    UIImage *up = [UIImage imageWithCGImage:arrow.CGImage scale:arrow.scale orientation:UIImageOrientationRight];
+    UIImage *down = [UIImage imageWithCGImage:arrow.CGImage scale:arrow.scale orientation:UIImageOrientationRightMirrored];
+    
+    CGRect btnRect = CGRectMake(0, 0, 35, 40);
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = btnRect;
+    button.backgroundColor = [UIColor clearColor];
+    button.showsTouchWhenHighlighted = YES;
+    [button setImage:up forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(lastHighlightedWord:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *last = [[UIBarButtonItem alloc] initWithCustomView:button];
+    
+    button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = btnRect;
+    button.backgroundColor = [UIColor clearColor];
+    button.showsTouchWhenHighlighted = YES;
+    [button setImage:down forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(nextHighlightedWord:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *next = [[UIBarButtonItem alloc] initWithCustomView:button];
+    
+    UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                          target:self
+                                                                          action:@selector(dismissSearchToolbar)];
+    
+    UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                                           target:nil action:nil];
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 40)];
+    label.backgroundColor = [UIColor clearColor];
+    label.font = [UIFont boldSystemFontOfSize:18];
+    label.textColor = [UIColor darkGrayColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.text = [NSString stringWithFormat:@"Found: %i", count];
+    UIBarButtonItem *textItem = [[UIBarButtonItem alloc] initWithCustomView:label];
+
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        searchToolbar.tintColor = kTabColor;
+        done.tintColor = [UIColor lightGrayColor];
+    }
+    
+    searchToolbar.items = @[last, next, space, textItem, space, done];
+    [self.view addSubview:searchToolbar];
+    self.searchToolbar = searchToolbar;
+    
+    return count;
+}
+
+- (IBAction)lastHighlightedWord:(id)sender {
+    [self.webView showLastHighlight];
+}
+
+- (IBAction)nextHighlightedWord:(id)sender {
+    [self.webView showNextHighlight];
+}
+
+- (IBAction)dismissSearchToolbar {
+    if (self.searchToolbar) {
+        [self.webView removeHighlights];
+        [UIView animateWithDuration:0.3
+                         animations:^{
+                             self.searchToolbar.alpha = 0;
+                         }
+                         completion:^(BOOL finished){
+                             [self.searchToolbar removeFromSuperview];
+                             self.searchToolbar = nil;
+                         }];
+    }
 }
 
 @end

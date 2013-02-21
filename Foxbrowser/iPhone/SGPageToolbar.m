@@ -59,7 +59,7 @@
         _forwardButton.showsTouchWhenHighlighted = YES;
         [_forwardButton setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
         [_forwardButton addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
-        _forwardButton.hidden = !self.browser.canGoForward;
+        _forwardButton.enabled = self.browser.canGoForward;
         [self addSubview:_forwardButton];
         
         btnRect = CGRectMake(0, (frame.size.height - 36)/2, 36, 36);
@@ -128,7 +128,7 @@
         _forwardButton.frame = CGRectMake(posX, (height - _forwardButton.frame.size.height)/2,
                                           _forwardButton.frame.size.width, _forwardButton.frame.size.height);
         
-        if (!_forwardButton.hidden)
+        if (_forwardButton.enabled)
             posX += _forwardButton.frame.size.width + margin;
     }
     
@@ -141,7 +141,7 @@
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGPoint topCenter = CGPointMake(CGRectGetMidX(self.bounds), 0.0f);
     CGPoint bottomCenter = CGPointMake(CGRectGetMidX(self.bounds), self.bounds.size.height);
-    CGFloat locations[2] = { 0.00, 1.0};
+    CGFloat locations[2] = {0.00, 1.0};
     
     CGFloat redEnd, greenEnd, blueEnd, alphaEnd;
     [_bottomColor getRed:&redEnd green:&greenEnd blue:&blueEnd alpha:&alphaEnd];
@@ -163,9 +163,9 @@
     [_tabsButton setTitle:text forState:UIControlStateNormal];
     
     self.backButton.enabled = self.browser.canGoBack;
-    if (_forwardButton.hidden == self.browser.canGoForward)
+    if (_forwardButton.enabled != self.browser.canGoForward)
         [UIView animateWithDuration:0.2 animations:^{
-            _forwardButton.hidden = !self.browser.canGoForward;
+            _forwardButton.enabled = self.browser.canGoForward;
             [self layoutSubviews];
         }];
     
@@ -191,7 +191,7 @@
 }
 
 - (IBAction)pressedTabsButton:(id)sender {
-    self.browser.exposeMode = YES;
+    [self.browser setExposeMode:YES animated:YES];
 }
 
 - (IBAction)showOptions:(UIButton *)sender {
@@ -374,12 +374,17 @@
 }
 
 - (void)finishSearch:(NSString *)searchString title:(NSString *)title {
-    if (searchString.length > 0)
+    if (searchString.length > 0)// Conduct the search. In this case, simply report the search term used.
         [self.browser handleURLString:searchString title:title];
     
-    // Conduct the search. In this case, simply report the search term used.
     [self dismissSearchController];
     [self.searchField resignFirstResponder];
+}
+
+- (void)finishPageSearch:(NSString *)searchString {
+    [self dismissSearchController];
+    [self.searchField resignFirstResponder];
+    [self.browser findInPage:searchString];
 }
 
 @end

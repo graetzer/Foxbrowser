@@ -40,32 +40,14 @@
 #import "CryptoUtils.h"
 #import "Stockboy.h"
 #import "WelcomePage.h"
+#import "DejalActivityView.h"
 #import "SGAppDelegate.h"
 #import "SGBrowserViewController.h"
 
 @implementation LogoutController
 
-@synthesize spinnerView;
-@synthesize spinner;
-
-- (void) startLogoutSpinner
-{
-  [spinner startAnimating];
-  [[self view] addSubview:spinnerView];
-}
-
-- (void) stopLogoutSpinner
-{
-  [spinnerView removeFromSuperview];
-  [spinner stopAnimating];
-}
-
-
-
 //this is the code run by the new thread we make to wait on the stockboy
-- (void) waitForStockboy
-{
-
+- (void) waitForStockboy {
     @autoreleasepool {
         [weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:@"stopping" waitUntilDone:YES];
         
@@ -77,37 +59,28 @@
         [syncLock signal];
         [syncLock unlock];
         
-        //stop the spinner
-        [self performSelectorOnMainThread:@selector(stopLogoutSpinner) withObject:nil waitUntilDone:YES];
         //erase the data
         [weaveService performSelectorOnMainThread:@selector(eraseAllUserData) withObject:nil waitUntilDone:YES];
-        
         [self performSelectorOnMainThread:@selector(loginAgain) withObject:nil waitUntilDone:YES];
     }
 }
 
 
-- (void) loginAgain
-{
-    NSUInteger c = appDelegate.browserViewController.count;
-    for (NSUInteger i = 0;i < c; i++) {
-        [appDelegate.browserViewController removeIndex:i];
-    }
+- (void) loginAgain {
+//    NSUInteger c = appDelegate.browserViewController.count;
+//    for (NSUInteger i = 0;i < c; i++) {
+//        [appDelegate.browserViewController removeIndex:i];
+//    }
     [self.parentViewController dismissViewControllerAnimated:YES completion:^{
+        [DejalBezelActivityView removeViewAnimated:YES];
         [appDelegate.browserViewController saveCurrentTabs];
         [appDelegate login];
     }];
-}  
-
-- (IBAction) cancel
-{
-	[self dismissViewControllerAnimated: YES completion:NULL];
 }
 
-- (IBAction) logout:(id)sender
-{
-  //start the spinner
-  [self startLogoutSpinner];
+- (IBAction) logout:(id)sender {
+    [DejalBezelActivityView activityViewForView:self.view.window withLabel:@""];
+    
   //fire the background thread to wait on the stockboy.
   NSThread* loiterer = [[NSThread alloc] initWithTarget:self selector:@selector(waitForStockboy) object:nil];
   [loiterer start];
@@ -129,11 +102,6 @@
 
 - (void)viewDidLoad {
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
-}
-
-- (void)viewDidUnload {
-	// Release any retained subviews of the main view.
-  spinner = nil;
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {

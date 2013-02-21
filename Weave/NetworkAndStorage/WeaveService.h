@@ -48,7 +48,7 @@ extern id<WeaveService> weaveService;
 
 - (NSURL *)parseURLString:(NSString *)input;
 - (NSString *)urlEncode:(NSString *)string;
-- (NSString *)queryURLForTerm:(NSString *)string;
+- (NSURL *)queryURLForTerm:(NSString *)string;
 - (BOOL)handleURLInternal:(NSURL *)url;
 - (void)addHistoryURL:(NSURL *)url title:(NSString *)title;
 

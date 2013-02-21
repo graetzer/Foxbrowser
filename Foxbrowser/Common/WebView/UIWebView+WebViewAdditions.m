@@ -46,6 +46,29 @@
     return pt;
 }
 
+- (void)showPlaceholder:(NSString *)message title:(NSString *)title {
+    if (!message)
+        message = @"";
+    if (!title)
+        title = @"";
+    
+    NSString *html = @"<html><head><title>%@</title>"
+    "<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' /></head><body>"
+    "<div style='margin:100px auto;width:18em'>"
+    "<p style='color:#c0bfbf;font:bolder 100px HelveticaNeue;text-align:center;margin:20px'>Fx</p>"
+    "<p style='color:#969595;font:bolder 17.5px HelveticaNeue;text-align:center'>%@</p> </div></body></html>";//
+    NSString *errorPage = [NSString stringWithFormat:html, title, message];
+    [self loadHTMLString:errorPage baseURL:[[NSBundle mainBundle] bundleURL]];
+}
+
+- (BOOL)isEmpty {
+    if ([self.request.URL.scheme hasPrefix:@"http"]) {// If the placeholder is shown, scheme would be file://
+        NSString *string = [self stringByEvaluatingJavaScriptFromString:@"document.getElementsByTagName('body')[0].innerHTML"];
+        return !string || string.length == 0;
+    }
+    return YES;
+}
+
 - (NSString *)title {
     NSString *htmlTitle = [self stringByEvaluatingJavaScriptFromString:@"document.title"];
     if (!htmlTitle.length) {
@@ -83,24 +106,37 @@
     return [val isEqualToString:@"YES"];
 }
 
-- (void)disableContextMenu {
-    [self stringByEvaluatingJavaScriptFromString:@"document.body.style.webkitTouchCallout='none';"];
-}
-
-- (void)modifyLinkTargets {
-    [self stringByEvaluatingJavaScriptFromString:@"FoxbrowserModifyLinkTargets()"];
-}
-
-- (void)modifyOpen {
-    [self stringByEvaluatingJavaScriptFromString:@"FoxbrowserModifyOpen()"];
-}
-
 - (void)clearContent {
     [self stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML = ''"];
 }
 
 - (void)enableDoNotTrack {
     [self stringByEvaluatingJavaScriptFromString:@"document.navigator.doNotTrack = '1';"];
+}
+
+#pragma mark Search stuff
+
+- (NSInteger)highlightOccurencesOfString:(NSString*)str {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"JSSearchTools" ofType:@"js"];
+    NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    [self stringByEvaluatingJavaScriptFromString:jsCode];
+    
+    NSString *startSearch = [NSString stringWithFormat:@"foxbrowser_hilitior_instance.apply('%@');",str];
+    NSString *result = [self stringByEvaluatingJavaScriptFromString:startSearch];
+    
+    return [result integerValue];
+}
+
+- (void)showNextHighlight; {
+    [self stringByEvaluatingJavaScriptFromString:@"foxbrowser_hilitior_instance.showNext();"];
+}
+
+- (void)showLastHighlight; {
+    [self stringByEvaluatingJavaScriptFromString:@"foxbrowser_hilitior_instance.showLast();"];
+}
+
+- (void)removeHighlights {
+    [self stringByEvaluatingJavaScriptFromString:@"foxbrowser_hilitior_instance.remove()"];
 }
 
 #pragma mark - Tag stuff

@@ -128,7 +128,7 @@
 					<object class="IBUILabel" id="946991357">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">293</int>
-						<string key="NSFrame">{{20, 165}, {178, 88}}</string>
+						<string key="NSFrame">{{71, 165}, {178, 88}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -141,6 +141,7 @@
 						<int key="IBUIBaselineAdjustment">1</int>
 						<float key="IBUIMinimumFontSize">10</float>
 						<int key="IBUINumberOfLines">4</int>
+						<int key="IBUITextAlignment">1</int>
 						<object class="IBUIFontDescription" key="IBUIFontDescription">
 							<string key="name">Helvetica-Bold</string>
 							<string key="family">Helvetica</string>
@@ -236,8 +237,8 @@
 							<reference ref="704339065"/>
 							<reference ref="944802588"/>
 							<reference ref="264694476"/>
-							<reference ref="946991357"/>
 							<reference ref="979977845"/>
+							<reference ref="946991357"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>

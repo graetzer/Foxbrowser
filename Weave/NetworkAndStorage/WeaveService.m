@@ -41,22 +41,19 @@ NSString *kWeavePrivateMode = @"privateMode";
 }
 
 - (NSURL *)parseURLString:(NSString *)input {
-    NSString *destination;
-    
     BOOL hasSpace = ([input rangeOfString:@" "].location != NSNotFound);
     BOOL hasDot = ([input rangeOfString:@"."].location != NSNotFound);
     BOOL hasScheme = ([input rangeOfString:@"://"].location != NSNotFound);
     
-    if (hasDot && !hasSpace) { 
-        if (hasScheme) {
-            destination = input;
-        } else {
+    if (hasDot && !hasSpace) {
+        NSString *destination = input;
+        if (!hasScheme)
             destination = [NSString stringWithFormat:@"http://%@", input];
-        }
-    } else  {
-        destination = [[WeaveOperations sharedOperations] queryURLForTerm:input];
+        
+        return [NSURL URLWithUnicodeString:destination];
     }
-    return [NSURL URLWithUnicodeString:destination];// TODO 
+    
+    return [[WeaveOperations sharedOperations] queryURLForTerm:input];
 }
 
 - (NSString *)urlEncode:(NSString *)string {
@@ -67,16 +64,17 @@ NSString *kWeavePrivateMode = @"privateMode";
                                                                kCFStringEncodingUTF8);
 }
 
-- (NSString *)queryURLForTerm:(NSString *)string {
-    NSString *url = [[NSUserDefaults standardUserDefaults] stringForKey:@"org.graetzer.search"];
+- (NSURL *)queryURLForTerm:(NSString *)string {
+    NSString *searchEngine = [[NSUserDefaults standardUserDefaults] stringForKey:@"org.graetzer.search"];
+    NSString *locale = [NSLocale preferredLanguages][0];
+    NSString *urlString = [NSString stringWithFormat:searchEngine, [self urlEncode:string], locale];
+    NSURL *url = [NSURL URLWithUnicodeString:urlString];
+    
     [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Toolbar"
                                                     withAction:@"Search"
-                                                     withLabel:url
+                                                     withLabel:url.host
                                                      withValue:nil];
-    
-    NSArray *locales = [NSLocale preferredLanguages];
-    NSString *locale = locales.count > 0 ? locales[0]: @"en";
-    return [NSString stringWithFormat:url, [self urlEncode:string], locale];
+    return url;
 }
 
 - (BOOL)handleURLInternal:(NSURL *)url; {

@@ -29,17 +29,21 @@
 - (CGSize)windowSize;
 - (CGPoint)scrollOffset;
 
+- (void)showPlaceholder:(NSString *)message title:(NSString *)title;
+- (BOOL)isEmpty;
 - (NSString *)title;
 - (NSString *)location;
 - (void)setLocationHash:(NSString *)location;
 
 - (void)loadJSTools;
 - (BOOL)JSToolsLoaded;
-- (void)disableContextMenu;
-- (void)modifyLinkTargets;
-- (void)modifyOpen;
 - (void)clearContent;
 - (void)enableDoNotTrack;
+
+- (NSInteger)highlightOccurencesOfString:(NSString*)str;
+- (void)removeHighlights;
+- (void)showNextHighlight;
+- (void)showLastHighlight;
 
 - (NSDictionary *)tagsForPosition:(CGPoint)pt;
 

@@ -116,7 +116,7 @@
     [CryptoUtils deletePrivateKeys];
     
     [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"EasySetup"
+                                                    withAction:@"Easy"
                                                      withLabel:@"Fail"
                                                     withValue:nil];
 }
@@ -138,7 +138,7 @@
 	[_delegate easySetupViewControllerDidLogin: self];
     
     [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"EasySetup"
+                                                    withAction:@"Easy"
                                                      withLabel:@"Success"
                                                      withValue:nil];
 }

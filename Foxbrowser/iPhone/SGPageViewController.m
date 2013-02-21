@@ -429,13 +429,14 @@
     [self scaleChildViewControllers];
 }
 
-- (void)setExposeMode:(BOOL)exposeMode {
+- (void)setExposeMode:(BOOL)exposeMode animated:(BOOL)animated {
     _exposeMode = exposeMode;
+    CGFloat duration = animated ? SG_DURATION : 0;
     if (exposeMode) {
         [self.toolbar.searchField resignFirstResponder];
         [self disableScrollsToTop];
         
-        [UIView animateWithDuration:SG_DURATION
+        [UIView animateWithDuration:duration
                          animations:^{
                              self.toolbar.frame = CGRectMake(0, -self.toolbar.frame.size.height,
                                                              self.view.bounds.size.width, self.toolbar.frame.size.height);
@@ -448,17 +449,21 @@
                              [self arrangeChildViewControllers];
                              [self setCloseButtonHidden:NO];
                          }];
-
+        
     } else {
         [self enableScrollsToTop];
         self.closeButton.hidden = YES;
-        [UIView animateWithDuration:SG_DURATION
+        [UIView animateWithDuration:duration
                          animations:^{
                              self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.toolbar.frame.size.height);
                              [self scaleChildViewControllers];
                          }
          ];
     }
+}
+
+- (void)setExposeMode:(BOOL)exposeMode {
+    [self setExposeMode:exposeMode animated:NO];
 }
 
 #pragma mark - IBAction
@@ -473,7 +478,7 @@
         UIView *view = [self selectedViewController].view;
         CGPoint pos = [recognizer locationInView:view];
         if (CGRectContainsPoint(view.bounds, pos)) {
-            self.exposeMode = NO;
+            [self setExposeMode:NO animated:YES];
             [self.view removeGestureRecognizer:recognizer];
         }
     }
@@ -481,7 +486,7 @@
 
 - (IBAction)pressedTabsButton:(id)sender {
     if (!SG_CONTAINER_EMPTY)
-        self.exposeMode = NO;
+        [self setExposeMode:NO animated:YES];
 }
 
 - (IBAction)closeTabButton:(UIButton *)button {

@@ -168,6 +168,10 @@ JPAKEReporter* gSharedReporter = nil;
 }
 
 - (IBAction)cancel:(id)sender {
+    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
+                                                    withAction:@"Welcome"
+                                                     withLabel:@"Cancel"
+                                                     withValue:nil];
     [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
 }
 
