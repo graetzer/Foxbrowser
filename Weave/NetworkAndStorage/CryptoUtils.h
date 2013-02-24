@@ -89,6 +89,8 @@
 //NOTE: THIS IS ONLY USED BY THE LOGIN CONTROLLER, TO ASSIGN THE SINGLETON THAT WAS CREATED BY USER LOGIN
 + (void) assignManager:(CryptoUtils*)newManager;
 
++ (NSString *)errorReason;
+
 //instance methods
 - (NSString*) cluster;
 - (NSString*) accountName;

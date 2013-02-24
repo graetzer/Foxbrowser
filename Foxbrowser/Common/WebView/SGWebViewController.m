@@ -41,7 +41,7 @@
 }
 
 // TODO Allow to change this preferences in the Settings App
-+ (void)load {
++ (void)initialize {
     // Enable cookies
     @autoreleasepool { // TODO private mode
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage
@@ -76,7 +76,7 @@
         
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.webView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
+    self.webView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
     UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc] 
                                         initWithTarget:self action:@selector(handleLongPress:)];
     [self.webView addGestureRecognizer:gr];

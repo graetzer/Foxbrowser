@@ -25,6 +25,8 @@
 #import "SGWebViewController.h"
 #import "SGCredentialsPrompt.h"
 
+#import "GAI.h"
+
 #define HTTP_AGENT5 @"Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3"
 
 @implementation SGBrowserViewController {
@@ -54,6 +56,8 @@
             [SGHTTPURLProtocol setValue:@"do-not-track" forHTTPHeaderField:@"X-Tracking-Choice"];
         }
     }
+    
+    [[GAI sharedInstance].defaultTracker trackView:@"SGBrowserViewController"];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

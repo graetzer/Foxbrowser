@@ -140,6 +140,7 @@
 		F48A732516BFECF3006B25CB /* libGoogleAnalytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F48A732416BFECF3006B25CB /* libGoogleAnalytics.a */; };
 		F48A732716BFFF8B006B25CB /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F48A732616BFFF8B006B25CB /* CoreData.framework */; };
 		F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */; };
+		F48C5A5D16D96A7100264CB2 /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F48C5A5B16D96A7100264CB2 /* AppiraterLocalizable.strings */; };
 		F4904F5D169B24DF00B19748 /* dialpad.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5B169B24DF00B19748 /* dialpad.png */; };
 		F4904F5E169B24DF00B19748 /* dialpad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5C169B24DF00B19748 /* dialpad@2x.png */; };
 		F4904F60169B65F600B19748 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F4904F5F169B65F600B19748 /* Default-568h@2x.png */; };
@@ -518,6 +519,11 @@
 		F48A732616BFFF8B006B25CB /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F48AF7B815A39632003A8DF0 /* UIWebView+WebViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+WebViewAdditions.h"; sourceTree = "<group>"; };
 		F48AF7B915A39632003A8DF0 /* UIWebView+WebViewAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+WebViewAdditions.m"; sourceTree = "<group>"; };
+		F48C5A5C16D96A7100264CB2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Foxbrowser/en.lproj/AppiraterLocalizable.strings; sourceTree = SOURCE_ROOT; };
+		F48C5A5E16D96A9600264CB2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = Foxbrowser/de.lproj/AppiraterLocalizable.strings; sourceTree = SOURCE_ROOT; };
+		F48C5A5F16D96AA000264CB2 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Foxbrowser/es.lproj/AppiraterLocalizable.strings; sourceTree = SOURCE_ROOT; };
+		F48C5A6016D96AE400264CB2 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Foxbrowser/fr.lproj/AppiraterLocalizable.strings; sourceTree = SOURCE_ROOT; };
+		F48C5A6116D96AF500264CB2 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "Foxbrowser/zh-Hant.lproj/AppiraterLocalizable.strings"; sourceTree = SOURCE_ROOT; };
 		F4904F5B169B24DF00B19748 /* dialpad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dialpad.png; sourceTree = "<group>"; };
 		F4904F5C169B24DF00B19748 /* dialpad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dialpad@2x.png"; sourceTree = "<group>"; };
 		F4904F5F169B65F600B19748 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -1186,6 +1192,7 @@
 		F4BB5B0D16C32C8300275E31 /* Appirater */ = {
 			isa = PBXGroup;
 			children = (
+				F48C5A5B16D96A7100264CB2 /* AppiraterLocalizable.strings */,
 				F4BB5B0E16C32C8300275E31 /* Appirater.h */,
 				F4BB5B0F16C32C8300275E31 /* Appirater.m */,
 				F4BB5B1016C32C8300275E31 /* AppiraterDelegate.h */,
@@ -1527,6 +1534,7 @@
 				F4904F63169B700300B19748 /* ManualSetupViewController.xib in Resources */,
 				F46C5D1F169CCF4B00D9B717 /* Default.png in Resources */,
 				F46C5D20169CCF4B00D9B717 /* Default@2x.png in Resources */,
+				F48C5A5D16D96A7100264CB2 /* AppiraterLocalizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1625,6 +1633,18 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		F48C5A5B16D96A7100264CB2 /* AppiraterLocalizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F48C5A5C16D96A7100264CB2 /* en */,
+				F48C5A5E16D96A9600264CB2 /* de */,
+				F48C5A5F16D96AA000264CB2 /* es */,
+				F48C5A6016D96AE400264CB2 /* fr */,
+				F48C5A6116D96AF500264CB2 /* zh-Hant */,
+			);
+			name = AppiraterLocalizable.strings;
+			sourceTree = "<group>";
+		};
 		F4BF6F1015B715AA005FD2B6 /* LogoutController.xib */ = {
 			isa = PBXVariantGroup;
 			children = (

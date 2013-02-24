@@ -84,6 +84,7 @@
 
 @end
 
+static NSString *_errorReason = nil;
 
 @implementation CryptoUtils
 
@@ -102,6 +103,15 @@ static CryptoUtils* _cryptoManager = nil;
   _cryptoManager = [newManager retain];
 }
 
+
++ (NSString *)errorReason {
+    return _errorReason;
+}
+
++ (void)setErrorReason:(NSString *)reason {
+    NSLog(@"%@", reason);
+    _errorReason = reason;
+}
 
 //NOTE: this will either return a valid cryptoutils or nil!
 // nil means try again later!
@@ -402,9 +412,8 @@ static CryptoUtils* _cryptoManager = nil;
 {
 	if (self = [super init]) 
 	{
-		if (accountName == nil || password == nil || passphrase == nil)
-		{
-			NSLog(@"Crypto initialization failed: username or password was empty");
+		if (accountName == nil || password == nil || passphrase == nil) {
+            [CryptoUtils setErrorReason:@"Crypto initialization failed: username or password was empty"];
 			[self release];
 			return nil;
 		}
