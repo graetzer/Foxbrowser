@@ -20,6 +20,17 @@
 		F41E7FE9169356DC0036AE81 /* iTunesArtwork@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F41E7FE3169356DC0036AE81 /* iTunesArtwork@2x.png */; };
 		F41E7FEC16937DB90036AE81 /* monitor.png in Resources */ = {isa = PBXBuildFile; fileRef = F41E7FEA16937DB90036AE81 /* monitor.png */; };
 		F41E7FED16937DB90036AE81 /* monitor@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F41E7FEB16937DB90036AE81 /* monitor@2x.png */; };
+		F44178B516DBFEC60041FB00 /* facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178A716DBFEC60041FB00 /* facebook.png */; };
+		F44178B616DBFEC60041FB00 /* facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178A816DBFEC60041FB00 /* facebook@2x.png */; };
+		F44178B716DBFEC60041FB00 /* google-plus.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178A916DBFEC60041FB00 /* google-plus.png */; };
+		F44178B816DBFEC60041FB00 /* mail.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178AA16DBFEC60041FB00 /* mail.png */; };
+		F44178B916DBFEC60041FB00 /* mail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178AB16DBFEC60041FB00 /* mail@2x.png */; };
+		F44178BA16DBFEC60041FB00 /* sina_weibo.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178AC16DBFEC60041FB00 /* sina_weibo.png */; };
+		F44178BB16DBFEC60041FB00 /* sina_weibo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178AD16DBFEC60041FB00 /* sina_weibo@2x.png */; };
+		F44178BC16DBFEC60041FB00 /* twitter.png in Resources */ = {isa = PBXBuildFile; fileRef = F44178AE16DBFEC60041FB00 /* twitter.png */; };
+		F44178BD16DBFEC60041FB00 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = F44178AF16DBFEC60041FB00 /* LICENSE.txt */; };
+		F44178BE16DBFEC60041FB00 /* SGShareView+UIKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F44178B116DBFEC60041FB00 /* SGShareView+UIKit.m */; };
+		F44178BF16DBFEC60041FB00 /* SGShareView.m in Sources */ = {isa = PBXBuildFile; fileRef = F44178B316DBFEC60041FB00 /* SGShareView.m */; };
 		F446638816A2E31F00047704 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F446638716A2E31F00047704 /* Social.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		F44870BC1687E0E700769EA4 /* JSTools.js in Resources */ = {isa = PBXBuildFile; fileRef = F46A6371167C300E0004BE43 /* JSTools.js */; };
 		F44D3D3416D6BFE700918D4E /* DejalActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = F44D3D3316D6BFE700918D4E /* DejalActivityView.m */; };
@@ -228,6 +239,19 @@
 		F41E7FE3169356DC0036AE81 /* iTunesArtwork@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunesArtwork@2x.png"; sourceTree = SOURCE_ROOT; };
 		F41E7FEA16937DB90036AE81 /* monitor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = monitor.png; sourceTree = "<group>"; };
 		F41E7FEB16937DB90036AE81 /* monitor@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "monitor@2x.png"; sourceTree = "<group>"; };
+		F44178A716DBFEC60041FB00 /* facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = facebook.png; sourceTree = "<group>"; };
+		F44178A816DBFEC60041FB00 /* facebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "facebook@2x.png"; sourceTree = "<group>"; };
+		F44178A916DBFEC60041FB00 /* google-plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "google-plus.png"; sourceTree = "<group>"; };
+		F44178AA16DBFEC60041FB00 /* mail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mail.png; sourceTree = "<group>"; };
+		F44178AB16DBFEC60041FB00 /* mail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mail@2x.png"; sourceTree = "<group>"; };
+		F44178AC16DBFEC60041FB00 /* sina_weibo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sina_weibo.png; sourceTree = "<group>"; };
+		F44178AD16DBFEC60041FB00 /* sina_weibo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sina_weibo@2x.png"; sourceTree = "<group>"; };
+		F44178AE16DBFEC60041FB00 /* twitter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = twitter.png; sourceTree = "<group>"; };
+		F44178AF16DBFEC60041FB00 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		F44178B016DBFEC60041FB00 /* SGShareView+UIKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SGShareView+UIKit.h"; sourceTree = "<group>"; };
+		F44178B116DBFEC60041FB00 /* SGShareView+UIKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SGShareView+UIKit.m"; sourceTree = "<group>"; };
+		F44178B216DBFEC60041FB00 /* SGShareView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGShareView.h; sourceTree = "<group>"; };
+		F44178B316DBFEC60041FB00 /* SGShareView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGShareView.m; sourceTree = "<group>"; };
 		F446638716A2E31F00047704 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		F44D3D3216D6BFE700918D4E /* DejalActivityView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DejalActivityView.h; sourceTree = "<group>"; };
 		F44D3D3316D6BFE700918D4E /* DejalActivityView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DejalActivityView.m; sourceTree = "<group>"; };
@@ -709,6 +733,34 @@
 			path = Images;
 			sourceTree = "<group>";
 		};
+		F44178A416DBFEC60041FB00 /* SGShareKit */ = {
+			isa = PBXGroup;
+			children = (
+				F44178A616DBFEC60041FB00 /* icons */,
+				F44178AF16DBFEC60041FB00 /* LICENSE.txt */,
+				F44178B016DBFEC60041FB00 /* SGShareView+UIKit.h */,
+				F44178B116DBFEC60041FB00 /* SGShareView+UIKit.m */,
+				F44178B216DBFEC60041FB00 /* SGShareView.h */,
+				F44178B316DBFEC60041FB00 /* SGShareView.m */,
+			);
+			path = SGShareKit;
+			sourceTree = "<group>";
+		};
+		F44178A616DBFEC60041FB00 /* icons */ = {
+			isa = PBXGroup;
+			children = (
+				F44178A716DBFEC60041FB00 /* facebook.png */,
+				F44178A816DBFEC60041FB00 /* facebook@2x.png */,
+				F44178A916DBFEC60041FB00 /* google-plus.png */,
+				F44178AA16DBFEC60041FB00 /* mail.png */,
+				F44178AB16DBFEC60041FB00 /* mail@2x.png */,
+				F44178AC16DBFEC60041FB00 /* sina_weibo.png */,
+				F44178AD16DBFEC60041FB00 /* sina_weibo@2x.png */,
+				F44178AE16DBFEC60041FB00 /* twitter.png */,
+			);
+			path = icons;
+			sourceTree = "<group>";
+		};
 		F44D3D3116D6BFE700918D4E /* DejalActivityView */ = {
 			isa = PBXGroup;
 			children = (
@@ -729,6 +781,7 @@
 				F467FF3615A6446200EACFBD /* ios-openssl */,
 				F46A638F167C31F80004BE43 /* Reachability */,
 				F467FF9615A6446300EACFBD /* RegexKitLite-4.0 */,
+				F44178A416DBFEC60041FB00 /* SGShareKit */,
 				F40DFBB316125CDB005CE2F3 /* SGURLProtocol */,
 			);
 			path = External;
@@ -1535,6 +1588,15 @@
 				F46C5D1F169CCF4B00D9B717 /* Default.png in Resources */,
 				F46C5D20169CCF4B00D9B717 /* Default@2x.png in Resources */,
 				F48C5A5D16D96A7100264CB2 /* AppiraterLocalizable.strings in Resources */,
+				F44178B516DBFEC60041FB00 /* facebook.png in Resources */,
+				F44178B616DBFEC60041FB00 /* facebook@2x.png in Resources */,
+				F44178B716DBFEC60041FB00 /* google-plus.png in Resources */,
+				F44178B816DBFEC60041FB00 /* mail.png in Resources */,
+				F44178B916DBFEC60041FB00 /* mail@2x.png in Resources */,
+				F44178BA16DBFEC60041FB00 /* sina_weibo.png in Resources */,
+				F44178BB16DBFEC60041FB00 /* sina_weibo@2x.png in Resources */,
+				F44178BC16DBFEC60041FB00 /* twitter.png in Resources */,
+				F44178BD16DBFEC60041FB00 /* LICENSE.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1627,6 +1689,8 @@
 				F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */,
 				F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */,
 				F44D3D3416D6BFE700918D4E /* DejalActivityView.m in Sources */,
+				F44178BE16DBFEC60041FB00 /* SGShareView+UIKit.m in Sources */,
+				F44178BF16DBFEC60041FB00 /* SGShareView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

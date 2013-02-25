@@ -21,16 +21,15 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <MessageUI/MessageUI.h>
-#import <Twitter/Twitter.h>
 
 #import "SGSearchViewController.h"
-
+#import "SGShareView.h"
+#import "SGShareView+UIKit.h"
 
 @class SGSearchViewController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
 
 @interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
-UIActionSheetDelegate, MFMailComposeViewControllerDelegate, SGSearchDelegate> {
+UIActionSheetDelegate, SGSearchDelegate, SGShareViewDelegate> {
     UIColor *_bottomColor;
 }
 

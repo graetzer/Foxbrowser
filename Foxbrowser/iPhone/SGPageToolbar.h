@@ -21,14 +21,15 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <MessageUI/MessageUI.h>
-#import <Social/Social.h>
-#import <Twitter/Twitter.h>
+
 #import "SGSearchViewController.h"
+#import "SGShareView.h"
+#import "SGShareView+UIKit.h"
 
 @class SGSearchField, SGSearchViewController, SGPageViewController;
 
-@interface SGPageToolbar : UIView <UITextFieldDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate,SGSearchDelegate>
+@interface SGPageToolbar : UIView <UITextFieldDelegate, UIActionSheetDelegate,
+SGSearchDelegate, SGShareViewDelegate>
 @property (readonly, nonatomic) SGSearchField *searchField;
 @property (readonly, nonatomic) SGSearchViewController *searchController;
 

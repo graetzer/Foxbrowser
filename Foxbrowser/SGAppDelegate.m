@@ -69,9 +69,9 @@ id<WeaveService> weaveService;
     [GAI sharedInstance].dispatchInterval = 60*5;
     self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
     self.tracker.anonymize = YES;
-#ifdef DEBUG
-    [GAI sharedInstance].debug =  YES;
-#endif
+//#ifdef DEBUG
+//    [GAI sharedInstance].debug =  YES;
+//#endif
     
     [Appirater setAppId:@"550365886"];
     [Appirater setDelegate:self];

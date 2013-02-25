@@ -41,7 +41,7 @@
 }
 
 // TODO Allow to change this preferences in the Settings App
-+ (void)initialize {
++ (void)load {
     // Enable cookies
     @autoreleasepool { // TODO private mode
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage

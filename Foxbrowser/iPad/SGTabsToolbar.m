@@ -22,15 +22,17 @@
 
 #import "SGTabsToolbar.h"
 #import "SGTabDefines.h"
-#import "BookmarkPage.h"
 #import "SGAppDelegate.h"
 #import "SGTabsViewController.h"
 #import "SGProgressCircleView.h"
 #import "SGSearchField.h"
 #import "SGBrowserViewController.h"
 
+#import "BookmarkPage.h"
 #import "SettingsController.h"
 #import "WelcomePage.h"
+
+#import "GAI.h"
 
 @interface SGTabsToolbar ()
 @property (nonatomic, strong) UIButton *forwardItem;
@@ -170,31 +172,14 @@
 - (IBAction)showOptions:(UIButton *)sender {
     [self destroyPopovers];
     
-    if (!NSClassFromString(@"SLComposeViewController")) {
-        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                       delegate:self
-                                              cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                                         destructiveButtonTitle:nil
-                                              otherButtonTitles:
-                            NSLocalizedString(@"Tweet", @"Tweet the current url"),
-                            NSLocalizedString(@"Email URL", nil),
-                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                            NSLocalizedString(@"Settings", nil), nil];
-    } else {
-        NSString *social = [SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]
-        ? @"Sina Weibo" : @"Facebook";
-        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                       delegate:self
-                                              cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                                         destructiveButtonTitle:nil
-                                              otherButtonTitles:
-                            social,
-                            NSLocalizedString(@"Tweet", @"Tweet the current url"),
-                            NSLocalizedString(@"Email URL", nil),
-                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                            NSLocalizedString(@"Settings", nil), nil];
-    }
-    
+    self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                   delegate:self
+                                          cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
+                                     destructiveButtonTitle:nil
+                                          otherButtonTitles:
+                        NSLocalizedString(@"Share Link", @"Share url title"),
+                        NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
+                        NSLocalizedString(@"Settings", nil), nil];
     [self.actionSheet showFromRect:sender.frame inView:self animated:YES];
 }
 
@@ -202,44 +187,17 @@
     [self destroyPopovers];
     NSURL *url = [self.browser URL];
     
-    if (!NSClassFromString(@"SLComposeViewController")) {
-        buttonIndex++;
-    } else if (buttonIndex == 0 && url) {// Post on facebook
-        if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
-            SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
-            [composeVC addURL:url];
-            [self.browser presentViewController:composeVC animated:YES completion:NULL];
-        } else if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]) {
-            SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];
-            [composeVC addURL:url];
-            [self.browser presentViewController:composeVC animated:YES completion:NULL];
-        }
+    if (buttonIndex == 0) {
+        SGShareView *share = [SGShareView shareView];
+        [share addURL:url];
+        share.delegate = self;
+        [share show];
     }
     
-    if (buttonIndex == 1) {// Send a tweet
-        if (url && [TWTweetComposeViewController canSendTweet]) {
-            TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
-            [tw addURL:url];
-            [self.browser presentViewController:tw animated:YES completion:NULL];
-        }
-    }
-    
-    if (buttonIndex == 2) {// Send a mail
-        if (url && [MFMailComposeViewController canSendMail]) {
-            MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
-            mail.mailComposeDelegate = self;
-            [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
-            NSString *text = [NSString stringWithFormat:@"%@\n %@", NSLocalizedString(@"Here is that site we talked about:", nil), url];
-            [mail setMessageBody:text isHTML:NO];
-            [self.browser presentViewController:mail animated:YES completion:NULL];
-        }
-    }
-    
-    if (buttonIndex == 3) {// Open in mobile safari
+    if (buttonIndex == 1) // Open in mobile safari
         [[UIApplication sharedApplication] openURL:url];
-    }
     
-    if (buttonIndex == 4) {// Show settings or welcome page
+    if (buttonIndex == 2) {// Show settings or welcome page
         BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
         if (!showedFirstRunPage) {
             WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
@@ -255,29 +213,10 @@
     }
 }
 
-- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
-{
-    switch (result)
-    {
-        case MFMailComposeResultCancelled:
-            DLog(@"Mail cancelled: you cancelled the operation and no email message was queued.");
-            break;
-        case MFMailComposeResultSaved:
-            DLog(@"Mail saved: you saved the email message in the drafts folder.");
-            break;
-        case MFMailComposeResultSent:
-            DLog(@"Mail send: the email message is queued in the outbox. It is ready to send.");
-            break;
-        case MFMailComposeResultFailed:
-            DLog(@"Mail failed: the email message was not saved or queued, possibly due to an error.");
-            break;
-        default:
-            DLog(@"Mail not sent.");
-            break;
-    }
-    
-    // Remove the mail view
-    [self.browser dismissViewControllerAnimated:YES completion:NULL];
+- (void)shareView:(SGShareView *)shareView didSelectService:(NSString *)name {
+    [[GAI sharedInstance].defaultTracker trackSocial:name
+                                          withAction:@"Share URL"
+                                          withTarget:nil];
 }
 
 - (void)updateChrome {

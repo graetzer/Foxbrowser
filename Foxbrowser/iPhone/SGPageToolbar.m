@@ -30,6 +30,8 @@
 #import "WelcomePage.h"
 #import "SGNavViewController.h"
 
+#import "GAI.h"
+
 @implementation SGPageToolbar {
     UIColor *_bottomColor;
     BOOL _searchMaskVisible;
@@ -195,32 +197,15 @@
 }
 
 - (IBAction)showOptions:(UIButton *)sender {
-    if (!NSClassFromString(@"SLComposeViewController")) {// iOS <= 5.1
         self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
                                                        delegate:self
                                               cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
                                          destructiveButtonTitle:nil
                                               otherButtonTitles:
                             NSLocalizedString(@"Bookmarks", @"Bookmarks"),
-                            NSLocalizedString(@"Tweet", @"Tweet the current url"),
-                            NSLocalizedString(@"Email URL", nil),
+                            NSLocalizedString(@"Share Link", @"Share url title"),
                             NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                             NSLocalizedString(@"Settings", nil), nil];
-    } else {// iOS >= 6.0
-        NSString *social = [SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]
-        ? @"Sina Weibo" : @"Facebook";
-        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                       delegate:self
-                                              cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                                         destructiveButtonTitle:nil
-                                              otherButtonTitles:
-                            NSLocalizedString(@"Bookmarks", @"Bookmarks"),
-                            social,
-                            NSLocalizedString(@"Tweet", @"Tweet the current url"),
-                            NSLocalizedString(@"Email URL", nil),
-                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                            NSLocalizedString(@"Settings", nil), nil];
-    }
     [self.actionSheet showInView:self];
 }
 
@@ -237,44 +222,17 @@
         [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
     }
     
-    if (!NSClassFromString(@"SLComposeViewController")) {
-        buttonIndex++;
-    } else if (buttonIndex == 1 && url) {// Post on facebook
-        if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
-            SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
-            [composeVC addURL:url];
-            [self.browser presentViewController:composeVC animated:YES completion:NULL];
-        } else if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]) {
-            SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];
-            [composeVC addURL:url];
-            [self.browser presentViewController:composeVC animated:YES completion:NULL];
-        }
+    if (buttonIndex == 1) {
+        SGShareView *share = [SGShareView shareView];
+        [share addURL:url];
+        share.delegate = self;
+        [share show];
     }
     
-    if (buttonIndex == 2) {// Send a tweet
-        if (url && [TWTweetComposeViewController canSendTweet]) {
-            TWTweetComposeViewController *tw = [[TWTweetComposeViewController alloc] init];
-            [tw addURL:url];
-            [self.browser presentViewController:tw animated:YES completion:NULL];
-        }
-    }
-    
-    if (buttonIndex == 3) {// Send a mail
-        if (url && [MFMailComposeViewController canSendMail]) {
-            MFMailComposeViewController *mail = [[MFMailComposeViewController alloc] init];
-            mail.mailComposeDelegate = self;
-            [mail setSubject:NSLocalizedString(@"Sending you a link", nil)];
-            NSString *text = [NSString stringWithFormat:@"%@\n %@", NSLocalizedString(@"Here is that site we talked about:", nil), url];
-            [mail setMessageBody:text isHTML:NO];
-            [self.browser presentViewController:mail animated:YES completion:NULL];
-        }
-    }
-    
-    if (buttonIndex == 4) {// Open in mobile safari
+    if (buttonIndex == 2)// Open in mobile safari
         [[UIApplication sharedApplication] openURL:url];
-    }
     
-    if (buttonIndex == 5) {// Show settings or welcome page
+    if (buttonIndex == 3) {// Show settings or welcome page
         BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
         if (!showedFirstRunPage) {
             WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
@@ -290,10 +248,10 @@
     }
 }
 
-- (void)mailComposeController:(MFMailComposeViewController*)controller
-          didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
-    // Remove the mail view
-    [self.browser dismissViewControllerAnimated:YES completion:NULL];
+- (void)shareView:(SGShareView *)shareView didSelectService:(NSString *)name {
+    [[GAI sharedInstance].defaultTracker trackSocial:name
+                                          withAction:@"Share URL"
+                                          withTarget:nil];
 }
 
 #pragma mark - UITextFieldDelegate
