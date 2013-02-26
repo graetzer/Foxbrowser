@@ -21,6 +21,11 @@
 
 #import "SGShareView.h"
 
+#if !__has_feature(objc_arc)
+#error SGShareView must be built with ARC.
+// You can partially turn on ARC by adding -fobjc-arc to the build phase for each file.
+#endif
+
 #define POPLISTVIEW_SCREENINSET 40.
 #define POPLISTVIEW_HEADER_HEIGHT 50.
 #define RADIUS 5.
@@ -29,6 +34,7 @@
 @end
 
 static NSMutableArray *Services;
+static NSMutableArray *LaunchURLHandler;
 
 @interface SGShareView ()
 @property(strong, nonatomic) UIWindow *myWindow;
@@ -52,8 +58,22 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
         [Services addObject:@{@"text":name, @"handler" : [handler copy]}];
 }
 
++ (void)addLaunchURLHandler:(SGShareViewLaunchURLHandler)handler {
+    if (!LaunchURLHandler)
+        LaunchURLHandler = [[NSMutableArray alloc] initWithCapacity:5];
+    [LaunchURLHandler addObject:[handler copy]];
+}
+
++ (BOOL)handleURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+    for (SGShareViewLaunchURLHandler handler in LaunchURLHandler) 
+        if (handler(url, sourceApplication, annotation))
+            return YES;
+    
+    return NO;
+}
+
 + (SGShareView *)shareView {
-    return [[SGShareView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    return [[SGShareView alloc] initWithFrame:CGRectZero];
 }
 
 - (void)show {
@@ -117,6 +137,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 #pragma mark - Private
 
 - (id)initWithFrame:(CGRect)frame {
+    frame = [UIScreen mainScreen].bounds;
     if (self = [super initWithFrame:frame]) {
         _options = [Services copy];
         _bgColor = [UIColor colorWithWhite:0 alpha:.75];

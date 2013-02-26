@@ -24,6 +24,7 @@
 @protocol SGShareViewDelegate;
 @class SGShareView;
 typedef void (^SGShareViewCallback)(SGShareView*);
+typedef BOOL (^SGShareViewLaunchURLHandler)(NSURL*, NSString *, id);
 
 @interface SGShareView : UIView <UITableViewDataSource, UITableViewDelegate> {
 @protected
@@ -38,6 +39,8 @@ typedef void (^SGShareViewCallback)(SGShareView*);
 @property (copy, nonatomic) NSString *initialText;
 
 + (void)addService:(NSString *)name image:(UIImage *)image handler:(SGShareViewCallback)handler;
++ (void)addLaunchURLHandler:(SGShareViewLaunchURLHandler)handler;
++ (BOOL)handleURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation;
 
 + (SGShareView *)shareView;
 - (void)show;

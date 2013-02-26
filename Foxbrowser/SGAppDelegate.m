@@ -34,6 +34,8 @@
 #import "WelcomePage.h"
 #import "SGFavouritesManager.h"
 
+#import "SGShareView.h"
+
 #import "GAI.h"
 #import "Appirater.h"
 
@@ -105,6 +107,11 @@ id<WeaveService> weaveService;
             openURL:(NSURL *)url
   sourceApplication:(NSString *)sourceApplication
          annotation:(id)annotation {
+    
+    if ([SGShareView handleURL:url
+             sourceApplication:sourceApplication
+                    annotation:annotation])
+        return YES;
     
     NSString *urlS = url.resourceSpecifier;
     if ([url.scheme isEqualToString:@"foxbrowser"]) {

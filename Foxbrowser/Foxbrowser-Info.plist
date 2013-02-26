@@ -42,14 +42,19 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLIconFile</key>
+			<string>logo</string>
 			<key>CFBundleURLName</key>
-			<string>org.graetzer.foxbrowser</string>
+			<string>org.graetzer.Foxbrowser</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>foxbrowsers</string>
 				<string>foxbrowser</string>
 				<string>http</string>
 				<string>https</string>
+				<string>org.graetzer.Foxbrowser</string>
 			</array>
 		</dict>
 	</array>

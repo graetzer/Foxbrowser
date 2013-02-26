@@ -25,6 +25,7 @@
 #import "SGSearchViewController.h"
 #import "SGShareView.h"
 #import "SGShareView+UIKit.h"
+#import "SGShareView+GooglePlus.h"
 
 @class SGSearchField, SGSearchViewController, SGPageViewController;
 
