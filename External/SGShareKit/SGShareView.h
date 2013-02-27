@@ -38,7 +38,7 @@ typedef BOOL (^SGShareViewLaunchURLHandler)(NSURL*, NSString *, id);
 @property (copy, nonatomic) NSString *title;
 @property (copy, nonatomic) NSString *initialText;
 
-+ (void)addService:(NSString *)name image:(UIImage *)image handler:(SGShareViewCallback)handler;
++ (void)addService:(NSString *)name imageName:(NSString *)imageName handler:(SGShareViewCallback)handler;
 + (void)addLaunchURLHandler:(SGShareViewLaunchURLHandler)handler;
 + (BOOL)handleURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation;
 

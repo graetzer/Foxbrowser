@@ -47,12 +47,12 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     UIColor *_bgColor;
 }
 
-+ (void)addService:(NSString *)name image:(UIImage *)image handler:(SGShareViewCallback)handler {
++ (void)addService:(NSString *)name imageName:(NSString *)imageName handler:(SGShareViewCallback)handler {
     if (!Services)
         Services = [[NSMutableArray alloc] initWithCapacity:5];
     
-    if (name && image)
-        [Services addObject:@{@"img":image, @"text":name, @"handler" : [handler copy]}];
+    if (name && imageName)
+        [Services addObject:@{@"img":imageName, @"text":name, @"handler" : [handler copy]}];
     else
         [Services addObject:@{@"text":name, @"handler" : [handler copy]}];
 }
@@ -199,7 +199,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     }
     
     if ([_options[indexPath.row] respondsToSelector:@selector(objectForKey:)]) {
-        cell.imageView.image = _options[indexPath.row][@"img"];
+        cell.imageView.image = [UIImage imageNamed:_options[indexPath.row][@"img"]];
         cell.textLabel.text = _options[indexPath.row][@"text"];
     } else
         cell.textLabel.text = _options[indexPath.row];

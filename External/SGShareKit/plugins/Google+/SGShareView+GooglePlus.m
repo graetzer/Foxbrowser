@@ -19,7 +19,7 @@ static NSString * const kClientId = @"1012733718205.apps.googleusercontent.com";
     [GPPSignIn sharedInstance].clientID = kClientId;
     
     [SGShareView addService:@"Google+"
-                      image:[UIImage imageNamed:@"google-plus"]
+                      imageName:@"googleplus-icon"
                     handler:^(SGShareView *shareView){
                         id<GPPShareBuilder> shareBuilder = [[GPPShare sharedInstance] shareDialog];
                         if (shareView.initialText)

@@ -53,7 +53,7 @@
     
     __strong UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc]
                                                    initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    indicator.frame = CGRectOffset(indicator.frame, (self.view.bounds.size.width - indicator.frame.size.width)/2, 10);
+    indicator.frame = CGRectOffset(indicator.frame, (self.view.bounds.size.width - indicator.frame.size.width)/2, 60);
     indicator.hidesWhenStopped = YES;
     [self.view addSubview:indicator];
     self.activityIndicator = indicator;
