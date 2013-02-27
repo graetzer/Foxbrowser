@@ -12,6 +12,4 @@
 
 @interface SGShareView (GooglePlus)
 
-+ (GPPShare *)gppShare;
-
 @end

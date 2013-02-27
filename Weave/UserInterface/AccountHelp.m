@@ -35,95 +35,41 @@
  ***** END LICENSE BLOCK *****/
 
 #import "AccountHelp.h"
-#import "Stockboy.h"
-#import "WeaveService.h"
+#import "UIWebView+WebViewAdditions.h"
 
 #import "GAI.h"
 
 @implementation AccountHelp
 
-@synthesize emailAddr;
+- (void)loadView {
+    __strong UIWebView *webView = [[UIWebView alloc] initWithFrame:
+                                   [UIScreen mainScreen].applicationFrame];
+    self.view = webView;
+    self.webView = webView;
+}
+
+- (void)viewDidLoad {
+    self.title = NSLocalizedString(@"Instructions", @"Instructions title");
+    
+    __strong UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc]
+                                                   initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    indicator.frame = CGRectOffset(indicator.frame, (self.view.bounds.size.width - indicator.frame.size.width)/2, 10);
+    indicator.hidesWhenStopped = YES;
+    [self.view addSubview:indicator];
+    self.activityIndicator = indicator;
+    
+    self.webView.backgroundColor = [UIColor clearColor];
+    self.webView.delegate = self;
+    [self.webView loadRequest:[NSURLRequest requestWithURL:
+                               [NSURL URLWithString:@"http://support.mozilla.org/kb/how-do-i-set-up-firefox-sync"]]];
+}
 
 - (void)viewWillAppear:(BOOL)animated {
     [[GAI sharedInstance].defaultTracker sendView:@"AccountHelp"];
 }
 
-//I most likely need to do this http request in a background thread, in case the network is slow, so that I can put up a spinner
-- (IBAction) sendEmail:(id)sender
-{
-
-  if ([weaveService canConnectToInternet])
-  {
-    //send the email address to Mozilla
-    NSString* email = [emailAddr text];  //perhaps we should check to see if this looks like a valid email address
-                   
-    NSString* currentLocale = [[NSLocale currentLocale] localeIdentifier];
-
-    NSString* destString = [Stockboy getURIForKey:@"Email Submit"];
-        
-    NSURL* destURL = [NSURL URLWithString:destString];
-    NSMutableURLRequest* postRequest = [NSMutableURLRequest requestWithURL:destURL];
-    [postRequest setHTTPMethod:@"POST"];
-    
-    NSString *stringBoundary = [NSString stringWithFormat:@"FFH%@HFF", [NSDate date]];
-
-    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",stringBoundary];
-    [postRequest addValue:contentType forHTTPHeaderField: @"Content-Type"];
-    
-    NSMutableData* postBody = [NSMutableData data];
-    [postBody appendData:[[NSString stringWithFormat:@"\r\n\r\n--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[@"Content-Disposition: form-data; name=\"email\"\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[[NSString stringWithString:email] dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    [postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[@"Content-Disposition: form-data; name=\"locale\"\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[[NSString stringWithString:currentLocale] dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    [postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[@"Content-Disposition: form-data; name=\"campaign\"\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[@"firefox-home-instructions" dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    [postBody appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    [postRequest setHTTPBody:postBody];
-    
-    
-    //now submit it
-    NSHTTPURLResponse* response = nil;
-    NSError* error = nil;
-      
-    [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&error];    
-    NSDictionary* errInfo = nil;
-    
-    if ([response statusCode] == 201)
-    {
-      errInfo = @{@"title": NSLocalizedString(@"Thank you!", @"thank you for submitting"), 
-                 @"message": NSLocalizedString(@"Instructions are on the way", @"we will send instructions")};
-    }
-    else if ([response statusCode] == 409)
-    {
-      errInfo = @{@"title": NSLocalizedString(@"Duplicate", @"duplicate email address"), 
-                 @"message": NSLocalizedString(@"That email address has already been submitted", @"the email address already exists in our database")};
-    }    
-    else 
-    {
-      NSString* errMsg = [NSString stringWithFormat:NSLocalizedString(@"Unable to submit your email, please try again later (%d)", @"unable to submit email"), [response statusCode]]; 
-      errInfo = @{@"title": @"Problem", @"message": errMsg};
-    }
-    
-    [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
-
-  }
-  else 
-  {
-    //no connectivity, put up alert
-    NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Submit", @"cannot submit email"), 
-                             @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
-    [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
-  }
-
-    [self.emailAddr resignFirstResponder];
-  [self.navigationController popViewControllerAnimated:YES];
+- (void)viewWillDisappear:(BOOL)animated {
+    self.webView.delegate = nil;
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
@@ -132,6 +78,33 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad || toInterfaceOrientation == UIInterfaceOrientationPortrait;
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    [self.activityIndicator startAnimating];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    [self.activityIndicator stopAnimating];
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"])
+        return;
+    
+    NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
+    if ([self.webView isEmpty]) {
+        [self.webView showPlaceholder:error.localizedDescription title:title];
+    } else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+                                                        message:error.localizedDescription
+                                                       delegate:nil
+                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
+                                              otherButtonTitles: nil];
+        [alert show];
+    }
 }
 
 @end

@@ -145,8 +145,9 @@
 
 #pragma mark -
 
-- (void) viewDidLoad
-{
+- (void) viewDidLoad {
+    self.title = NSLocalizedString(@"Sign In", @"re-authenticate");
+    
 	_passwordView1.layer.cornerRadius = 7;
 	_passwordView2.layer.cornerRadius = 7;
 	_passwordView3.layer.cornerRadius = 7;

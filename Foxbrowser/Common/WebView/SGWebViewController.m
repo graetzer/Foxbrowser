@@ -310,7 +310,8 @@
     
     DLog(@"WebView error code: %d", error.code);
     //ignore these
-    if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"]) return;
+    if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"])
+        return;
     
     if ([error.domain isEqualToString:@"NSURLErrorDomain"]) {
         // Host not found, try adding www. in front?

@@ -202,7 +202,8 @@ id<WeaveService> weaveService;
 - (void) reportAuthErrorWithMessage: (NSDictionary*)errInfo; {
     DLog(@"Error: %@", errInfo[@"message"]);
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle: errInfo[@"title"]
-                                                    message:errInfo[@"message"] delegate:self
+                                                    message:errInfo[@"message"]
+                                                   delegate:self
                                           cancelButtonTitle:NSLocalizedString(@"Not Now", @"Not Now")
                                           otherButtonTitles:NSLocalizedString(@"Sign In", @"re-authenticate"), nil];
 	[alert show];

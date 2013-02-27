@@ -37,13 +37,9 @@
 
 @class AccountHelp;
 
-@interface AccountHelp : UIViewController  {
-  @private
-	UITextField* emailAddr;
-}
+@interface AccountHelp : UIViewController <UIWebViewDelegate>
 
-@property (nonatomic, retain) IBOutlet UITextField *emailAddr;
-
-- (IBAction) sendEmail:(id)sender;
+@property (nonatomic, weak) UIWebView *webView;
+@property (nonatomic, weak) UIActivityIndicatorView *activityIndicator;
 
 @end

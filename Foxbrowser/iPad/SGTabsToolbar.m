@@ -177,7 +177,7 @@
                                           cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
                                      destructiveButtonTitle:nil
                                           otherButtonTitles:
-                        NSLocalizedString(@"Share Link", @"Share url title"),
+                        NSLocalizedString(@"Share Page", @"Share url of page"),
                         NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                         NSLocalizedString(@"Settings", nil), nil];
     [self.actionSheet showFromRect:sender.frame inView:self animated:YES];

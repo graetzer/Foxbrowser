@@ -107,7 +107,7 @@
 						<double key="IBUIContentEdgeInsets.left">8</double>
 						<double key="IBUIContentEdgeInsets.right">8</double>
 						<int key="IBUILineBreakMode">0</int>
-						<string key="IBUINormalTitle">告訴我如何開始</string>
+						<string key="IBUINormalTitle">我說明</string>
 						<object class="NSColor" key="IBUIHighlightedTitleColor" id="132763158">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MQA</bytes>
