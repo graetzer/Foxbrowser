@@ -54,12 +54,14 @@
     __strong UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc]
                                                    initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     indicator.frame = CGRectOffset(indicator.frame, (self.view.bounds.size.width - indicator.frame.size.width)/2, 60);
+    indicator.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     indicator.hidesWhenStopped = YES;
     [self.view addSubview:indicator];
     self.activityIndicator = indicator;
     
     self.webView.backgroundColor = [UIColor clearColor];
     self.webView.delegate = self;
+    self.webView.scalesPageToFit = YES;
     [self.webView loadRequest:[NSURLRequest requestWithURL:
                                [NSURL URLWithString:@"http://support.mozilla.org/kb/how-do-i-set-up-firefox-sync"]]];
 }
