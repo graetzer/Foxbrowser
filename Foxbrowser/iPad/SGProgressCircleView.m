@@ -31,12 +31,11 @@
 
 #import "SGProgressCircleView.h"
 
-#define AnimationTimer 0.015
-#define AnimationIncrement 0.02
+#define kSGProgressAnimationKey @"SGProgressAnimationKey"
 
 @implementation SGProgressCircleView
 
-- (id) init{
+- (id)init {
 	self = [self initWithFrame:CGRectZero];	
 	return self;
 }
@@ -53,20 +52,17 @@
 }
 
 - (void) drawRect:(CGRect)rect {
-
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	
 	CGRect r = CGRectInset(rect, 7.5, 7.5);
-	
     CGFloat c = 108./255.;
-	CGContextSetRGBStrokeColor(context, c, c, c, 1.);//108./255., 115./255., 122./255, 1.0);
+	CGContextSetRGBStrokeColor(context, c, c, c, 1.);
     CGContextSetLineWidth(context, 3.0);
     CGContextAddEllipseInRect(context, r);
 	CGContextStrokePath(context);
 	
-	
-	CGContextSetRGBFillColor(context, c, c, c, 1.);//108./255., 115./255., 122./255 ,1);
-    float start = (M_PI/2.0);//(M_PI*2.0 *_displayProgress) - 
+	CGContextSetRGBFillColor(context, c, c, c, 1.);
+    float start = (M_PI/2.0);
     
     CGContextAddArc(context, rect.size.width/2, rect.size.height/2, (rect.size.width/2)-7, start, start + (M_PI/2.0), false);
     CGContextAddLineToPoint(context, rect.size.width/2, rect.size.height/2);
@@ -74,28 +70,42 @@
 }
 
 - (void)startAnimating {    
-    CABasicAnimation* rotationAnimation;
-    rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-    rotationAnimation.toValue = @(M_PI * 2.0);
-    rotationAnimation.duration = 1.0;
-    rotationAnimation.cumulative = NO;
-    rotationAnimation.repeatCount = MAXFLOAT;
-    rotationAnimation.autoreverses = NO;
-    
-    [self.layer addAnimation:rotationAnimation forKey:@"rotationAnimation"];
+    CABasicAnimation* rotationAnimation = (CABasicAnimation *)[self.layer animationForKey:kSGProgressAnimationKey];
+    if (!rotationAnimation) {
+        rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+        rotationAnimation.toValue = @(M_PI * 2.0);
+        rotationAnimation.duration = 1.0;
+        rotationAnimation.cumulative = NO;
+        rotationAnimation.repeatCount = MAXFLOAT;
+        rotationAnimation.autoreverses = NO;
+        [self.layer addAnimation:rotationAnimation forKey:kSGProgressAnimationKey];
+    }
+//    } else {
+//        CFTimeInterval pausedTime = [self.layer timeOffset];
+//        self.layer.speed = 1.0;
+//        self.layer.timeOffset = 0.0;
+//        self.layer.beginTime = 0.0;
+//        CFTimeInterval timeSincePause = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil] - pausedTime;
+//        self.layer.beginTime = timeSincePause;
+//    }
 }
 
 - (void)stopAnimating {
-    [self.layer removeAnimationForKey:@"rotationAnimation"];
+    [self.layer removeAnimationForKey:kSGProgressAnimationKey];
+//    CFTimeInterval pausedTime = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil];
+//    self.layer.speed = 0.0;
+//    self.layer.timeOffset = pausedTime;
 }
 
 - (void)setHidden:(BOOL)hidden {
     [super setHidden:hidden];
-    if (hidden) {
-        [self stopAnimating];
-    } else {
+//    if (hidden) {
+//        [self stopAnimating];
+//    } else {
+//        [self startAnimating];
+//    }
+    if (!hidden)
         [self startAnimating];
-    }
 }
 
 - (void)didMoveToSuperview {

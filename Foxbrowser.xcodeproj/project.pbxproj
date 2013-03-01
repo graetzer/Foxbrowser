@@ -737,8 +737,8 @@
 		F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
 		F4D03D4816C6A9BA00A67B9F /* SGCredentialsPrompt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGCredentialsPrompt.h; sourceTree = "<group>"; };
 		F4D03D4916C6A9BA00A67B9F /* SGCredentialsPrompt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGCredentialsPrompt.m; sourceTree = "<group>"; };
-		F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
-		F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
+		F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SGNavViewController.h; path = Browser/SGNavViewController.h; sourceTree = "<group>"; };
+		F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SGNavViewController.m; path = Browser/SGNavViewController.m; sourceTree = "<group>"; };
 		F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SGBrowserViewController.h"; sourceTree = "<group>"; };
 		F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SGBrowserViewController.m"; sourceTree = "<group>"; };
 		F4D03D4F16C6A9BA00A67B9F /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
@@ -803,6 +803,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F467007B15A64CD500EACFBD /* libsqlite3.dylib in Frameworks */,
 				F4BB5B0C16C32B7F00275E31 /* StoreKit.framework in Frameworks */,
 				F48A732716BFFF8B006B25CB /* CoreData.framework in Frameworks */,
 				F446638816A2E31F00047704 /* Social.framework in Frameworks */,
@@ -811,7 +812,6 @@
 				F46700FE15A651FA00EACFBD /* libicucore.dylib in Frameworks */,
 				F467007F15A64CF200EACFBD /* QuartzCore.framework in Frameworks */,
 				F467007D15A64CE000EACFBD /* Security.framework in Frameworks */,
-				F467007B15A64CD500EACFBD /* libsqlite3.dylib in Frameworks */,
 				F455171C15A47DB100E0B54E /* MobileCoreServices.framework in Frameworks */,
 				F455171A15A47DA400E0B54E /* SystemConfiguration.framework in Frameworks */,
 				F455171815A47D9E00E0B54E /* libz.dylib in Frameworks */,
@@ -1356,6 +1356,8 @@
 		F48AF7B715A3960A003A8DF0 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */,
+				F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */,
 				F4C1EE1F15B07F9F00FB2B97 /* Blank */,
 				F4D03D4516C6A9BA00A67B9F /* Browser */,
 				F4D03D4E16C6A9BA00A67B9F /* Favourites */,
@@ -1563,8 +1565,6 @@
 				F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */,
 				F4D03D4816C6A9BA00A67B9F /* SGCredentialsPrompt.h */,
 				F4D03D4916C6A9BA00A67B9F /* SGCredentialsPrompt.m */,
-				F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */,
-				F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */,
 				F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */,
 				F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */,
 			);

@@ -52,15 +52,6 @@
     return UIInterfaceOrientationMaskAll;
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    self.selectedViewController.view.frame = self.contentFrame;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    self.selectedViewController.view.frame = self.contentFrame;
-}
-
 - (UIView *)rotatingHeaderView {
     return self.headerView;
 }
@@ -115,6 +106,11 @@
                       bounds.origin.y + head.size.height,
                       bounds.size.width,
                       bounds.size.height - head.size.height);
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    self.selectedViewController.view.frame = self.contentFrame;
 }
 
 #pragma mark - Tab stuff

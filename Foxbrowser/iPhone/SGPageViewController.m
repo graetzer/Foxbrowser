@@ -138,18 +138,17 @@
     self.scrollView.delegate = nil;
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-                                         duration:(NSTimeInterval)duration {
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    [self arrangeChildViewControllers];
+    self.scrollView.delegate = self;
+}
+
+- (void)viewWillLayoutSubviews {
     [self arrangeChildViewControllers];
     
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width * _viewControllers.count, 1);
     self.scrollView.contentOffset = CGPointMake(self.scrollView.bounds.size.width * self.pageControl.currentPage, 0);
     [self setCloseButtonHidden:NO];
-}
-
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
-    [self arrangeChildViewControllers];
-    self.scrollView.delegate = self;
 }
 
 - (UIView *)rotatingHeaderView {

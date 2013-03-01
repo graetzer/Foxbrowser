@@ -89,16 +89,12 @@
     [super didMoveToParentViewController:parent];
     if (!parent) {// View is removed
         [self.webView stopLoading];
-        [self.webView clearContent];
         [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
     }
 }
 
 - (void)viewWillUnload {
     [super viewWillUnload];
-    
-    [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
-    [self.webView stopLoading];
     self.webView.delegate = nil;
 }
 

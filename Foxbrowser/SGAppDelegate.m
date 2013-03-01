@@ -238,9 +238,12 @@ id<WeaveService> weaveService;
     // Workaround for the bug where the credentials seem to be not saved
     [CryptoUtils deletePrivateKeys];
     
+    Class navClass = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ?
+    [SGNavViewController class] : [UINavigationController class];
+    
     // Present the WelcomePage with the TabBarController as it's parent
     WelcomePage* welcomePage = [WelcomePage new];
-    UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
+    UINavigationController *navController = [[navClass alloc] initWithRootViewController:welcomePage];
     navController.modalPresentationStyle = UIModalPresentationFormSheet;
     navController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     [self.browserViewController presentViewController:navController animated:YES completion:NULL];
