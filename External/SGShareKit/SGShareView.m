@@ -175,7 +175,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     CGRect tableRect = _bgRect;
     tableRect.origin.x += 5;
     tableRect.origin.y += POPLISTVIEW_HEADER_HEIGHT;
-    tableRect.size.height -= POPLISTVIEW_HEADER_HEIGHT - RADIUS;
+    tableRect.size.height -= POPLISTVIEW_HEADER_HEIGHT + RADIUS;
     tableRect.size.width -= 5;
     self.tableView.frame = tableRect;
 }
