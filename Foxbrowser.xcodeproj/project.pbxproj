@@ -65,7 +65,7 @@
 		F467007015A64C9500EACFBD /* NSURL+IFUnicodeURL.m in Sources */ = {isa = PBXBuildFile; fileRef = F467005715A64C9500EACFBD /* NSURL+IFUnicodeURL.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F467007115A64C9500EACFBD /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = F467005815A64C9500EACFBD /* README.txt */; };
 		F467007215A64C9500EACFBD /* Stockboy.m in Sources */ = {isa = PBXBuildFile; fileRef = F467005A15A64C9500EACFBD /* Stockboy.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		F467007315A64C9500EACFBD /* Store.m in Sources */ = {isa = PBXBuildFile; fileRef = F467005C15A64C9500EACFBD /* Store.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		F467007315A64C9500EACFBD /* Store.m in Sources */ = {isa = PBXBuildFile; fileRef = F467005C15A64C9500EACFBD /* Store.m */; };
 		F467007415A64C9500EACFBD /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = F467005E15A64C9500EACFBD /* Utility.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F467007515A64C9500EACFBD /* WeaveKeys.m in Sources */ = {isa = PBXBuildFile; fileRef = F467006015A64C9500EACFBD /* WeaveKeys.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F467007B15A64CD500EACFBD /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F467007A15A64CD500EACFBD /* libsqlite3.dylib */; };

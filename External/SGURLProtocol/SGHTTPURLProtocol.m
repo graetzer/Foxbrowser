@@ -79,7 +79,7 @@ typedef enum {
 	if(frag.length > 0) { // map different fragments to same base file
         NSMutableURLRequest *mutable = [request mutableCopy];
         NSString *s = [url absoluteString];
-        s  =[s substringToIndex:s.length - frag.length];// remove fragment
+        s = [s substringToIndex:s.length - frag.length];// remove fragment
         mutable.URL = [NSURL URLWithString:s];
         return mutable;
     }

@@ -262,6 +262,7 @@ id<WeaveService> weaveService;
 	for (cookie in [storage cookies])  {
 		[storage deleteCookie: cookie];
 	}
+    [[NSURLCache sharedURLCache] removeAllCachedResponses];
     
     [[SGFavouritesManager sharedManager] resetFavourites];
     

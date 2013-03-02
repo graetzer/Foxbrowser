@@ -96,21 +96,18 @@
 @implementation Store
 
 // The singleton instance
-static Store* _gStore = nil;
+static __strong Store* _gStore = nil;
 
 //CLASS METHODS////////
-+ (Store*)getStore
-{
++ (Store*)getStore {
 	if (_gStore == nil) {
-		_gStore = [[[Store alloc] init] retain];
+		_gStore = [[Store alloc] init];
 	}
 
 	return _gStore;
 }
 
-+ (void) deleteStore
-{
-	[_gStore release];
++ (void) deleteStore {
 	_gStore = nil;
 
 	NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -163,9 +160,9 @@ static Store* _gStore = nil;
 		success = [fileManager copyItemAtPath:defaultDB toPath:databasePath error:&error];
 		if (success) {
 			if (sqlite3_open([databasePath UTF8String], &sqlDatabase) == SQLITE_OK) {
-				tabs = [[NSMutableArray array] retain];
-				history = [[NSMutableArray array] retain];
-				bookmarkListSortedByFrecency = [[NSMutableArray array] retain];
+				tabs = [NSMutableArray array];
+				history = [NSMutableArray array];
+				bookmarkListSortedByFrecency = [NSMutableArray array];
 				return self;
 			} else {
 				DLog(@"Could not open database!");
@@ -174,23 +171,22 @@ static Store* _gStore = nil;
 			DLog(@"Could not create database!");
 			NSLog(@"%@", [error localizedDescription]);
 		}
-        [self release];
 	}
-	return NULL;
+	return nil;
 }
 
 -(void) dealloc
 {
 	sqlite3_close(sqlDatabase);
-	[tabs release];
-	tabs = nil;
-	[bookmarkListSortedByFrecency release];
-	bookmarkListSortedByFrecency = nil;
-	[hierarchicalBookmarks release];
-	hierarchicalBookmarks = nil;
-	[history release];
-	history = nil;
-	[super dealloc];
+//	[tabs release];
+//	tabs = nil;
+//	[bookmarkListSortedByFrecency release];
+//	bookmarkListSortedByFrecency = nil;
+//	[hierarchicalBookmarks release];
+//	hierarchicalBookmarks = nil;
+//	[history release];
+//	history = nil;
+//	[super dealloc];
 }
 
 #pragma mark -
@@ -431,15 +427,12 @@ static Store* _gStore = nil;
 			[newTabs addObject:temporaryTabIndex[key]];
 		}
 
-		[temporaryTabIndex release];
-
 		//now sort the new tabs by frecency
 		[newTabs sortUsingFunction:compareSearchResults context:NULL];
 
-		NSMutableArray* temp = tabs;
+		//NSMutableArray* temp = tabs;
 		tabs = newTabs;
-		[temp release];
-	} 
+	}
 }
 
 //LOADS HISTORY SORTED BY FRECENCY INTO MEMORY
@@ -472,13 +465,6 @@ static Store* _gStore = nil;
 			historyItem[@"icon"] = icon;
 
 			[newHistory addObject:historyItem];
-													 
-			[id_col release];  
-			[url_col release];
-			[title_col release];
-			[sort_col release];
-
-			[historyItem release];
 		}
 
 		sqlite3_finalize(dbStatement);
@@ -487,9 +473,8 @@ static Store* _gStore = nil;
 	//now sort the history by frecency
 	[newHistory sortUsingFunction:compareSearchResults context:NULL];
 
-	NSMutableArray* temp = history;
+	//NSMutableArray* temp = history;
 	history = newHistory;
-	[temp release];
 }
 
 
@@ -608,12 +593,30 @@ static Store* _gStore = nil;
 				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)); 
 				if ((id)temp != [NSNull null]) title = temp;
 			}
+            
+            char* resultID = (char *)sqlite3_column_text(dbStatement, BOOKMARKS_ID_COLUMN);
+            char* resultParentID = (char *)sqlite3_column_text(dbStatement, BOOKMARKS_PARENTID_COLUMN);
+            char* resultType = (char *)sqlite3_column_text(dbStatement, BOOKMARKS_TYPE_COLUMN);
+            double resultSortindex = (double)sqlite3_column_double(dbStatement, BOOKMARKS_SORTINDEX_COLUMN);
 
 			//add the unchecked fields
-			bmkEntry[@"id"] = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_ID_COLUMN));
-			bmkEntry[@"parentid"] = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PARENTID_COLUMN));
-			bmkEntry[@"type"] = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TYPE_COLUMN));
-			bmkEntry[@"sortindex"] = @((double)sqlite3_column_double(dbStatement, BOOKMARKS_SORTINDEX_COLUMN));
+            if (resultID)
+                bmkEntry[@"id"] = @(resultID);
+            else
+                continue;
+            
+            if (resultParentID)
+                bmkEntry[@"parentid"] = @(resultParentID);
+            else
+                continue;
+
+            if (resultType)
+                bmkEntry[@"type"] = @(resultType);
+            else
+                continue;
+
+            
+			bmkEntry[@"sortindex"] = @(resultSortindex);
 
 			//add the checked fields
 			bmkEntry[@"predecessorid"] = predecessor;
@@ -633,11 +636,9 @@ static Store* _gStore = nil;
 			{
 				parentList = [[NSMutableDictionary alloc] init];
 				newHierarchicalBookmarks[bmkEntry[@"parentid"]] = parentList;
-				[parentList release];
 			}
 
 			parentList[bmkEntry[@"id"]] = bmkEntry;
-			[bmkEntry release];
 		}
 
 		sqlite3_finalize(dbStatement);
@@ -652,15 +653,13 @@ static Store* _gStore = nil;
 		newHierarchicalBookmarks[folderid] = result;
 	}
 
-	NSMutableDictionary* tempSorted = hierarchicalBookmarks;
+	//NSMutableDictionary* tempSorted = hierarchicalBookmarks;
 	hierarchicalBookmarks = newHierarchicalBookmarks;
-	[tempSorted release];
 
 	//now sort the bookmark _list_ by frecency
 	[newBookmarkListSortedByFrecency sortUsingFunction:compareSearchResults context:NULL];
-	NSMutableArray* temp = bookmarkListSortedByFrecency;
+	//NSMutableArray* temp = bookmarkListSortedByFrecency;
 	bookmarkListSortedByFrecency = newBookmarkListSortedByFrecency;
-	[temp release];
 }
 
 
@@ -1039,8 +1038,7 @@ static Store* _gStore = nil;
 
 	// Second, insert all the new tabs 
 
-	for (NSString* anID in [tabSetDict allKeys]) 
-	{
+	for (NSString* anID in [tabSetDict allKeys]) {
 		[self addTabSet:tabSetDict[anID] withClientID:anID];
 	}
 

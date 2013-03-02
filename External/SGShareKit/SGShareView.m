@@ -151,7 +151,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
         tableView.backgroundColor = [UIColor clearColor];
         tableView.dataSource = self;
         tableView.delegate = self;
-        tableView.rowHeight = 40;
+        tableView.rowHeight = 50;
         [self addSubview:tableView];
         _tableView = tableView;
     }
@@ -194,8 +194,8 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentity];
         cell.backgroundColor = [UIColor clearColor];
         cell.textLabel.textColor = [UIColor whiteColor];
-        cell.textLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15.];
-        cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        cell.textLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16.];
+        cell.imageView.contentMode = UIViewContentModeCenter;
     }
     
     if ([_options[indexPath.row] respondsToSelector:@selector(objectForKey:)]) {
