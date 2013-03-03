@@ -96,18 +96,20 @@
 @implementation Store
 
 // The singleton instance
-static __strong Store* _gStore = nil;
+static __strong Store* _gStore;
+static dispatch_once_t onceToken;
 
 //CLASS METHODS////////
 + (Store*)getStore {
-	if (_gStore == nil) {
-		_gStore = [[Store alloc] init];
-	}
+    dispatch_once(&onceToken, ^{
+        _gStore = [[Store alloc] init];
+    });
 
 	return _gStore;
 }
 
 + (void) deleteStore {
+    onceToken = 0;
 	_gStore = nil;
 
 	NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -175,9 +177,9 @@ static __strong Store* _gStore = nil;
 	return nil;
 }
 
--(void) dealloc
-{
+-(void) dealloc {
 	sqlite3_close(sqlDatabase);
+    sqlDatabase = NULL;
 //	[tabs release];
 //	tabs = nil;
 //	[bookmarkListSortedByFrecency release];
@@ -447,8 +449,7 @@ static __strong Store* _gStore = nil;
 	/* Load existing history */
 	if (sqlite3_prepare_v2(sqlDatabase, historyQuery, -1, &dbStatement, NULL) == SQLITE_OK) 
 	{
-		while (sqlite3_step(dbStatement) == SQLITE_ROW) 
-		{
+		while (sqlite3_step(dbStatement) == SQLITE_ROW)  {
 			icon = @"history.png";
 
 			NSMutableDictionary *historyItem = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -484,9 +485,8 @@ static __strong Store* _gStore = nil;
 	//this is now a one-liner, with no database calls.
 	// we can't have multiple threads hitting the database or Bad Things happen sometimes
 	NSArray* result = hierarchicalBookmarks[parentid];
-	if (!result) {
+	if (!result)
 		result = @[];
-	}
 	
 	return result;
 }
@@ -906,9 +906,7 @@ static __strong Store* _gStore = nil;
 			sqlite3_bind_int(stmnt, 6, [historyItem[@"sortindex"] intValue]);
 
 			if (sqlite3_step(stmnt) == SQLITE_DONE) 
-			{
 				result = YES;
-			}
 		}
 
 		@catch (NSException *exception) 

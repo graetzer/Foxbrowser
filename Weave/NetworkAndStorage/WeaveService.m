@@ -22,7 +22,7 @@ NSString *kWeaveUseNativeApps = @"useNativeApps";
 NSString *kWeavePrivateMode = @"privateMode";
 
 @implementation WeaveOperations {
-    NSOperationQueue *_queue;
+    dispatch_queue_t _queue;
 }
 
 + (WeaveOperations *)sharedOperations {
@@ -34,8 +34,7 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (id)init {
     if (self = [super init]) {
-        _queue = [NSOperationQueue new];
-        _queue.maxConcurrentOperationCount = 1;
+        _queue = dispatch_queue_create("Weave Updater", DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }
@@ -105,7 +104,11 @@ NSString *kWeavePrivateMode = @"privateMode";
 
 - (void)addHistoryURL:(NSURL *)url title:(NSString *)title {    
     // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
-    [_queue addOperationWithBlock:^{
+    dispatch_async(_queue, ^{
+        [[Stockboy syncLock] lock];
+        if ([Stockboy syncInProgress])
+            [[Stockboy syncLock] wait];
+
         NSString *urlText = [NSString stringWithFormat:@"%@", url];
         
         // Check if this history entry already exists
@@ -121,22 +124,24 @@ NSString *kWeavePrivateMode = @"privateMode";
             int sortIndex = [existing[@"sortindex"] intValue];
             
             historyEntry = @{ @"id" : existing[@"id"],
-            @"histUri" : existing[@"url"],
-            @"title" : existing[@"title"],
-            @"modified" : @([[NSDate date] timeIntervalSince1970]),
-            @"sortindex" : @(sortIndex + 100)};
+                              @"histUri" : existing[@"url"],
+                              @"title" : existing[@"title"],
+                              @"modified" : @([[NSDate date] timeIntervalSince1970]),
+                              @"sortindex" : @(sortIndex + 100)};
         } else {
             NSString *titleSrc = title != nil ? title : [NSString stringWithFormat:@"%@", url.host];
             
             historyEntry = @{ @"id" : [NSString stringWithFormat:@"abc%i", url.hash],// No idea about this
-            @"histUri" : urlText,
-            @"title" : titleSrc,
-            @"modified" : @([[NSDate date] timeIntervalSince1970]),
-            @"sortindex" : @100};// Choosen without further information
+                              @"histUri" : urlText,
+                              @"title" : titleSrc,
+                              @"modified" : @([[NSDate date] timeIntervalSince1970]),
+                              @"sortindex" : @100};// Choosen without further information
         }
         
         [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
-    }];
+        [[Stockboy syncLock] signal];
+        [[Stockboy syncLock] unlock];
+    });
 }
 
 @end

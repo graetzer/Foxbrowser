@@ -76,7 +76,7 @@
         
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.webView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
+    self.webView.backgroundColor = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [UIColor colorWithWhite:1 alpha:0.2] : [UIColor clearColor];
     UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc] 
                                         initWithTarget:self action:@selector(handleLongPress:)];
     [self.webView addGestureRecognizer:gr];
