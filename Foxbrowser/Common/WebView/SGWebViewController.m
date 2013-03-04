@@ -85,11 +85,13 @@
     self.webView.scalesPageToFit = YES;
 }
 
-- (void)didMoveToParentViewController:(UIViewController *)parent {
-    [super didMoveToParentViewController:parent];
+- (void)willMoveToParentViewController:(UIViewController *)parent {
+    [super willMoveToParentViewController:parent];
     if (!parent) {// View is removed
+        self.webView.delegate = nil;
         [self.webView stopLoading];
         [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
+        [self.webView clearContent];
     }
 }
 
@@ -102,10 +104,6 @@
     if (!self.webView.request) {
         [self openURL:nil];
     }
-}
-
-- (void)dealloc {
-    self.webView.delegate = nil;
 }
 
 #pragma mark - UILongPressGesture
