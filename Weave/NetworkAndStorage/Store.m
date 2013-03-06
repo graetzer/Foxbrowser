@@ -110,6 +110,7 @@ static dispatch_once_t onceToken;
 
 + (void) deleteStore {
     onceToken = 0;
+    [_gStore release];
 	_gStore = nil;
 
 	NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -162,9 +163,9 @@ static dispatch_once_t onceToken;
 		success = [fileManager copyItemAtPath:defaultDB toPath:databasePath error:&error];
 		if (success) {
 			if (sqlite3_open([databasePath UTF8String], &sqlDatabase) == SQLITE_OK) {
-				tabs = [NSMutableArray array];
-				history = [NSMutableArray array];
-				bookmarkListSortedByFrecency = [NSMutableArray array];
+				tabs = [[NSMutableArray array] retain];
+				history = [[NSMutableArray array] retain];
+				bookmarkListSortedByFrecency = [[NSMutableArray array] retain];
 				return self;
 			} else {
 				DLog(@"Could not open database!");
@@ -173,6 +174,7 @@ static dispatch_once_t onceToken;
 			DLog(@"Could not create database!");
 			NSLog(@"%@", [error localizedDescription]);
 		}
+        [self release];
 	}
 	return nil;
 }
@@ -180,15 +182,15 @@ static dispatch_once_t onceToken;
 -(void) dealloc {
 	sqlite3_close(sqlDatabase);
     sqlDatabase = NULL;
-//	[tabs release];
-//	tabs = nil;
-//	[bookmarkListSortedByFrecency release];
-//	bookmarkListSortedByFrecency = nil;
-//	[hierarchicalBookmarks release];
-//	hierarchicalBookmarks = nil;
-//	[history release];
-//	history = nil;
-//	[super dealloc];
+	[tabs release];
+	tabs = nil;
+	[bookmarkListSortedByFrecency release];
+	bookmarkListSortedByFrecency = nil;
+	[hierarchicalBookmarks release];
+	hierarchicalBookmarks = nil;
+	[history release];
+	history = nil;
+	[super dealloc];
 }
 
 #pragma mark -
@@ -428,12 +430,14 @@ static dispatch_once_t onceToken;
 		while ((key = [enumerator nextObject])) {
 			[newTabs addObject:temporaryTabIndex[key]];
 		}
+        [temporaryTabIndex release];
 
 		//now sort the new tabs by frecency
 		[newTabs sortUsingFunction:compareSearchResults context:NULL];
 
-		//NSMutableArray* temp = tabs;
+		NSMutableArray* temp = tabs;
 		tabs = newTabs;
+		[temp release];
 	}
 }
 
@@ -466,6 +470,12 @@ static dispatch_once_t onceToken;
 			historyItem[@"icon"] = icon;
 
 			[newHistory addObject:historyItem];
+            
+            [id_col release];
+			[url_col release];
+			[title_col release];
+			[sort_col release];
+			[historyItem release];
 		}
 
 		sqlite3_finalize(dbStatement);
@@ -474,8 +484,9 @@ static dispatch_once_t onceToken;
 	//now sort the history by frecency
 	[newHistory sortUsingFunction:compareSearchResults context:NULL];
 
-	//NSMutableArray* temp = history;
+	NSMutableArray* temp = history;
 	history = newHistory;
+	[temp release];
 }
 
 
@@ -566,13 +577,12 @@ static dispatch_once_t onceToken;
 	{
 		while (sqlite3_step(dbStatement) == SQLITE_ROW) 
 		{
-			NSMutableDictionary* bmkEntry = [[NSMutableDictionary alloc] initWithCapacity:10];
+			NSMutableDictionary* bmkEntry = [NSMutableDictionary dictionaryWithCapacity:10];
 
 			NSString* icon = @"bookmark.png";  //use default icon
 
 			NSString* url = @"";
-			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_URL_COLUMN)) 
-			{
+			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_URL_COLUMN)) {
 				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_URL_COLUMN)); 
 				if ((id)temp != [NSNull null]) url = temp;
 			}
@@ -581,15 +591,13 @@ static dispatch_once_t onceToken;
 			predKey++;
 			NSString* predecessor = [NSString stringWithFormat:@"HEAD_%d", predKey];
 
-			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PREDECESSORID_COLUMN)) 
-			{
+			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PREDECESSORID_COLUMN)) {
 				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_PREDECESSORID_COLUMN)); 
 				if ((id)temp != [NSNull null]) predecessor = temp;
 			}
 
 			NSString* title = @"";
-			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)) 
-			{
+			if ((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)) {
 				NSString* temp = @((char *)sqlite3_column_text(dbStatement, BOOKMARKS_TITLE_COLUMN)); 
 				if ((id)temp != [NSNull null]) title = temp;
 			}
@@ -632,10 +640,10 @@ static dispatch_once_t onceToken;
 
 			//and add all entries to the appropriate parent dictionary in the sorted list/tree thingie
 			NSMutableDictionary* parentList = newHierarchicalBookmarks[bmkEntry[@"parentid"]];
-			if (parentList == nil)
-			{
+			if (parentList == nil) {
 				parentList = [[NSMutableDictionary alloc] init];
 				newHierarchicalBookmarks[bmkEntry[@"parentid"]] = parentList;
+                [parentList release];
 			}
 
 			parentList[bmkEntry[@"id"]] = bmkEntry;
@@ -646,20 +654,21 @@ static dispatch_once_t onceToken;
 
 
 	//now I just need to sort the sorted list(s) by predecessor
-	for (NSString* folderid in [newHierarchicalBookmarks allKeys])
-	{
+	for (NSString* folderid in [newHierarchicalBookmarks allKeys]) {
 		NSMutableDictionary* itemsInFolder = newHierarchicalBookmarks[folderid];
 		NSArray* result = [self sortFolderBookmarks:itemsInFolder];
 		newHierarchicalBookmarks[folderid] = result;
 	}
 
-	//NSMutableDictionary* tempSorted = hierarchicalBookmarks;
+	NSMutableDictionary* tempSorted = hierarchicalBookmarks;
 	hierarchicalBookmarks = newHierarchicalBookmarks;
+    [tempSorted release];
 
 	//now sort the bookmark _list_ by frecency
 	[newBookmarkListSortedByFrecency sortUsingFunction:compareSearchResults context:NULL];
-	//NSMutableArray* temp = bookmarkListSortedByFrecency;
+	NSMutableArray* temp = bookmarkListSortedByFrecency;
 	bookmarkListSortedByFrecency = newBookmarkListSortedByFrecency;
+	[temp release];
 }
 
 
