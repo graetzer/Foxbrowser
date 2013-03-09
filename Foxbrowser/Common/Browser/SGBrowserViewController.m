@@ -46,10 +46,9 @@
         [SGHTTPURLProtocol registerProtocol];
         [SGHTTPURLProtocol setAuthDelegate:self];
         
-        if ([[UIDevice currentDevice].systemVersion doubleValue] < 6) {
+        if ([[UIDevice currentDevice].systemVersion doubleValue] < 6)
             [SGHTTPURLProtocol setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
-        }
-        
+            
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
             [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
             [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"DNT"];
@@ -112,11 +111,17 @@
     [self updateChrome];
 }
 
-- (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;{
+- (void)addTabWithURLRequest:(NSMutableURLRequest *)request title:(NSString *)title {
+    if (!title)
+        title = request.URL.absoluteString;
+    title = [title stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+    title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
+    
     SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
     webC.title = title;
-    [webC openURL:url];
+    [webC openRequest:request];
     [self addViewController:webC];
+    
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.tabs.foreground"])
         [self showViewController:webC];
     
@@ -202,38 +207,33 @@
 - (NSURL *)URL {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        return webC.location;
+        return webC.request.URL;
     }
     return nil;
 }
 
-- (void)openURL:(NSURL *)url title:(NSString *)title {
-    if (!url)
-        return;
-    
+- (void)openURLRequest:(NSMutableURLRequest *)request title:(NSString *)title {
+    NSParameterAssert(request);
     if (!title)
-        title = url.host;
+        title = request.URL.absoluteString;
+    title = [title stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+    title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
     
     if ([self.selectedViewController isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
         webC.title = title;
-        [webC openURL:url];
+        [webC openRequest:request];
     } else {
-        SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
+        SGWebViewController *webC = [SGWebViewController new];
         webC.title = title;
-        [webC openURL:url];
+        [webC openRequest:request];
         [self swapCurrentViewControllerWith:webC];
     }
 }
 
 - (void)handleURLString:(NSString*)input title:(NSString *)title {
     NSURL *url = [[WeaveOperations sharedOperations] parseURLString:input];
-    if (!title) {
-        title = [input stringByReplacingOccurrencesOfString:@"http://" withString:@""];
-        title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
-    }
-    
-    [self openURL:url title:title];
+    [self openURLRequest:[NSMutableURLRequest requestWithURL:url] title:title];
 }
 
 - (void)findInPage:(NSString *)searchPage {
@@ -244,7 +244,7 @@
 }
 
 - (NSString *)savedTabsCacheFile {
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+    NSString* path = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).lastObject;
     return [path stringByAppendingPathComponent:@"latestURLs.plist"];
 }
 
@@ -252,7 +252,18 @@
     NSArray *latest = [NSArray arrayWithContentsOfFile:[self savedTabsCacheFile]];
     if (latest.count > 0) {
         for (NSString *urlString in latest) {
-            [self addTabWithURL:[NSURL URLWithString:urlString] withTitle:urlString];
+            NSURL *url = [NSURL URLWithString:urlString];
+
+            if ([url.scheme hasPrefix:@"http"]) {
+                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+                SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
+                webC.title = request.URL.absoluteString;
+                [webC openRequest:request];
+                [self addViewController:webC];
+            } else {
+                SGBlankController *latest = [SGBlankController new];
+                [self addViewController:latest];
+            }
         }
     } else {
         SGBlankController *latest = [SGBlankController new];
@@ -261,15 +272,17 @@
 }
 
 - (void)saveCurrentTabs {
-    dispatch_queue_t q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    dispatch_async(q, ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        
         NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
         for (UIViewController *controller in self.childViewControllers) {
+            
             if ([controller isKindOfClass:[SGWebViewController class]]) {
-                NSURL *url = ((SGWebViewController*)controller).location;
-                if (url != nil && [url.scheme hasPrefix:@"http"])
+                NSURL *url = ((SGWebViewController *)controller).request.URL;
+                if ([url.scheme hasPrefix:@"http"])
                     [latest addObject:[NSString stringWithFormat:@"%@",url]];
-            }
+            } else
+                [latest addObject:@"empty://about:blank"];
         }
         [latest writeToFile:[self savedTabsCacheFile] atomically:YES];
     });

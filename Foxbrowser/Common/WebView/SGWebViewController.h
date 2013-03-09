@@ -33,10 +33,12 @@ UIActionSheetDelegate, UIAlertViewDelegate>
 @property (weak, nonatomic) UIActivityIndicatorView *indicator;
 @property (weak, nonatomic) UIToolbar *searchToolbar;
 
-@property (strong, nonatomic) NSURL *location;
+@property (strong, nonatomic) NSMutableURLRequest *request;
 @property (assign, nonatomic, getter = isLoading) BOOL loading;
 
-- (void)openURL:(NSURL *)url;
+/// Loads a request
+/// If parameter request is nil, the last loaded request will be reloaded
+- (void)openRequest:(NSMutableURLRequest *)request;
 - (void)reload;
 - (NSInteger)search:(NSString *)searchString;
 @end

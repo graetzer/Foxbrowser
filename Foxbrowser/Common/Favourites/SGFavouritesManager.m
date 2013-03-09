@@ -102,7 +102,7 @@
 
 #pragma mark Screenshot stuff
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController; {
-    NSURL *url = webController.location;
+    NSURL *url = webController.request.URL;
     if (![self containsHost:url.host])
         return;
     

@@ -101,9 +101,8 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    if (!self.webView.request) {
-        [self openURL:nil];
-    }
+    if (!self.webView.request)
+        [self openRequest:nil];
 }
 
 #pragma mark - UILongPressGesture
@@ -125,7 +124,8 @@
     }
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES;
 }
 
@@ -190,18 +190,13 @@
     if ([link hasPrefix:prefix])
         return;
     
-    prefix = @"newtab:";
-    if ([link hasPrefix:prefix]) {
-        link = [link substringFromIndex:prefix.length];
-        link = [link stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    }
+    NSMutableURLRequest *request = [self linkRequestForURL:[NSURL URLWithString:link]];
     
     if (link && imageSrc) {
         if (buttonIndex == 0) {
-            NSURL *url = [NSURL URLWithString:link];
-            [self openURL:url];
+            [self openRequest:request];
         } else if (buttonIndex == 1) {
-            [self.browserViewController addTabWithURL:[NSURL URLWithString:link] withTitle:link];
+            [self.browserViewController addTabWithURLRequest:request title:nil];
         } else if (buttonIndex == 2) {
             [self performSelectorInBackground:@selector(saveImageURL:) withObject:[NSURL URLWithString:imageSrc]];
         } else if (buttonIndex == 3) {
@@ -209,10 +204,9 @@
         }
     } else if (link) {
         if (buttonIndex == 0) {
-            NSURL *url = [NSURL URLWithString:link];
-            [self openURL:url];
+            [self openRequest:request];
         } else if (buttonIndex == 1) {
-            [self.browserViewController addTabWithURL:[NSURL URLWithString:link] withTitle:link];
+            [self.browserViewController addTabWithURLRequest:request title:nil];
         } else if (buttonIndex == 2) {
             [UIPasteboard generalPasteboard].string = link;
         }
@@ -250,19 +244,25 @@
 
 #pragma mark - UIWebViewDelegate
 
--  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+-  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request
+  navigationType:(UIWebViewNavigationType)navigationType {
+    
     if ([request.URL.scheme isEqualToString:@"newtab"]) {
-        NSString *source = [request.URL resourceSpecifier];
-        NSString *urlString = [source stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *url = [NSURL URLWithString:urlString relativeToURL:self.location];
-        [self.browserViewController addTabWithURL:url withTitle:url.absoluteString];
+        NSString *urlString = [request.URL.resourceSpecifier stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        NSMutableURLRequest *mutableReq = [request mutableCopy];
+        mutableReq.URL = [NSURL URLWithString:urlString relativeToURL:self.request.URL];
+        [self.browserViewController addTabWithURLRequest:mutableReq title:nil];
         return NO;
     }
     
     if (navigationType != UIWebViewNavigationTypeOther) {
-        self.location = request.mainDocumentURL;
-        [self.browserViewController updateChrome];
-        return [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
+        BOOL handleRequest = [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
+        if (handleRequest) {
+            self.request = [request mutableCopy];
+            [self.browserViewController updateChrome];
+        }
+        return handleRequest;
     }
     return YES;
 }
@@ -286,12 +286,12 @@
     self.loading = NO;
     NSString *webLoc = [self.webView location];
     if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
-        self.location = [NSURL URLWithUnicodeString:webLoc];
+        self.request.URL = [NSURL URLWithUnicodeString:webLoc];
     
     [self.browserViewController updateChrome];
     // Private mode
     //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
-        [[WeaveOperations sharedOperations] addHistoryURL:self.location title:self.title];
+        [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     //}
     
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
@@ -309,12 +309,13 @@
     
     if ([error.domain isEqualToString:@"NSURLErrorDomain"]) {
         // Host not found, try adding www. in front?
-        if (error.code == -1003 && [self.location.host rangeOfString:@"www"].location == NSNotFound) {
-            NSMutableString *url = [self.location.absoluteString mutableCopy];
+        if (error.code == -1003 && [self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
+            NSMutableString *url = [self.request.URL.absoluteString mutableCopy];
             NSRange range = [url rangeOfString:@"://"];
             if (range.location != NSNotFound) {
                 [url insertString:@"www." atIndex:range.location+range.length];
-                [self openURL:[NSURL URLWithString:url]];
+                self.request.URL = [NSURL URLWithString:url];
+                [self openRequest:nil];
                 return;
             }
         }
@@ -343,10 +344,26 @@
 }
 
 #pragma mark - Networking
- 
-- (void)openURL:(NSURL *)url {
-    if (url)
-        self.location = url;
+
+- (NSMutableURLRequest *)linkRequestForURL:(NSURL *)url {
+    if (!url)
+        return nil;
+    
+    DLog(@"WebView URL: %@", self.webView.request.URL);
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    if (self.request) {
+        NSString *webLoc = [self.webView location];
+        if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
+            self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+        DLog(@"WebController URL: %@", self.request.URL);
+        [request setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
+    }
+    return request;
+}
+
+- (void)openRequest:(NSMutableURLRequest *)request {
+    if (request)
+        self.request = request;
     
     if (![self isViewLoaded])
         return;
@@ -358,13 +375,14 @@
                                                        delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
         [alert show];
     } else {
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.location];
-        [self.webView loadRequest:request];
+
+        
+        [self.webView loadRequest:self.request];
     }
 }
 
 - (void)reload {
-    [self openURL:nil];
+    [self openRequest:nil];
 }
 
 #pragma mark - Search on page

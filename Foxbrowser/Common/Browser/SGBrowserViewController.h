@@ -59,7 +59,8 @@
 // Add and show a SGBlankViewController
 - (void)addTab;
 
-- (void)addTabWithURL:(NSURL *)url withTitle:(NSString *)title;
+// Add a new SGWebViewController, title can be nil
+- (void)addTabWithURLRequest:(NSMutableURLRequest *)request title:(NSString *)title;
 
 - (void)reload;
 - (void)stop;
@@ -76,7 +77,8 @@
 - (BOOL)canRemoveTab:(UIViewController *)viewController;
 
 - (NSURL *)URL;
-- (void)openURL:(NSURL *)url title:(NSString *)title;
+// Open a webPage in the current tab, title can be nil
+- (void)openURLRequest:(NSMutableURLRequest *)request title:(NSString *)title;
 - (void)handleURLString:(NSString*)input title:(NSString *)title;
 
 - (void)findInPage:(NSString *)searchPage;

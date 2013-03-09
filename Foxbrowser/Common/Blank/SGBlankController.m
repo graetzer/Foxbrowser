@@ -126,12 +126,14 @@
 #pragma mark - SGPreviewPanelDelegate
 - (void)openNewTab:(SGPreviewTile *)tile {
     if (tile.url)
-        [self.browserViewController addTabWithURL:tile.url withTitle:tile.label.text];
+        [self.browserViewController addTabWithURLRequest:[NSMutableURLRequest requestWithURL:tile.url]
+                                                   title:tile.label.text];
 }
 
 - (void)open:(SGPreviewTile *)tile {
     if (tile.url)
-        [self.browserViewController openURL:tile.url title:tile.label.text];
+        [self.browserViewController openURLRequest:[NSMutableURLRequest requestWithURL:tile.url]
+                                             title:tile.label.text];
 }
 
 #pragma mark - UIScrollViewDelegate

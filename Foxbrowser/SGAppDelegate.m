@@ -116,14 +116,15 @@ id<WeaveService> weaveService;
     NSString *urlS = url.resourceSpecifier;
     if ([url.scheme isEqualToString:@"foxbrowser"]) {
         urlS = [NSString stringWithFormat:@"http:%@", urlS];
-        [self.browserViewController addTabWithURL:[NSURL URLWithString:urlS] withTitle:url.host];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlS]];
+        [self.browserViewController addTabWithURLRequest:request title:sourceApplication];
         return YES;
     } else if ([url.scheme isEqualToString:@"foxbrowsers"]) {
-        urlS = [NSString stringWithFormat:@"https:%@", urlS];
-        [self.browserViewController addTabWithURL:[NSURL URLWithString:urlS] withTitle:url.host];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlS]];
+        [self.browserViewController addTabWithURLRequest:request title:sourceApplication];
         return YES;
     } else if ([url.scheme hasPrefix:@"http"] || [url.scheme hasPrefix:@"https"]) {
-        [self.browserViewController addTabWithURL:url withTitle:sourceApplication];
+        [self.browserViewController addTabWithURLRequest:[NSMutableURLRequest requestWithURL:url] title:sourceApplication];
         return YES;
     }
     return NO;
