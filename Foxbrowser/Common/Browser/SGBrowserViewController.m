@@ -114,9 +114,9 @@
 #pragma mark - Implemented
 
 - (void)addTab; {
-    if (self.count >= self.maxCount) {
+    if (self.count >= self.maxCount)
         return;
-    }
+        
     SGBlankController *latest = [SGBlankController new];
     [self addViewController:latest];
     [self showViewController:latest];

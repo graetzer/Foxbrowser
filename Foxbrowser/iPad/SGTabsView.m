@@ -30,10 +30,10 @@
 @end
 
 @implementation SGTabsView
-@synthesize tabs = _tabs, selected = _selected;
+@synthesize tabs = _tabs;
+@dynamic selected;
 
-- (id)initWithFrame:(CGRect)frame
-{
+- (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
@@ -79,6 +79,8 @@
     UIControlEvents event = [[UIDevice currentDevice].systemVersion doubleValue] < 6 ? UIControlEventTouchCancel : UIControlEventTouchUpInside;
     [newTab.closeButton addTarget:self action:@selector(handleRemove:) forControlEvents:event];
     
+    if (self.tabs.count == 0)
+        newTab.selected = YES;
     // Add the tab
     [self.tabs addObject:newTab];
     [self addSubview:newTab];
@@ -115,11 +117,18 @@
     return [self.tabs[index] viewController];
 }
 
+- (NSUInteger)selected {
+    for (NSUInteger i = 0; i < self.tabs.count; i++) {
+        if (((SGTabView *)self.tabs[i]).selected)
+            return i;
+    }
+    return 0;
+}
+
 - (void)setSelected:(NSUInteger)selected {
     if (selected >= self.tabs.count)
         return;
     
-    _selected = selected;
     for (int i = 0; i < self.tabs.count; i++) {
         SGTabView *tab = (self.tabs)[i];
         if (i == selected) {
@@ -196,16 +205,12 @@
                 if (nextPos >= self.tabs.count)
                     return;
                 
-                SGTabView *next = (self.tabs)[nextPos];
-                if (next) {
-                    if (_selected == panPosition)
-                        _selected = nextPos;
-                    [self.tabs exchangeObjectAtIndex:panPosition withObjectAtIndex:nextPos];
-                    
-                    [UIView animateWithDuration:0.5 animations:^{// Move the item on the old position of the panTab
-                        next.frame = CGRectMake(width*panPosition, 0, width, self.bounds.size.height - kTabsBottomMargin);
-                    }];
-                }
+                SGTabView *next = self.tabs[nextPos];
+                [self.tabs exchangeObjectAtIndex:panPosition withObjectAtIndex:nextPos];
+                
+                [UIView animateWithDuration:0.5 animations:^{// Move the item on the old position of the panTab
+                    next.frame = CGRectMake(width*panPosition, 0, width, self.bounds.size.height - kTabsBottomMargin);
+                }];                
             }
         }
         

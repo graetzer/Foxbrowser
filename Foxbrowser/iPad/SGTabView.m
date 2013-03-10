@@ -42,6 +42,7 @@
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        self.autoresizesSubviews = NO;
         self.exclusiveTouch = YES;
         self.contentMode = UIViewContentModeRedraw;
         
@@ -102,16 +103,15 @@
     CGFloat margin = kCornerRadius;
     
     CGSize t = _tSize;
-    if (t.width > b.size.width*0.75) {
-        t.width = b.size.width*0.75 - 2*margin;
-    }
+    if (t.width > b.size.width*0.70)
+        t.width = b.size.width*0.70 - 2*margin;
         
-    if(!self.closeButton.hidden) {
-        self.titleLabel.frame = CGRectMake((b.size.width - t.width)/2 + margin,
+    if(self.closeButton.hidden) {
+        self.titleLabel.frame = CGRectMake((b.size.width - t.width)/2,
                                            (b.size.height - t.height)/2,
                                            t.width, t.height);
     } else {
-        self.titleLabel.frame = CGRectMake((b.size.width - t.width)/2,
+        self.titleLabel.frame = CGRectMake((b.size.width - t.width)/2 + margin,
                                            (b.size.height - t.height)/2,
                                            t.width, t.height);
     }

@@ -161,35 +161,45 @@
 }
 
 - (void)removeViewController:(UIViewController *)viewController index:(NSUInteger)index {
-    if (self.tabsView.tabs.count == 1) {// 0 shouldn't happen
+    if (self.tabsView.tabs.count <= 1) {// 0 shouldn't happen
         SGBlankController *latest = [SGBlankController new];
         [self swapCurrentViewControllerWith:latest];
         return;
     }
     
-    NSUInteger newIndex = index;
-    UIViewController *to;
-    if (index == self.tabsView.tabs.count - 1) {
-        newIndex--;
-        to = [self.tabsView viewControllerAtIndex:newIndex];
-    } else
-        to  = [self.tabsView viewControllerAtIndex:newIndex+1];
-    
-    to.view.frame = self.contentFrame;
-    
     [viewController willMoveToParentViewController:nil];
-    [self transitionFromViewController:viewController
-                      toViewController:to
-                              duration:kRemoveTabDuration 
-                               options:UIViewAnimationOptionAllowAnimatedContent
-                            animations:^{
-                                [self.tabsView removeTab:index];
-                                self.tabsView.selected = newIndex;
-                            }
-                            completion:^(BOOL finished){
-                                [viewController removeFromParentViewController];
-                                [self updateChrome];
-                            }];
+    if (index == self.selectedIndex) {
+        NSUInteger newIndex = index;
+        UIViewController *to;
+        if (index == self.tabsView.tabs.count - 1) {
+            newIndex--;
+            to = [self.tabsView viewControllerAtIndex:newIndex];
+        } else
+            to  = [self.tabsView viewControllerAtIndex:newIndex+1];
+        
+        to.view.frame = self.contentFrame;
+        [self transitionFromViewController:viewController
+                          toViewController:to
+                                  duration:kRemoveTabDuration
+                                   options:UIViewAnimationOptionAllowAnimatedContent
+                                animations:^{
+                                    [self.tabsView removeTab:index];
+                                    self.tabsView.selected = newIndex;
+                                }
+                                completion:^(BOOL finished){
+                                    [viewController removeFromParentViewController];
+                                    [self updateChrome];
+                                }];
+    } else {
+        [UIView animateWithDuration:kRemoveTabDuration
+                         animations:^{
+                             [self.tabsView removeTab:index];
+                         }
+                         completion:^(BOOL finished){
+                             [viewController removeFromParentViewController];
+                             [self updateChrome];
+                         }];
+    }
 }
 
 - (void)removeViewController:(UIViewController *)viewController {

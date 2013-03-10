@@ -957,10 +957,10 @@
 				F49EE8AC15A24426001B4D5F /* SGTabsToolbar.m */,
 				F49EE8A915A24426001B4D5F /* SGTabsViewController.h */,
 				F49EE8AA15A24426001B4D5F /* SGTabsViewController.m */,
-				F49EE8A515A24426001B4D5F /* SGTabView.h */,
-				F49EE8A615A24426001B4D5F /* SGTabView.m */,
 				F49EE8A715A24426001B4D5F /* SGTabsView.h */,
 				F49EE8A815A24426001B4D5F /* SGTabsView.m */,
+				F49EE8A515A24426001B4D5F /* SGTabView.h */,
+				F49EE8A615A24426001B4D5F /* SGTabView.m */,
 			);
 			name = TabsBar;
 			sourceTree = "<group>";
