@@ -310,6 +310,11 @@
     return self.pageControl.currentPage;
 }
 
+- (void)setSelectedIndex:(NSUInteger)selectedIndex {
+    UIViewController *controller = _viewControllers[selectedIndex];
+    [self showViewController:controller];
+}
+
 - (NSUInteger)count {
     return _viewControllers.count;
 }

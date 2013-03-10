@@ -307,9 +307,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"])
         return;
     
-    if ([error.domain isEqualToString:@"NSURLErrorDomain"]) {
+    if (error.code == NSURLErrorCannotFindHost
+        || error.code == NSURLErrorDNSLookupFailed
+        || ([(id)kCFErrorDomainCFNetwork isEqualToString:error.domain] && error.code == 2)) {
         // Host not found, try adding www. in front?
-        if (error.code == -1003 && [self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
+        if ([self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
             NSMutableString *url = [self.request.URL.absoluteString mutableCopy];
             NSRange range = [url rangeOfString:@"://"];
             if (range.location != NSNotFound) {
@@ -336,6 +338,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 - (void)prepareWebView {
     [self.browserViewController updateChrome];
+    [self.webView disableTouchCallout];
     if (![self.webView JSToolsLoaded]) {
         [self.webView loadJSTools];
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])

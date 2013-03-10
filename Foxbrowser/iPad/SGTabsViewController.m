@@ -156,10 +156,6 @@
                             }];
 }
 
-- (void)showIndex:(NSUInteger)index; {
-    [self showViewController:[self.tabsView viewControllerAtIndex:index] index:index];
-}
-
 - (void)showViewController:(UIViewController *)viewController {
     [self showViewController:viewController index:[self.tabsView indexOfViewController:viewController]];
 }
@@ -240,6 +236,10 @@
 
 - (NSUInteger)selectedIndex {
     return self.tabsView.selected;
+}
+
+- (void)setSelectedIndex:(NSUInteger)selectedIndex {
+    [self showViewController:[self.tabsView viewControllerAtIndex:selectedIndex] index:selectedIndex];
 }
 
 - (NSUInteger)maxCount {

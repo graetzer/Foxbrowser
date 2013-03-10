@@ -34,6 +34,34 @@
     int _dialogResult;
 }
 
++ (void)initialize {
+    if ([[UIDevice currentDevice].systemVersion doubleValue] < 6) {
+        [SGHTTPURLProtocol setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
+    }
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
+        [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
+        [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"DNT"];
+        [SGHTTPURLProtocol setValue:@"do-not-track" forHTTPHeaderField:@"X-Tracking-Choice"];
+    }
+}
+
+- (void)willEnterForeground {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
+        [SGHTTPURLProtocol setAuthDelegate:self];
+        [SGHTTPURLProtocol registerProtocol];
+    } else {
+        [SGHTTPURLProtocol setAuthDelegate:nil];
+        [SGHTTPURLProtocol unregisterProtocol];
+    }
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self willEnterForeground];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification object:nil];
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
@@ -41,20 +69,6 @@
                                               target:self
                                             selector:@selector(saveCurrentTabs)
                                             userInfo:nil repeats:YES];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
-        [SGHTTPURLProtocol registerProtocol];
-        [SGHTTPURLProtocol setAuthDelegate:self];
-        
-        if ([[UIDevice currentDevice].systemVersion doubleValue] < 6)
-            [SGHTTPURLProtocol setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
-            
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
-            [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
-            [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"DNT"];
-            [SGHTTPURLProtocol setValue:@"do-not-track" forHTTPHeaderField:@"X-Tracking-Choice"];
-        }
-    }
     
     [[GAI sharedInstance].defaultTracker trackView:@"SGBrowserViewController"];
 }
@@ -64,11 +78,6 @@
     
     [_timer invalidate];
     _timer = nil;
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
-        [SGHTTPURLProtocol setAuthDelegate:nil];
-        [SGHTTPURLProtocol unregisterProtocol];
-    }
 }
 
 - (BOOL)shouldAutorotate {
@@ -93,9 +102,12 @@
 }
 - (void)updateChrome {
     [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
-};
+}
 - (UIViewController *)selectedViewController {return nil;}
 - (NSUInteger)selectedIndex {return NSNotFound;}
+- (void)setSelectedIndex:(NSUInteger)selectedIndex {
+    [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
+}
 - (NSUInteger)count {return 0;}
 - (NSUInteger)maxCount {return 0;}
 
@@ -251,9 +263,11 @@
 - (void)addSavedTabs {
     NSArray *latest = [NSArray arrayWithContentsOfFile:[self savedTabsCacheFile]];
     if (latest.count > 0) {
-        for (NSString *urlString in latest) {
-            NSURL *url = [NSURL URLWithString:urlString];
-
+        for (id item in latest) {
+            if (![item isKindOfClass:[NSString class]])
+                continue;
+            
+            NSURL *url = [NSURL URLWithString:item];
             if ([url.scheme hasPrefix:@"http"]) {
                 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
                 SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
@@ -269,6 +283,9 @@
         SGBlankController *latest = [SGBlankController new];
         [self addViewController:latest];
     }
+    
+    if ([latest.lastObject isKindOfClass:[NSNumber class]])
+        self.selectedIndex = [latest.lastObject unsignedIntegerValue];
 }
 
 - (void)saveCurrentTabs {
@@ -284,6 +301,7 @@
             } else
                 [latest addObject:@"empty://about:blank"];
         }
+        [latest addObject:@(self.selectedIndex)];
         [latest writeToFile:[self savedTabsCacheFile] atomically:YES];
     });
 }

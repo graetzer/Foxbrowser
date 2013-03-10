@@ -31,9 +31,6 @@
 /// The frame in wihich content is shown
 @property (nonatomic, readonly) CGRect contentFrame;
 
-/// Primarily intended for internal use
-- (void)showIndex:(NSUInteger)index;
-
 /// Tells the view controller to update it's chrome
 - (void)updateChrome;
 

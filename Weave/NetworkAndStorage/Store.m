@@ -577,7 +577,7 @@ static dispatch_once_t onceToken;
 	{
 		while (sqlite3_step(dbStatement) == SQLITE_ROW) 
 		{
-			NSMutableDictionary* bmkEntry = [NSMutableDictionary dictionaryWithCapacity:10];
+			NSMutableDictionary* bmkEntry = [[NSMutableDictionary alloc] initWithCapacity:10];
 
 			NSString* icon = @"bookmark.png";  //use default icon
 
@@ -606,24 +606,15 @@ static dispatch_once_t onceToken;
             char* resultParentID = (char *)sqlite3_column_text(dbStatement, BOOKMARKS_PARENTID_COLUMN);
             char* resultType = (char *)sqlite3_column_text(dbStatement, BOOKMARKS_TYPE_COLUMN);
             double resultSortindex = (double)sqlite3_column_double(dbStatement, BOOKMARKS_SORTINDEX_COLUMN);
-
+            
+            if (!resultID || !resultParentID || !resultType) {
+                [bmkEntry release];
+                continue;
+            }
 			//add the unchecked fields
-            if (resultID)
-                bmkEntry[@"id"] = @(resultID);
-            else
-                continue;
-            
-            if (resultParentID)
-                bmkEntry[@"parentid"] = @(resultParentID);
-            else
-                continue;
-
-            if (resultType)
-                bmkEntry[@"type"] = @(resultType);
-            else
-                continue;
-
-            
+            bmkEntry[@"id"] = @(resultID);
+            bmkEntry[@"parentid"] = @(resultParentID);
+            bmkEntry[@"type"] = @(resultType);
 			bmkEntry[@"sortindex"] = @(resultSortindex);
 
 			//add the checked fields
@@ -645,8 +636,8 @@ static dispatch_once_t onceToken;
 				newHierarchicalBookmarks[bmkEntry[@"parentid"]] = parentList;
                 [parentList release];
 			}
-
 			parentList[bmkEntry[@"id"]] = bmkEntry;
+            [bmkEntry release];
 		}
 
 		sqlite3_finalize(dbStatement);

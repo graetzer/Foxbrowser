@@ -170,7 +170,7 @@
 - (void)handleTap:(UITapGestureRecognizer *)sender { 
     if (sender.state == UIGestureRecognizerStateEnded) {
         SGTabView *tab = (SGTabView *)sender.view;
-        [self.tabsController showIndex:[self.tabs indexOfObject:tab]];
+        self.tabsController.selectedIndex = [self.tabs indexOfObject:tab];
     }
 }
 
@@ -179,7 +179,7 @@
     NSUInteger panPosition = [self.tabs indexOfObject:panTab];
     
     if (sender.state == UIGestureRecognizerStateBegan) {
-        [self.tabsController showIndex:panPosition];
+        self.tabsController.selectedIndex = panPosition;
     } else if (sender.state == UIGestureRecognizerStateChanged) {
         CGPoint position = [sender translationInView:self];
         CGPoint center = CGPointMake(sender.view.center.x + position.x, sender.view.center.y);

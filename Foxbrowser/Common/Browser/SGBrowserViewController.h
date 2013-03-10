@@ -47,7 +47,7 @@
 - (void)updateChrome;
 
 @property (readonly, nonatomic) UIViewController *selectedViewController;
-@property (readonly, nonatomic) NSUInteger selectedIndex;
+@property (assign, nonatomic) NSUInteger selectedIndex;
 @property (readonly, nonatomic) NSUInteger count;
 @property (readonly, nonatomic) NSUInteger maxCount;
 

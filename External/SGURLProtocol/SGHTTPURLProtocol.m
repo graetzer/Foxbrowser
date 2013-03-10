@@ -8,7 +8,6 @@
 
 #import "SGHTTPURLProtocol.h"
 
-static NSInteger RegisterCount = 0;
 static BOOL SSLValidatesCertificateChain = NO;
 __strong static NSLock* VariableLock;
 __strong static id<SGHTTPAuthDelegate> AuthDelegate;
@@ -39,21 +38,11 @@ typedef enum {
 }
 
 + (void)registerProtocol {
-	[VariableLock lock];
-	if (RegisterCount==0) {
-        [NSURLProtocol registerClass:[self class]];
-	}
-	RegisterCount++;
-	[VariableLock unlock];
+    [NSURLProtocol registerClass:[self class]];
 }
 
 + (void)unregisterProtocol {
-	[VariableLock lock];
-	RegisterCount--;
-	if (RegisterCount==0) {
-		[NSURLProtocol unregisterClass:[self class]];
-	}
-	[VariableLock unlock];
+    [NSURLProtocol unregisterClass:[self class]];
 }
 
 + (void)setAuthDelegate:(id<SGHTTPAuthDelegate>)delegate {
@@ -110,7 +99,6 @@ typedef enum {
         _compression = SGIdentity;
         _authenticationAttempts = -1;
         _HTTPMessage = [self newMessageWithURLRequest:request];
-        NSLog(@"Headers:\n%@", request.allHTTPHeaderFields);
     }
     return self;
 }
@@ -124,7 +112,7 @@ typedef enum {
 }
 
 - (void)startLoading {
-    NSAssert(_URLResponse, @"URLResponse is not nil, connection still ongoing");
+    NSAssert(_URLResponse == nil, @"URLResponse is not nil, connection still ongoing");
     NSAssert(_HTTPStream == nil, @"HTTPStream is not nil, connection still ongoing");
     
     if (self.cachedResponse) {// Doesn't seem to happen

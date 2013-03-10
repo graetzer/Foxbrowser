@@ -98,12 +98,17 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"JSTools" ofType:@"js"];
     NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     [self stringByEvaluatingJavaScriptFromString:jsCode];
+    [self disableTouchCallout];
     [self stringByEvaluatingJavaScriptFromString:@"function FoxbrowserToolsLoaded() {return \"YES\";}"];
 }
 
 - (BOOL)JSToolsLoaded {
     NSString *val = [self stringByEvaluatingJavaScriptFromString:@"FoxbrowserToolsLoaded()"];
     return [val isEqualToString:@"YES"];
+}
+
+- (void)disableTouchCallout {
+    [self stringByEvaluatingJavaScriptFromString:@"document.body.style.webkitTouchCallout='none';"];
 }
 
 - (void)clearContent {

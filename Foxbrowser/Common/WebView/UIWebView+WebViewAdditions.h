@@ -37,6 +37,7 @@
 
 - (void)loadJSTools;
 - (BOOL)JSToolsLoaded;
+- (void)disableTouchCallout;
 - (void)clearContent;
 - (void)enableDoNotTrack;
 
