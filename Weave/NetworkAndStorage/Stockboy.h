@@ -63,6 +63,7 @@
 // test to see if a sync is in progress and a Condition to protect access and allow waiting on it
 + (NSCondition*) syncLock;
 + (BOOL) syncInProgress;
++ (void)setSyncInProgress:(BOOL)newVal;
 
 
 //returns the isCancelled flag of the stockboy's thread

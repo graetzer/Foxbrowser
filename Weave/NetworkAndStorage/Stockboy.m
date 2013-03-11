@@ -104,15 +104,14 @@ static NSDictionary *_gNetworkPaths = nil;
 }
 
 + (NSCondition*) syncLock { return _gSyncLock;}
-+ (BOOL) syncInProgress { return _gSyncInProgress;}
++ (BOOL)syncInProgress { return _gSyncInProgress;}
++ (void)setSyncInProgress:(BOOL)newVal {_gSyncInProgress = newVal;}
 
-+ (void) restock
-{
++ (void) restock {
   //if there is already one running, then do nothing
   
   [_gSyncLock lock];
-  if (!_gSyncInProgress)
-  {
+  if (!_gSyncInProgress) {
     [weaveService performSelectorOnMainThread:@selector(startProgressSpinnersWithMessage:)
                                    withObject:NSLocalizedString(@"connecting", @"connecting")
                                 waitUntilDone:NO];

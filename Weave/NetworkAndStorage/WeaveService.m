@@ -106,8 +106,11 @@ NSString *kWeavePrivateMode = @"privateMode";
     // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
     dispatch_async(_queue, ^{
         [[Stockboy syncLock] lock];
-        if ([Stockboy syncInProgress])
+        while([Stockboy syncInProgress])
             [[Stockboy syncLock] wait];
+        
+        [Stockboy setSyncInProgress:YES];
+        [[Stockboy syncLock] unlock];
 
         NSString *urlText = [NSString stringWithFormat:@"%@", url];
         
@@ -138,7 +141,11 @@ NSString *kWeavePrivateMode = @"privateMode";
                               @"sortindex" : @100};// Choosen without further information
         }
         
+        
         [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
+        
+        [[Stockboy syncLock] lock];
+        [Stockboy setSyncInProgress:NO];
         [[Stockboy syncLock] signal];
         [[Stockboy syncLock] unlock];
     });

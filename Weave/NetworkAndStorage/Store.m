@@ -327,8 +327,7 @@ static dispatch_once_t onceToken;
 }
 
 //deletes every item in the tabs table, clearing it
--(void) deleteTabs
-{
+- (void) deleteTabs {
 	const char *sql;
 	sqlite3_stmt *stmnt = nil;
 
@@ -375,8 +374,7 @@ static dispatch_once_t onceToken;
 ///////////////////////////////////////////////////////////////////////
 //LOADS TABS SORTED BY FRECENCY INTO MEMORY
 
--(void)loadTabsFromDB
-{
+- (void)loadTabsFromDB {
 	//ok, for easier use with the UI code, we're going to load the tabs into a structure with the following shape:
 	// * Array, one slot for each client, which is a:
 	//   * Dictionary, containing:
@@ -405,8 +403,7 @@ static dispatch_once_t onceToken;
 
 			NSMutableDictionary* thisClient = temporaryTabIndex[client];
 
-			if (thisClient == nil)
-			{
+			if (thisClient == nil) {
 				thisClient = [NSMutableDictionary dictionary];
 				thisClient[@"client"] = client;
 				thisClient[@"tabs"] = [NSMutableArray array];
@@ -442,8 +439,7 @@ static dispatch_once_t onceToken;
 }
 
 //LOADS HISTORY SORTED BY FRECENCY INTO MEMORY
-- (void) loadHistoryFromDB
-{
+- (void) loadHistoryFromDB {
 	sqlite3_stmt *dbStatement = nil;
 	const char *historyQuery = "SELECT * FROM history";
 	NSString* icon;
@@ -451,9 +447,9 @@ static dispatch_once_t onceToken;
 	NSMutableArray* newHistory = [[NSMutableArray alloc] init];
 
 	/* Load existing history */
-	if (sqlite3_prepare_v2(sqlDatabase, historyQuery, -1, &dbStatement, NULL) == SQLITE_OK) 
-	{
-		while (sqlite3_step(dbStatement) == SQLITE_ROW)  {
+	if (sqlite3_prepare_v2(sqlDatabase, historyQuery, -1, &dbStatement, NULL) == SQLITE_OK) {
+        
+		while (sqlite3_step(dbStatement) == SQLITE_ROW) {
 			icon = @"history.png";
 
 			NSMutableDictionary *historyItem = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -491,8 +487,7 @@ static dispatch_once_t onceToken;
 
 
 
-- (NSArray*) getBookmarksWithParent:(NSString*) parentid
-{
+- (NSArray*) getBookmarksWithParent:(NSString*) parentid {
 	//this is now a one-liner, with no database calls.
 	// we can't have multiple threads hitting the database or Bad Things happen sometimes
 	NSArray* result = hierarchicalBookmarks[parentid];
@@ -504,8 +499,7 @@ static dispatch_once_t onceToken;
 
 
 //input: all items in the folder, in a dictionary keyed by their unique id, for easy lookup
-- (NSArray*) sortFolderBookmarks:(NSMutableDictionary*)bookmarksKeyedById
-{
+- (NSArray*) sortFolderBookmarks:(NSMutableDictionary*)bookmarksKeyedById {
 	//ok, now sort the list according to the predecessor references.  HA!  how naive.
 	// It turns out that the places DB in most instances of Firefox is completely borked,
 	// but the Firefox code that reads it out and renders it into nice menus is basically a heuristic,
@@ -521,11 +515,9 @@ static dispatch_once_t onceToken;
 	NSMutableDictionary* bookmarksKeyedByPred = [NSMutableDictionary dictionary];
 
 	//collect up all the starts of lists
-	for (NSDictionary* item in [bookmarksKeyedById allValues])
-	{
+	for (NSDictionary* item in [bookmarksKeyedById allValues]) {
 		NSString* predecessor = item[@"predecessorid"];
-		if (bookmarksKeyedById[predecessor] == nil)
-		{
+		if (bookmarksKeyedById[predecessor] == nil) {
 			//we've found an item who's predecessor isn't in our list of all items in this folder, so it must be one of the 1..n sortedlist heads
 			[listHeads addObject:item];
 		}
@@ -538,9 +530,8 @@ static dispatch_once_t onceToken;
 
 	NSMutableDictionary* bookmark;
 
-	NSMutableArray* sortedResults = [NSMutableArray array];
-	for (NSMutableDictionary* head in listHeads)
-	{
+	NSMutableArray* sortedResults = [[NSMutableArray alloc] initWithCapacity:listHeads.count];
+	for (NSMutableDictionary* head in listHeads) {
 		[sortedResults addObject:head];
 		NSString* nextid = head[@"id"];
 		while ((bookmark = bookmarksKeyedByPred[nextid]) != nil) 
@@ -553,7 +544,7 @@ static dispatch_once_t onceToken;
 	//now strip out anything that isn't a bookmark or folder
 	NSPredicate* onlyFoldersAndBookmarks = [NSPredicate predicateWithFormat:@"(type == %@ || type == %@)", @"bookmark", @"folder"];  
 	[sortedResults filterUsingPredicate:onlyFoldersAndBookmarks];
-	return sortedResults;
+	return [sortedResults autorelease];
 }
 
 
@@ -728,8 +719,7 @@ static dispatch_once_t onceToken;
 
 
 ///////////////////////////////////////////////////////////////////////
--(BOOL) addBookmarkRecord:(NSDictionary*)bookmark 
-{
+- (BOOL) addBookmarkRecord:(NSDictionary*)bookmark {
 	//Insert the bookmark directly into the bookmarks table.
 	// we don't need to check the type, just stuff them in, putting in all the fields we have
 	const char *sql = "INSERT OR REPLACE INTO bookmarks ('id', 'url', 'title', 'favicon', 'type', 'parentid', 'predecessorid', 'description', 'modified', 'sortindex') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

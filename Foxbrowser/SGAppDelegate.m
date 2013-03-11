@@ -214,14 +214,12 @@ id<WeaveService> weaveService;
     return [_reachability isReachable];
 }
 
-- (void) startProgressSpinnersWithMessage:(NSString*)msg
-{
+- (void) startProgressSpinnersWithMessage:(NSString*)msg {
 	[[NSNotificationCenter defaultCenter] postNotificationName: kWeaveSyncStatusChangedNotification
                                                         object: nil userInfo: @{kWeaveMessageKey: msg}];
 }
 
-- (void) changeProgressSpinnersMessage:(NSString*)msg
-{
+- (void) changeProgressSpinnersMessage:(NSString*)msg {
 	[[NSNotificationCenter defaultCenter] postNotificationName: kWeaveSyncStatusChangedNotification
                                                         object: nil userInfo: @{kWeaveMessageKey: msg}];
 }
