@@ -192,10 +192,11 @@ id<WeaveService> weaveService;
 
 //put up an alert explaining what just went wrong
 - (void) reportErrorWithInfo: (NSDictionary*)errInfo; {
-#ifdef DEBUG
-    NSLog(@"Error: %@", errInfo[@"message"]);
-#endif
-    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:errInfo[@"title"] message:errInfo[@"message"] delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles:nil];
+    DLog(@"Error: %@", errInfo[@"message"]);
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:errInfo[@"title"]
+                                                    message:errInfo[@"message"]
+                                                   delegate:nil
+                                          cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles:nil];
     [alert show];
 }
 

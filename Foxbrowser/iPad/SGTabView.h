@@ -26,7 +26,7 @@
 
 @interface SGTabView : UIView
 
-@property (strong, nonatomic, readonly) UIButton *closeButton;
+@property (weak, nonatomic) UIButton *closeButton;
 @property (weak, nonatomic) UIViewController *viewController;
 @property (assign, nonatomic) BOOL selected;
 

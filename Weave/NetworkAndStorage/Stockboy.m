@@ -222,7 +222,9 @@ static NSDictionary *_gNetworkPaths = nil;
   //set the flag to "A-ok boss!"
   syncCompletedSuccessfully = YES;
   
-  [weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:NSLocalizedString(@"Authorizing", @"Authorizing") waitUntilDone:NO];
+  [weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:)
+                                 withObject:NSLocalizedString(@"Authorizing", @"Authorizing")
+                              waitUntilDone:NO];
   
   if ([weaveService canConnectToInternet]) 
   {   
@@ -258,7 +260,9 @@ static NSDictionary *_gNetworkPaths = nil;
 		{		
 		  if (![self isCancelled])
 		  {
-			[weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:NSLocalizedString(@"tabs", @"tabs") waitUntilDone:NO];
+			[weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:)
+                                           withObject:NSLocalizedString(@"tabs", @"tabs")
+                                        waitUntilDone:NO];
 			if ([[CryptoUtils getManager] storageVersion] >= 5) {
 				[self checkCryptoKeys];
 			}
@@ -268,14 +272,18 @@ static NSDictionary *_gNetworkPaths = nil;
 		  
 		  if (![self isCancelled])
 		  {
-			[weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:NSLocalizedString(@"Bookmarks", @"Bookmarks") waitUntilDone:NO];
+			[weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:)
+                                           withObject:NSLocalizedString(@"Bookmarks", @"Bookmarks")
+                                        waitUntilDone:NO];
 			[self updateBookmarks];
 			[weaveService performSelectorOnMainThread:@selector(refreshViews) withObject:nil waitUntilDone:NO];
 		  }
 		  
 		  if (![self isCancelled])
 		  {
-			[weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:) withObject:NSLocalizedString(@"history", @"history") waitUntilDone:NO];
+			[weaveService performSelectorOnMainThread:@selector(changeProgressSpinnersMessage:)
+                                           withObject:NSLocalizedString(@"history", @"history")
+                                        waitUntilDone:NO];
 			[self updateHistory];
 			[weaveService performSelectorOnMainThread:@selector(refreshViews) withObject:nil waitUntilDone:NO];
 		  }

@@ -59,15 +59,16 @@
         self.titleLabel.textColor = [UIColor darkGrayColor];
         [self addSubview:self.titleLabel];
         
-        _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.closeButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        [self.closeButton setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-        [self.closeButton setTitle:@"x" forState:UIControlStateNormal];
-        [self.closeButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        [self.closeButton setShowsTouchWhenHighlighted:YES];
-        self.closeButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:17.0];
-        [self addSubview:self.closeButton];
+        __strong UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        [button setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
+        [button setTitle:@"x" forState:UIControlStateNormal];
+        [button setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        [button setShowsTouchWhenHighlighted:YES];
+        button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:17.0];
+        [self addSubview:button];
         
+        self.closeButton = button;
         self.viewController = controller;
     }
     return self;

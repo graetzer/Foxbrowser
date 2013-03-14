@@ -20,11 +20,14 @@
 
 @interface SGHTTPURLProtocol : NSURLProtocol <NSStreamDelegate, NSURLAuthenticationChallengeSender>
 @property (strong, nonatomic) SGHTTPAuthenticationChallenge *authChallenge;
+@property (strong, nonatomic) NSHTTPURLResponse *URLResponse;
+
 
 + (void)registerProtocol;
 + (void)unregisterProtocol;
 
-+ (void)setAuthDelegate:(id<SGHTTPAuthDelegate>)delegate;
++ (id<SGHTTPAuthDelegate>)authDelegate;
++ (void)setAuthDelegate:(id<SGHTTPAuthDelegate>)delegate;//weak
 
 /// Set values for http request fields that overwrite any of the values in the requests
 /// Useful for HTTP Agent

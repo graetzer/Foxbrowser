@@ -128,13 +128,15 @@
         return;
     }
     
-    [UIView animateWithDuration:kAddTabDuration
-                     animations:^{
-                         [self.tabsView addTab:childController];
-                     }
-                     completion:^(BOOL finished){
-                         [childController didMoveToParentViewController:self];
-                     }];
+    [UIView transitionWithView:self.tabsView
+                      duration:kAddTabDuration
+                       options:UIViewAnimationOptionAllowAnimatedContent
+                    animations:^{
+                        [self.tabsView addTab:childController];
+                    }
+                    completion:^(BOOL finished){
+                        [childController didMoveToParentViewController:self];
+                    }];
 }
 
 - (void)showViewController:(UIViewController *)viewController index:(NSUInteger)index {
@@ -191,14 +193,17 @@
                                     [self updateChrome];
                                 }];
     } else {
-        [UIView animateWithDuration:kRemoveTabDuration
-                         animations:^{
-                             [self.tabsView removeTab:index];
-                         }
-                         completion:^(BOOL finished){
-                             [viewController removeFromParentViewController];
-                             [self updateChrome];
-                         }];
+        [UIView transitionWithView:self.tabsView
+                          duration:kRemoveTabDuration
+                           options:UIViewAnimationOptionAllowAnimatedContent
+                        animations:^{
+                            [self.tabsView removeTab:index];
+                        }
+                        completion:^(BOOL finished){
+                            [viewController.view removeFromSuperview];//Just in case
+                            [viewController removeFromParentViewController];
+                            [self updateChrome];
+                        }];
     }
 }
 

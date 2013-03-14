@@ -10,7 +10,7 @@
 
 static BOOL SSLValidatesCertificateChain = NO;
 __strong static NSLock* VariableLock;
-__strong static id<SGHTTPAuthDelegate> AuthDelegate;
+__weak static id<SGHTTPAuthDelegate> AuthDelegate;
 __strong static NSMutableDictionary *HTTPHeaderFields;
 
 typedef enum {
@@ -24,8 +24,6 @@ typedef enum {
     NSInputStream *_HTTPStream;
     CFHTTPMessageRef _HTTPMessage;
     
-    //Response
-    NSHTTPURLResponse *_URLResponse;
     NSInteger _authenticationAttempts;
     
     NSMutableData *_buffer;
@@ -49,6 +47,14 @@ typedef enum {
     [VariableLock lock];
     AuthDelegate = delegate;
 	[VariableLock unlock];
+}
+
++ (id<SGHTTPAuthDelegate>)authDelegate {
+    id<SGHTTPAuthDelegate> delegate;
+    [VariableLock lock];
+    delegate = AuthDelegate;
+	[VariableLock unlock];
+    return delegate;
 }
 
 + (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field {
@@ -257,12 +263,9 @@ typedef enum {
         if (location &&((statusCode >= 301 && statusCode <= 303) || statusCode == 307 || statusCode == 308)) {
             DLog(@"Redirect status code %d, Loc: %@", statusCode, location);
 
-            NSURL *nextURL = [NSURL URLWithString:location];
-            if (!nextURL)
-                nextURL = [NSURL URLWithString:location relativeToURL:URL];
-            
+            NSURL *nextURL = [NSURL URLWithString:location relativeToURL:URL];
             if (nextURL) {
-                NSMutableURLRequest *nextRequest;//
+                NSMutableURLRequest *nextRequest;
                 if (statusCode == 301 || statusCode == 307 || statusCode == 308) {
                     nextRequest = [self.request mutableCopy];
                     nextRequest.URL = nextURL;
@@ -270,11 +273,12 @@ typedef enum {
                     nextRequest = [NSMutableURLRequest requestWithURL:nextURL
                                                           cachePolicy:self.request.cachePolicy
                                                       timeoutInterval:self.request.timeoutInterval];
+                    [nextRequest setValue:[self.request valueForHTTPHeaderField:@"Accept"] forHTTPHeaderField:@"Accept"];
                 }
+                
                 NSString *referer = [self.request valueForHTTPHeaderField:@"Referer"];
                 if (!referer)
                     referer = self.request.URL.absoluteString;
-                
                 [nextRequest setValue:referer forHTTPHeaderField:@"Referer"];
                 [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:_URLResponse];
             }
@@ -404,15 +408,12 @@ typedef enum {
 }
 
 - (void)handleCookiesWithURLResponse:(NSHTTPURLResponse *)response {
-//    NSString *cookieString = (response.allHeaderFields)[@"Set-Cookie"];
-//    if (cookieString) {
-        NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-        NSArray *cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:response.allHeaderFields
-                                                                  forURL:response.URL];
-        [cookieStorage setCookies:cookies
-                           forURL:response.URL
-                  mainDocumentURL:self.request.mainDocumentURL];
-    //}
+    NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    NSArray *cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:response.allHeaderFields
+                                                              forURL:response.URL];
+    [cookieStorage setCookies:cookies
+                       forURL:response.URL
+              mainDocumentURL:self.request.mainDocumentURL];
 }
 
 #pragma mark - NSURLAuthenticationChallengeSender

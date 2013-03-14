@@ -304,7 +304,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     
     DLog(@"WebView error code: %d", error.code);
     //ignore these
-    if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"])
+    if (error.code == NSURLErrorCancelled)// || [error.domain isEqualToString:@"WebKitErrorDomain"])
         return;
     
     if (error.code == NSURLErrorCannotFindHost

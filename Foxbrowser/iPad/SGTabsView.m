@@ -96,7 +96,7 @@
 }
 
 - (void)removeTab:(NSUInteger)index {
-    SGTabView *oldTab = (self.tabs)[index];
+    SGTabView *oldTab = self.tabs[index];
     if (oldTab) {
         [self.tabs removeObjectAtIndex:index];
         [oldTab removeFromSuperview];
