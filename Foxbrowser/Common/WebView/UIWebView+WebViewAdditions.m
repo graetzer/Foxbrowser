@@ -98,7 +98,6 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"JSTools" ofType:@"js"];
     NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     [self stringByEvaluatingJavaScriptFromString:jsCode];
-    [self disableTouchCallout];
     [self stringByEvaluatingJavaScriptFromString:@"function FoxbrowserToolsLoaded() {return \"YES\";}"];
 }
 
@@ -147,6 +146,8 @@
 #pragma mark - Tag stuff
 
 - (NSDictionary *)tagsForPosition:(CGPoint)pt {
+    if (![self JSToolsLoaded]) [self loadJSTools];
+    
     // get the Tags at the touch location
     NSString *tagString = [self stringByEvaluatingJavaScriptFromString:
                       [NSString stringWithFormat:@"FoxbrowserGetHTMLElementsAtPoint(%i,%i);",(NSInteger)pt.x,(NSInteger)pt.y]];

@@ -78,9 +78,9 @@
     _addButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     [_addButton.button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
     
+    [self.headerView addSubview:_toolbar];
     [self.headerView addSubview:_tabsView];
     [self.headerView addSubview:_addButton];
-    [self.headerView addSubview:_toolbar];
      
     [self.view addSubview:self.headerView];
 }

@@ -8,32 +8,44 @@
 
 #import <Foundation/Foundation.h>
 #import <CFNetwork/CFNetwork.h>
+#import <Security/SecureTransport.h>
+
 #import "SGURLProtocol.h"
 
-@protocol SGHTTPAuthDelegate <NSObject>
+@class SGHTTPURLProtocol, SGHTTPAuthenticationChallenge;
 
-- (void)URLProtocol:(NSURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+@protocol SGHTTPURLProtocolDelegate <NSObject>
+
+@optional
+- (void)URLProtocol:(SGHTTPURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (BOOL)URLProtocol:(SGHTTPURLProtocol *)protocol canIgnoreUntrustedHost:(SecTrustRef)trust;
 
 @end
 
-@class SGHTTPAuthenticationChallenge;
 
 @interface SGHTTPURLProtocol : NSURLProtocol <NSStreamDelegate, NSURLAuthenticationChallengeSender>
-@property (strong, nonatomic) SGHTTPAuthenticationChallenge *authChallenge;
-@property (strong, nonatomic) NSHTTPURLResponse *URLResponse;
+@property (strong, nonatomic, readonly) SGHTTPAuthenticationChallenge *authChallenge;
+@property (strong, nonatomic, readonly) NSHTTPURLResponse *URLResponse;
 
 
 + (void)registerProtocol;
 + (void)unregisterProtocol;
 
-+ (id<SGHTTPAuthDelegate>)authDelegate;
-+ (void)setAuthDelegate:(id<SGHTTPAuthDelegate>)delegate;//weak
++ (id<SGHTTPURLProtocolDelegate>)protocolDelegate;
++ (void)setProtocolDelegate:(id<SGHTTPURLProtocolDelegate>)delegate;//weak
 
 /// Set values for http request fields that overwrite any of the values in the requests
 /// Useful for HTTP Agent
 + (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field;
 
-+ (BOOL)SSLValidatesCertificateChain;
-+ (void)setSSLValidatesCertificateChain:(BOOL)validate;
+/// Default is YES
++ (BOOL)validatesSecureCertificate;
++ (void)setValidatesSecureCertificate:(BOOL)validate;
 
 @end
+
+typedef NS_ENUM(NSInteger, SGURLProtocolError) {
+    SGURLProtocolErrorStreamCreation = -1, // HTTP request stream could not be created
+    SGURLProtocolErrorInvalidResponse = -200, // HTTP Response was malformed
+    SGURLProtocolErrorNoCachedResponse = -304 // response contained HTTP status code 304, but no cached response existed
+};

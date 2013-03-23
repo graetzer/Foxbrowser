@@ -21,22 +21,13 @@ NSString *kWeaveShowedFirstRunPage = @"showedFirstRunPage";
 NSString *kWeaveUseNativeApps = @"useNativeApps";
 NSString *kWeavePrivateMode = @"privateMode";
 
-@implementation WeaveOperations {
-    dispatch_queue_t _queue;
-}
+@implementation WeaveOperations
 
 + (WeaveOperations *)sharedOperations {
     static dispatch_once_t once;
     static WeaveOperations *shared;
     dispatch_once(&once, ^ { shared = [[self alloc] init]; });
     return shared;
-}
-
-- (id)init {
-    if (self = [super init]) {
-        _queue = dispatch_queue_create("Weave Updater", DISPATCH_QUEUE_SERIAL);
-    }
-    return self;
 }
 
 - (NSURL *)parseURLString:(NSString *)input {
@@ -103,51 +94,29 @@ NSString *kWeavePrivateMode = @"privateMode";
 }
 
 - (void)addHistoryURL:(NSURL *)url title:(NSString *)title {    
-    // Queue is configured to run just 1 operation at the same time, so there shouldn't be illegal states
-    dispatch_async(_queue, ^{
-        [[Stockboy syncLock] lock];
-        while([Stockboy syncInProgress])
-            [[Stockboy syncLock] wait];
-        
-        [Stockboy setSyncInProgress:YES];
-        [[Stockboy syncLock] unlock];
 
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        
         NSString *urlText = [NSString stringWithFormat:@"%@", url];
         
+        NSDictionary *item;
         // Check if this history entry already exists
-        NSDictionary *existing = nil;
-        for (NSDictionary *entry in [[Store getStore] getHistory]) {
-            if ([urlText isEqualToString:entry[@"url"]]) {
-                existing = entry;
-            }
+        NSArray *history = [[Store getStore] getHistory];
+        for (NSUInteger i = 0; i < history.count; i++) {
+            item = history[i];
+            if ([urlText isEqualToString:item[@"url"]]) break;
+            item = nil;
         }
         
-        NSDictionary *historyEntry = nil;
-        if (existing) {// There is a differnce between the two dictionary formats
-            int sortIndex = [existing[@"sortindex"] intValue];
-            
-            historyEntry = @{ @"id" : existing[@"id"],
-                              @"histUri" : existing[@"url"],
-                              @"title" : existing[@"title"],
-                              @"modified" : @([[NSDate date] timeIntervalSince1970]),
-                              @"sortindex" : @(sortIndex + 100)};
-        } else {
+        if (!item) {
             NSString *titleSrc = title != nil ? title : [NSString stringWithFormat:@"%@", url.host];
-            
-            historyEntry = @{ @"id" : [NSString stringWithFormat:@"abc%i", url.hash],// No idea about this
-                              @"histUri" : urlText,
-                              @"title" : titleSrc,
-                              @"modified" : @([[NSDate date] timeIntervalSince1970]),
-                              @"sortindex" : @100};// Choosen without further information
+            item = @{@"id" : [NSString stringWithFormat:@"org.graetzer.%i", url.hash],
+                         @"url" : urlText,
+                         @"title" : titleSrc,
+                         @"sortindex" : @0,
+                         @"icon": @"history.png"};
         }
-        
-        
-        [[Store getStore] updateHistoryAdding:@[historyEntry] andRemoving:nil fullRefresh:NO];
-        
-        [[Stockboy syncLock] lock];
-        [Stockboy setSyncInProgress:NO];
-        [[Stockboy syncLock] signal];
-        [[Stockboy syncLock] unlock];
+        [[Store getStore] addTempHistoryObject:item];
     });
 }
 

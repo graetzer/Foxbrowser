@@ -4,7 +4,6 @@
 <dict>
 	<key>PreferenceSpecifiers</key>
 	<array>
-
 		<dict>
 			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
@@ -37,7 +36,7 @@
 			<key>DefaultValue</key>
 			<true/>
 		</dict>
-        <dict>
+		<dict>
 			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
 			<key>Title</key>
@@ -63,7 +62,7 @@
 			<key>Title</key>
 			<string>Experimental</string>
 		</dict>
-        <dict>
+		<dict>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>DefaultValue</key>

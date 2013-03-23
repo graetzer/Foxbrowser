@@ -93,7 +93,7 @@ id<WeaveService> weaveService;
 	}
     //check to see if we were suspended for 5 minutes or more, and refresh if true
     double slept = [defaults doubleForKey:kWeaveBackgroundedAtTime];
-    double now =[[NSDate date] timeIntervalSince1970];
+    double now = [[NSDate date] timeIntervalSince1970];
     if ((now - slept) >= 60 * 5) {
         [Stockboy restock];
     }
@@ -131,9 +131,7 @@ id<WeaveService> weaveService;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    [self stopProgressSpinners];
     [Stockboy cancel];
-    
     [self.browserViewController saveCurrentTabs];
 }
 
@@ -141,11 +139,15 @@ id<WeaveService> weaveService;
     //stop timers, threads, spinner animations, etc.
     // note the time we were suspended, so we can decide whether to do a refresh when we are resumed
     [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970] forKey:kWeaveBackgroundedAtTime];
-    [self stopProgressSpinners];
     [Stockboy cancel];
+    [self stopProgressSpinners];
     [self.browserViewController saveCurrentTabs];
-    
     [[GAI sharedInstance] dispatch];
+    
+    // Call last, blocks
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        [[Store getStore] saveChanges];
+    });
 }
 
 #pragma mark - WeaveService

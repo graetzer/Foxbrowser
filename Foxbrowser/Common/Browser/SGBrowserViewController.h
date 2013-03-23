@@ -27,7 +27,7 @@
 @class SGCredentialsPrompt;
 
 // Container for SGWebViewController & SGBlankViewController
-@interface SGBrowserViewController : UIViewController <SGHTTPAuthDelegate, UIAlertViewDelegate>
+@interface SGBrowserViewController : UIViewController <SGHTTPURLProtocolDelegate, UIAlertViewDelegate>
 
 // =========== Abstract =============
 

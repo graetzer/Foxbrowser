@@ -28,16 +28,20 @@
 #import "GAI.h"
 
 #define HTTP_AGENT5 @"Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3"
+#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_0_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10B146 Safari/8536.25"
 
 @implementation SGBrowserViewController {
     NSTimer *_timer;
     int _dialogResult;
+    NSMutableArray *_allowedHosts;
 }
 
 + (void)initialize {
-    if ([[UIDevice currentDevice].systemVersion doubleValue] < 6) {
+    if ([[UIDevice currentDevice].systemVersion doubleValue] < 6)
         [SGHTTPURLProtocol setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
-    }
+    else
+        [SGHTTPURLProtocol setValue:HTTP_AGENT6 forHTTPHeaderField:@"User-Agent"];
+    
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
         [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
         [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"DNT"];
@@ -47,10 +51,10 @@
 
 - (void)willEnterForeground {
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
-        [SGHTTPURLProtocol setAuthDelegate:self];
+        [SGHTTPURLProtocol setProtocolDelegate:self];
         [SGHTTPURLProtocol registerProtocol];
     } else {
-        [SGHTTPURLProtocol setAuthDelegate:nil];
+        [SGHTTPURLProtocol setProtocolDelegate:nil];
         [SGHTTPURLProtocol unregisterProtocol];
     }
 }
@@ -65,7 +69,7 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    _timer = [NSTimer scheduledTimerWithTimeInterval:5
+    _timer = [NSTimer scheduledTimerWithTimeInterval:10
                                               target:self
                                             selector:@selector(saveCurrentTabs)
                                             userInfo:nil repeats:YES];
@@ -289,7 +293,7 @@
 }
 
 - (void)saveCurrentTabs {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         
         NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
         for (UIViewController *controller in self.childViewControllers) {
@@ -309,16 +313,16 @@
 
 #pragma mark - HTTP Authentication
 
-- (void)URLProtocol:(NSURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+- (void)URLProtocol:(SGHTTPURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     if (!self.credentialsPrompt) {
         // The protocol states you shall execute the response on the same thread.
         // So show the prompt on the main thread and wait until the result is finished
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            _dialogResult = -1;
+        dispatch_async(dispatch_get_main_queue(), ^{
             self.credentialsPrompt = [[SGCredentialsPrompt alloc] initWithChallenge:challenge delegate:self];
             [self.credentialsPrompt show];
         });
         
+        _dialogResult = -1;
         NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
         while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
             LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
@@ -343,8 +347,37 @@
     }
 }
 
+- (BOOL)URLProtocol:(SGHTTPURLProtocol *)protocol canIgnoreUntrustedHost:(SecTrustRef)trust {
+    
+    NSString *host = protocol.request.URL.host;
+    if (!_allowedHosts)
+        _allowedHosts = [NSMutableArray arrayWithCapacity:10];
+    else if ([_allowedHosts containsObject:host])
+        return YES;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *warning = NSLocalizedString(@"Failed to verify the identity of \"%@\"\nThis is potentially dangerous. Would you like to continue anyway?", nil);
+        NSString *message = [NSString stringWithFormat:warning, host];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Verify Server Identity", @"Untrusted certificate")
+                                                        message:message
+                                                       delegate:self
+                                              cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
+                                              otherButtonTitles:NSLocalizedString(@"Continue", nil), nil];
+        [alert show];
+    });
+
+    [_allowedHosts addObject:host];// Remove it later if user taps cancel
+    
+    return NO;
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     _dialogResult = buttonIndex;
+    
+    if (alertView != self.credentialsPrompt) {
+        if (buttonIndex == 1) [self reload];
+        else [_allowedHosts removeLastObject];
+    }
 }
 
 @end

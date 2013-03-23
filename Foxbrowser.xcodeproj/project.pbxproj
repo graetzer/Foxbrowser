@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		F40AF1E516D2C9AB00EDFD02 /* JSSearchTools.js in Resources */ = {isa = PBXBuildFile; fileRef = F40AF1E416D2C9AA00EDFD02 /* JSSearchTools.js */; };
-		F40DFBBD16125CDB005CE2F3 /* NSData+Compress.m in Sources */ = {isa = PBXBuildFile; fileRef = F40DFBB516125CDB005CE2F3 /* NSData+Compress.m */; };
 		F40DFBBE16125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = F40DFBB716125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.m */; };
 		F40DFBBF16125CDB005CE2F3 /* SGHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = F40DFBB916125CDB005CE2F3 /* SGHTTPURLProtocol.m */; };
 		F41E7FD7169341FF0036AE81 /* close_x.png in Resources */ = {isa = PBXBuildFile; fileRef = F41E7FD4169341FF0036AE81 /* close_x.png */; };
@@ -262,12 +261,12 @@
 		F4FE2C56159B6C58001B04D7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE2C55159B6C58001B04D7 /* main.m */; };
 		F4FE2C5A159B6C58001B04D7 /* SGAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE2C59159B6C58001B04D7 /* SGAppDelegate.m */; };
 		F4FE7F2015B48F8900471BD1 /* SGAddButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FE7F1F15B48F8900471BD1 /* SGAddButton.m */; };
+		F4FFEC5E16F91F9E007024EF /* CanonicalRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FFEC5A16F91F9E007024EF /* CanonicalRequest.m */; };
+		F4FFEC5F16F91F9E007024EF /* NSData+Compress.m in Sources */ = {isa = PBXBuildFile; fileRef = F4FFEC5C16F91F9E007024EF /* NSData+Compress.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F40AF1E416D2C9AA00EDFD02 /* JSSearchTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = JSSearchTools.js; sourceTree = "<group>"; };
-		F40DFBB416125CDB005CE2F3 /* NSData+Compress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Compress.h"; sourceTree = "<group>"; };
-		F40DFBB516125CDB005CE2F3 /* NSData+Compress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Compress.m"; sourceTree = "<group>"; };
 		F40DFBB616125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGHTTPAuthenticationChallenge.h; sourceTree = "<group>"; };
 		F40DFBB716125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGHTTPAuthenticationChallenge.m; sourceTree = "<group>"; };
 		F40DFBB816125CDB005CE2F3 /* SGHTTPURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGHTTPURLProtocol.h; sourceTree = "<group>"; };
@@ -796,6 +795,10 @@
 		F4FE2C59159B6C58001B04D7 /* SGAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SGAppDelegate.m; sourceTree = "<group>"; };
 		F4FE7F1E15B48F8900471BD1 /* SGAddButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGAddButton.h; sourceTree = "<group>"; };
 		F4FE7F1F15B48F8900471BD1 /* SGAddButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGAddButton.m; sourceTree = "<group>"; };
+		F4FFEC5916F91F9E007024EF /* CanonicalRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanonicalRequest.h; sourceTree = "<group>"; };
+		F4FFEC5A16F91F9E007024EF /* CanonicalRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CanonicalRequest.m; sourceTree = "<group>"; };
+		F4FFEC5B16F91F9E007024EF /* NSData+Compress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Compress.h"; sourceTree = "<group>"; };
+		F4FFEC5C16F91F9E007024EF /* NSData+Compress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Compress.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -832,13 +835,12 @@
 		F40DFBB316125CDB005CE2F3 /* SGURLProtocol */ = {
 			isa = PBXGroup;
 			children = (
-				F40DFBB416125CDB005CE2F3 /* NSData+Compress.h */,
-				F40DFBB516125CDB005CE2F3 /* NSData+Compress.m */,
+				F4FFEC5616F91F9E007024EF /* Utility */,
+				F40DFBBC16125CDB005CE2F3 /* SGURLProtocol.h */,
 				F40DFBB616125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.h */,
 				F40DFBB716125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.m */,
 				F40DFBB816125CDB005CE2F3 /* SGHTTPURLProtocol.h */,
 				F40DFBB916125CDB005CE2F3 /* SGHTTPURLProtocol.m */,
-				F40DFBBC16125CDB005CE2F3 /* SGURLProtocol.h */,
 			);
 			path = SGURLProtocol;
 			sourceTree = "<group>";
@@ -1706,6 +1708,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		F4FFEC5616F91F9E007024EF /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				F4FFEC5916F91F9E007024EF /* CanonicalRequest.h */,
+				F4FFEC5A16F91F9E007024EF /* CanonicalRequest.m */,
+				F4FFEC5B16F91F9E007024EF /* NSData+Compress.h */,
+				F4FFEC5C16F91F9E007024EF /* NSData+Compress.m */,
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1941,7 +1954,6 @@
 				F485A5F815B786FA00C7304E /* SettingsController.m in Sources */,
 				F459C15F15C6AF3200740236 /* SGBottomView.m in Sources */,
 				F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */,
-				F40DFBBD16125CDB005CE2F3 /* NSData+Compress.m in Sources */,
 				F40DFBBE16125CDB005CE2F3 /* SGHTTPAuthenticationChallenge.m in Sources */,
 				F40DFBBF16125CDB005CE2F3 /* SGHTTPURLProtocol.m in Sources */,
 				F46A6387167C31CE0004BE43 /* ASIAuthenticationDialog.m in Sources */,
@@ -2009,6 +2021,8 @@
 				F4A165B816DD390A007F95AF /* GTMOAuth2ViewControllerTouch.m in Sources */,
 				F4A165BA16DD390A007F95AF /* GTMObjC2Runtime.m in Sources */,
 				F4A165BB16DD390A007F95AF /* OpenInChromeController.m in Sources */,
+				F4FFEC5E16F91F9E007024EF /* CanonicalRequest.m in Sources */,
+				F4FFEC5F16F91F9E007024EF /* NSData+Compress.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

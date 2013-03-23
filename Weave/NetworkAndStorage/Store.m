@@ -93,7 +93,9 @@
 
 @end
 
-@implementation Store
+@implementation Store {
+    NSMutableArray *_tempHistory;
+}
 
 // The singleton instance
 static __strong Store* _gStore;
@@ -136,6 +138,8 @@ static dispatch_once_t onceToken;
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *documentsDir = paths[0];
 		NSString *databasePath = [documentsDir stringByAppendingString:DATABASE_NAME];
+        
+        _tempHistory = [[NSMutableArray alloc] initWithCapacity:10];
 		
 		/* DB already exists */
 		success = [fileManager fileExistsAtPath:databasePath];
@@ -311,19 +315,46 @@ static dispatch_once_t onceToken;
 	return YES;	
 }
 
-- (NSArray*)  getTabs
-{
+- (NSArray*) getTabs {
 	return tabs;
 }
 
-- (NSArray*) getHistory
-{
+- (NSArray*) getHistory {
 	return history;
 }
 
-- (NSArray*) getBookmarks
-{
+- (NSArray*) getBookmarks {
 	return bookmarkListSortedByFrecency;
+}
+
+- (void)addTempHistoryObject:(NSDictionary *)item {
+    [history addObject:item];// Shouldn't lead to errors
+    
+    [[Stockboy syncLock] lock];
+    while([Stockboy syncInProgress])
+        [[Stockboy syncLock] wait];
+    
+    int sortIndex = [item[@"sortindex"] intValue];
+    NSDictionary *historyEntry = @{ @"id" : item[@"id"],
+                                    @"histUri" : item[@"url"],
+                                    @"title" : item[@"title"],
+                                    @"modified" : @([[NSDate date] timeIntervalSince1970]),
+                                    @"sortindex" : @(sortIndex + 100)};
+    [_tempHistory addObject:historyEntry];
+    [[Stockboy syncLock] unlock];
+}
+
+- (void)saveChanges {
+    [[Stockboy syncLock] lock];
+    if (![Stockboy syncInProgress] && _tempHistory.count > 0) {
+        [self beginTransaction];
+        
+        for (NSDictionary* historyItem in _tempHistory) [self addHistoryItem:historyItem];
+        [_tempHistory removeAllObjects];
+        
+        [self endTransaction];
+    }
+    [[Stockboy syncLock] unlock];
 }
 
 //deletes every item in the tabs table, clearing it
@@ -832,29 +863,22 @@ static dispatch_once_t onceToken;
 	[self beginTransaction];
 
 	//if we were told that this was a full refresh, then empty the database
-	if (full)
-	{
-		[self deleteHistory];
-	}
+	if (full) [self deleteHistory];
 
 	//if we are _not_ doing a complete refresh, delete all the dead history entries, before adding the new ones
-	if (!full)
-	{
+	if (!full) {
 		for (NSDictionary* deletedHistoryItem in removedHistory) 
-		{
-			[self removeHistoryItem: deletedHistoryItem];
-		}
+			[self removeHistoryItem:deletedHistoryItem];
 	}
 
 	// Second, insert all the new history entries 
-	for (NSDictionary* historyItem in addedHistory) 
-	{
-		[self addHistoryItem:historyItem];
-	}
-
-	if (full) {
-		[self updateTimestamp:@"fullhistory"];
-	}
+	for (NSDictionary* historyItem in addedHistory) [self addHistoryItem:historyItem];
+    
+    for (NSDictionary* historyItem in _tempHistory) [self addHistoryItem:historyItem];
+    
+    [_tempHistory removeAllObjects];
+    
+	if (full) [self updateTimestamp:@"fullhistory"];
 	
 	[self updateTimestamp:@"history"];
 	[self endTransaction];
@@ -868,14 +892,10 @@ static dispatch_once_t onceToken;
 	sqlite3_stmt *stmnt = nil;
 	BOOL result = NO;
 
-	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) 
-	{
+	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) {
 		NSLog(@"Could not prepare history item statement");
-	}
-	else
-	{    
-		@try
-		{
+	} else {    
+		@try {
 			//if it has a url, then create and save the expected path to its favicon
 			NSString* faviconPath = @""; //unused
 
@@ -899,18 +919,15 @@ static dispatch_once_t onceToken;
 				result = YES;
 		}
 
-		@catch (NSException *exception) 
-		{
+		@catch (NSException *exception) {
 			NSLog(@"Malformed history item data: %@, %@",[exception name], [exception reason]);
             [[GAI sharedInstance].defaultTracker sendException:YES
                                                withDescription:@"Malformed history item data: %@, %@", [exception name], [exception reason]];
 		}
 
-		@finally 
-		{
+		@finally {
 			int resultCode = sqlite3_finalize(stmnt);
-			if (resultCode != SQLITE_OK)
-			{
+			if (resultCode != SQLITE_OK) {
 				DLog(@"Error storing history item: %d)", resultCode);
 				result = NO;
 			}
@@ -921,8 +938,7 @@ static dispatch_once_t onceToken;
 }
 
 //SHOULD REMOVE THE FAVICON TOO
-- (BOOL) removeHistoryItem: (NSDictionary*)historyItem
-{
+- (BOOL) removeHistoryItem: (NSDictionary*)historyItem {
 	const char *sql;
 	sqlite3_stmt *stmnt = nil;
 	NSString* id = historyItem[@"id"];

@@ -16,36 +16,27 @@
   previousFailureCount:(NSInteger)failureCount
        failureResponse:(NSHTTPURLResponse *)URLResponse
                 sender:(id <NSURLAuthenticationChallengeSender>)sender {
-    NSParameterAssert(response);
+    NSParameterAssert(response != nil);
+    NSParameterAssert(sender != nil);
     
     // Try to create an authentication object from the response
     _HTTPAuthentication = CFHTTPAuthenticationCreateFromResponse(NULL, response);
-    if (![self CFHTTPAuthentication]) {
+    if (!_HTTPAuthentication || !CFHTTPAuthenticationIsValid(_HTTPAuthentication, NULL))
         return nil;
-    }
     
-    // NSURLAuthenticationChallenge only handles user and password
-    if (!CFHTTPAuthenticationIsValid([self CFHTTPAuthentication], NULL)) {
+    if (!CFHTTPAuthenticationRequiresUserNameAndPassword(_HTTPAuthentication))
         return nil;
-    }
-    
-    if (!CFHTTPAuthenticationRequiresUserNameAndPassword([self CFHTTPAuthentication])) {
-        return nil;
-    }
-    
     
     // Fail if we can't retrieve decent protection space info
-    CFArrayRef authenticationDomains = CFHTTPAuthenticationCopyDomains([self CFHTTPAuthentication]);
+    CFArrayRef authenticationDomains = CFHTTPAuthenticationCopyDomains(_HTTPAuthentication);
     NSURL *URL = [(__bridge NSArray *)authenticationDomains lastObject];
     CFRelease(authenticationDomains);
     
     if (!URL || ![URL host])
-    {
         return nil;
-    }
     
     // Fail for an unsupported authentication method
-    CFStringRef authMethod = CFHTTPAuthenticationCopyMethod([self CFHTTPAuthentication]);
+    CFStringRef authMethod = CFHTTPAuthenticationCopyMethod(_HTTPAuthentication);
     NSString *authenticationMethod;
     if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic]) {
         authenticationMethod = NSURLAuthenticationMethodHTTPBasic;
@@ -59,21 +50,18 @@
     }
     CFRelease(authMethod);
     
-    
     // Initialise
     CFStringRef realm = CFHTTPAuthenticationCopyRealm([self CFHTTPAuthentication]);
     
     NSInteger port = 80;
-    
     if ([URL port]) {
-        port = [[URL port] integerValue];
+        port = [URL.port integerValue];
     } else {
-        NSString *scheme = [[URL scheme] lowercaseString];
-        if ([scheme isEqualToString:@"http"]) {
+        NSString *scheme = [URL.scheme lowercaseString];
+        if ([scheme isEqualToString:@"http"])
             port = 80;
-        } else if ([scheme isEqualToString:@"https"]) {
+        else if ([scheme isEqualToString:@"https"])
             port = 443;
-        }
     }
     
     
@@ -89,7 +77,7 @@
     
     NSError *error = [NSError errorWithDomain:@"org.graetzer.http"
                                          code:401
-                                     userInfo:@{NSLocalizedDescriptionKey:@"Failed to authenticate"}];
+                                     userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"Failed to authenticate", NULL)}];
     self = [super initWithProtectionSpace:protectionSpace
                       proposedCredential:credential
                     previousFailureCount:failureCount
@@ -97,13 +85,10 @@
                                    error:error
                                   sender:sender];
     
-    
-    // Tidy up
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     CFRelease(_HTTPAuthentication);
 }
 

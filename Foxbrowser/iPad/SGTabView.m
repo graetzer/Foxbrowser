@@ -49,7 +49,7 @@
         self.tabColor = kTabColor;
         self.tabDarkerColor = kTabDarkerColor;
         
-        self.titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        self.titleLabel = [[UILabel alloc] initWithFrame:frame];
         self.titleLabel.textAlignment = UITextAlignmentCenter;
         self.titleLabel.lineBreakMode = UILineBreakModeTailTruncation;
         self.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;

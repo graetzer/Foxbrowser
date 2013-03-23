@@ -271,7 +271,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     [self dismissSearchToolbar];
     self.loading = YES;
     [self.browserViewController updateChrome];
-    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:2.5
+    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:3
                                                     target:self
                                                   selector:@selector(prepareWebView)
                                                   userInfo:nil repeats:YES];
@@ -280,7 +280,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     [_updateTimer invalidate];
     _updateTimer = nil;
-    [self prepareWebView];
+    
+    [self.webView disableTouchCallout];
+    [self.webView loadJSTools];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
+        [self.webView enableDoNotTrack];
     
     self.title = [webView title];
     self.loading = NO;
@@ -288,12 +292,12 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
         self.request.URL = [NSURL URLWithUnicodeString:webLoc];
     
-    [self.browserViewController updateChrome];
     // Private mode
     //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
         [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     //}
     
+    [self.browserViewController updateChrome];
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 
@@ -304,8 +308,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     
     DLog(@"WebView error code: %d", error.code);
     //ignore these
-    if (error.code == NSURLErrorCancelled)// || [error.domain isEqualToString:@"WebKitErrorDomain"])
-        return;
+    if ([error.domain isEqual:NSURLErrorDomain] && error.code == NSURLErrorCancelled)
+        return;// || [error.domain isEqualToString:@"WebKitErrorDomain"])
     
     if (error.code == NSURLErrorCannotFindHost
         || error.code == NSURLErrorDNSLookupFailed
@@ -337,13 +341,14 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 - (void)prepareWebView {
-    [self.browserViewController updateChrome];
     [self.webView disableTouchCallout];
-    if (![self.webView JSToolsLoaded]) {
-        [self.webView loadJSTools];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
-            [self.webView enableDoNotTrack];
-    }
+    self.title = [self.webView title];
+    [self.browserViewController updateChrome];
+//    if (![self.webView JSToolsLoaded]) {
+//        [self.webView loadJSTools];
+//        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
+//            [self.webView enableDoNotTrack];
+//    }
 }
 
 #pragma mark - Networking

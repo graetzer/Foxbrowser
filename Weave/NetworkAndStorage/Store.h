@@ -61,6 +61,11 @@
 - (NSArray*)getHistory;
 - (NSArray*)getBookmarks;
 
+// Blocking method, do not call on main thread
+- (void)addTempHistoryObject:(NSDictionary *)item;
+// Force saving of unsaved changes
+- (void)saveChanges;
+
 //uses instance var 'sortedBookmarks', which is a dictionary mapping folderid to sorted list of items in that folder
 - (NSArray*)getBookmarksWithParent:(NSString*) parentid;
 
