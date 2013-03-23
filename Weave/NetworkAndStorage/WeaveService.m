@@ -31,6 +31,8 @@ NSString *kWeavePrivateMode = @"privateMode";
 }
 
 - (NSURL *)parseURLString:(NSString *)input {
+    if ([input isEqualToString:@"about:config"]) return [NSURL URLWithString:input];
+    
     BOOL hasSpace = ([input rangeOfString:@" "].location != NSNotFound);
     BOOL hasDot = ([input rangeOfString:@"."].location != NSNotFound);
     BOOL hasScheme = ([input rangeOfString:@"://"].location != NSNotFound);

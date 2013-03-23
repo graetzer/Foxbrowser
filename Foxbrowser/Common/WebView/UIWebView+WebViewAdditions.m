@@ -24,6 +24,9 @@
 #import "NSURL+IFUnicodeURL.h"
 #import "UIImage+Scaling.h"
 
+// Caching the most frequently used javascript code
+static NSString *JSTools;
+static NSString *JSSearchTools;
 
 @implementation UIWebView (WebViewAdditions)
 
@@ -95,9 +98,12 @@
 }
 
 - (void)loadJSTools {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"JSTools" ofType:@"js"];
-    NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    [self stringByEvaluatingJavaScriptFromString:jsCode];
+    if (!JSTools) {
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"JSTools" ofType:@"js"];
+        JSTools = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    }
+    
+    [self stringByEvaluatingJavaScriptFromString:JSTools];
     [self stringByEvaluatingJavaScriptFromString:@"function FoxbrowserToolsLoaded() {return \"YES\";}"];
 }
 
@@ -121,9 +127,11 @@
 #pragma mark Search stuff
 
 - (NSInteger)highlightOccurencesOfString:(NSString*)str {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"JSSearchTools" ofType:@"js"];
-    NSString *jsCode = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    [self stringByEvaluatingJavaScriptFromString:jsCode];
+    if (!JSSearchTools) {
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"JSSearchTools" ofType:@"js"];
+        JSSearchTools = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    }
+    [self stringByEvaluatingJavaScriptFromString:JSSearchTools];
     
     NSString *startSearch = [NSString stringWithFormat:@"foxbrowser_hilitior_instance.apply('%@');",str];
     NSString *result = [self stringByEvaluatingJavaScriptFromString:startSearch];

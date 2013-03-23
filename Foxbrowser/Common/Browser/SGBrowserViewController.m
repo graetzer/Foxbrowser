@@ -266,7 +266,7 @@
 
 - (void)addSavedTabs {
     NSArray *latest = [NSArray arrayWithContentsOfFile:[self savedTabsCacheFile]];
-    if (latest.count > 0) {
+    if (latest.count > 1) {
         for (id item in latest) {
             if (![item isKindOfClass:[NSString class]])
                 continue;

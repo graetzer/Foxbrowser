@@ -311,8 +311,10 @@
 }
 
 - (void)setSelectedIndex:(NSUInteger)selectedIndex {
-    UIViewController *controller = _viewControllers[selectedIndex];
-    [self showViewController:controller];
+    if (selectedIndex < _viewControllers.count) {
+        UIViewController *controller = _viewControllers[selectedIndex];
+        [self showViewController:controller];
+    }
 }
 
 - (NSUInteger)count {

@@ -29,8 +29,9 @@
 #import "WeaveService.h"
 #import "NSURL+IFUnicodeURL.h"
 #import "SGFavouritesManager.h"
-
 #import "SGTabDefines.h"
+
+#import "GAI.h"
 
 @interface SGWebViewController ()
 @property (strong, nonatomic) NSDictionary *selected;
@@ -131,7 +132,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 #pragma mark - Contextual menu
 
-- (void)contextMenuFor:(CGPoint)pt showAt:(CGPoint) at{    
+- (void)contextMenuFor:(CGPoint)pt showAt:(CGPoint) at {
+    if (![self.webView JSToolsLoaded]) {
+        [self.webView loadJSTools];
+    }
+    
     UIActionSheet *sheet;
     self.selected = [self.webView tagsForPosition:pt];
     
@@ -344,11 +349,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     [self.webView disableTouchCallout];
     self.title = [self.webView title];
     [self.browserViewController updateChrome];
-//    if (![self.webView JSToolsLoaded]) {
-//        [self.webView loadJSTools];
-//        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
-//            [self.webView enableDoNotTrack];
-//    }
 }
 
 #pragma mark - Networking
@@ -376,16 +376,25 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (![self isViewLoaded])
         return;
     
-    // In case the webView is empty, show the error on the site
+    // In case the webView is not empty, show the error on the site
     if (![appDelegate canConnectToInternet] && ![self.webView isEmpty]) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Load Page", @"unable to load page")
                                                         message:NSLocalizedString(@"No internet connection available", nil)
                                                        delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
         [alert show];
     } else {
-
-        
-        [self.webView loadRequest:self.request];
+        // Show some info if asked for it
+        if ([self.request.URL.absoluteString isEqualToString:@"about:config"]) {
+            NSString *version = [NSBundle mainBundle].infoDictionary[(NSString*)kCFBundleVersionKey];
+            NSString *text = [NSString stringWithFormat:@"Version %@<br/>Developer simon@graetzer.org<br/>Thanks for using Foxbrowser!", version];
+            [self.webView showPlaceholder:text title:@"Foxbrowser Configuration"];
+            [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Various"
+                                                            withAction:@"about:config"
+                                                             withLabel:nil
+                                                             withValue:nil];
+        } else {
+            [self.webView loadRequest:self.request];
+        }
     }
 }
 

@@ -254,7 +254,9 @@
 }
 
 - (void)setSelectedIndex:(NSUInteger)selectedIndex {
-    [self showViewController:[self.tabsView viewControllerAtIndex:selectedIndex] index:selectedIndex];
+    if (selectedIndex < self.tabsView.tabs.count) {
+        [self showViewController:[self.tabsView viewControllerAtIndex:selectedIndex] index:selectedIndex];
+    }
 }
 
 - (NSUInteger)maxCount {
