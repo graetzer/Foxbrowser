@@ -23,13 +23,12 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-/** A progress circle view */
+/// A progress circle view
 @interface SGProgressCircleView : UIView 
-/** Initialized a new progress circle view. */
+/// Initialized a new progress circle view
 - (id) init;
 
 - (void)startAnimating;
-
 - (void)stopAnimating;
 
 @end

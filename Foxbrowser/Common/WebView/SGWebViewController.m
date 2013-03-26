@@ -41,6 +41,10 @@
     NSTimer *_updateTimer;
 }
 
+- (void)dealloc {
+    [_updateTimer invalidate];
+}
+
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
     // Enable cookies
@@ -64,10 +68,6 @@
     self.webView = webView;
 }
 
-- (NSUInteger)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskAll;
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
 }
@@ -80,19 +80,34 @@
     self.webView.backgroundColor = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [UIColor colorWithWhite:1 alpha:0.2] : [UIColor clearColor];
     UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc] 
                                         initWithTarget:self action:@selector(handleLongPress:)];
-    [self.webView addGestureRecognizer:gr];
     gr.delegate = self;
+    [self.webView addGestureRecognizer:gr];
     self.webView.delegate = self;
     self.webView.scalesPageToFit = YES;
+    
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        __strong UIActivityIndicatorView *ind = [[UIActivityIndicatorView alloc]
+                                                 initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        ind.transform = CGAffineTransformMakeScale(2, 2);
+        self.indicator = ind;
+        ind.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin;
+        [self.view addSubview:ind];
+    }
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
     [super willMoveToParentViewController:parent];
     if (!parent) {// View is removed
+        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
         self.webView.delegate = nil;
         [self.webView stopLoading];
-        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
         [self.webView clearContent];
+        self.webView = nil;
+        
+        if (_updateTimer) {
+            [_updateTimer invalidate];
+            _updateTimer = nil;
+        }
     }
 }
 
@@ -104,6 +119,11 @@
 - (void)viewWillAppear:(BOOL)animated {
     if (!self.webView.request)
         [self openRequest:nil];
+}
+
+- (void)viewWillLayoutSubviews {
+    UIActivityIndicatorView *ind = self.indicator;
+    ind.center = CGPointMake(self.view.bounds.size.width - ind.frame.size.width/2 - 10, ind.frame.size.height/2 + 10);
 }
 
 #pragma mark - UILongPressGesture
@@ -274,8 +294,13 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     [self dismissSearchToolbar];
+    
     self.loading = YES;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        [self.indicator startAnimating];
+    }
     [self.browserViewController updateChrome];
+    
     _updateTimer = [NSTimer scheduledTimerWithTimeInterval:3
                                                     target:self
                                                   selector:@selector(prepareWebView)
@@ -287,26 +312,39 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     _updateTimer = nil;
     
     [self.webView disableTouchCallout];
+    self.title = [webView title];
+    
+    NSString *webLoc = [self.webView location];
+    if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
+        self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+    
     [self.webView loadJSTools];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
         [self.webView enableDoNotTrack];
     
-    self.title = [webView title];
     self.loading = NO;
-    NSString *webLoc = [self.webView location];
-    if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
-        self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        [self.indicator stopAnimating];
+    }
+    [self.browserViewController updateChrome];
     
     // Private mode
     //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
         [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     //}
     
-    [self.browserViewController updateChrome];
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 
-//there are too many spurious warnings, so I'm going to just ignore or log them all for now.
+- (void)prepareWebView {
+    if (self.webView) {
+        [self.webView disableTouchCallout];
+        self.title = [self.webView title];
+        
+        [self.browserViewController updateChrome];
+    }
+}
+
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     self.loading = NO;
     [self.browserViewController updateChrome];
@@ -319,6 +357,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (error.code == NSURLErrorCannotFindHost
         || error.code == NSURLErrorDNSLookupFailed
         || ([(id)kCFErrorDomainCFNetwork isEqualToString:error.domain] && error.code == 2)) {
+        
         // Host not found, try adding www. in front?
         if ([self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
             NSMutableString *url = [self.request.URL.absoluteString mutableCopy];
@@ -333,6 +372,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     }
     
     NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
+    // If the webpage contains stuff we don't want to delete  it
     if ([self.webView isEmpty]) {
         [self.webView showPlaceholder:error.localizedDescription title:title];
     } else {
@@ -343,12 +383,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                                               otherButtonTitles: nil];
         [alert show];
     }
-}
-
-- (void)prepareWebView {
-    [self.webView disableTouchCallout];
-    self.title = [self.webView title];
-    [self.browserViewController updateChrome];
 }
 
 #pragma mark - Networking

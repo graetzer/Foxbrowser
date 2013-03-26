@@ -169,9 +169,7 @@ static NSArray* gFreshSearchHits = nil;
     } else {
         //now fire up a new search thread
         gRefreshThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadRefreshHits:) object:query];
-        if (gRefreshThread != nil) {//Seems to be nessesary sometimes
-            [gRefreshThread start];
-        }
+        [gRefreshThread start];
     }
 }
 

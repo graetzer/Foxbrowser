@@ -123,7 +123,7 @@
     
     self.toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     
-    [self addSavedTabs];
+    [self loadSavedTabs];
 }
 
 - (void)viewDidUnload {
@@ -204,7 +204,7 @@
         [((SGWebViewController *)childController).webView.scrollView setScrollsToTop:NO];
 }
 
-- (void)showViewController:(UIViewController *)viewController {
+- (void)showViewController:(UIViewController *)viewController{
     NSUInteger index = [_viewControllers indexOfObject:viewController];
     if (index != NSNotFound) {
         self.pageControl.currentPage = index;
@@ -301,6 +301,10 @@
     
     [self.toolbar updateChrome];
 };
+
+- (UIViewController *)viewControllerAtIndex:(NSUInteger)index {
+    return index < _viewControllers.count ? _viewControllers[index] : nil;
+}
 
 - (UIViewController *)selectedViewController {
     return _viewControllers.count > 0 ? _viewControllers[self.pageControl.currentPage] : nil;
@@ -496,7 +500,7 @@
 }
 
 - (IBAction)closeTabButton:(UIButton *)button {
-    [self removeViewController:self.selectedViewController];
+    [self removeViewController:self.selectedViewController withIndex:self.selectedIndex];
 }
 
 @end

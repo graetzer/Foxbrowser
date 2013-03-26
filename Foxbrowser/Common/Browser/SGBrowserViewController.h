@@ -46,6 +46,8 @@
 
 - (void)updateChrome;
 
+- (UIViewController *)viewControllerAtIndex:(NSUInteger)index;
+
 @property (readonly, nonatomic) UIViewController *selectedViewController;
 @property (assign, nonatomic) NSUInteger selectedIndex;
 @property (readonly, nonatomic) NSUInteger count;
@@ -83,7 +85,7 @@
 
 - (void)findInPage:(NSString *)searchPage;
 
-- (void)addSavedTabs;
+- (void)loadSavedTabs;
 - (void)saveCurrentTabs;
 
 @end

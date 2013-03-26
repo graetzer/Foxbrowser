@@ -79,8 +79,8 @@ typedef enum {
 #pragma mark - NSURLProtocol
 + (BOOL)canInitWithRequest:(NSURLRequest *)request{
     NSString *scheme = [request.URL.scheme lowercaseString];
-    //return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
-    return [scheme isEqualToString:@"https"];
+    return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
+    //return [scheme isEqualToString:@"https"];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
@@ -124,6 +124,12 @@ typedef enum {
         return;
     }
     
+    if ([NSThread isMainThread]) {// Happens on some pages, when a UIWebView is removed
+        DLog(@"Main thread: %@", self.request.URL);
+        [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]];
+        return; // Ignore these for now
+    }
+    
     _HTTPMessage = [self newMessageWithURLRequest:self.request];
     
     NSInputStream *bodyStream = self.request.HTTPBodyStream;
@@ -157,7 +163,6 @@ typedef enum {
         CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPAttemptPersistentConnection, kCFBooleanFalse);
     
     if (self.request.networkServiceType != NSURLNetworkServiceTypeDefault) {
-        
         CFStringRef serviceType = NULL;
         switch (self.request.networkServiceType) {
             case NSURLNetworkServiceTypeVoIP:
@@ -179,19 +184,18 @@ typedef enum {
         }
     }
     
-    // Handle SSL stuff
+    // Handle SSL manually, to allow us to ask the user about it
     if([[self.request.URL.scheme lowercaseString] isEqualToString:@"https"]) {
         CFReadStreamSetProperty(stream, kCFStreamPropertySocketSecurityLevel, kCFStreamSocketSecurityLevelNegotiatedSSL);
-        
         //https://developer.apple.com/library/mac/documentation/NetworkingInternet/Conceptual/NetworkingTopics/Articles/OverridingSSLChainValidationCorrectly.html
         CFMutableDictionaryRef pDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 4,
                                                                      &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFDictionarySetValue(pDict, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
-            
         CFReadStreamSetProperty(stream, kCFStreamPropertySSLSettings, pDict);
         CFRelease(pDict);
     } else {
-        _validatesSecureCertificate = NO;// Ignore in case of http
+        // Ignore in case of http
+        _validatesSecureCertificate = NO;
     }
     
     _HTTPStream = (NSInputStream *)CFBridgingRelease(stream);
@@ -231,7 +235,7 @@ typedef enum {
             if (_validatesSecureCertificate) {// Should be == NO in case of http
                 SecTrustRef trust = (__bridge SecTrustRef)[theStream propertyForKey:(__bridge NSString *)kCFStreamPropertySSLPeerTrust];
 
-                if (![self evaluateTrust:trust]) {// connection is untrusted
+                if (trust != NULL && ![self evaluateTrust:trust]) {// connection is untrusted
                     [self stopLoading];
                     NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:@{
                                     NSLocalizedDescriptionKey:NSLocalizedString(@"Cannot Verify Server Identity", @"Untrusted certificate")
@@ -315,12 +319,10 @@ typedef enum {
         // If the response was an authentication failure, try to request fresh credentials.
         if (location && ((statusCode >= 301 && statusCode <= 303) || statusCode == 307 || statusCode == 308)) {
             
-            NSURL *nextURL = [[NSURL URLWithString:location relativeToURL:URL] absoluteURL];
-            DLog(@"\n\nURL: %@\nLocation: %@\n nextURL: %@\n", URL, location, nextURL.absoluteString);
-            
+            NSURL *nextURL = [[NSURL URLWithString:location relativeToURL:URL] absoluteURL];            
             if (nextURL) {
                 NSMutableURLRequest *nextRequest;
-                if (statusCode == 301 || statusCode == 307 || statusCode == 308) {
+                if (statusCode == 307 || statusCode == 308) {
                     nextRequest = [self.request mutableCopy];
                     nextRequest.URL = nextURL;
                 } else {
@@ -328,6 +330,7 @@ typedef enum {
                                                           cachePolicy:self.request.cachePolicy
                                                       timeoutInterval:self.request.timeoutInterval];
                     [nextRequest setValue:[self.request valueForHTTPHeaderField:@"Accept"] forHTTPHeaderField:@"Accept"];
+                    [nextRequest setValue:[self.request valueForHTTPHeaderField:@"User-Agent"] forHTTPHeaderField:@"User-Agent"];
                 }
                 
                 NSString *referer = [self.request valueForHTTPHeaderField:@"Referer"];
@@ -558,7 +561,7 @@ typedef enum {
     _authChallenge = nil;
     
     DLog(@"Try to use user: %@", credential.user);
-    // Retry the request, this time with authentication // TODO: What if this function fails?
+    // Retry the request, this time with authenticatio
     CFHTTPAuthenticationRef HTTPAuthentication = [(SGHTTPAuthenticationChallenge *)challenge CFHTTPAuthentication];
     if (HTTPAuthentication) {
         CFHTTPMessageApplyCredentials(_HTTPMessage,

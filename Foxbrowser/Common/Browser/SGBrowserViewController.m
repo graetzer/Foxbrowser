@@ -107,6 +107,7 @@
 - (void)updateChrome {
     [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
 }
+- (UIViewController *)viewControllerAtIndex:(NSUInteger)index {return nil;}
 - (UIViewController *)selectedViewController {return nil;}
 - (NSUInteger)selectedIndex {return NSNotFound;}
 - (void)setSelectedIndex:(NSUInteger)selectedIndex {
@@ -264,23 +265,30 @@
     return [path stringByAppendingPathComponent:@"latestURLs.plist"];
 }
 
-- (void)addSavedTabs {
+- (void)loadSavedTabs {
     NSArray *latest = [NSArray arrayWithContentsOfFile:[self savedTabsCacheFile]];
     if (latest.count > 1) {
+        
         for (id item in latest) {
             if (![item isKindOfClass:[NSString class]])
                 continue;
             
             NSURL *url = [NSURL URLWithString:item];
+            id viewC;
             if ([url.scheme hasPrefix:@"http"]) {
                 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
                 SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
                 webC.title = request.URL.absoluteString;
                 [webC openRequest:request];
                 [self addViewController:webC];
+                viewC = webC;
             } else {
-                SGBlankController *latest = [SGBlankController new];
-                [self addViewController:latest];
+                SGBlankController *blank = [SGBlankController new];
+                [self addViewController:blank];
+                viewC = blank;
+            }
+            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+                [self showViewController:viewC];
             }
         }
     } else {
@@ -296,8 +304,10 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         
         NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
-        for (UIViewController *controller in self.childViewControllers) {
-            
+        
+        for (NSUInteger i = 0; i < self.count; i++) {
+            UIViewController *controller = [self viewControllerAtIndex:i];
+
             if ([controller isKindOfClass:[SGWebViewController class]]) {
                 NSURL *url = ((SGWebViewController *)controller).request.URL;
                 if ([url.scheme hasPrefix:@"http"])

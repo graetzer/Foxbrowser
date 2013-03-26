@@ -88,7 +88,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.tabsView.tabsController = self;
-    [self addSavedTabs];
+    [self loadSavedTabs];
 }
 
 - (void)viewDidUnload {
@@ -243,6 +243,10 @@
                                     [self updateChrome];
                                 }];
     }
+}
+
+- (UIViewController *)viewControllerAtIndex:(NSUInteger)index {
+    return index < self.tabsView.tabs.count ? [self.tabsView viewControllerAtIndex:index] : nil;
 }
 
 - (UIViewController *)selectedViewController {
