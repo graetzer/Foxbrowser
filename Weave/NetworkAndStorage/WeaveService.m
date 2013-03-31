@@ -36,8 +36,11 @@ NSString *kWeavePrivateMode = @"privateMode";
     BOOL hasSpace = ([input rangeOfString:@" "].location != NSNotFound);
     BOOL hasDot = ([input rangeOfString:@"."].location != NSNotFound);
     BOOL hasScheme = ([input rangeOfString:@"://"].location != NSNotFound);
+    NSUInteger points = [input rangeOfString:@":"].location;
+    BOOL hasPoints = (points != NSNotFound);
     
-    if (hasDot && !hasSpace) {
+    // eg. "localhost:8080" is a valid adress
+    if ((hasDot || (hasPoints && points < input.length-1)) && !hasSpace) {
         NSString *destination = input;
         if (!hasScheme)
             destination = [NSString stringWithFormat:@"http://%@", input];

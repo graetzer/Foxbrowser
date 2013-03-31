@@ -24,6 +24,8 @@
 #import "SGPageViewController.h"
 #import "SGTabDefines.h"
 #import "SGSearchField.h"
+#import "SGActionSheetController.h"
+#import "SGActivityView.h"
 
 #import "BookmarkPage.h"
 #import "SettingsController.h"
@@ -174,14 +176,11 @@
     if (self.browser.canStopOrReload) {
         if ([self.browser isLoading]) {
             self.searchField.state = SGSearchFieldStateStop;
-            //self.progressView.hidden = NO;
         } else {
             self.searchField.state = SGSearchFieldStateReload;
-            //self.progressView.hidden = YES;
         }
     } else {
         self.searchField.state = SGSearchFieldStateDisabled;
-        //self.progressView.hidden = YES;
     }
 }
 
@@ -197,61 +196,55 @@
 }
 
 - (IBAction)showOptions:(UIButton *)sender {
-        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                       delegate:self
-                                              cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                                         destructiveButtonTitle:nil
-                                              otherButtonTitles:
-                            NSLocalizedString(@"Bookmarks", @"Bookmarks"),
-                            NSLocalizedString(@"Share Page", @"Share url of page"),
-                            NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                            NSLocalizedString(@"Settings", nil), nil];
-    [self.actionSheet showInView:self];
-}
-
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    [self dismissSearchController];
-    NSURL *url = [self.browser URL];
+    SGActionSheetController *actionSheet = [SGActionSheetController new];
     
-    if (buttonIndex == 0) {
-        if (!self.bookmarks) {
-            BookmarkPage *bookmarksPage = [BookmarkPage new];
-            bookmarksPage.browser = self.browser;
-            self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
-        }
-        [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
-    }
+    [actionSheet addTitle:NSLocalizedString(@"Bookmarks", @"Bookmarks")
+                 callback:^{
+                     if (!self.bookmarks) {
+                         BookmarkPage *bookmarksPage = [BookmarkPage new];
+                         bookmarksPage.browser = self.browser;
+                         self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
+                     }
+                     [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
+                 }];
+    [actionSheet addTitle:NSLocalizedString(@"Share Page", @"Share url of page")
+                 callback:^{
+                     NSURL *url = [self.browser URL];
+                     if (url) {
+                         SGActivityView *share = [[SGActivityView alloc] initWithActivityItems:@[url]
+                                                                         applicationActivities:nil];
+                         share.completionHandler = ^(NSString *activity, BOOL completed) {
+                             if (completed) {
+                                 [[GAI sharedInstance].defaultTracker sendSocial:activity
+                                                                      withAction:@"Share URL"
+                                                                      withTarget:nil];
+                             }
+                         };
+                         [share show];
+                     }
+                 }];
+    [actionSheet addTitle:NSLocalizedString(@"View in Safari", @"launch safari to display the url")
+                 callback:^{
+                     NSURL *url = [self.browser URL];
+                     [[UIApplication sharedApplication] openURL:url];
+                 }];
+    [actionSheet addTitle:NSLocalizedString(@"Settings", nil)
+                 callback:^{
+                     BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
+                     if (!showedFirstRunPage) {
+                         WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
+                         UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
+                         navController.modalPresentationStyle = UIModalPresentationFormSheet;
+                         [self.browser presentViewController:navController animated:YES completion:NULL];
+                     } else {
+                         SettingsController *settings = [SettingsController new];
+                         UINavigationController *nav = [[SGNavViewController alloc] initWithRootViewController:settings];
+                         nav.modalPresentationStyle = UIModalPresentationFormSheet;
+                         [self.browser presentViewController:nav animated:YES completion:NULL];
+                     }
+                 }];
     
-    if (buttonIndex == 1) {
-        SGShareView *share = [SGShareView shareView];
-        [share addURL:url];
-        share.delegate = self;
-        [share show];
-    }
-    
-    if (buttonIndex == 2)// Open in mobile safari
-        [[UIApplication sharedApplication] openURL:url];
-    
-    if (buttonIndex == 3) {// Show settings or welcome page
-        BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
-        if (!showedFirstRunPage) {
-            WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
-            UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
-            navController.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentViewController:navController animated:YES completion:NULL];
-        } else {
-            SettingsController *settings = [SettingsController new];
-            UINavigationController *nav = [[SGNavViewController alloc] initWithRootViewController:settings];
-            nav.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentViewController:nav animated:YES completion:NULL];
-        }
-    }
-}
-
-- (void)shareView:(SGShareView *)shareView didSelectService:(NSString *)name {
-    [[GAI sharedInstance].defaultTracker trackSocial:name
-                                          withAction:@"Share URL"
-                                          withTarget:nil];
+    [actionSheet showWithRect:sender.frame];
 }
 
 #pragma mark - UITextFieldDelegate

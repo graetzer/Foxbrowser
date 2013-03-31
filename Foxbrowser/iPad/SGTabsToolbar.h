@@ -23,15 +23,12 @@
 #import <UIKit/UIKit.h>
 
 #import "SGSearchViewController.h"
-#import "SGShareView.h"
-#import "SGShareView+UIKit.h"
+#import "SGActivityView.h"
 
 @class SGSearchViewController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
 
 @interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
-UIActionSheetDelegate, SGSearchDelegate, SGShareViewDelegate> {
-    UIColor *_bottomColor;
-}
+UIActionSheetDelegate, SGSearchDelegate>
 
 @property (nonatomic, weak, readonly) SGBrowserViewController *browser;
 

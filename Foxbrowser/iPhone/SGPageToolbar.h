@@ -23,14 +23,11 @@
 #import <UIKit/UIKit.h>
 
 #import "SGSearchViewController.h"
-#import "SGShareView.h"
-#import "SGShareView+UIKit.h"
-#import "SGShareView+GooglePlus.h"
 
 @class SGSearchField, SGSearchViewController, SGPageViewController;
 
-@interface SGPageToolbar : UIView <UITextFieldDelegate, UIActionSheetDelegate,
-SGSearchDelegate, SGShareViewDelegate>
+@interface SGPageToolbar : UIView <UITextFieldDelegate, SGSearchDelegate>
+
 @property (readonly, nonatomic) SGSearchField *searchField;
 @property (readonly, nonatomic) SGSearchViewController *searchController;
 
@@ -41,7 +38,6 @@ SGSearchDelegate, SGShareViewDelegate>
 @property (readonly, nonatomic) UIButton *cancelButton;
 
 @property (strong, nonatomic) UINavigationController *bookmarks;
-@property (strong, nonatomic) UIActionSheet *actionSheet;
 @property (weak, nonatomic) SGPageViewController *browser;
 
 - (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser;

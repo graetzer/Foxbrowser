@@ -27,6 +27,7 @@
 #import "SGProgressCircleView.h"
 #import "SGSearchField.h"
 #import "SGBrowserViewController.h"
+#import "SGActivityView.h"
 
 #import "BookmarkPage.h"
 #import "SettingsController.h"
@@ -42,7 +43,9 @@
 
 @end
 
-@implementation SGTabsToolbar
+@implementation SGTabsToolbar {
+    UIColor *_bottomColor;
+}
 
 - (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
 {
@@ -188,9 +191,14 @@
     NSURL *url = [self.browser URL];
     
     if (buttonIndex == 0) {
-        SGShareView *share = [SGShareView shareView];
-        [share addURL:url];
-        share.delegate = self;
+        SGActivityView *share = [[SGActivityView alloc] initWithActivityItems:@[url] applicationActivities:nil];
+        share.completionHandler = ^(NSString *activity, BOOL completed) {
+            if (completed) {
+                [[GAI sharedInstance].defaultTracker sendSocial:activity
+                                                     withAction:@"Share URL"
+                                                     withTarget:nil];
+            }
+        };
         [share show];
     }
     
@@ -211,12 +219,6 @@
             [self.browser presentViewController:nav animated:YES completion:NULL];
         }
     }
-}
-
-- (void)shareView:(SGShareView *)shareView didSelectService:(NSString *)name {
-    [[GAI sharedInstance].defaultTracker trackSocial:name
-                                          withAction:@"Share URL"
-                                          withTarget:nil];
 }
 
 - (void)updateChrome {

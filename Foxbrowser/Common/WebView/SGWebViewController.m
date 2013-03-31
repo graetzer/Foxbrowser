@@ -383,6 +383,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                                               otherButtonTitles: nil];
         [alert show];
     }
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        [self.indicator stopAnimating];
+    }
 }
 
 #pragma mark - Networking
@@ -411,11 +414,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
         return;
     
     // In case the webView is not empty, show the error on the site
-    if (![appDelegate canConnectToInternet] && ![self.webView isEmpty]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Load Page", @"unable to load page")
-                                                        message:NSLocalizedString(@"No internet connection available", nil)
-                                                       delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
-        [alert show];
+    if (![appDelegate canConnectToInternet]) {
+        [self.webView showPlaceholder:NSLocalizedString(@"No internet connection available", nil)
+                                title:NSLocalizedString(@"Cannot Load Page", @"unable to load page")];
     } else {
         // Show some info if asked for it
         if ([self.request.URL.absoluteString isEqualToString:@"about:config"]) {

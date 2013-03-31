@@ -10,12 +10,6 @@
 #import "NSData+Compress.h"
 #import "CanonicalRequest.h"
 
-__strong static NSLock* VariableLock;
-
-static BOOL ValidatesSecureCertificate = YES;
-__weak static id<SGHTTPURLProtocolDelegate> ProtocolDelegate;
-__strong static NSMutableDictionary *HTTPHeaderFields;
-
 typedef enum {
         SGIdentity = 0,
         SGGzip = 1,
@@ -23,6 +17,8 @@ typedef enum {
     } SGCompression;
 
 @implementation SGHTTPURLProtocol {
+    NSThread *_clientThread;
+    
     NSInputStream *_HTTPStream;
     CFHTTPMessageRef _HTTPMessage;
     
@@ -33,50 +29,6 @@ typedef enum {
     SGCompression _compression;
 }
 
-+ (void)initialize {
-    VariableLock = [NSLock new];
-    HTTPHeaderFields = [[NSMutableDictionary alloc] initWithCapacity:10];
-}
-
-+ (void)registerProtocol {
-    [NSURLProtocol registerClass:[self class]];
-}
-
-+ (void)unregisterProtocol {
-    [NSURLProtocol unregisterClass:[self class]];
-}
-
-+ (void)setProtocolDelegate:(id<SGHTTPURLProtocolDelegate>)delegate {
-    [VariableLock lock];
-    ProtocolDelegate = delegate;
-	[VariableLock unlock];
-}
-
-+ (id<SGHTTPURLProtocolDelegate>)protocolDelegate {
-    id<SGHTTPURLProtocolDelegate> delegate;
-    [VariableLock lock];
-    delegate = ProtocolDelegate;
-	[VariableLock unlock];
-    return delegate;
-}
-
-+ (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field {
-    [VariableLock lock];
-    HTTPHeaderFields[field] = value;
-	[VariableLock unlock];
-}
-
-+ (BOOL)validatesSecureCertificate {
-    return ValidatesSecureCertificate;
-}
-
-+ (void)setValidatesSecureCertificate:(BOOL)validate; {
-    [VariableLock lock];
-    ValidatesSecureCertificate = validate;
-	[VariableLock unlock];
-}
-
-#pragma mark - NSURLProtocol
 + (BOOL)canInitWithRequest:(NSURLRequest *)request{
     NSString *scheme = [request.URL.scheme lowercaseString];
     return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
@@ -130,6 +82,20 @@ typedef enum {
         return; // Ignore these for now
     }
     
+    _clientThread = [NSThread currentThread];
+    
+    NSThread *thread = [SGHTTPURLProtocol threadForURLProtocol:self];
+    [self performSelector:@selector(openHttpStream) onThread:thread withObject:nil waitUntilDone:NO];
+}
+
+- (void)stopLoading {
+    NSThread *thread = [SGHTTPURLProtocol threadForURLProtocol:self];
+    [self performSelector:@selector(closeHttpStream) onThread:thread withObject:nil waitUntilDone:NO];
+}
+
+#pragma mark - HTTP handling
+
+- (void)openHttpStream {
     _HTTPMessage = [self newMessageWithURLRequest:self.request];
     
     NSInputStream *bodyStream = self.request.HTTPBodyStream;
@@ -142,6 +108,7 @@ typedef enum {
     if (stream == NULL) {
         NSString *desc = @"Could not create HTTP stream";
         ELog(desc);
+        
         [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http"
                                                                            code:SGURLProtocolErrorStreamCreation
                                                                        userInfo:@{NSLocalizedDescriptionKey:desc}]];
@@ -150,7 +117,7 @@ typedef enum {
     
     // We have to manage redirects for ourselves
     CFReadStreamSetProperty(stream, kCFStreamPropertyHTTPShouldAutoredirect, kCFBooleanFalse);
-
+    
     if ([self.request respondsToSelector:@selector(allowsCellularAccess)]) {// Not present on iOS 5 and OSX < 10.8
         if (!self.request.allowsCellularAccess)
             CFReadStreamSetProperty(stream, kCFStreamPropertyNoCellular, kCFBooleanTrue);
@@ -189,7 +156,7 @@ typedef enum {
         CFReadStreamSetProperty(stream, kCFStreamPropertySocketSecurityLevel, kCFStreamSocketSecurityLevelNegotiatedSSL);
         //https://developer.apple.com/library/mac/documentation/NetworkingInternet/Conceptual/NetworkingTopics/Articles/OverridingSSLChainValidationCorrectly.html
         CFMutableDictionaryRef pDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 4,
-                                                                     &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+                                                                 &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFDictionarySetValue(pDict, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
         CFReadStreamSetProperty(stream, kCFStreamPropertySSLSettings, pDict);
         CFRelease(pDict);
@@ -202,9 +169,10 @@ typedef enum {
     [_HTTPStream setDelegate:self];
     [_HTTPStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     [_HTTPStream open];
+
 }
 
-- (void)stopLoading {
+- (void)closeHttpStream {
     if (_HTTPStream && _HTTPStream.streamStatus != NSStreamStatusClosed) {
         _HTTPStream.delegate = nil;
         // This method has to be called on the same thread as startLoading
@@ -221,7 +189,6 @@ typedef enum {
     _buffer = nil;
 }
 
-#pragma mark - CFStreamDelegate
 - (void)stream:(NSInputStream *)theStream handleEvent:(NSStreamEvent)streamEvent {
     NSAssert(theStream == _HTTPStream, @"Not my stream!");
 
@@ -236,7 +203,7 @@ typedef enum {
                 SecTrustRef trust = (__bridge SecTrustRef)[theStream propertyForKey:(__bridge NSString *)kCFStreamPropertySSLPeerTrust];
 
                 if (trust != NULL && ![self evaluateTrust:trust]) {// connection is untrusted
-                    [self stopLoading];
+                    [self closeHttpStream];
                     NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:@{
                                     NSLocalizedDescriptionKey:NSLocalizedString(@"Cannot Verify Server Identity", @"Untrusted certificate")
                                       }];
@@ -271,9 +238,16 @@ typedef enum {
         }
             
         case NSStreamEventErrorOccurred: { // Report an error in the stream as the operation failing
-            [self stopLoading];
+            [self closeHttpStream];
 
             NSError *error = theStream.streamError;
+            
+            if (_authChallenge) {
+                [self.client URLProtocol:self didCancelAuthenticationChallenge:_authChallenge];
+                _authChallenge = nil;
+            }
+            
+            
             DLog(@"A stream error occured,\n URL: %@\n Error domain: %@  code: %d", self.request.URL, error.domain,error.code);
             [self.client URLProtocol:self didFailWithError:error];
             
@@ -307,7 +281,7 @@ typedef enum {
             [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http"
                                                                                code:SGURLProtocolErrorInvalidResponse
                                                                            userInfo:@{NSLocalizedDescriptionKey:@"Invalid HTTP response"}]];
-            [self stopLoading];
+            [self closeHttpStream];
             return;
         }
         
@@ -339,7 +313,7 @@ typedef enum {
                 [nextRequest setValue:referer forHTTPHeaderField:@"Referer"];
                 [self.client URLProtocol:self wasRedirectedToRequest:nextRequest redirectResponse:_URLResponse];
                 
-                [self stopLoading];
+                [self closeHttpStream];
                 [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]];
                 return;
             }
@@ -351,7 +325,7 @@ typedef enum {
                 [self.client URLProtocol:self didReceiveResponse:cached.response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
                 [self.client URLProtocol:self didLoadData:[cached data]];
                 [self.client URLProtocolDidFinishLoading:self];// No http body expected
-                [self stopLoading];
+                [self closeHttpStream];
                 return;
             } else {
                 DLog(@"No cached response existent for %@", self.request.URL);
@@ -370,7 +344,7 @@ typedef enum {
             
             if (self.authChallenge) {
                 // Cancel any further loading and ask the delegate for authentication
-                [self stopLoading];
+                [self closeHttpStream];
                 
                 if (_authenticationAttempts == 0 && self.authChallenge.proposedCredential) {
                     [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
@@ -406,7 +380,7 @@ typedef enum {
         if (_compression != SGIdentity) {
             long long capacity = _URLResponse.expectedContentLength;
             if (capacity == NSURLResponseUnknownLength || capacity == 0)
-                capacity = 1024*1024;//10M buffer
+                capacity = 1024*512;//5M buffer capacity
             _buffer = [[NSMutableData alloc] initWithCapacity:capacity];
         }
         
@@ -507,7 +481,6 @@ typedef enum {
             cacheable = NO;
         }
     }
-    
     if (cacheable) {
         if ([[request.URL.scheme lowercaseString] isEqual:@"https"]) result = NSURLCacheStorageAllowedInMemoryOnly;
         else result = NSURLCacheStorageAllowed;
@@ -581,6 +554,98 @@ typedef enum {
 
 - (void)rejectProtectionSpaceAndContinueWithChallenge:(NSURLAuthenticationChallenge *)challenge {
     [self cancelAuthenticationChallenge:challenge];
+}
+
+#pragma mark - Threading
+
+// In the default implementation, all requests run in a single background thread
+// Advanced users only: Override this method in a subclass for a different threading behaviour
+// Eg: return [NSThread mainThread] to run all requests in the main thread
+// Alternatively, you can create a thread on demand, or manage a pool of threads
+// Threads returned by this method will need to run the runloop in default mode (eg CFRunLoopRun())
+// Requests will stop the runloop when they complete
+// If you have multiple requests sharing the thread or you want to re-use the thread, you'll need to restart the runloop
+static NSThread *NetworkThread = nil;
++ (NSThread *)threadForURLProtocol:(NSURLProtocol *)protocol {
+	if (NetworkThread == nil) {
+		@synchronized(self) {
+			if (NetworkThread == nil) {
+                // Let the thread run indefinetly
+				NetworkThread = [[NSThread alloc] initWithTarget:self selector:@selector(runRequests) object:nil];
+                [NetworkThread setName:@"SGHTTPURLProtocol net thread"];
+				[NetworkThread start];
+			}
+		}
+	}
+	return NetworkThread;
+}
+
++ (void)runRequests {
+	// Should keep the runloop from exiting
+	CFRunLoopSourceContext context = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+	CFRunLoopSourceRef source = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
+	CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+    
+    BOOL runAlways = YES; // Introduced to cheat Static Analyzer
+	while (runAlways) {
+		@autoreleasepool {
+            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0e10, true);
+        }
+	}
+    
+	// Should never be called, but anyway
+	CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+	CFRelease(source);
+}
+
+#pragma mark - Stuff
+
+__strong static NSLock* VariableLock;
+static BOOL ValidatesSecureCertificate = YES;
+__weak static id<SGHTTPURLProtocolDelegate> ProtocolDelegate;
+__strong static NSMutableDictionary *HTTPHeaderFields;
+
++ (void)initialize {
+    VariableLock = [NSLock new];
+    HTTPHeaderFields = [[NSMutableDictionary alloc] initWithCapacity:10];
+}
+
++ (void)registerProtocol {
+    [NSURLProtocol registerClass:[self class]];
+}
+
++ (void)unregisterProtocol {
+    [NSURLProtocol unregisterClass:[self class]];
+}
+
++ (void)setProtocolDelegate:(id<SGHTTPURLProtocolDelegate>)delegate {
+    [VariableLock lock];
+    ProtocolDelegate = delegate;
+	[VariableLock unlock];
+}
+
++ (id<SGHTTPURLProtocolDelegate>)protocolDelegate {
+    id<SGHTTPURLProtocolDelegate> delegate;
+    [VariableLock lock];
+    delegate = ProtocolDelegate;
+	[VariableLock unlock];
+    return delegate;
+}
+
++ (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field {
+    [VariableLock lock];
+    HTTPHeaderFields[field] = value;
+	[VariableLock unlock];
+}
+
++ (BOOL)validatesSecureCertificate {
+    return ValidatesSecureCertificate;
+}
+
++ (void)setValidatesSecureCertificate:(BOOL)validate; {
+    [VariableLock lock];
+    ValidatesSecureCertificate = validate;
+	[VariableLock unlock];
 }
 
 @end

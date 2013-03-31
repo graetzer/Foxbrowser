@@ -34,7 +34,7 @@
 #import "WelcomePage.h"
 #import "SGFavouritesManager.h"
 
-#import "SGShareView.h"
+#import "SGActivityView.h"
 
 #import "GAI.h"
 #import "Appirater.h"
@@ -108,7 +108,7 @@ id<WeaveService> weaveService;
   sourceApplication:(NSString *)sourceApplication
          annotation:(id)annotation {
     
-    if ([SGShareView handleURL:url
+    if ([SGActivityView handleURL:url
              sourceApplication:sourceApplication
                     annotation:annotation])
         return YES;
