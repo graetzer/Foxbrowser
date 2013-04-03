@@ -341,6 +341,7 @@ static dispatch_once_t onceToken;
                                     @"modified" : @([[NSDate date] timeIntervalSince1970]),
                                     @"sortindex" : @(sortIndex + 100)};
     [_tempHistory addObject:historyEntry];
+    [[Stockboy syncLock] signal];
     [[Stockboy syncLock] unlock];
 }
 
@@ -349,11 +350,14 @@ static dispatch_once_t onceToken;
     if (![Stockboy syncInProgress] && _tempHistory.count > 0) {
         [self beginTransaction];
         
-        for (NSDictionary* historyItem in _tempHistory) [self addHistoryItem:historyItem];
+        for (NSDictionary* historyItem in _tempHistory) {
+            [self addHistoryItem:historyItem];
+        }
         [_tempHistory removeAllObjects];
         
         [self endTransaction];
     }
+    [[Stockboy syncLock] signal];
     [[Stockboy syncLock] unlock];
 }
 
@@ -873,9 +877,7 @@ static dispatch_once_t onceToken;
 
 	// Second, insert all the new history entries 
 	for (NSDictionary* historyItem in addedHistory) [self addHistoryItem:historyItem];
-    
     for (NSDictionary* historyItem in _tempHistory) [self addHistoryItem:historyItem];
-    
     [_tempHistory removeAllObjects];
     
 	if (full) [self updateTimestamp:@"fullhistory"];

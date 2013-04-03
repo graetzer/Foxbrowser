@@ -32,7 +32,7 @@
 }
 
 - (NSString *)activityType {
-    //DLog(@"%@",UIActivityTypePostToWeibo);
+    //NSLog(@"%@",UIActivityTypePostToWeibo);
     return SGActivityTypePostToWeibo;
 }
 

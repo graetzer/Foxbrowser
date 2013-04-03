@@ -218,9 +218,9 @@
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
     UIViewController *old = [self selectedViewController];
     
-    if (!old)
+    if (!old) {
         [self addViewController:viewController];
-    else if (![self.childViewControllers containsObject:viewController]) {
+    } else if (![self.childViewControllers containsObject:viewController]) {
         viewController.view.frame = self.contentFrame;
         [self addChildViewController:viewController];
         NSUInteger index = [self selectedIndex];

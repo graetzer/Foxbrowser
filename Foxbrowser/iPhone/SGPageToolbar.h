@@ -23,10 +23,11 @@
 #import <UIKit/UIKit.h>
 
 #import "SGSearchViewController.h"
+#import "PopoverView.h"
 
 @class SGSearchField, SGSearchViewController, SGPageViewController;
 
-@interface SGPageToolbar : UIView <UITextFieldDelegate, SGSearchDelegate>
+@interface SGPageToolbar : UIView <UITextFieldDelegate, SGSearchDelegate, PopoverViewDelegate>
 
 @property (readonly, nonatomic) SGSearchField *searchField;
 @property (readonly, nonatomic) SGSearchViewController *searchController;

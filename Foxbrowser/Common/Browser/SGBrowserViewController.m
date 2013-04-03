@@ -31,9 +31,9 @@
 #define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_0_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10B146 Safari/8536.25"
 
 @implementation SGBrowserViewController {
-    NSTimer *_timer;
+    NSTimer *_saveTimer;
     int _dialogResult;
-    NSMutableArray *_allowedHosts;
+    NSMutableArray *_httpsHosts;
 }
 
 + (void)initialize {
@@ -69,7 +69,7 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    _timer = [NSTimer scheduledTimerWithTimeInterval:10
+    _saveTimer = [NSTimer scheduledTimerWithTimeInterval:10
                                               target:self
                                             selector:@selector(saveCurrentTabs)
                                             userInfo:nil repeats:YES];
@@ -80,8 +80,8 @@
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
-    [_timer invalidate];
-    _timer = nil;
+    [_saveTimer invalidate];
+    _saveTimer = nil;
 }
 
 - (BOOL)shouldAutorotate {
@@ -360,9 +360,9 @@
 - (BOOL)URLProtocol:(SGHTTPURLProtocol *)protocol canIgnoreUntrustedHost:(SecTrustRef)trust {
     
     NSString *host = protocol.request.URL.host;
-    if (!_allowedHosts)
-        _allowedHosts = [NSMutableArray arrayWithCapacity:10];
-    else if ([_allowedHosts containsObject:host])
+    if (!_httpsHosts)
+        _httpsHosts = [NSMutableArray arrayWithCapacity:10];
+    else if ([_httpsHosts containsObject:host])
         return YES;
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -376,7 +376,7 @@
         [alert show];
     });
 
-    [_allowedHosts addObject:host];// Remove it later if user taps cancel
+    [_httpsHosts addObject:host];// Remove it later if user taps cancel
     
     return NO;
 }
@@ -386,7 +386,7 @@
     
     if (alertView != self.credentialsPrompt) {
         if (buttonIndex == 1) [self reload];
-        else [_allowedHosts removeLastObject];
+        else [_httpsHosts removeLastObject];
     }
 }
 

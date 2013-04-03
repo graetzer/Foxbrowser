@@ -28,6 +28,22 @@
 
 @implementation SGBlankController
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    return YES;
+}
+
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
+}
+
+- (UIView *)rotatingFooterView {
+    return self.bottomView;
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -78,22 +94,6 @@
     self.tabBrowser = tabBrowser;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    return YES;
-}
-
-- (NSUInteger)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskAll;
-}
-
-- (UIView *)rotatingFooterView {
-    return self.bottomView;
-}
-
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
-}
-
 - (void)viewWillAppear:(BOOL)animated {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(refresh)
@@ -111,12 +111,12 @@
     [self.browserViewController updateChrome];
 }
 
-- (void)viewDidUnload {
-    [super viewDidUnload];
-    
-    [self.tabBrowser willMoveToParentViewController:nil];
-    [self.tabBrowser removeFromParentViewController];
-    self.tabBrowser = nil;
+- (void)willMoveToParentViewController:(UIViewController *)parent {
+    if (parent == nil) {
+        [self.tabBrowser willMoveToParentViewController:nil];
+        [self.tabBrowser removeFromParentViewController];
+        self.tabBrowser = nil;
+    }
 }
 
 - (void)refresh {

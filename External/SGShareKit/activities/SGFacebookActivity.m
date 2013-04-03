@@ -32,7 +32,7 @@
 }
 
 - (NSString *)activityType {
-    DLog(@"%@",UIActivityTypePostToFacebook);
+    //NSLog(@"%@",UIActivityTypePostToFacebook);
     return SGActivityTypePostToFacebook;
 }
 

@@ -34,15 +34,11 @@
 #define POPLISTVIEW_HEADER_HEIGHT 50.
 #define RADIUS 5.
 
-@interface SGShareViewController : UIViewController
+@interface SGActivityViewController : UIViewController
 @end
 
 static NSMutableArray *LaunchURLHandler;
 static NSArray *PreconfiguredActivities;
-
-@interface SGActivityView ()
-@property(strong, nonatomic) UIWindow *myWindow;
-@end
 
 CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientation);
 
@@ -52,6 +48,9 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     
     NSArray *_activityItems;
     NSMutableArray *_applicationActivities;
+    
+    UIWindow *_myWindow;
+    UIWindow *_originalWindow;
 }
 
 + (void)initialize {
@@ -93,34 +92,36 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 
 - (void)show {
     [self validateApplicationActivities];
-    //[self.tableView reloadData];
     
-    self.myWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    self.myWindow.windowLevel = UIWindowLevelAlert;
-    self.myWindow.backgroundColor = [UIColor colorWithWhite:0 alpha:0.20];
-    self.myWindow.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    _originalWindow = [[UIApplication sharedApplication] keyWindow];
+    _myWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    _myWindow.windowLevel = UIWindowLevelAlert;
+    _myWindow.backgroundColor = [UIColor colorWithWhite:0 alpha:0.20];
+    _myWindow.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         
-    UIViewController *vC = [SGShareViewController new];
+    UIViewController *vC = [SGActivityViewController new];
     vC.view.frame = [UIScreen mainScreen].bounds;
     [vC.view addSubview:self];
     vC.wantsFullScreenLayout = YES;
-    self.myWindow.rootViewController = vC;
-    [self.myWindow makeKeyAndVisible];
+    _myWindow.rootViewController = vC;
+    [_myWindow makeKeyAndVisible];
 
     if (!_title) {
-//        if ((self->images != nil) != (self->urls != nil)) {//Xor
-//            if (self->images)
-//                _title  = NSLocalizedString(@"Share Picture", @"Share picture title");
-//            else
-//                _title  = NSLocalizedString(@"Share Page", @"Share url of page");
-//        } else
-            _title = NSLocalizedString(@"Share", @"Share title");
+        if (_activityItems.count == 1) {
+            if ([_activityItems[0] isKindOfClass:[UIImage class]]) {
+                _title  = NSLocalizedString(@"Share Picture", @"Share picture title");
+            } else if ([_activityItems[0] isKindOfClass:[NSURL class]]) {
+                _title  = NSLocalizedString(@"Share Page", @"Share url of page");
+            }
+        } else {
+            _title = NSLocalizedString(@"Share", @"Share title"); 
+        }
     }
     
     self.transform = CGAffineTransformConcat(self.transform, CGAffineTransformMakeScale(1.3, 1.3));
-    self.myWindow.alpha = 0;
+    _myWindow.alpha = 0;
     [UIView animateWithDuration:.35 animations:^{
-        self.myWindow.alpha = 1;
+        _myWindow.alpha = 1;
         self.transform = CGAffineTransformIdentity;
     }];
 }
@@ -128,11 +129,13 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 - (void)hide {
     [UIView animateWithDuration:.35 animations:^{
         self.transform = CGAffineTransformIdentity;
-        self.myWindow.alpha = 0;
+        _myWindow.alpha = 0;
     } completion:^(BOOL finished){
         [self removeFromSuperview];
-        self.myWindow.hidden = YES;
-        self.myWindow = nil;
+        _myWindow.hidden = YES;
+        _myWindow.rootViewController = nil;
+        _myWindow = nil;
+        [_originalWindow makeKeyWindow];
     }];
 }
 
@@ -140,10 +143,11 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 
 - (void)layoutSubviews {
     CGRect bounds = [UIScreen mainScreen].bounds;
-    if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPhone)
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        _bgRect = CGRectInset(bounds, bounds.size.width*0.10, bounds.size.height*0.21);
+    } else {
         _bgRect = CGRectInset(bounds, bounds.size.width/3.3, bounds.size.height/3.3);
-    else
-        _bgRect = CGRectInset(bounds, bounds.size.width*0.09, bounds.size.height*0.12);
+    }
     
     bounds = self.bounds;
     if (_bgRect.size.height > bounds.size.height)
@@ -210,9 +214,10 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     // Dismiss 
     [UIView animateWithDuration:.35 animations:^{
         self.transform = CGAffineTransformConcat(self.transform, CGAffineTransformMakeScale(1./1.3, 1/1.3));
-        self.myWindow.alpha = 0;
+        _myWindow.alpha = 0;
     } completion:^(BOOL finished){
-        self.myWindow.hidden = YES;
+        _myWindow.hidden = YES;
+        [_originalWindow makeKeyWindow];
         
         UIViewController *viewController = [activity activityViewController];
         if (viewController) {
@@ -224,7 +229,8 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
         }
         
         [self removeFromSuperview];
-        self.myWindow = nil;
+        _myWindow.rootViewController = nil;
+        _myWindow = nil;
     }];
 }
 
@@ -297,7 +303,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 
 @end
 
-@implementation SGShareViewController
+@implementation SGActivityViewController
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     return YES;

@@ -34,7 +34,7 @@
 }
 
 - (NSString *)activityType {
-    //DLog(@"%@",UIActivityTypePostToTwitter);
+    //NSLog(@"%@",UIActivityTypePostToTwitter);
     return SGActivityTypePostToTwitter;
 }
 

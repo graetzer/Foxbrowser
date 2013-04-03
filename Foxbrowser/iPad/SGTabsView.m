@@ -97,11 +97,9 @@
 
 - (void)removeTab:(NSUInteger)index {
     SGTabView *oldTab = self.tabs[index];
-    if (oldTab) {
-        [self.tabs removeObjectAtIndex:index];
-        [oldTab removeFromSuperview];
-        [self resizeTabs];
-    }
+    [oldTab removeFromSuperview];
+    [self.tabs removeObjectAtIndex:index];
+    [self resizeTabs];
 }
 
 - (NSUInteger)indexOfViewController:(UIViewController *)controller {

@@ -34,7 +34,7 @@
 }
 
 - (NSString *)activityType {
-    //DLog(@"%@",UIActivityTypeMail);
+    //NSLog(@"%@",UIActivityTypeMail);
     return SGActivityTypeMail;
 }
 
@@ -73,7 +73,7 @@
                 
                 NSData *data = [NSData dataWithContentsOfURL:url];
                 [mail addAttachmentData:data
-                               mimeType:(__bridge NSString*)MIMEType
+                               mimeType:CFBridgingRelease(MIMEType)
                                fileName:[url lastPathComponent]];
             } else {
                 [bodyText appendFormat:@"%@\n", url.absoluteString];

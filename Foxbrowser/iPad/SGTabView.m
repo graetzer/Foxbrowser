@@ -37,8 +37,8 @@
 }
 @synthesize viewController = _viewController;
 
-- (id)initWithFrame:(CGRect)frame
-     viewController:(UIViewController *)controller {
+- (id)initWithFrame:(CGRect)frame viewController:(UIViewController *)controller {
+    
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;

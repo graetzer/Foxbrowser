@@ -7,24 +7,15 @@
 // https://github.com/takashisite/TSPopover
 //
 
-#import "TSPopoverPopoverView.h"
+#import "SGPopoverView.h"
 
 #define MARGIN 5
 #define ARROW_SIZE 20
 
-@implementation TSPopoverPopoverView
+@implementation SGPopoverView
 
-@synthesize cornerRadius = _cornerRadius;
-@synthesize arrowPoint = _arrowPoint;
-@synthesize arrowDirection = _arrowDirection;
-@synthesize arrowPosition = _arrowPosition;
-@synthesize baseColor = _baseColor;
-@synthesize isGradient = _isGradient;
-
-- (id)init
-{
-    self = [super init];
-    if(self){
+- (id)initWithFrame:(CGRect)frame {
+    if ([super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         self.baseColor = [UIColor blackColor];
         self.isGradient = YES;
@@ -32,15 +23,12 @@
     return self;
 }
 
-- (void)drawRect:(CGRect)rect
-{    
+- (void)drawRect:(CGRect)rect {    
     UIImage *backgroundImage = self.backgroundImage;
     [backgroundImage drawInRect:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height) blendMode:kCGBlendModeNormal alpha:1];
-    
 }
 
--(UIImage*)backgroundImage
-{
+-(UIImage*)backgroundImage {
     //// Color
     CGFloat myRed=0,myGreen=0,myBlue=0,myWhite=0,alpha=1;
     UIColor *gradientBaseColor = self.baseColor;
@@ -69,7 +57,7 @@
     }
     
     UIColor *arrowColor = gradientBottomColor;
-    if(self.arrowDirection == TSPopoverArrowDirectionTop && self.isGradient){
+    if(self.arrowDirection == SGPopoverArrowDirectionUp && self.isGradient){
         arrowColor = gradientTopColor;
     }
     
@@ -89,27 +77,27 @@
     UIWindow *appWindow = [[UIApplication sharedApplication] keyWindow];
     CGPoint senderLocationInViewPoint = [self convertPoint:self.arrowPoint fromView:appWindow.rootViewController.view];
 
-    if(self.arrowPosition == TSPopoverArrowPositionVertical){
+    if(self.arrowDirection == SGPopoverArrowDirectionUp || self.arrowDirection == SGPopoverArrowDirectionDown){
         bgRectSizeWidth = bgSizeWidth;
         bgRectSizeHeight = bgSizeHeight - ARROW_SIZE;
         
-        if(self.arrowDirection == TSPopoverArrowDirectionTop){
+        if(self.arrowDirection == SGPopoverArrowDirectionUp){
             bgRectPositionY = ARROW_SIZE;
         }
         
-        if(self.arrowDirection == TSPopoverArrowDirectionBottom){
+        if(self.arrowDirection == SGPopoverArrowDirectionDown){
             arrowHead = bgRectSizeHeight + ARROW_SIZE;
             arrowBase = bgRectSizeHeight - 1;
         }
-    }else if(self.arrowPosition == TSPopoverArrowPositionHorizontal){
+    } else if(self.arrowDirection == SGPopoverArrowDirectionLeft || self.arrowDirection == SGPopoverArrowDirectionRight){
         bgRectSizeWidth = bgSizeWidth - ARROW_SIZE;
         bgRectSizeHeight = bgSizeHeight;
         
-        if(self.arrowDirection == TSPopoverArrowDirectionLeft){
+        if(self.arrowDirection == SGPopoverArrowDirectionLeft){
             bgRectPositionX = ARROW_SIZE;
         }
         
-        if(self.arrowDirection == TSPopoverArrowDirectionRight){
+        if(self.arrowDirection == SGPopoverArrowDirectionRight){
             arrowHead = bgRectSizeWidth + ARROW_SIZE;
             arrowBase = bgRectSizeWidth - 1;
         }
@@ -139,7 +127,7 @@
     
     //// Polygon Drawing
     UIBezierPath* bezierPath = [UIBezierPath bezierPath];
-    if(self.arrowPosition == TSPopoverArrowPositionVertical){
+    if(self.arrowDirection == SGPopoverArrowDirectionUp || self.arrowDirection == SGPopoverArrowDirectionDown){
         arrowFirst = senderLocationInViewPoint.x-ARROW_SIZE/2;
         arrowLast = senderLocationInViewPoint.x+ARROW_SIZE/2;
         if(arrowFirst < bgRectPositionX + (self.cornerRadius+MARGIN)){
@@ -153,7 +141,7 @@
         [bezierPath moveToPoint: CGPointMake(arrowFirst, arrowBase)];
         [bezierPath addLineToPoint: CGPointMake(senderLocationInViewPoint.x, arrowHead)];
         [bezierPath addLineToPoint: CGPointMake(arrowLast, arrowBase)];
-    }else if(self.arrowPosition == TSPopoverArrowPositionHorizontal){
+    } else if(self.arrowDirection == SGPopoverArrowDirectionLeft || self.arrowDirection == SGPopoverArrowDirectionRight){
         arrowFirst = senderLocationInViewPoint.y-ARROW_SIZE/2;
         arrowLast = senderLocationInViewPoint.y+ARROW_SIZE/2;
         
@@ -181,7 +169,7 @@
     
     [gradientBottomColor setFill];
     [roundedRectanglePath fill];
-    if(self.arrowDirection == TSPopoverArrowDirectionTop){
+    if(self.arrowDirection == SGPopoverArrowDirectionUp){
         [arrowColor setFill];
         [bezierPath fill];
     }
@@ -198,7 +186,6 @@
     UIImage *output = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
-   
     return output;
 }
 

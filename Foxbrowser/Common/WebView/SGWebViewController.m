@@ -33,15 +33,14 @@
 
 #import "GAI.h"
 
-@interface SGWebViewController ()
-@property (strong, nonatomic) NSDictionary *selected;
-@end
 
 @implementation SGWebViewController {
     NSTimer *_updateTimer;
+    NSDictionary *_selected;
 }
 
 - (void)dealloc {
+    self.webView.delegate = nil;
     [_updateTimer invalidate];
 }
 
@@ -98,32 +97,33 @@
 - (void)willMoveToParentViewController:(UIViewController *)parent {
     [super willMoveToParentViewController:parent];
     if (!parent) {// View is removed
-        [self.webView removeGestureRecognizer:[self.webView.gestureRecognizers lastObject]];
+        for (UIGestureRecognizer *rec in self.webView.gestureRecognizers) {
+            [rec removeTarget:self action:nil];
+        }
+        [_updateTimer invalidate];
         self.webView.delegate = nil;
         [self.webView stopLoading];
         [self.webView clearContent];
-        self.webView = nil;
-        
-        if (_updateTimer) {
-            [_updateTimer invalidate];
-            _updateTimer = nil;
-        }
     }
 }
 
-- (void)viewWillUnload {
-    [super viewWillUnload];
-    self.webView.delegate = nil;
+- (void)didMoveToParentViewController:(UIViewController *)parent {
+    [super didMoveToParentViewController:parent];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    if (!self.webView.request)
+    [super viewWillAppear:animated];
+    if (!self.webView.request) {
         [self openRequest:nil];
+    }
 }
 
 - (void)viewWillLayoutSubviews {
-    UIActivityIndicatorView *ind = self.indicator;
-    ind.center = CGPointMake(self.view.bounds.size.width - ind.frame.size.width/2 - 10, ind.frame.size.height/2 + 10);
+    [super viewWillLayoutSubviews];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        UIActivityIndicatorView *ind = self.indicator;
+        ind.center = CGPointMake(self.view.bounds.size.width - ind.frame.size.width/2 - 10, ind.frame.size.height/2 + 10);
+    }
 }
 
 #pragma mark - UILongPressGesture
@@ -158,10 +158,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     }
     
     UIActionSheet *sheet;
-    self.selected = [self.webView tagsForPosition:pt];
+    _selected = [self.webView tagsForPosition:pt];
     
-    NSString *link = self.selected[@"A"];
-    NSString *imageSrc = self.selected[@"IMG"];
+    NSString *link = _selected[@"A"];
+    NSString *imageSrc = _selected[@"IMG"];
     
     NSString *prefix = @"newtab:";
     if ([link hasPrefix:prefix]) {
@@ -208,8 +208,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    NSString *link = (self.selected)[@"A"];
-    NSString *imageSrc = (self.selected)[@"IMG"];
+    NSString *link = _selected[@"A"];
+    NSString *imageSrc = _selected[@"IMG"];
     
     NSString *prefix = @"javascript:";
     if ([link hasPrefix:prefix])
@@ -309,7 +309,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     [_updateTimer invalidate];
-    _updateTimer = nil;
     
     [self.webView disableTouchCallout];
     self.title = [webView title];
@@ -332,7 +331,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
         [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     //}
-    
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 

@@ -190,7 +190,7 @@
     [self destroyPopovers];
     NSURL *url = [self.browser URL];
     
-    if (buttonIndex == 0) {
+    if (buttonIndex == 0 && url != nil) {
         SGActivityView *share = [[SGActivityView alloc] initWithActivityItems:@[url] applicationActivities:nil];
         share.completionHandler = ^(NSString *activity, BOOL completed) {
             if (completed) {

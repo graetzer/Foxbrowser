@@ -8,7 +8,7 @@
 
 #import "SGActionSheetController.h"
 
-#import "TSPopoverController.h"
+#import "SGPopoverController.h"
 
 @implementation SGActionSheetController {
     NSMutableArray *_titles;
@@ -56,9 +56,10 @@
 }
 
 - (void)dismissWithClickedButtonIndex:(NSInteger)buttonIndex animated:(BOOL)animated {
-    if (buttonIndex > -1 && buttonIndex < _titles.count) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:buttonIndex inSection:0];
-        [self.tableView deselectRowAtIndexPath:indexPath animated:animated];
+    void (^callback)(void);
+    callback = _callbacks[buttonIndex];
+    if (callback) {
+        callback();
     }
     
     [self.popover dismissPopoverAnimated:animated];
@@ -91,12 +92,7 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    void (^callback)(void);
-    callback = _callbacks[indexPath.row];
-    if (callback) {
-        callback();
-    }
-    
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
     [self dismissWithClickedButtonIndex:indexPath.row animated:YES];
 }
 

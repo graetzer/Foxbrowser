@@ -8,10 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class TSPopoverController;
+@class SGPopoverController;
 
 @interface SGActionSheetController : UITableViewController
-@property (nonatomic, strong) TSPopoverController *popover;
+@property (nonatomic, strong) SGPopoverController *popover;
 
 - (void)showWithTouch:(UIEvent*)senderEvent;
 - (void)showWithCell:(UITableViewCell*)senderCell;
