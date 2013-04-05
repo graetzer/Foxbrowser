@@ -99,30 +99,26 @@ NSString *kWeavePrivateMode = @"privateMode";
 }
 
 - (void)addHistoryURL:(NSURL *)url title:(NSString *)title {    
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        
-        NSString *urlText = [NSString stringWithFormat:@"%@", url];
-        
-        NSDictionary *item;
-        // Check if this history entry already exists
-        NSArray *history = [[Store getStore] getHistory];
-        for (NSUInteger i = 0; i < history.count; i++) {
-            item = history[i];
-            if ([urlText isEqualToString:item[@"url"]]) break;
-            item = nil;
-        }
-        
-        if (!item) {
-            NSString *titleSrc = title != nil ? title : [NSString stringWithFormat:@"%@", url.host];
-            item = @{@"id" : [NSString stringWithFormat:@"org.graetzer.%i", url.hash],
-                         @"url" : urlText,
-                         @"title" : titleSrc,
-                         @"sortindex" : @0,
-                         @"icon": @"history.png"};
-        }
-        [[Store getStore] addTempHistoryObject:item];
-    });
+    NSString *urlText = [NSString stringWithFormat:@"%@", url];
+    
+    NSDictionary *item;
+    // Check if this history entry already exists
+    NSArray *history = [[Store getStore] getHistory];
+    for (NSUInteger i = 0; i < history.count; i++) {
+        item = history[i];
+        if ([urlText isEqualToString:item[@"url"]]) break;
+        item = nil;
+    }
+    
+    if (!item) {
+        NSString *titleSrc = title != nil ? title : [NSString stringWithFormat:@"%@", url.host];
+        item = @{@"id" : [NSString stringWithFormat:@"org.graetzer.%i", url.hash],
+                     @"url" : urlText,
+                     @"title" : titleSrc,
+                     @"sortindex" : @0,
+                     @"icon": @"history.png"};
+    }
+    [[Store getStore] addTempHistoryObject:item];
 }
 
 @end

@@ -39,11 +39,6 @@
     NSDictionary *_selected;
 }
 
-- (void)dealloc {
-    self.webView.delegate = nil;
-    [_updateTimer invalidate];
-}
-
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
     // Enable cookies
@@ -59,6 +54,10 @@
                                                               diskPath:path];
         [NSURLCache setSharedURLCache:cache];
     }
+}
+
+- (void)dealloc {
+    self.webView.delegate = nil;
 }
 
 - (void)loadView {
@@ -100,15 +99,14 @@
         for (UIGestureRecognizer *rec in self.webView.gestureRecognizers) {
             [rec removeTarget:self action:nil];
         }
-        [_updateTimer invalidate];
+        
         self.webView.delegate = nil;
         [self.webView stopLoading];
         [self.webView clearContent];
+        
+        [_updateTimer invalidate];
+        self.loading = NO;
     }
-}
-
-- (void)didMoveToParentViewController:(UIViewController *)parent {
-    [super didMoveToParentViewController:parent];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -300,58 +298,68 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
         [self.indicator startAnimating];
     }
     [self.browserViewController updateChrome];
-    
-    _updateTimer = [NSTimer scheduledTimerWithTimeInterval:3
-                                                    target:self
-                                                  selector:@selector(prepareWebView)
-                                                  userInfo:nil repeats:YES];
+    [self updateWebView:nil];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    [_updateTimer invalidate];
-    
-    [self.webView disableTouchCallout];
-    self.title = [webView title];
-    
-    NSString *webLoc = [self.webView location];
-    if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
-        self.request.URL = [NSURL URLWithUnicodeString:webLoc];
-    
-    [self.webView loadJSTools];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"])
-        [self.webView enableDoNotTrack];
-    
     self.loading = NO;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.indicator stopAnimating];
     }
+    [_updateTimer invalidate];
+    
+    [self.webView loadJSTools];
+    [self.webView disableTouchCallout];
+    self.title = [webView title];
+    
+    NSString *webLoc = [self.webView location];
+    if (webLoc.length && ![webLoc hasPrefix:@"file:///"]) {
+        self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+    }
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
+        [self.webView enableDoNotTrack];
+    }
     [self.browserViewController updateChrome];
     
-    // Private mode
-    //if (![[NSUserDefaults standardUserDefaults] boolForKey:kWeavePrivateMode]) {
-        [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
-    //}
+    [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 
-- (void)prepareWebView {
-    if (self.webView) {
+- (void)updateWebView:(NSTimer *)timer {
+    if (timer == _updateTimer) {
+        _updateTimer = nil;
+    } else if (_updateTimer != nil) {
+        [_updateTimer invalidate];
+    }
+    
+    if (self.loading) {
+        _updateTimer = [NSTimer scheduledTimerWithTimeInterval:3
+                                                        target:self
+                                                      selector:@selector(updateWebView:)
+                                                      userInfo:nil
+                                                       repeats:NO];
+    }
+    if (timer != nil) {// Just perform an actual update if this was called from a timer
         [self.webView disableTouchCallout];
         self.title = [self.webView title];
-        
         [self.browserViewController updateChrome];
     }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    // If an error oocured, disable the loading stuff
     self.loading = NO;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        [self.indicator stopAnimating];
+    }
+    [_updateTimer invalidate];
     [self.browserViewController updateChrome];
     
     DLog(@"WebView error code: %d", error.code);
     //ignore these
     if ([error.domain isEqual:NSURLErrorDomain] && error.code == NSURLErrorCancelled)
-        return;// || [error.domain isEqualToString:@"WebKitErrorDomain"])
-    
+        return;
+        
     if (error.code == NSURLErrorCannotFindHost
         || error.code == NSURLErrorDNSLookupFailed
         || ([(id)kCFErrorDomainCFNetwork isEqualToString:error.domain] && error.code == 2)) {
@@ -380,9 +388,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                                               cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
                                               otherButtonTitles: nil];
         [alert show];
-    }
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.indicator stopAnimating];
     }
 }
 

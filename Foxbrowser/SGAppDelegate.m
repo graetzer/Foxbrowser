@@ -144,9 +144,16 @@ id<WeaveService> weaveService;
     [self.browserViewController saveCurrentTabs];
     [[GAI sharedInstance] dispatch];
     
-    // Call last, blocks
+    __block UIBackgroundTaskIdentifier identifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+        [[UIApplication sharedApplication] endBackgroundTask:identifier];
+        identifier = UIBackgroundTaskInvalid;
+    }];
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        [[Store getStore] saveChanges];
+        if (identifier != UIBackgroundTaskInvalid) {
+            [[Store getStore] saveChanges];
+            [[UIApplication sharedApplication] endBackgroundTask:identifier];
+        }
     });
 }
 

@@ -94,7 +94,7 @@
 @end
 
 @implementation Store {
-    NSMutableArray *_tempHistory;
+    NSArray *_tempHistory;
 }
 
 // The singleton instance
@@ -139,7 +139,7 @@ static dispatch_once_t onceToken;
 		NSString *documentsDir = paths[0];
 		NSString *databasePath = [documentsDir stringByAppendingString:DATABASE_NAME];
         
-        _tempHistory = [[NSMutableArray alloc] initWithCapacity:10];
+        _tempHistory = @[];
 		
 		/* DB already exists */
 		success = [fileManager fileExistsAtPath:databasePath];
@@ -194,6 +194,8 @@ static dispatch_once_t onceToken;
 	hierarchicalBookmarks = nil;
 	[history release];
 	history = nil;
+    [_tempHistory release];
+    _tempHistory = nil;
 	[super dealloc];
 }
 
@@ -330,35 +332,41 @@ static dispatch_once_t onceToken;
 - (void)addTempHistoryObject:(NSDictionary *)item {
     [history addObject:item];// Shouldn't lead to errors
     
-    [[Stockboy syncLock] lock];
-    while([Stockboy syncInProgress])
-        [[Stockboy syncLock] wait];
-    
     int sortIndex = [item[@"sortindex"] intValue];
     NSDictionary *historyEntry = @{ @"id" : item[@"id"],
                                     @"histUri" : item[@"url"],
                                     @"title" : item[@"title"],
                                     @"modified" : @([[NSDate date] timeIntervalSince1970]),
                                     @"sortindex" : @(sortIndex + 100)};
-    [_tempHistory addObject:historyEntry];
-    [[Stockboy syncLock] signal];
-    [[Stockboy syncLock] unlock];
+        
+    NSArray *tmp = _tempHistory;
+    _tempHistory = [[tmp arrayByAddingObject:historyEntry] retain];
+    [tmp release];
 }
 
 - (void)saveChanges {
-    [[Stockboy syncLock] lock];
-    if (![Stockboy syncInProgress] && _tempHistory.count > 0) {
+    NSCondition *synLock = [Stockboy syncLock];
+    if (_tempHistory.count == 0) {
+        return;
+    }
+    
+    [synLock lock];
+    while ([Stockboy syncInProgress])[synLock wait];
+    [Stockboy setSyncInProgress:YES];
+    [synLock unlock];
+    
+    if (_tempHistory.count > 0) {
         [self beginTransaction];
-        
-        for (NSDictionary* historyItem in _tempHistory) {
-            [self addHistoryItem:historyItem];
-        }
-        [_tempHistory removeAllObjects];
-        
+        NSArray *tmp = _tempHistory;
+        for (NSDictionary* historyItem in tmp) [self addHistoryItem:historyItem];
+        _tempHistory = @[];
         [self endTransaction];
     }
-    [[Stockboy syncLock] signal];
-    [[Stockboy syncLock] unlock];
+    
+    [synLock lock];
+    [Stockboy setSyncInProgress:NO];
+    [synLock signal];
+    [synLock unlock];
 }
 
 //deletes every item in the tabs table, clearing it
@@ -877,8 +885,9 @@ static dispatch_once_t onceToken;
 
 	// Second, insert all the new history entries 
 	for (NSDictionary* historyItem in addedHistory) [self addHistoryItem:historyItem];
+    
     for (NSDictionary* historyItem in _tempHistory) [self addHistoryItem:historyItem];
-    [_tempHistory removeAllObjects];
+    _tempHistory = @[];
     
 	if (full) [self updateTimestamp:@"fullhistory"];
 	
