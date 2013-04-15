@@ -60,6 +60,11 @@
             [tw addImage:item];
         }
     }
+    
+    tw.completionHandler = ^(SLComposeViewControllerResult result) {
+        [self activityDidFinish:result == TWTweetComposeViewControllerResultDone];
+    };
+    
     _viewController = tw;
 }
 
