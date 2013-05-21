@@ -247,8 +247,10 @@
                          
                          if (_exposeMode)
                              self.closeButton.hidden = SG_CONTAINER_EMPTY;
-                         else
+                         else if (_viewControllers.count > 0)
                              [self enableScrollsToTop];
+                         else
+                             self.exposeMode = YES;
                      }];
 }
 

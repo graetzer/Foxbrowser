@@ -100,7 +100,7 @@
 			case 503:
 			case 504:
 			case 505:
-				[NSException raise:@"ConnectFail" format: NSLocalizedString(@"Unable To Communicate With Server (%d)", @"unable to communicate with server"), request.responseStatusCode];
+				[NSException raise:@"ConnectFail" format: NSLocalizedString(@"Unable To Communicate With Server (%d), %@", @"unable to communicate with server"), request.responseStatusCode, request.responseString];
 				return nil;
 				break;
 

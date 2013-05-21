@@ -22,7 +22,7 @@ typedef enum {
     NSInputStream *_HTTPStream;
     CFHTTPMessageRef _HTTPMessage;
     
-    NSInteger _authenticationAttempts;
+    NSInteger _failedAuthAttempts;
     BOOL _validatesSecureCertificate;
     
     NSMutableData *_buffer;
@@ -31,8 +31,8 @@ typedef enum {
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request{
     NSString *scheme = [request.URL.scheme lowercaseString];
-    //return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
-    return [scheme isEqualToString:@"https"];
+    return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
+    //return [scheme isEqualToString:@"https"];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
@@ -46,8 +46,9 @@ typedef enum {
                 cachedResponse:cachedResponse
                         client:client]) {
         _compression = SGIdentity;
-        _authenticationAttempts = -1;
+        _failedAuthAttempts = 0;
         _validatesSecureCertificate = ValidatesSecureCertificate;
+        _HTTPMessage = [self newMessageWithURLRequest:self.request];
     }
     return self;
 }
@@ -76,28 +77,31 @@ typedef enum {
         return;
     }
     
-    if ([NSThread isMainThread]) {// Happens on some pages, when a UIWebView is removed
+    // Happens on some pages, when a UIWebView is removed, causes the UI to freeze
+    if ([NSThread isMainThread]) {
         DLog(@"Main thread: %@", self.request.URL);
-        [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]];
+        [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain
+                                                                           code:NSUserCancelledError userInfo:nil]];
         return; // Ignore these for now
     }
     
     _clientThread = [NSThread currentThread];
-    
-    NSThread *thread = [SGHTTPURLProtocol threadForURLProtocol:self];
-    [self performSelector:@selector(openHttpStream) onThread:thread withObject:nil waitUntilDone:NO];
+    [self openHttpStream];
 }
 
 - (void)stopLoading {
-    NSThread *thread = [SGHTTPURLProtocol threadForURLProtocol:self];
-    [self performSelector:@selector(closeHttpStream) onThread:thread withObject:nil waitUntilDone:NO];
+    [self performSelector:@selector(closeHttpStream)
+                 onThread:_clientThread withObject:nil waitUntilDone:YES];
+    
+    if (_HTTPMessage)
+        CFRelease(_HTTPMessage);
+    
+    _HTTPMessage = NULL;
 }
 
 #pragma mark - HTTP handling
 
 - (void)openHttpStream {
-    _HTTPMessage = [self newMessageWithURLRequest:self.request];
-    
     NSInputStream *bodyStream = self.request.HTTPBodyStream;
     CFReadStreamRef stream;
     if (bodyStream)
@@ -179,11 +183,6 @@ typedef enum {
         [_HTTPStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         [_HTTPStream close];
     }
-    
-    if (_HTTPMessage)
-        CFRelease(_HTTPMessage);
-    
-    _HTTPMessage = NULL;
     _HTTPStream = nil;
     _URLResponse = nil;
     _buffer = nil;
@@ -192,11 +191,14 @@ typedef enum {
 - (void)stream:(NSInputStream *)theStream handleEvent:(NSStreamEvent)streamEvent {
     NSAssert(theStream == _HTTPStream, @"Not my stream!");
 
+    BOOL proceed = YES;
     if (!_URLResponse)// Handle the response as soon as it's available
-        [self parseStreamHttpHeader:theStream];
+        proceed = [self parseStreamHttpHeader:theStream];
+    
+    if (!proceed)
+        return;
     
     switch (streamEvent) {
-            
         case NSStreamEventHasBytesAvailable: {
             
             if (_validatesSecureCertificate) {// Should be == NO in case of http
@@ -217,20 +219,20 @@ typedef enum {
                 NSInteger len = [theStream read:buf maxLength:1024];
                 if (len > 0) {
                     // If there is no buffer, there is no compression specified. Therefore we can just send the data
-                    if (_buffer)
-                        [_buffer appendBytes:(const void *)buf length:len];
-                    else
-                        [self.client URLProtocol:self didLoadData:[NSData dataWithBytes:buf length:len]];
+                    if (_buffer) [_buffer appendBytes:(const void *)buf length:len];
+                    else [self.client URLProtocol:self didLoadData:[NSData dataWithBytes:buf length:len]];
                 }
             }
             break;
         }
             
-        case NSStreamEventEndEncountered: { // Report the end of the stream to the delegate            
-            if (_compression == SGGzip)
-                [self.client URLProtocol:self didLoadData:[_buffer gzipInflate]];
-            else if (_compression == SGDeflate)
-                [self.client URLProtocol:self didLoadData:[_buffer zlibInflate]];
+        case NSStreamEventEndEncountered: { // Report the end of the stream to the delegate
+            if (_buffer) {
+                if (_compression == SGGzip)
+                    [self.client URLProtocol:self didLoadData:[_buffer gzipInflate]];
+                else if (_compression == SGDeflate)
+                    [self.client URLProtocol:self didLoadData:[_buffer zlibInflate]];
+            }
             
             [self.client URLProtocolDidFinishLoading:self];
             _buffer = nil;
@@ -261,7 +263,7 @@ typedef enum {
 
 #pragma mark - Helper methods
 
-- (void)parseStreamHttpHeader:(NSInputStream *)theStream {
+- (BOOL)parseStreamHttpHeader:(NSInputStream *)theStream {
     
     CFHTTPMessageRef response = (__bridge CFHTTPMessageRef)[theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPResponseHeader];
     if (response && CFHTTPMessageIsHeaderComplete(response)) {
@@ -282,7 +284,7 @@ typedef enum {
                                                                                code:SGURLProtocolErrorInvalidResponse
                                                                            userInfo:@{NSLocalizedDescriptionKey:@"Invalid HTTP response"}]];
             [self closeHttpStream];
-            return;
+            return NO;
         }
         
         if ([self.request HTTPShouldHandleCookies])
@@ -315,7 +317,7 @@ typedef enum {
                 
                 [self closeHttpStream];
                 [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSUserCancelledError userInfo:nil]];
-                return;
+                return NO;
             }
         } else if (statusCode == 304) { // Handle cached stuff
             
@@ -326,7 +328,7 @@ typedef enum {
                 [self.client URLProtocol:self didLoadData:[cached data]];
                 [self.client URLProtocolDidFinishLoading:self];// No http body expected
                 [self closeHttpStream];
-                return;
+                return NO;
             } else {
                 DLog(@"No cached response existent for %@", self.request.URL);
                 [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:@"org.graetzer.http"
@@ -336,17 +338,18 @@ typedef enum {
         } else if (statusCode == 401 || statusCode == 407) {
             NSAssert(!self.authChallenge, @"Authentication challenge received while another one is in progress");
             
-            _authenticationAttempts++;
+            
             _authChallenge = [[SGHTTPAuthenticationChallenge alloc] initWithResponse:response
-                                                                previousFailureCount:_authenticationAttempts
+                                                                previousFailureCount:_failedAuthAttempts
                                                                      failureResponse:_URLResponse
                                                                               sender:self];
+            _failedAuthAttempts++;
             
-            if (self.authChallenge) {
+            if (_authChallenge) {
                 // Cancel any further loading and ask the delegate for authentication
                 [self closeHttpStream];
                 
-                if (_authenticationAttempts == 0 && self.authChallenge.proposedCredential) {
+                if (self.authChallenge.previousFailureCount == 0 && self.authChallenge.proposedCredential) {
                     [self useCredential:self.authChallenge.proposedCredential forAuthenticationChallenge:self.authChallenge];
                 } else {
                     [self.client URLProtocol:self didReceiveAuthenticationChallenge:self.authChallenge];
@@ -357,13 +360,12 @@ typedef enum {
                     }
                     [VariableLock unlock];
                 }
-                return; // Stops the delegate being sent a response received message
+                return NO; // Stops the delegate being sent a response received message
             } else {
                 ELog(@"Failed to create auth challenge");
-                NSError *error = [NSError errorWithDomain:@"org.graetzer.http"
-                                                     code:407
-                                                 userInfo:@{NSLocalizedDescriptionKey:@"Unable to create authentication challenge"}];
-                [self.client URLProtocol:self didFailWithError:error];
+                [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain
+                                                                                   code:NSUserCancelledError
+                                                                               userInfo:@{NSLocalizedDescriptionKey:@"Unable to create authentication challenge"}]];
             }
         }
         
@@ -387,10 +389,7 @@ typedef enum {
         NSURLCacheStoragePolicy policy = [self cachePolicyForRequest:self.request response:_URLResponse];
         [self.client URLProtocol:self didReceiveResponse:_URLResponse cacheStoragePolicy:policy];
     }
-}
-
-- (NSUInteger)lengthOfDataSent {
-    return [[_HTTPStream propertyForKey:(NSString *)kCFStreamPropertyHTTPRequestBytesWrittenCount] unsignedIntValue];
+    return YES;
 }
 
 - (CFHTTPMessageRef)newMessageWithURLRequest:(NSURLRequest *)request {
@@ -432,8 +431,7 @@ typedef enum {
                                          (__bridge CFStringRef)val);
     }
     
-    if (request.HTTPBody)
-        CFHTTPMessageSetBody(message, (__bridge CFDataRef)request.HTTPBody);
+    if (request.HTTPBody) CFHTTPMessageSetBody(message, (__bridge CFDataRef)request.HTTPBody);
     
     return message;
 }
@@ -530,8 +528,7 @@ typedef enum {
 }
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    NSParameterAssert(challenge == [self authChallenge]);
-    _authChallenge = nil;
+    NSParameterAssert(challenge == _authChallenge);
     
     DLog(@"Try to use user: %@", credential.user);
     // Retry the request, this time with authenticatio
@@ -542,7 +539,8 @@ typedef enum {
                                       (__bridge CFStringRef)[credential user],
                                       (__bridge CFStringRef)[credential password],
                                       NULL);
-        [self startLoading];
+        _authChallenge = nil;
+        [self performSelector:@selector(openHttpStream) onThread:_clientThread withObject:nil waitUntilDone:NO];
     } else {
         [self cancelAuthenticationChallenge:challenge];
     }
@@ -556,54 +554,13 @@ typedef enum {
     [self cancelAuthenticationChallenge:challenge];
 }
 
-#pragma mark - Threading
-
-// In the default implementation, all requests run in a single background thread
-// Advanced users only: Override this method in a subclass for a different threading behaviour
-// Eg: return [NSThread mainThread] to run all requests in the main thread
-// Alternatively, you can create a thread on demand, or manage a pool of threads
-// Threads returned by this method will need to run the runloop in default mode (eg CFRunLoopRun())
-// Requests will stop the runloop when they complete
-// If you have multiple requests sharing the thread or you want to re-use the thread, you'll need to restart the runloop
-static NSThread *NetworkThread = nil;
-+ (NSThread *)threadForURLProtocol:(NSURLProtocol *)protocol {
-	if (NetworkThread == nil) {
-		@synchronized(self) {
-			if (NetworkThread == nil) {
-                // Let the thread run indefinetly
-				NetworkThread = [[NSThread alloc] initWithTarget:self selector:@selector(runRequests) object:nil];
-                [NetworkThread setName:@"SGHTTPURLProtocol net thread"];
-				[NetworkThread start];
-			}
-		}
-	}
-	return NetworkThread;
-}
-
-+ (void)runRequests {
-	// Should keep the runloop from exiting
-	CFRunLoopSourceContext context = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-	CFRunLoopSourceRef source = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
-	CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-    
-    BOOL runAlways = YES; // Introduced to cheat Static Analyzer
-	while (runAlways) {
-		@autoreleasepool {
-            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0e10, true);
-        }
-	}
-    
-	// Should never be called, but anyway
-	CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-	CFRelease(source);
-}
-
 #pragma mark - Stuff
 
 __strong static NSLock* VariableLock;
 static BOOL ValidatesSecureCertificate = YES;
 __weak static id<SGHTTPURLProtocolDelegate> ProtocolDelegate;
 __strong static NSMutableDictionary *HTTPHeaderFields;
+//__strong static NSArray *HTTPCredentialStore;
 
 + (void)initialize {
     VariableLock = [NSLock new];
@@ -647,5 +604,6 @@ __strong static NSMutableDictionary *HTTPHeaderFields;
     ValidatesSecureCertificate = validate;
 	[VariableLock unlock];
 }
+
 
 @end

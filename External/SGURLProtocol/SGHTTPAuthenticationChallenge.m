@@ -40,18 +40,16 @@
     NSString *authenticationMethod;
     if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic]) {
         authenticationMethod = NSURLAuthenticationMethodHTTPBasic;
-    }
-    else if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest]) {
+    } else if ([(__bridge NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest]) {
         authenticationMethod = NSURLAuthenticationMethodHTTPDigest;
-    }
-    else {
+    } else {
         CFRelease(authMethod);
         return nil;
     }
     CFRelease(authMethod);
     
     // Initialise
-    CFStringRef realm = CFHTTPAuthenticationCopyRealm([self CFHTTPAuthentication]);
+    CFStringRef realm = CFHTTPAuthenticationCopyRealm(_HTTPAuthentication);
     
     NSInteger port = 80;
     if ([URL port]) {
@@ -64,13 +62,11 @@
             port = 443;
     }
     
-    
     NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[URL host]
                                                                                   port:port
                                                                               protocol:[URL scheme]
-                                                                                 realm:(__bridge NSString *)realm
+                                                                                 realm:CFBridgingRelease(realm)
                                                                   authenticationMethod:authenticationMethod];
-    CFRelease(realm);
     
     NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage]
                                    defaultCredentialForProtectionSpace:protectionSpace];
