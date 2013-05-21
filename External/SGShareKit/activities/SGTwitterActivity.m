@@ -60,12 +60,16 @@
             [tw addImage:item];
         }
     }
+    _viewController = tw;
     
     tw.completionHandler = ^(SLComposeViewControllerResult result) {
         [self activityDidFinish:result == TWTweetComposeViewControllerResultDone];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_viewController dismissViewControllerAnimated:YES completion:NULL];
+        });
     };
     
-    _viewController = tw;
+    
 }
 
 - (UIViewController *)activityViewController {

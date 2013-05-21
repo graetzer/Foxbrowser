@@ -50,7 +50,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     NSMutableArray *_applicationActivities;
     
     UIWindow *_myWindow;
-    UIWindow *_originalWindow;
+    __weak UIWindow *_originalWindow;
 }
 
 + (void)initialize {
@@ -93,7 +93,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 - (void)show {
     [self validateApplicationActivities];
     
-    _originalWindow = [[UIApplication sharedApplication] keyWindow];
+    _originalWindow = [UIApplication sharedApplication].keyWindow;
     _myWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     _myWindow.windowLevel = UIWindowLevelAlert;
     _myWindow.backgroundColor = [UIColor colorWithWhite:0 alpha:0.20];
@@ -135,7 +135,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
         _myWindow.hidden = YES;
         _myWindow.rootViewController = nil;
         _myWindow = nil;
-        [_originalWindow makeKeyWindow];
+        [_originalWindow makeKeyAndVisible];
     }];
 }
 
@@ -208,7 +208,6 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     SGActivity *activity = _applicationActivities[indexPath.row];
-    [activity prepareWithActivityItems:_activityItems];
     activity.completionHandler = _completionHandler;
     
     // Dismiss 
@@ -217,20 +216,25 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
         _myWindow.alpha = 0;
     } completion:^(BOOL finished){
         _myWindow.hidden = YES;
-        [_originalWindow makeKeyWindow];
+        [_originalWindow makeKeyAndVisible];
         
-        UIViewController *viewController = [activity activityViewController];
-        if (viewController) {
-            UIViewController *parent = [[UIApplication sharedApplication].windows[0] rootViewController];
-            viewController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-            [parent presentViewController:viewController animated:YES completion:NULL];
-        } else {
-            [activity performActivity];
-        }
-        
-        [self removeFromSuperview];
-        _myWindow.rootViewController = nil;
-        _myWindow = nil;
+        double delayInSeconds = 0.2;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            [activity prepareWithActivityItems:_activityItems];
+            
+            UIViewController *viewController = [activity activityViewController];
+            if (viewController) {
+                UIViewController *parent = _originalWindow.rootViewController;
+                viewController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+                [parent presentViewController:viewController animated:YES completion:NULL];
+            } else {
+                [activity performActivity];
+            }
+            [self removeFromSuperview];
+            _myWindow.rootViewController = nil;
+            _myWindow = nil;
+        });
     }];
 }
 

@@ -102,7 +102,7 @@
             // I might certainly need to do different things for different error conditions
             [self performSelectorOnMainThread:@selector(authFailed:) withObject:[e reason] waitUntilDone:YES];
             NSLog(@"Failed to initialize CryptoManager: %@", e.reason);
-            [[GAI sharedInstance].defaultTracker sendException:YES withDescription:@"Failed to initialize CryptoManager: %@", e.reason];
+            [[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Failed to initialize CryptoManager: %@", e.reason];
         }
         
         @finally

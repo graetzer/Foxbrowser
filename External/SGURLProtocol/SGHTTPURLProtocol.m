@@ -31,8 +31,8 @@ typedef enum {
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request{
     NSString *scheme = [request.URL.scheme lowercaseString];
-    return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
-    //return [scheme isEqualToString:@"https"];
+    //return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
+    return [scheme isEqualToString:@"https"];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
