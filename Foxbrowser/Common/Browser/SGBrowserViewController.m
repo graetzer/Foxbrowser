@@ -324,7 +324,7 @@
 #pragma mark - HTTP Authentication
 
 - (void)URLProtocol:(SGHTTPURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    if (!self.credentialsPrompt) {
+    if (_dialogResult != -1 && !self.credentialsPrompt) {
         // The protocol states you shall execute the response on the same thread.
         // So show the prompt on the main thread and wait until the result is finished
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -344,12 +344,10 @@
                                                                   persistence:creds.persistence];
             [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
                                                                 forProtectionSpace:creds.challenge.protectionSpace];
-            [creds.challenge.sender useCredential:credential
-                       forAuthenticationChallenge:creds.challenge];
+            [creds.challenge.sender useCredential:credential forAuthenticationChallenge:creds.challenge];
         } else {
             DLog(@"Cancel authenctication");
-            [creds.challenge.sender
-             cancelAuthenticationChallenge:creds.challenge];
+            [creds.challenge.sender cancelAuthenticationChallenge:creds.challenge];
         }
         self.credentialsPrompt = nil;
     } else {

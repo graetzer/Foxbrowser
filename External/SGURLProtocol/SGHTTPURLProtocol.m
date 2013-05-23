@@ -31,8 +31,8 @@ typedef enum {
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request{
     NSString *scheme = [request.URL.scheme lowercaseString];
-    //return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
-    return [scheme isEqualToString:@"https"];
+    return [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"];
+    //return [scheme isEqualToString:@"https"];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
@@ -55,11 +55,12 @@ typedef enum {
 
 #ifdef DEBUG
 - (void)dealloc {
-    NSAssert(!_HTTPMessage, @"Deallocating HTTP message while it still exists");
+    if (_HTTPMessage) CFRelease(_HTTPMessage);
+    //NSAssert(!_HTTPMessage, @"Deallocating HTTP message while it still exists");
     NSAssert(!_HTTPStream, @"Deallocating HTTP connection while stream still exists");
     NSAssert(!_URLResponse, @"Deallocating HTTP response while it still exists");
-    NSAssert(!_authChallenge, @"HTTP connection deallocated mid-authentication");
     NSAssert(!_buffer, @"Buffer should be nil by now");
+    NSAssert(!_authChallenge, @"HTTP connection deallocated mid-authentication");
 }
 #endif
 
@@ -78,7 +79,7 @@ typedef enum {
     }
     
     // Happens on some pages, when a UIWebView is removed, causes the UI to freeze
-    if ([NSThread isMainThread]) {
+    if ([NSThread isMainThread] || _HTTPMessage == NULL) {
         DLog(@"Main thread: %@", self.request.URL);
         [self.client URLProtocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain
                                                                            code:NSUserCancelledError userInfo:nil]];
@@ -92,10 +93,9 @@ typedef enum {
 - (void)stopLoading {
     [self performSelector:@selector(closeHttpStream)
                  onThread:_clientThread withObject:nil waitUntilDone:YES];
+    _clientThread = nil;
     
-    if (_HTTPMessage)
-        CFRelease(_HTTPMessage);
-    
+    if (_HTTPMessage) CFRelease(_HTTPMessage);
     _HTTPMessage = NULL;
 }
 
@@ -397,6 +397,7 @@ typedef enum {
                                               (__bridge CFStringRef)[request HTTPMethod],
                                               (__bridge CFURLRef)[request URL],
                                               kCFHTTPVersion1_1);
+    if (message == NULL) return NULL;
 
     NSString *locale = [[[NSLocale preferredLanguages] subarrayWithRange:NSMakeRange(0, 3)] componentsJoinedByString:@","];
     
@@ -542,7 +543,7 @@ typedef enum {
         _authChallenge = nil;
         [self performSelector:@selector(openHttpStream) onThread:_clientThread withObject:nil waitUntilDone:NO];
     } else {
-        [self cancelAuthenticationChallenge:challenge];
+        [self performSelector:@selector(cancelAuthenticationChallenge:) onThread:_clientThread withObject:challenge waitUntilDone:NO];
     }
 }
 
@@ -560,7 +561,6 @@ __strong static NSLock* VariableLock;
 static BOOL ValidatesSecureCertificate = YES;
 __weak static id<SGHTTPURLProtocolDelegate> ProtocolDelegate;
 __strong static NSMutableDictionary *HTTPHeaderFields;
-//__strong static NSArray *HTTPCredentialStore;
 
 + (void)initialize {
     VariableLock = [NSLock new];
@@ -604,6 +604,5 @@ __strong static NSMutableDictionary *HTTPHeaderFields;
     ValidatesSecureCertificate = validate;
 	[VariableLock unlock];
 }
-
 
 @end

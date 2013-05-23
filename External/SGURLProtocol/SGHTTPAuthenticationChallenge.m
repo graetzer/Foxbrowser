@@ -73,7 +73,7 @@
     
     NSError *error = [NSError errorWithDomain:@"org.graetzer.http"
                                          code:401
-                                     userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"Failed to authenticate", NULL)}];
+                                     userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"Failed to authenticate", nil)}];
     self = [super initWithProtectionSpace:protectionSpace
                       proposedCredential:credential
                     previousFailureCount:failureCount

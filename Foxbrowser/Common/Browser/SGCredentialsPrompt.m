@@ -35,6 +35,7 @@
     self.challenge = challenge;
     
 	self.usernameField                    = [[UITextField alloc] initWithFrame:CGRectMake(12.0, 55.0, 260.0, 25.0)];
+    self.usernameField.autoresizingMask   = UIViewAutoresizingFlexibleBottomMargin;//UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
 	self.usernameField.placeholder        = NSLocalizedString(@"Account", @"Account");
 	self.usernameField.autocorrectionType = UITextAutocorrectionTypeNo;
     self.usernameField.autocapitalizationType = UITextAutocapitalizationTypeNone;
@@ -44,6 +45,7 @@
     [self addSubview:self.usernameField];
 	
 	self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(12.0, 90.0, 260.0, 25.0)];
+    self.passwordField.autoresizingMask   = UIViewAutoresizingFlexibleBottomMargin;//UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
 	self.passwordField.placeholder        = NSLocalizedString(@"Password", @"Password");
 	self.passwordField.autocorrectionType = UITextAutocorrectionTypeNo;
     self.passwordField.autocapitalizationType = UITextAutocapitalizationTypeNone;
@@ -121,7 +123,12 @@
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
-	[self.delegate dismissWithClickedButtonIndex:1 animated:YES];
+	//[self.delegate dismissWithClickedButtonIndex:1 animated:YES];
+    if (textField == self.usernameField) {
+        [self.passwordField  performSelector:@selector(becomeFirstResponder)
+                                  withObject:nil
+                                  afterDelay:0.1];
+    }
 	return YES;
 }
 
