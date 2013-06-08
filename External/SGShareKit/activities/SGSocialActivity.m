@@ -41,15 +41,18 @@
     NSString *service = [self serviceType];
     SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:service];
     
+    NSMutableString *initialText = [NSMutableString stringWithCapacity:160];
+    
     for (id item in activityItems) {
         if ([item isKindOfClass:[NSURL class]]) {
             [composeVC addURL:item];
         } else if ([item isKindOfClass:[NSString class]]) {
-            [composeVC setInitialText:item];
+            [initialText appendFormat:@"%@\n", item];
         } else if ([item isKindOfClass:[UIImage class]]) {
             [composeVC addImage:item];
         }
     }
+    [composeVC setInitialText:initialText];
     
     composeVC.completionHandler = ^(SLComposeViewControllerResult result) {
         [self activityDidFinish:result == SLComposeViewControllerResultDone];

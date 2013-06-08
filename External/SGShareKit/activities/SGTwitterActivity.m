@@ -51,16 +51,18 @@
 - (void)prepareWithActivityItems:(NSArray *)activityItems {
     TWTweetComposeViewController *tw = [TWTweetComposeViewController new];
     
+    NSMutableString *initialText = [NSMutableString stringWithCapacity:160];
+    
     for (id item in activityItems) {
         if ([item isKindOfClass:[NSURL class]]) {
             [tw addURL:item];
         } else if ([item isKindOfClass:[NSString class]]) {
-            [tw setInitialText:item];
+            [initialText appendFormat:@"%@\n", item];
         } else if ([item isKindOfClass:[UIImage class]]) {
             [tw addImage:item];
         }
     }
-    _viewController = tw;
+    [tw setInitialText:initialText];
     
     tw.completionHandler = ^(SLComposeViewControllerResult result) {
         [self activityDidFinish:result == TWTweetComposeViewControllerResultDone];
@@ -69,7 +71,7 @@
         });
     };
     
-    
+    _viewController = tw;
 }
 
 - (UIViewController *)activityViewController {
