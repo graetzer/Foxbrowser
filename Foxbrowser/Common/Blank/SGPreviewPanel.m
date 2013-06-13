@@ -176,7 +176,7 @@
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
                 [sheet showFromRect:recognizer.view.frame inView:self animated:YES];
             else
-                [sheet showInView:self.window];
+                [sheet showInView:self.window.rootViewController.view];
         }
     }
 }

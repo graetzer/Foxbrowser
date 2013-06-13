@@ -76,11 +76,11 @@
 }
 
 - (UIView *)generateInputAccessoryView {
-    UIToolbar *_inputAccessory = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
-    _inputAccessory.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.superview.bounds.size.width, 44.)];
+    toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        _inputAccessory.translucent = YES;
-        _inputAccessory.tintColor = kTabColor;
+        toolbar.translucent = YES;
+        toolbar.tintColor = kTabColor;
     }
     
     UIBarButtonItem *btn, *flex, *fix;
@@ -106,8 +106,8 @@
         [buttons addObject:fix];
     }
     [buttons addObject:flex];
-    _inputAccessory.items = buttons;
-    return _inputAccessory;
+    toolbar.items = buttons;
+    return toolbar;
 }
 
 - (IBAction)addText:(UIBarButtonItem *)sender {

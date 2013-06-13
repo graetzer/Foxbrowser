@@ -222,6 +222,12 @@ id<WeaveService> weaveService;
 	[alert show];
 }
 
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    //this handler is only called by the alert made directly below, so we know that button 1 is the signout button
+    if (buttonIndex == 1) //sign out
+        [self login]; //also erases user data
+}
+
 - (BOOL) canConnectToInternet; {
     return [_reachability isReachable];
 }

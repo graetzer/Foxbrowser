@@ -139,7 +139,7 @@ static dispatch_once_t onceToken;
 		NSString *documentsDir = paths[0];
 		NSString *databasePath = [documentsDir stringByAppendingString:DATABASE_NAME];
         
-        _tempHistory = @[];
+        _tempHistory = [[NSArray alloc] init];
 		
 		/* DB already exists */
 		success = [fileManager fileExistsAtPath:databasePath];
@@ -359,7 +359,7 @@ static dispatch_once_t onceToken;
         [self beginTransaction];
         NSArray *tmp = _tempHistory;
         for (NSDictionary* historyItem in tmp) [self addHistoryItem:historyItem];
-        _tempHistory = @[];
+        _tempHistory = [[NSArray alloc] init];
         [self endTransaction];
     }
     
@@ -375,14 +375,10 @@ static dispatch_once_t onceToken;
 	sqlite3_stmt *stmnt = nil;
 
 	sql = "DELETE FROM tabs";
-	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) 
-	{
+	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) {
 		NSLog(@"Could not prepare statement!");
-	} 
-	else 
-	{
-		if (sqlite3_step(stmnt) != SQLITE_DONE) 
-		{
+	} else {
+		if (sqlite3_step(stmnt) != SQLITE_DONE) {
 			NSLog(@"failed to delete tabs");
 			sqlite3_finalize(stmnt);
 		}
@@ -392,25 +388,19 @@ static dispatch_once_t onceToken;
 }
 
 //deletes every item in the history table, clearing it
--(void) deleteHistory
-{
+-(void) deleteHistory {
 	const char *sql;
 	sqlite3_stmt *stmnt = nil;
 
 	sql = "DELETE FROM history";
-	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) 
-	{
+	if (sqlite3_prepare_v2(sqlDatabase, sql, -1, &stmnt, NULL) != SQLITE_OK) {
 		NSLog(@"Could not prepare statement!");
-	} 
-	else 
-	{
-		if (sqlite3_step(stmnt) != SQLITE_DONE) 
-		{
+	} else {
+		if (sqlite3_step(stmnt) != SQLITE_DONE) {
 			NSLog(@"failed to delete history");
 			sqlite3_finalize(stmnt);
 		}
 	}
-
 	sqlite3_finalize(stmnt);
 }
 
@@ -887,7 +877,7 @@ static dispatch_once_t onceToken;
 	for (NSDictionary* historyItem in addedHistory) [self addHistoryItem:historyItem];
     
     for (NSDictionary* historyItem in _tempHistory) [self addHistoryItem:historyItem];
-    _tempHistory = @[];
+    _tempHistory = [[NSArray alloc] init];
     
 	if (full) [self updateTimestamp:@"fullhistory"];
 	

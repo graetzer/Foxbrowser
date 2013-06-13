@@ -464,7 +464,7 @@ typedef enum {
     // If the response might be cacheable, look at the "Cache-Control" header in
     // the response.
     if (cacheable) {
-        NSString *responseHeader = [[[response allHeaderFields] objectForKey:@"Cache-Control"] lowercaseString];
+        NSString *responseHeader = [response.allHeaderFields[@"Cache-Control"] lowercaseString];
         if ( (responseHeader != nil) && [responseHeader rangeOfString:@"no-store"].location != NSNotFound) {
             cacheable = NO;
         }
@@ -473,7 +473,7 @@ typedef enum {
     // If we still think it might be cacheable, look at the "Cache-Control" header in
     // the request.
     if (cacheable) {
-        NSString *requestHeader = [[[request allHTTPHeaderFields] objectForKey:@"Cache-Control"] lowercaseString];
+        NSString *requestHeader = [request.allHTTPHeaderFields[@"Cache-Control"] lowercaseString];
         if ( (requestHeader != nil)
             && ([requestHeader rangeOfString:@"no-store"].location != NSNotFound)
             && ([requestHeader rangeOfString:@"no-cache"].location != NSNotFound) ) {
