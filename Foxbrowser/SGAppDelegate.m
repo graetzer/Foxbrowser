@@ -42,6 +42,9 @@
 SGAppDelegate *appDelegate;
 id<WeaveService> weaveService;
 
+NSString *const kSGEnableStartpage = @"org.graetzer.enableStartpage";
+NSString *const kSGStartpage = @"org.graetzer.startpage";
+
 @implementation SGAppDelegate {
     Reachability *_reachability;
 }

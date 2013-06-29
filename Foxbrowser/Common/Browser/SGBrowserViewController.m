@@ -121,10 +121,23 @@
 - (void)addTab; {
     if (self.count >= self.maxCount)
         return;
-        
-    SGBlankController *latest = [SGBlankController new];
-    [self addViewController:latest];
-    [self showViewController:latest];
+    
+    UIViewController *viewC;
+    
+    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
+    NSURL *url = [NSURL URLWithString:startpage];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+        SGWebViewController *webC = [SGWebViewController new];
+        webC.title = request.URL.absoluteString;
+        [webC openRequest:request];
+        viewC = webC;
+    } else {
+        viewC = [SGBlankController new];
+    }
+    
+    [self addViewController:viewC];
+    [self showViewController:viewC];
     [self updateChrome];
 }
 
@@ -292,8 +305,18 @@
             }
         }
     } else {
-        SGBlankController *latest = [SGBlankController new];
-        [self addViewController:latest];
+        NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
+        NSURL *url = [NSURL URLWithString:startpage];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+            SGWebViewController *webC = [SGWebViewController new];
+            webC.title = request.URL.absoluteString;
+            [webC openRequest:request];
+            [self addViewController:webC];
+        } else {
+            SGBlankController *latest = [SGBlankController new];
+            [self addViewController:latest];
+        }
     }
     
     if ([latest.lastObject isKindOfClass:[NSNumber class]])

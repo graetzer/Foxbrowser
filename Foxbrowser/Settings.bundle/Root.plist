@@ -38,6 +38,32 @@
 		</dict>
 		<dict>
 			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Open startpage</string>
+			<key>Key</key>
+			<string>org.graetzer.enableStartpage</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Title</key>
+			<string>Startpage</string>
+			<key>Key</key>
+			<string>org.graetzer.startpage</string>
+			<key>DefaultValue</key>
+			<string>https://duckduckgo.com/</string>
+		</dict>
+        <dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Experimental</string>
+		</dict>
+		<dict>
+			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
 			<key>Title</key>
 			<string>Performance statistics</string>
@@ -58,12 +84,6 @@
 		</dict>
 		<dict>
 			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-			<key>Title</key>
-			<string>Experimental</string>
-		</dict>
-		<dict>
-			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>DefaultValue</key>
 			<false/>
@@ -78,7 +98,7 @@
 			<key>Key</key>
 			<string>org.graetzer.track</string>
 			<key>Title</key>
-			<string>Do Not Track Header</string>
+			<string>Do Not Track</string>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 		</dict>
