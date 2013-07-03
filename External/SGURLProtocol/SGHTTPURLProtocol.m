@@ -92,7 +92,9 @@ typedef enum {
 
 - (void)stopLoading {
     [self performSelector:@selector(closeHttpStream)
-                 onThread:_clientThread withObject:nil waitUntilDone:YES];
+                 onThread:_clientThread
+               withObject:nil
+            waitUntilDone:NO];
     _clientThread = nil;
     
     if (_HTTPMessage) CFRelease(_HTTPMessage);

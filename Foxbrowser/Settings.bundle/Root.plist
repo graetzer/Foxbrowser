@@ -56,11 +56,11 @@
 			<key>DefaultValue</key>
 			<string>https://duckduckgo.com/</string>
 		</dict>
-        <dict>
+		<dict>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Experimental</string>
+			<string>Advanced</string>
 		</dict>
 		<dict>
 			<key>Type</key>

@@ -164,18 +164,7 @@
 
 - (void)removeViewController:(UIViewController *)viewController index:(NSUInteger)index {
     if (self.tabsView.tabs.count <= 1) {// 0 shouldn't happen
-        UIViewController *viewC;
-        NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
-        NSURL *url = [NSURL URLWithString:startpage];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
-            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-            SGWebViewController *webC = [SGWebViewController new];
-            webC.title = request.URL.absoluteString;
-            [webC openRequest:request];
-            viewC = webC;
-        } else {
-            viewC = [SGBlankController new];
-        }
+        UIViewController *viewC = [self createNewTabViewController];
         [self swapCurrentViewControllerWith:viewC];
         return;
     }

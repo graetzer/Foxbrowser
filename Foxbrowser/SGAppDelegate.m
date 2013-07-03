@@ -44,6 +44,7 @@ id<WeaveService> weaveService;
 
 NSString *const kSGEnableStartpage = @"org.graetzer.enableStartpage";
 NSString *const kSGStartpage = @"org.graetzer.startpage";
+NSString *const kSGOpenTabsInForeground = @"org.graetzer.tabs.foreground";
 
 @implementation SGAppDelegate {
     Reachability *_reachability;

@@ -343,6 +343,19 @@
     });
 }
 
+- (UIViewController *)createNewTabViewController {
+    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
+    NSURL *url = [NSURL URLWithString:startpage];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+        SGWebViewController *webC = [SGWebViewController new];
+        webC.title = request.URL.absoluteString;
+        [webC openRequest:request];
+        return webC;
+    } else {
+        return [SGBlankController new];
+    }
+}
 
 #pragma mark - HTTP Authentication
 

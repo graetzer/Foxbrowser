@@ -88,4 +88,6 @@
 - (void)loadSavedTabs;
 - (void)saveCurrentTabs;
 
+- (UIViewController *)createNewTabViewController;
+
 @end

@@ -38,5 +38,7 @@
 @end
 
 extern SGAppDelegate *appDelegate;
+
 extern NSString *const kSGEnableStartpage;
 extern NSString *const kSGStartpage;
+extern NSString *const kSGOpenTabsInForeground;
