@@ -214,8 +214,8 @@
     if (index == 0) {
         if (!self.bookmarks) {
             BookmarkPage *bookmarksPage = [BookmarkPage new];
-            bookmarksPage.browser = self.browser;
             self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
+            self.bookmarks.navigationBar.tintColor = kTabColor;
         }
         [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
     } else if (index == 1 && url) {

@@ -76,7 +76,7 @@
 - (BOOL)canGoForward;
 
 - (BOOL)canStopOrReload;
-- (BOOL)canRemoveTab:(UIViewController *)viewController;
+
 
 - (NSURL *)URL;
 // Open a webPage in the current tab, title can be nil

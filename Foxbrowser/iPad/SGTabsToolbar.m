@@ -159,9 +159,7 @@
     [self destroyPopovers];
     
     if (!self.bookmarks) {
-        BookmarkPage *bookmarksPage = [BookmarkPage new];
-        bookmarksPage.browser = self.browser;
-        self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
+        self.bookmarks = [[UINavigationController alloc] initWithRootViewController:[BookmarkPage new]];
     }
     
     self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.bookmarks];

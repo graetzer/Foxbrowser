@@ -17,6 +17,6 @@
 - (IBAction) termsOfService;
 
 - (IBAction) privacyPolicy;
-
+- (IBAction) signOut:(id)sender;
 
 @end

@@ -176,8 +176,7 @@
         if (index == self.tabsView.tabs.count - 1) {
             newIndex--;
             to = [self.tabsView viewControllerAtIndex:newIndex];
-        } else
-            to  = [self.tabsView viewControllerAtIndex:newIndex+1];
+        } else to  = [self.tabsView viewControllerAtIndex:newIndex+1];
         
         to.view.frame = self.contentFrame;
         [self transitionFromViewController:viewController
@@ -274,6 +273,13 @@
 - (void)updateChrome {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
     [self.toolbar updateChrome];
+}
+
+- (BOOL)canRemoveTab:(UIViewController *)viewController {
+    if ([viewController isKindOfClass:[SGBlankController class]] && self.count == 1) {
+        return NO;
+    }
+    return YES;
 }
 
 @end

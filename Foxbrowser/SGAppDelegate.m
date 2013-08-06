@@ -58,7 +58,8 @@ NSString *const kSGOpenTabsInForeground = @"org.graetzer.tabs.foreground";
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
-    SGBrowserViewController *browser = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [SGPageViewController new] : [SGTabsViewController new];
+    SGBrowserViewController *browser = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ?
+        [SGPageViewController new] : [SGTabsViewController new];
     self.browserViewController = browser;
     self.window.rootViewController = browser;
     [self.window makeKeyAndVisible];

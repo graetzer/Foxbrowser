@@ -669,8 +669,12 @@ static CryptoUtils* _cryptoManager = nil;
 	NSString *myID = [self UUID];
 	NSString *clientURL = [NSString stringWithFormat:[Stockboy getURIForKey:@"Client Path"], [myID UTF8String]];
 	NSData* myClientData = [Fetcher getWeaveBasicObject:clientURL authenticatingWith:self];
-	NSString* myClientString = [[[NSString alloc] initWithData:myClientData encoding:NSUTF8StringEncoding] autorelease];
-	NSDictionary* myClient = [myClientString JSONValue];
+    NSDictionary* myClient = nil;
+    
+    if (myClientData != nil) {
+        NSString* myClientString = [[[NSString alloc] initWithData:myClientData encoding:NSUTF8StringEncoding] autorelease];
+        myClient = [myClientString JSONValue];
+    }
 
 	if (myClient == nil) 
 	{

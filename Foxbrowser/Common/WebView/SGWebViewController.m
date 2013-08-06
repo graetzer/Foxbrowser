@@ -105,7 +105,7 @@
         [self.webView clearContent];
         
         [_updateTimer invalidate];
-        self.loading = NO;
+        _loading = NO;
     }
 }
 
@@ -114,6 +114,9 @@
     if (!self.webView.request) {
         [self openRequest:nil];
     }
+    
+    // Starts the update timer
+    [self updateInterfaceTimer:nil];
 }
 
 - (void)viewWillLayoutSubviews {
@@ -121,6 +124,33 @@
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         UIActivityIndicatorView *ind = self.indicator;
         ind.center = CGPointMake(self.view.bounds.size.width - ind.frame.size.width/2 - 10, ind.frame.size.height/2 + 10);
+    }
+}
+
+- (void)updateInterfaceTimer:(NSTimer *)timer {
+    if (timer == _updateTimer) {
+        _updateTimer = nil;
+    } else if (_updateTimer != nil) {
+        [_updateTimer invalidate];
+    }
+    
+    //if (_loading) {
+    if (self.browserViewController.selectedViewController == self) {
+        _updateTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                        target:self
+                                                      selector:@selector(updateInterfaceTimer:)
+                                                      userInfo:nil
+                                                       repeats:NO];
+        if (timer != nil) {// Just perform an actual update if this was called from a timer
+            [self.webView disableTouchCallout];
+            
+            NSString *webLoc = [self.webView location];
+            if (!_loading && webLoc.length && ![webLoc hasPrefix:@"file:///"]) {
+                self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+            }
+            self.title = [self.webView title];
+            [self.browserViewController updateChrome];
+        }
     }
 }
 
@@ -280,33 +310,25 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     }
     
     if (navigationType != UIWebViewNavigationTypeOther) {
-        BOOL handleRequest = [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
-        if (handleRequest) {
-            self.request = [request mutableCopy];
-            [self.browserViewController updateChrome];
-        }
-        return handleRequest;
+        return [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
     }
     return YES;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
+    _loading = YES;
     [self dismissSearchToolbar];
     
-    self.loading = YES;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.indicator startAnimating];
     }
-    [self.browserViewController updateChrome];
-    [self updateWebView:nil];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    self.loading = NO;
+    _loading = NO;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.indicator stopAnimating];
     }
-    [_updateTimer invalidate];
     
     [self.webView loadJSTools];
     [self.webView disableTouchCallout];
@@ -325,35 +347,14 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
 }
 
-- (void)updateWebView:(NSTimer *)timer {
-    if (timer == _updateTimer) {
-        _updateTimer = nil;
-    } else if (_updateTimer != nil) {
-        [_updateTimer invalidate];
-    }
-    
-    if (self.loading) {
-        _updateTimer = [NSTimer scheduledTimerWithTimeInterval:3
-                                                        target:self
-                                                      selector:@selector(updateWebView:)
-                                                      userInfo:nil
-                                                       repeats:NO];
-    }
-    if (timer != nil) {// Just perform an actual update if this was called from a timer
-        [self.webView disableTouchCallout];
-        self.title = [self.webView title];
-        [self.browserViewController updateChrome];
-    }
-}
-
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     // If an error oocured, disable the loading stuff
-    self.loading = NO;
+    _loading = NO;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.indicator stopAnimating];
     }
     [_updateTimer invalidate];
-    [self.browserViewController updateChrome];
+//    [self.browserViewController updateChrome];
     
     DLog(@"WebView error code: %d", error.code);
     //ignore these
@@ -379,30 +380,30 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     
     NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
     // If the webpage contains stuff we don't want to delete  it
-    if ([self.webView isEmpty]) {
-        [self.webView showPlaceholder:error.localizedDescription title:title];
-    } else {
+    if (![self.webView isEmpty] && self.browserViewController.selectedViewController == self) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
                                                         message:error.localizedDescription
                                                        delegate:nil
                                               cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
                                               otherButtonTitles: nil];
         [alert show];
+    } else {
+        [self.webView showPlaceholder:error.localizedDescription title:title];
     }
 }
 
 #pragma mark - Networking
 
 - (NSMutableURLRequest *)linkRequestForURL:(NSURL *)url {
-    if (!url)
-        return nil;
+    if (!url) return nil;
     
     DLog(@"WebView URL: %@", self.webView.request.URL);
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     if (self.request) {
         NSString *webLoc = [self.webView location];
-        if (webLoc.length && ![webLoc hasPrefix:@"file:///"])
+        if (webLoc.length && ![webLoc hasPrefix:@"file:///"]) {
             self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+        }
         DLog(@"WebController URL: %@", self.request.URL);
         [request setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
     }
@@ -410,11 +411,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 - (void)openRequest:(NSMutableURLRequest *)request {
-    if (request)
-        self.request = request;
-    
-    if (![self isViewLoaded])
-        return;
+    if (request) self.request = request;
+    if (![self isViewLoaded]) return;
     
     // In case the webView is not empty, show the error on the site
     if (![appDelegate canConnectToInternet]) {
@@ -431,7 +429,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                                                              withLabel:nil
                                                              withValue:nil];
         } else {
+            _loading = YES;
             [self.webView loadRequest:self.request];
+            [self.browserViewController updateChrome];
         }
     }
 }
@@ -442,8 +442,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 #pragma mark - Search on page
 - (NSInteger)search:(NSString *)searchString {
-    if (self.searchToolbar)
-        [self.searchToolbar removeFromSuperview];
+    if (self.searchToolbar) [self.searchToolbar removeFromSuperview];
     
     NSInteger count = [self.webView highlightOccurencesOfString:searchString];
     DLog(@"Found the string %@ %i times", searchString, count);

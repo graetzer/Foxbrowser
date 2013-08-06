@@ -227,13 +227,6 @@
     return NO;
 }
 
-- (BOOL)canRemoveTab:(UIViewController *)viewController {
-    if ([viewController isKindOfClass:[SGBlankController class]] && self.count == 1) {
-        return NO;
-    }
-    return YES;
-}
-
 - (NSURL *)URL {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
@@ -244,8 +237,7 @@
 
 - (void)openURLRequest:(NSMutableURLRequest *)request title:(NSString *)title {
     NSParameterAssert(request);
-    if (!title)
-        title = request.URL.absoluteString;
+    if (!title) title = request.URL.absoluteString;
     title = [title stringByReplacingOccurrencesOfString:@"http://" withString:@""];
     title = [title stringByReplacingOccurrencesOfString:@"https://" withString:@""];
     
@@ -283,8 +275,7 @@
     if (latest.count > 1) {
         
         for (id item in latest) {
-            if (![item isKindOfClass:[NSString class]])
-                continue;
+            if (![item isKindOfClass:[NSString class]]) continue;
             
             NSURL *url = [NSURL URLWithString:item];
             id viewC;
@@ -333,10 +324,9 @@
 
             if ([controller isKindOfClass:[SGWebViewController class]]) {
                 NSURL *url = ((SGWebViewController *)controller).request.URL;
-                if ([url.scheme hasPrefix:@"http"])
-                    [latest addObject:[NSString stringWithFormat:@"%@",url]];
-            } else
-                [latest addObject:@"empty://about:blank"];
+                if ([url.scheme hasPrefix:@"http"]) [latest addObject:[NSString stringWithFormat:@"%@",url]];
+                
+            } else [latest addObject:@"empty://about:blank"];
         }
         [latest addObject:@(self.selectedIndex)];
         [latest writeToFile:[self savedTabsCacheFile] atomically:YES];

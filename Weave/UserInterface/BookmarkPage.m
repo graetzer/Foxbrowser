@@ -39,26 +39,29 @@
 #import "BookmarkPage.h"
 #import "WeaveService.h"
 #import "Store.h"
-#import "SGBrowserViewController.h"
+#import "SGAppDelegate.h"
 
-@implementation BookmarkPage
+@implementation BookmarkPage {
+    NSString* parentid;
+    NSArray* bookmarks;
+    NSMutableArray* topLevelBookmarks;
+}
 
--(void) setParent:(NSString *)parent
-{
+- (void)setParent:(NSString *)parent {
   parentid = parent;
 }
 
 - (void)viewDidLoad {
-  [super viewDidLoad];
+    [super viewDidLoad];
     self.title = NSLocalizedString(@"Bookmarks", @"Bookmarks");
-  self.view.autoresizesSubviews = YES;
-  self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  self.contentSizeForViewInPopover = CGSizeMake(320., 660.);
-    
+    self.view.autoresizesSubviews = YES;
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.contentSizeForViewInPopover = CGSizeMake(320., 660.);
+
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
-                                                                                              target:self
-                                                                                               action:@selector(dismiss:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                                          target:self
+                                                                                           action:@selector(dismiss:)];
     }
 }
 
@@ -76,8 +79,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self.tableView];
 }
 
-- (void) refresh
-{
+- (void)refresh {
   [self.tableView reloadData];
 }
 
@@ -91,47 +93,48 @@
 
 #pragma mark Table view methods
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView 
-{
-  if (parentid == nil)  //top level bookmarks
-  {
-    topLevelBookmarks = [NSMutableArray arrayWithCapacity:4];
-    
-    [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"toolbar"]];
-    [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"menu"]];
-    [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"mobile"]];
-    [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"unfiled"]];
-    
-    return 4;    
-  }
-  else //bookmark sub-directory
-  {
-    bookmarks = [[Store getStore] getBookmarksWithParent:parentid];
-    
-    return 1;
-  }
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    if (parentid == nil) { //top level bookmarks
+        topLevelBookmarks = [NSMutableArray arrayWithCapacity:4];
+        
+        // Add a history object
+        NSString *title = [NSLocalizedString(@"history", @"history") capitalizedStringWithLocale:[NSLocale currentLocale]];
+        [topLevelBookmarks addObject:@[@{@"title":title, @"icon":@"history", @"type":@"history",@"id":@"history"}]];
+        
+        [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"toolbar"]];
+        [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"menu"]];
+        [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"mobile"]];
+        [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"unfiled"]];
+        
+        return topLevelBookmarks.count;
+    } else if ([parentid isEqualToString:@"history"]){
+        bookmarks = [[Store getStore] getNewestHistory];
+        return 1;
+    } else {//bookmark sub-directory
+        bookmarks = [[Store getStore] getBookmarksWithParent:parentid];
+        return 1;
+    }
 
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
-{
-  if (parentid == nil)
-  {
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+  if (parentid == nil) {
     switch (section) {
-      case 0:
+        case 0: return nil;//[NSLocalizedString(@"history", @"history") capitalizedStringWithLocale:[NSLocale currentLocale]];
+        case 1:
         if ([topLevelBookmarks[0] count]) return NSLocalizedString(@"Bookmarks Toolbar", @"bookmarks toolbar");
         return nil;
-      case 1:
+        case 2:
         if ([topLevelBookmarks[1] count]) return NSLocalizedString(@"Bookmarks Menu", @"bookmarks menu");
         return nil;
-      case 2:
+        case 3:
         if ([topLevelBookmarks[2] count]) return NSLocalizedString(@"Mobile Bookmarks", @"mobile bookmarks");
         return nil;        
-      case 3:
+        case 4:
         if ([topLevelBookmarks[3] count]) return NSLocalizedString(@"Unsorted Bookmarks", @"unsorted bookmarks");
         return nil;
-        
-      default:
+
+        default:
         return nil;
     }
   }
@@ -140,57 +143,44 @@
 
 
 // Customize the number of rows in the table view.
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section 
-{
-  if (parentid == nil)
-  {
-    return [topLevelBookmarks[section] count];
-
-  }
-  else {
-    return [bookmarks count];
-  }
-
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (parentid == nil) return [topLevelBookmarks[section] count];
+    else return [bookmarks count];
 }
 
 
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-  //NOTE: I'm now sharinf table view cells across the app
-  static NSString *CellIdentifier = @"URL_CELL";
-  
-  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-  if (cell == nil) {
-    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
-  }
-  
-  NSDictionary* bookmarkItem = nil;
-  if (parentid == nil)
-  {
-    bookmarkItem = topLevelBookmarks[indexPath.section][indexPath.row];
-  }
-  else 
-  {
-    bookmarkItem = bookmarks[indexPath.row];
-  }
-  
-  cell.textLabel.text = bookmarkItem[@"title"];
-  cell.detailTextLabel.text = bookmarkItem[@"url"]?bookmarkItem[@"url"]:nil;
-  cell.accessoryType = UITableViewCellAccessoryNone;
 
-  if ([bookmarkItem[@"type"] isEqualToString:@"folder"])
-  {
-    cell.imageView.image = [UIImage imageNamed:@"folder.png"];
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-  }
-  else 
-  {
-    //default
-    cell.imageView.image = [UIImage imageNamed:bookmarkItem[@"icon"]];
-  }
-  
-  return cell;
+    //NOTE: I'm now sharingß table view cells across the app
+    static NSString *CellIdentifier = @"URL_CELL";
+
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+    }
+
+    NSDictionary* bookmarkItem = nil;
+    if (parentid == nil) {
+      bookmarkItem = topLevelBookmarks[indexPath.section][indexPath.row];
+    } else {
+      bookmarkItem = bookmarks[indexPath.row];
+    }
+
+    cell.textLabel.text = bookmarkItem[@"title"];
+    cell.detailTextLabel.text = bookmarkItem[@"url"];
+    cell.accessoryType = UITableViewCellAccessoryNone;
+
+    if ([bookmarkItem[@"type"] isEqualToString:@"folder"]
+        || [bookmarkItem[@"type"] isEqualToString:@"history"]) {
+        cell.imageView.image = [UIImage imageNamed:bookmarkItem[@"type"]];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else {
+        //default
+        cell.imageView.image = [UIImage imageNamed:bookmarkItem[@"icon"]];
+    }
+
+    return cell;
 }
 
 
@@ -203,32 +193,24 @@
 		bookmarkItem = bookmarks[indexPath.row];
 	}
 
-	UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-
-	if ([bookmarkItem[@"type"] isEqualToString:@"folder"])
-	{
+	if ([bookmarkItem[@"type"] isEqualToString:@"folder"]
+        || [bookmarkItem[@"type"] isEqualToString:@"history"]) {
 		BookmarkPage *newPage = [[BookmarkPage alloc] initWithNibName:nil bundle:nil];
-        newPage.browser = self.browser;
 		newPage.navigationItem.title = bookmarkItem[@"title"];
 		[newPage setParent:bookmarkItem[@"id"]];
 
 		[self.navigationController pushViewController: newPage animated:YES];
-	}
-	else  //bookmark
-	{
-		if ([weaveService canConnectToInternet])
-		{
-            [self.browser handleURLString: cell.detailTextLabel.text title: cell.textLabel.text];
+	} else { //bookmark
+//		if ([weaveService canConnectToInternet]) {
+            [appDelegate.browserViewController handleURLString:bookmarkItem[@"url"] title:bookmarkItem[@"title"]];
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
                 [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
-		}
-		else 
-		{
-			//no connectivity, put up alert
-			NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
-				@"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
-			[weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];      
-		}
+//		} else {
+//			//no connectivity, put up alert
+//			NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
+//				@"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
+//			[weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];      
+//		}
 	}
 
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];

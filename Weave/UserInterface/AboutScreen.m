@@ -10,6 +10,7 @@
 #import "WeaveService.h"
 #import "Stockboy.h"
 #import "SGAppDelegate.h"
+#import "LogoutController.h"
 #import "SGBrowserViewController.h"
 
 @implementation AboutScreen
@@ -49,11 +50,22 @@
   }  
 }
 
+- (IBAction) signOut:(id)sender
+{
+	LogoutController* logoutController = [LogoutController new];
+	if (logoutController != nil) {
+        [self.navigationController pushViewController:logoutController animated:YES];
+	}
+}
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
+    
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Sign Out", @"de-authenticate")
+                                                                              style:UIBarButtonItemStyleDone
+                                                                             target:self action:@selector(signOut:)];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {

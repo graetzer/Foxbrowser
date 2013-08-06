@@ -31,7 +31,9 @@
 /// The frame in wihich content is shown
 @property (nonatomic, readonly) CGRect contentFrame;
 
+
 /// Tells the view controller to update it's chrome
 - (void)updateChrome;
+- (BOOL)canRemoveTab:(UIViewController *)viewController;
 
 @end

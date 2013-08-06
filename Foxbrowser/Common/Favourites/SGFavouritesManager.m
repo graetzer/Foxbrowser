@@ -168,11 +168,15 @@
 
 - (NSURL *)fillFavourites {
     NSArray *history = [[Store getStore] getHistory];
+    NSArray *bookmarks = [[Store getStore] getBookmarks];
     
     NSURL *url;
     NSUInteger i = _favourites.count;
-    while (_favourites.count < [self maxFavs] && i < history.count) {
-        NSDictionary *item = history[i];
+    while (_favourites.count < [self maxFavs]) {
+        NSDictionary *item;
+        if (i < history.count) item = history[i];
+        else if (i < bookmarks.count) item = bookmarks[i];
+        else break;
         i++;
         
         NSString *urlS = item[@"url"];

@@ -301,9 +301,7 @@ static dispatch_once_t onceToken;
 	{
 		NSLog(@"Could not prepare commit transaction statement: %d", err);
 		return NO;
-	} 
-	else 
-	{
+	} else {
 		if ((err = sqlite3_step(stmnt)) != SQLITE_DONE) 
 		{
 			NSLog(@"Could not commit transaction: %d", err);
@@ -325,19 +323,25 @@ static dispatch_once_t onceToken;
 	return history;
 }
 
+- (NSArray *)getNewestHistory {
+    return newestHistory;
+}
+
 - (NSArray*) getBookmarks {
 	return bookmarkListSortedByFrecency;
 }
 
 - (void)addTempHistoryObject:(NSDictionary *)item {
+    if (newestHistory.count > 0 && ![newestHistory[0][@"id"] isEqualToString:item[@"id"]]) {
+        [newestHistory insertObject:item atIndex:0];
+    }
     [history addObject:item];// Shouldn't lead to errors
     
-    int sortIndex = [item[@"sortindex"] intValue];
     NSDictionary *historyEntry = @{ @"id" : item[@"id"],
                                     @"histUri" : item[@"url"],
                                     @"title" : item[@"title"],
                                     @"modified" : @([[NSDate date] timeIntervalSince1970]),
-                                    @"sortindex" : @(sortIndex + 100)};
+                                    @"sortindex" : item[@"sortindex"]};
         
     NSArray *tmp = _tempHistory;
     _tempHistory = [[tmp arrayByAddingObject:historyEntry] retain];
@@ -474,10 +478,14 @@ static dispatch_once_t onceToken;
 //LOADS HISTORY SORTED BY FRECENCY INTO MEMORY
 - (void) loadHistoryFromDB {
 	sqlite3_stmt *dbStatement = nil;
-	const char *historyQuery = "SELECT * FROM history";
+	const char *historyQuery = "SELECT * FROM history ORDER BY modified DESC";
 	NSString* icon;
 
 	NSMutableArray* newHistory = [[NSMutableArray alloc] init];
+    NSMutableArray* temp = newestHistory;
+    newestHistory = [[NSMutableArray alloc] initWithCapacity:100];
+    [temp release];
+    
 
 	/* Load existing history */
 	if (sqlite3_prepare_v2(sqlDatabase, historyQuery, -1, &dbStatement, NULL) == SQLITE_OK) {
@@ -490,6 +498,7 @@ static dispatch_once_t onceToken;
 			NSString *id_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_ID_COLUMN)];
 			NSString *url_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_URL_COLUMN)];
 			NSString *title_col = [[NSString alloc] initWithUTF8String:(char *)sqlite3_column_text(dbStatement, HISTORY_TITLE_COLUMN)];
+            //NSNumber *modified_col = [[NSNumber alloc] initWithDouble:sqlite3_column_double(dbStatement, HISTORY_MODIFIED_COLUMN)];
 			NSNumber *sort_col = [[NSNumber alloc] initWithInt:sqlite3_column_int(dbStatement, HISTORY_SORTINDEX_COLUMN)];
 
 			historyItem[@"id"] = id_col;
@@ -499,6 +508,7 @@ static dispatch_once_t onceToken;
 			historyItem[@"icon"] = icon;
 
 			[newHistory addObject:historyItem];
+            if (newestHistory.count < 100) [newestHistory addObject:historyItem];
             
             [id_col release];
 			[url_col release];
@@ -513,7 +523,7 @@ static dispatch_once_t onceToken;
 	//now sort the history by frecency
 	[newHistory sortUsingFunction:compareSearchResults context:NULL];
 
-	NSMutableArray* temp = history;
+	temp = history;
 	history = newHistory;
 	[temp release];
 }

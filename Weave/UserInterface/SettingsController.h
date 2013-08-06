@@ -57,7 +57,6 @@
 }
 
 - (IBAction) resync:(id)sender;
-- (IBAction) signOut:(id)sender;
 - (IBAction) displayAboutScreen:(id)sender;
 - (IBAction)resetStartscreen:(id)sender;
 

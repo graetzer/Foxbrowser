@@ -41,7 +41,7 @@
 #import "Stockboy.h"
 #import "AboutScreen.h"
 #import "KeychainItemWrapper.h"
-#import "LogoutController.h"
+
 
 #import "SGFavouritesManager.h"
 
@@ -125,10 +125,7 @@
 	self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     self.title = NSLocalizedString(@"Settings", @"Settings");
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Sign Out", @"de-authenticate")
-                                                                             style:UIBarButtonItemStyleDone
-                                                                            target:self action:@selector(signOut:)];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                           target:self
                                                                                           action:@selector(cancel)];
 
@@ -161,13 +158,7 @@
 }
 
 
-- (IBAction) signOut:(id)sender
-{
-	LogoutController* logoutController = [LogoutController new];
-	if (logoutController != nil) {
-        [self.navigationController pushViewController:logoutController animated:YES];
-	}
-}
+
 
 
 //called on main thread by the stockboy background thread

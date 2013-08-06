@@ -47,7 +47,8 @@
   @private
 	sqlite3             *sqlDatabase;
 	NSMutableArray      *tabs;
-	NSMutableArray      *history;
+	NSMutableArray      *history;// Sorted by frequency
+    NSMutableArray      *newestHistory;// Sorted by modified date
 	NSMutableArray      *bookmarkListSortedByFrecency;
 	NSMutableDictionary *hierarchicalBookmarks;
 }
@@ -59,7 +60,9 @@
 //these three return a frecency-sorted list, for fast searching
 - (NSArray*)getTabs;
 - (NSArray*)getHistory;
+- (NSArray*)getNewestHistory;
 - (NSArray*)getBookmarks;
+
 
 // Blocking method, do not call on main thread
 - (void)addTempHistoryObject:(NSDictionary *)item;
