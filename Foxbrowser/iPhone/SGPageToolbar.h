@@ -29,18 +29,19 @@
 
 @interface SGPageToolbar : UIView <UITextFieldDelegate, SGSearchDelegate, PopoverViewDelegate>
 
-@property (readonly, nonatomic) SGSearchField *searchField;
-@property (readonly, nonatomic) SGSearchViewController *searchController;
+@property (weak, readonly, nonatomic) SGSearchField *searchField;
+@property (strong, readonly, nonatomic) SGSearchViewController *searchController;
 
-@property (readonly, nonatomic) UIButton *backButton;
-@property (readonly, nonatomic) UIButton *forwardButton;
-@property (readonly, nonatomic) UIButton *optionsButton;
-@property (readonly, nonatomic) UIButton *tabsButton;
-@property (readonly, nonatomic) UIButton *cancelButton;
+@property (weak, readonly, nonatomic) UIButton *backButton;
+@property (weak, readonly, nonatomic) UIButton *forwardButton;
+@property (weak, readonly, nonatomic) UIButton *optionsButton;
+@property (weak, readonly, nonatomic) UIButton *tabsButton;
+@property (weak, readonly, nonatomic) UIButton *cancelButton;
 
 @property (strong, nonatomic) UINavigationController *bookmarks;
 @property (weak, nonatomic) SGPageViewController *browser;
 
 - (id)initWithFrame:(CGRect)frame browser:(SGPageViewController *)browser;
-- (void)updateChrome;
+- (void)updateInterface;
+- (void)setSubviewsAlpha:(CGFloat)alpha;
 @end

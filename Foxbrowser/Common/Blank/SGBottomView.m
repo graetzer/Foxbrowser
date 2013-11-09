@@ -38,7 +38,7 @@
     CGRect frame = CGRectMake(0, 0, 320., height);
     if (self = [super initWithFrame:frame]) {
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-        self.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1.0];
+        self.backgroundColor = kSGBrowserBarColor;
         
         UIImageView *logoView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
         
@@ -56,7 +56,7 @@
         label.autoresizingMask =  UIViewAutoresizingFlexibleRightMargin;
         label.backgroundColor = [UIColor clearColor];
         label.font = font;
-        label.textAlignment = UITextAlignmentCenter;
+        label.textAlignment = NSTextAlignmentCenter;
         label.text = text;
         [self addSubview:label];
         
@@ -93,7 +93,7 @@
             label.backgroundColor = [UIColor clearColor];
             label.font = font;
             label.text = title;
-            label.textAlignment = UITextAlignmentCenter;
+            label.textAlignment = NSTextAlignmentCenter;
             [_groupView addSubview:label];
             
             if (i < images.count) {

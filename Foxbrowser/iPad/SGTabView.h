@@ -26,10 +26,11 @@
 
 @interface SGTabView : UIView
 
-@property (weak, nonatomic) UIButton *closeButton;
+@property (readonly, weak, nonatomic) UILabel *titleLabel;
+@property (readonly, weak, nonatomic) UIButton *closeButton;
 @property (weak, nonatomic) UIViewController *viewController;
 @property (assign, nonatomic) BOOL selected;
 
-- (id)initWithFrame:(CGRect)frame viewController:(UIViewController *)controller;
+- (id)initWithFrame:(CGRect)frame;
 
 @end

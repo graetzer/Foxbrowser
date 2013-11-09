@@ -102,7 +102,6 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     UIViewController *vC = [SGActivityViewController new];
     vC.view.frame = [UIScreen mainScreen].bounds;
     [vC.view addSubview:self];
-    vC.wantsFullScreenLayout = YES;
     _myWindow.rootViewController = vC;
     [_myWindow makeKeyAndVisible];
 
@@ -112,6 +111,8 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
                 _title  = NSLocalizedString(@"Share Picture", @"Share picture title");
             } else if ([_activityItems[0] isKindOfClass:[NSURL class]]) {
                 _title  = NSLocalizedString(@"Share Page", @"Share url of page");
+            } else {
+                _title = NSLocalizedString(@"Share", @"Share title");
             }
         } else {
             _title = NSLocalizedString(@"Share", @"Share title"); 
@@ -142,6 +143,7 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
 #pragma mark - Private
 
 - (void)layoutSubviews {
+    [super layoutSubviews];
     CGRect bounds = [UIScreen mainScreen].bounds;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         _bgRect = CGRectInset(bounds, bounds.size.width*0.10, bounds.size.height*0.21);
@@ -279,16 +281,30 @@ CGFloat UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientat
     CGPathRelease(path);
     
     // Draw the title and the separator with shadow
+    UIColor *titleColor = [UIColor colorWithRed:0.020 green:0.549 blue:0.961 alpha:1.];
     CGContextSetShadowWithColor(ctx, CGSizeMake(0, 1), 0.5f, [UIColor blackColor].CGColor);
-    [[UIColor colorWithRed:0.020 green:0.549 blue:0.961 alpha:1.] setFill];
-    UIFont *textFont = [UIFont systemFontOfSize:16.];
-    [_title drawInRect:titleRect withFont:textFont];
+    [titleColor setFill];
     CGContextFillRect(ctx, separatorRect);
     
+    UIFont *textFont = [UIFont systemFontOfSize:16.];
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
+    [_title drawInRect:titleRect withFont:textFont];
+
     [@"x" drawInRect:titleRect
             withFont:textFont
        lineBreakMode:NSLineBreakByCharWrapping
            alignment:NSTextAlignmentRight];
+#else
+    [_title drawInRect:titleRect withAttributes:@{NSFontAttributeName:textFont,
+                                                  NSForegroundColorAttributeName:titleColor}];
+    
+    NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
+    para.alignment = NSTextAlignmentRight;
+    [@"x" drawInRect:titleRect withAttributes:@{
+                                                NSFontAttributeName:textFont,
+                                                NSForegroundColorAttributeName:titleColor,
+                                                NSParagraphStyleAttributeName:para}];
+#endif
 }
 
 + (void)addLaunchURLHandler:(SGShareViewLaunchURLHandler)handler {

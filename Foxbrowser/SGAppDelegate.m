@@ -36,31 +36,38 @@
 
 #import "SGActivityView.h"
 
-#import "GAI.h"
+
 #import "Appirater.h"
 
 SGAppDelegate *appDelegate;
 id<WeaveService> weaveService;
 
-NSString *const kSGEnableStartpage = @"org.graetzer.enableStartpage";
-NSString *const kSGStartpage = @"org.graetzer.startpage";
-NSString *const kSGOpenTabsInForeground = @"org.graetzer.tabs.foreground";
+NSString *const kSGEnableStartpageKey = @"org.graetzer.enableStartpage";
+NSString *const kSGStartpageURLKey = @"org.graetzer.startpage";
+NSString *const kSGOpenPagesInForegroundKey = @"org.graetzer.tabs.foreground";
+NSString *const kSGEnableDoNotTrackKey = @"org.graetzer.track";
+NSString *const kSGEnableHTTPStackKey = @"org.graetzer.httpauth";
+NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
 
 @implementation SGAppDelegate {
     Reachability *_reachability;
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     appDelegate = self;
     weaveService = self;
     _reachability = [Reachability reachabilityForInternetConnection];
     
+    SGBrowserViewController *browser;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        browser = [SGPageViewController new];
+    } else {
+        browser = [SGTabsViewController new];
+    }
+    self.browserViewController = browser;
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
-    SGBrowserViewController *browser = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ?
-        [SGPageViewController new] : [SGTabsViewController new];
-    self.browserViewController = browser;
     self.window.rootViewController = browser;
     [self.window makeKeyAndVisible];
     
@@ -68,15 +75,12 @@ NSString *const kSGOpenTabsInForeground = @"org.graetzer.tabs.foreground";
     // Weave stuff. 0.5 delay as a workaround so that modal views work
     [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
     
-    
     //-------------- Marketing stuff -------------------------
-    
     
     [GAI sharedInstance].trackUncaughtExceptions = YES;
     [GAI sharedInstance].dispatchInterval = 60*5;
-    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.analytics"];
+    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
     self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
-    self.tracker.anonymize = YES;
 //#ifdef DEBUG
 //    [GAI sharedInstance].debug =  YES;
 //#endif
@@ -306,24 +310,24 @@ NSString *const kSGOpenTabsInForeground = @"org.graetzer.tabs.foreground";
 
 #pragma mark - AppiraterDelegate
 - (void)appiraterDidDeclineToRate:(Appirater *)appirater {
-    [self.tracker sendEventWithCategory:@"Rating"
-                             withAction:@"Decline"
-                              withLabel:nil
-                              withValue:nil];
+    [self.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Rating"
+                                                               action:@"Decline"
+                                                                label:nil
+                                                                value:nil] build]];
 }
 
 - (void)appiraterDidOptToRate:(Appirater *)appirater {
-    [self.tracker sendEventWithCategory:@"Rating"
-                             withAction:@"Rate"
-                              withLabel:nil
-                              withValue:nil];
+    [self.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Rating"
+                                                               action:@"Rate"
+                                                                label:nil
+                                                                value:nil] build]];
 }
 
 - (void)appiraterDidOptToRemindLater:(Appirater *)appirater {
-    [self.tracker sendEventWithCategory:@"Rating"
-                             withAction:@"Remind Later"
-                              withLabel:nil
-                              withValue:nil];
+    [self.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Rating"
+                                                               action:@"Remind Later"
+                                                                label:nil
+                                                                value:nil] build]];
 }
 
 @end

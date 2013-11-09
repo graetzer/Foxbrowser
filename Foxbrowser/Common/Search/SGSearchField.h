@@ -22,6 +22,7 @@
 
 #import <UIKit/UIKit.h>
 
+
 typedef NS_ENUM(NSUInteger, SGSearchFieldState) {
     SGSearchFieldStateDisabled = 1,
     SGSearchFieldStateReload = 1<<2,
@@ -30,11 +31,9 @@ typedef NS_ENUM(NSUInteger, SGSearchFieldState) {
 
 @interface SGSearchField : UITextField
 
-- (id)initWithDelegate:(id<UITextFieldDelegate>)delegate;
 
 @property (readonly, nonatomic) UIButton *reloadItem;
 @property (readonly, nonatomic) UIButton *stopItem;
-
 @property (assign, nonatomic) SGSearchFieldState state;
 
 @end

@@ -22,22 +22,16 @@
 
 #import "SGTabView.h"
 #import "SGTabDefines.h"
-
 #import <math.h>
-
-@interface SGTabView ()
-@property (nonatomic, strong) UILabel *titleLabel;
-@property (nonatomic, strong) UIColor *tabColor;
-@property (nonatomic, strong) UIColor *tabDarkerColor;
-@end
 
 @implementation SGTabView {
     CGSize _tSize;
     CGFloat _cap;
+    UIColor *_tabColor;
+    UIColor *_tabDarkerColor;
 }
-@synthesize viewController = _viewController;
 
-- (id)initWithFrame:(CGRect)frame viewController:(UIViewController *)controller {
+- (id)initWithFrame:(CGRect)frame{
     
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
@@ -46,18 +40,19 @@
         self.exclusiveTouch = YES;
         self.contentMode = UIViewContentModeRedraw;
         
-        self.tabColor = kTabColor;
-        self.tabDarkerColor = kTabDarkerColor;
+        _tabColor = kSGBrowserBarColor;
+        _tabDarkerColor = kSGBrowserBarSelectedColor;
         
-        self.titleLabel = [[UILabel alloc] initWithFrame:frame];
-        self.titleLabel.textAlignment = UITextAlignmentCenter;
-        self.titleLabel.lineBreakMode = UILineBreakModeTailTruncation;
-        self.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        self.titleLabel.backgroundColor = [UIColor clearColor];
-        self.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14.0];
-        self.titleLabel.minimumFontSize = 14.0;
-        self.titleLabel.textColor = [UIColor darkGrayColor];
-        [self addSubview:self.titleLabel];
+        __strong UILabel *label = [[UILabel alloc] initWithFrame:frame];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.lineBreakMode = NSLineBreakByTruncatingTail;
+        label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        label.backgroundColor = [UIColor clearColor];
+        label.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14.0];
+        label.minimumScaleFactor = 0.5;
+        label.textColor = [UIColor darkGrayColor];
+        [self addSubview:label];
+        _titleLabel = label;
         
         __strong UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
@@ -67,9 +62,7 @@
         [button setShowsTouchWhenHighlighted:YES];
         button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:17.0];
         [self addSubview:button];
-        
-        self.closeButton = button;
-        self.viewController = controller;
+        _closeButton = button;
     }
     return self;
 }
@@ -87,19 +80,22 @@
                         options:NSKeyValueObservingOptionNew
                         context:NULL];
     self.titleLabel.text = _viewController.title;
-    _tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+    _tSize = [self.titleLabel.text sizeWithAttributes:@{NSFontAttributeName:self.titleLabel.font}];
+    //_tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
     [self setNeedsLayout];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"title"]) {
-        self.titleLabel.text = [object title];
-        _tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+        _titleLabel.text = [object title];
+        //_tSize = [self.titleLabel.text sizeWithAttributes:@{NSFontAttributeName:_titleLabel.font}];
+        _tSize = [self.titleLabel.text sizeWithFont:_titleLabel.font];
         [self setNeedsLayout];
     }
 }
 
 - (void)layoutSubviews {
+    [super layoutSubviews];
     CGRect b = self.bounds;
     CGFloat margin = kCornerRadius;
     
@@ -151,7 +147,7 @@
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     
     // Fill with current tab color
-    CGColorRef startColor = self.selected ? self.tabColor.CGColor : self.tabDarkerColor.CGColor;
+    CGColorRef startColor = self.selected ? _tabColor.CGColor : _tabDarkerColor.CGColor;
     
     CGContextSetFillColorWithColor(ctx, startColor);
     CGContextSetShadow(ctx, CGSizeMake(0, -1), kShadowRadius);

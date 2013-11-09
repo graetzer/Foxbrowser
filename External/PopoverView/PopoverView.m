@@ -357,8 +357,7 @@
     
     for (NSString *string in stringArray) {
         CGSize textSize = [string sizeWithFont:font];
-        UIButton *textButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, textSize.width+15, textSize.height+15)];
-        textButton.showsTouchWhenHighlighted = YES;
+        UIButton *textButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, textSize.width, textSize.height)];
         textButton.backgroundColor = [UIColor clearColor];
         textButton.titleLabel.font = font;
         textButton.titleLabel.textAlignment = kTextAlignment;
@@ -1036,6 +1035,15 @@
             }
         }
     }
+    
+    //Draw border if we need to
+    //The border is done last because it needs to be drawn on top of everything else
+    if (kDrawBorder) {
+        [kBorderColor setStroke];
+        popoverPath.lineWidth = kBorderWidth;
+        [popoverPath stroke];
+    }
+    
 }
 
 @end

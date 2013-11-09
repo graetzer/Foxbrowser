@@ -39,6 +39,9 @@
 
 extern SGAppDelegate *appDelegate;
 
-extern NSString *const kSGEnableStartpage;
-extern NSString *const kSGStartpage;
-extern NSString *const kSGOpenTabsInForeground;
+extern NSString *const kSGEnableStartpageKey;
+extern NSString *const kSGStartpageURLKey;
+extern NSString *const kSGOpenPagesInForegroundKey;
+extern NSString *const kSGEnableDoNotTrackKey;
+extern NSString *const kSGEnableHTTPStackKey;
+extern NSString *const kSGEnableAnalyticsKey;

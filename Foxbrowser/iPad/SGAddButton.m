@@ -10,14 +10,15 @@
 #import "SGTabDefines.h"
 #import <math.h>
 
-@implementation SGAddButton
-@synthesize button, tabColor;
+@implementation SGAddButton {
+    UIColor *_tabColor;
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.tabColor = kTabColor;
+        _tabColor = kSGBrowserBarColor;
         self.backgroundColor = [UIColor clearColor];
         
         self.button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -52,7 +53,7 @@
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     
     // Fill with current tab color
-    CGColorRef startColor = [self.tabColor CGColor];
+    CGColorRef startColor = _tabColor.CGColor;
     
     CGContextSetFillColorWithColor(ctx, startColor);
     CGContextSetShadow(ctx, CGSizeMake(0, -1), kShadowRadius);

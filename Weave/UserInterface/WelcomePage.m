@@ -51,6 +51,7 @@ JPAKEReporter* gSharedReporter = nil;
 #pragma mark -
 
 - (void) viewDidLoad {
+    [super viewDidLoad];
     self.title = NSLocalizedString(@"Foxbrowser", @"app name");
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"cancel")
                                                                             style:UIBarButtonItemStyleBordered
@@ -65,12 +66,14 @@ JPAKEReporter* gSharedReporter = nil;
 			size: _helpButton.titleLabel.font.pointSize - 2.0];
 	}
     
-    [[GAI sharedInstance].defaultTracker sendView:@"WelcomePage"];
+    [appDelegate.tracker set:kGAIScreenName value:@"WelcomePage"];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)viewDidUnload {
     self.setupButton = nil;
     self.helpButton = nil;
+    [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
@@ -164,10 +167,10 @@ JPAKEReporter* gSharedReporter = nil;
 }
 
 - (IBAction)cancel:(id)sender {
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"Welcome"
-                                                     withLabel:@"Cancel"
-                                                     withValue:nil];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Setup"
+                                                                      action:@"Welcome"
+                                                                       label:@"Cancel"
+                                                                       value:nil] build]];
     [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
 }
 

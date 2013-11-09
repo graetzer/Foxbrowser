@@ -819,8 +819,9 @@ static dispatch_once_t onceToken;
 
 		@catch (NSException *exception) {
 			NSLog(@"Malformed bookmark data: %@, %@",[exception name], [exception reason]);
-            [[GAI sharedInstance].defaultTracker sendException:YES
-                                               withDescription:@"Malformed bookmark data: %@, %@", [exception name], [exception reason]];
+            [appDelegate.tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:
+                                        [NSString stringWithFormat:@"Malformed bookmark data: %@, %@", [exception name], [exception reason]]
+                                                                                  withFatal:@YES] build]];
 		}
 
 		@finally 
@@ -932,8 +933,9 @@ static dispatch_once_t onceToken;
 
 		@catch (NSException *exception) {
 			NSLog(@"Malformed history item data: %@, %@",[exception name], [exception reason]);
-            [[GAI sharedInstance].defaultTracker sendException:YES
-                                               withDescription:@"Malformed history item data: %@, %@", [exception name], [exception reason]];
+            [appDelegate.tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:
+                                        [NSString stringWithFormat:@"Malformed history item data: %@, %@", [exception name], [exception reason]]
+                                                                                  withFatal:@YES] build]];
 		}
 
 		@finally {
@@ -1022,8 +1024,9 @@ static dispatch_once_t onceToken;
 			@catch (NSException *exception) 
 			{
 				NSLog(@"Malformed tab data: %@, %@",[exception name], [exception reason]);
-                [[GAI sharedInstance].defaultTracker sendException:YES
-                                                   withDescription:@"Malformed tab data: %@, %@", [exception name], [exception reason]];
+                [appDelegate.tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:
+                                            [NSString stringWithFormat:@"Malformed tab data: %@, %@", [exception name], [exception reason]]
+                                                                                      withFatal:@YES] build]];
 			}
 
 			@finally 

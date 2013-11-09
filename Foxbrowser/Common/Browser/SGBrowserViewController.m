@@ -24,38 +24,40 @@
 #import "SGBlankController.h"
 #import "SGWebViewController.h"
 #import "SGCredentialsPrompt.h"
-
+#import "SGAppDelegate.h"
 #import "GAI.h"
 
-#define HTTP_AGENT5 @"Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3"
-#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_0_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10B146 Safari/8536.25"
+#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_1_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10B146 Safari/8536.25"
 
 @implementation SGBrowserViewController {
     NSTimer *_saveTimer;
+    NSTimer *_interfaceTimer;
+    
     int _dialogResult;
     NSMutableArray *_httpsHosts;
 }
 
 + (void)initialize {
-    if ([[UIDevice currentDevice].systemVersion doubleValue] < 6)
-        [SGHTTPURLProtocol setValue:HTTP_AGENT5 forHTTPHeaderField:@"User-Agent"];
-    else
-        [SGHTTPURLProtocol setValue:HTTP_AGENT6 forHTTPHeaderField:@"User-Agent"];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
-        [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"X-Do-Not-Track"];
-        [SGHTTPURLProtocol setValue:@"1" forHTTPHeaderField:@"DNT"];
-        [SGHTTPURLProtocol setValue:@"do-not-track" forHTTPHeaderField:@"X-Tracking-Choice"];
+    NSMutableDictionary *dictionary;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        dictionary[@"User-Agent"] = HTTP_AGENT6;
     }
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableDoNotTrackKey]) {
+        dictionary[@"X-Do-Not-Track"] = @"1";
+        dictionary[@"DNT"] = @"1";
+        dictionary[@"X-Tracking-Choice"] = @"do-not-track";
+    }
+    [CustomHTTPProtocol setHeaders:dictionary];
+    [CustomHTTPProtocol start];
 }
 
 - (void)willEnterForeground {
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.httpauth"]) {
-        [SGHTTPURLProtocol setProtocolDelegate:self];
-        [SGHTTPURLProtocol registerProtocol];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableHTTPStackKey]) {
+        [CustomHTTPProtocol setDelegate:self];
+        [CustomHTTPProtocol start];
     } else {
-        [SGHTTPURLProtocol setProtocolDelegate:nil];
-        [SGHTTPURLProtocol unregisterProtocol];
+        [CustomHTTPProtocol setDelegate:nil];
+        [CustomHTTPProtocol stop];
     }
 }
 
@@ -73,15 +75,21 @@
                                               target:self
                                             selector:@selector(saveCurrentTabs)
                                             userInfo:nil repeats:YES];
+    _interfaceTimer = [NSTimer scheduledTimerWithTimeInterval:0.3
+                                                       target:self
+                                                     selector:@selector(updateInterface)
+                                                     userInfo:nil repeats:YES];
     
-    [[GAI sharedInstance].defaultTracker trackView:@"SGBrowserViewController"];
+    [appDelegate.tracker set:kGAIScreenName value:@"SGBrowserViewController"];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    
     [_saveTimer invalidate];
     _saveTimer = nil;
+    [_interfaceTimer invalidate];
+    _interfaceTimer = nil;
 }
 
 - (BOOL)shouldAutorotate {
@@ -104,7 +112,7 @@
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
     [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
 }
-- (void)updateChrome {
+- (void)updateInterface {
     [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
 }
 - (UIViewController *)viewControllerAtIndex:(NSUInteger)index {return nil;}
@@ -124,9 +132,9 @@
     
     UIViewController *viewC;
     
-    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
+    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpageURLKey];
     NSURL *url = [NSURL URLWithString:startpage];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpageKey] && url) {
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
         SGWebViewController *webC = [SGWebViewController new];
         webC.title = request.URL.absoluteString;
@@ -138,10 +146,10 @@
     
     [self addViewController:viewC];
     [self showViewController:viewC];
-    [self updateChrome];
+    [self updateInterface];
 }
 
-- (void)addTabWithURLRequest:(NSMutableURLRequest *)request title:(NSString *)title {
+- (void)addTabWithURLRequest:(NSURLRequest *)request title:(NSString *)title {
     if (!title)
         title = request.URL.absoluteString;
     title = [title stringByReplacingOccurrencesOfString:@"http://" withString:@""];
@@ -161,14 +169,14 @@
         else
             [self removeIndex:1];
     }
-    [self updateChrome];
+    [self updateInterface];
 }
 
 - (void)reload; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        [webC reload];
-        [self updateChrome];
+        [webC.webView reload];
+        [self updateInterface];
     }
 }
 
@@ -176,7 +184,7 @@
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
         [webC.webView stopLoading];
-        [self updateChrome];
+        [self updateInterface];
     }
 }
 
@@ -192,7 +200,7 @@
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
         [webC.webView goBack];
-        [self updateChrome];
+        [self updateInterface];
     }
 }
 
@@ -200,7 +208,7 @@
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
         [webC.webView goForward];
-        [self updateChrome];
+        [self updateInterface];
     }
 }
 
@@ -296,9 +304,9 @@
             }
         }
     } else {
-        NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
+        NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpageURLKey];
         NSURL *url = [NSURL URLWithString:startpage];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpageKey] && url) {
             NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
             SGWebViewController *webC = [SGWebViewController new];
             webC.title = request.URL.absoluteString;
@@ -334,9 +342,9 @@
 }
 
 - (UIViewController *)createNewTabViewController {
-    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpage];
+    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpageURLKey];
     NSURL *url = [NSURL URLWithString:startpage];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpage] && url) {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpageKey] && url) {
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
         SGWebViewController *webC = [SGWebViewController new];
         webC.title = request.URL.absoluteString;
@@ -349,45 +357,77 @@
 
 #pragma mark - HTTP Authentication
 
-- (void)URLProtocol:(SGHTTPURLProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    if (_dialogResult != -1 && !self.credentialsPrompt) {
-        // The protocol states you shall execute the response on the same thread.
-        // So show the prompt on the main thread and wait until the result is finished
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.credentialsPrompt = [[SGCredentialsPrompt alloc] initWithChallenge:challenge delegate:self];
-            [self.credentialsPrompt show];
-        });
-        
-        _dialogResult = -1;
-        NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-        while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
-            LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
-        
-        SGCredentialsPrompt *creds = self.credentialsPrompt;
-        if (_dialogResult == 1) {
-            NSURLCredential *credential = [NSURLCredential credentialWithUser:creds.usernameField.text
-                                                                     password:creds.passwordField.text
-                                                                  persistence:creds.persistence];
-            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
-                                                                forProtectionSpace:creds.challenge.protectionSpace];
-            [creds.challenge.sender useCredential:credential forAuthenticationChallenge:creds.challenge];
-        } else {
-            DLog(@"Cancel authenctication");
-            [creds.challenge.sender cancelAuthenticationChallenge:creds.challenge];
+- (BOOL)customHTTPProtocol:(CustomHTTPProtocol *)protocol canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace
+// A CustomHTTPProtocol delegate callback, called when the protocol needs to process
+// an authentication challenge.  In this case we accept any server trust authentication
+// challenges.
+{
+    assert(protocol != nil);
+#pragma unused(protocol)
+    assert(protectionSpace != nil);
+    
+    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]
+    || [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic]
+    || [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest];
+}
+
+- (void)customHTTPProtocol:(CustomHTTPProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
+        SecTrustResultType  trustResult;
+        SecTrustRef         trust = challenge.protectionSpace.serverTrust;
+        if (trust != NULL) {
+            OSStatus err = SecTrustEvaluate(trust, &trustResult);
+            if (err == noErr && ((trustResult == kSecTrustResultProceed) || (trustResult == kSecTrustResultUnspecified)) ) {
+                [protocol resolveAuthenticationChallenge:challenge
+                                          withCredential:[NSURLCredential credentialForTrust:trust]];
+                return;
+            }
         }
-        self.credentialsPrompt = nil;
+        // Decide if we can safely ignore this
+        [self customHTTPProtocol:protocol canIgnoreAuthenticationChallenge:challenge];
     } else {
-        DLog(@"Called while showing other credential");
+        [self customHTTPProtocol:protocol resolveAuthenticationChallenge:challenge];
     }
 }
 
-- (BOOL)URLProtocol:(SGHTTPURLProtocol *)protocol canIgnoreUntrustedHost:(SecTrustRef)trust {
+- (void)customHTTPProtocol:(CustomHTTPProtocol *)protocol resolveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    // The protocol states you shall execute the response on the same thread.
+    // So show the prompt on the main thread and wait until the result is finished
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.credentialsPrompt = [[SGCredentialsPrompt alloc] initWithChallenge:challenge delegate:self];
+        [self.credentialsPrompt show];
+    });
+    
+    _dialogResult = -1;
+    NSDate* LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
+    while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
+        LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
+    
+    SGCredentialsPrompt *creds = self.credentialsPrompt;
+    if (_dialogResult == 1) {
+        NSURLCredential *credential = [NSURLCredential credentialWithUser:creds.usernameField.text
+                                                                 password:creds.passwordField.text
+                                                              persistence:creds.persistence];
+        [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
+                                                            forProtectionSpace:creds.challenge.protectionSpace];
+        [protocol resolveAuthenticationChallenge:challenge withCredential:credential];
+    } else {
+        DLog(@"Cancel authenctication");
+        [protocol resolveAuthenticationChallenge:challenge withCredential:nil];
+    }
+    self.credentialsPrompt = nil;
+}
+
+- (void)customHTTPProtocol:(CustomHTTPProtocol *)protocol canIgnoreAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     
     NSString *host = protocol.request.URL.host;
-    if (!_httpsHosts)
+    if (!_httpsHosts) {
         _httpsHosts = [NSMutableArray arrayWithCapacity:10];
-    else if ([_httpsHosts containsObject:host])
-        return YES;
+    } else if ([_httpsHosts containsObject:host]) {
+        [protocol resolveAuthenticationChallenge:challenge
+                                  withCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust]];
+        return;
+    }
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *warning = NSLocalizedString(@"Failed to verify the identity of \"%@\"\nThis is potentially dangerous. Would you like to continue anyway?", nil);
@@ -399,10 +439,15 @@
                                               otherButtonTitles:NSLocalizedString(@"Continue", nil), nil];
         [alert show];
     });
-
-    [_httpsHosts addObject:host];// Remove it later if user taps cancel
     
-    return NO;
+    [_httpsHosts addObject:host];// Remove it later if user taps cancel
+    [protocol resolveAuthenticationChallenge:challenge
+                              withCredential:nil];
+}
+
+- (void)customHTTPProtocol:(CustomHTTPProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    _dialogResult = -1;
+    [self.credentialsPrompt dismissWithClickedButtonIndex:-1 animated:YES];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {

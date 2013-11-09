@@ -318,7 +318,10 @@ static NSDictionary *_gNetworkPaths = nil;
         [weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];
       }
         
-      [[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Stockboy: %@ - %@", errInfo[@"title"], errInfo[@"message"]];
+        //[[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Stockboy: %@ - %@", errInfo[@"title"], errInfo[@"message"]];
+        [appDelegate.tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:
+                                    [NSString stringWithFormat:@"Stockboy: %@ - %@", errInfo[@"title"], errInfo[@"message"]]
+                                                                              withFatal:@NO] build]];
     }
   } else {
     //no connectivity, put up alert

@@ -66,6 +66,8 @@
 }
 
 - (NSString *)serviceType {
+    [NSException raise:@"Not implemented Exception" format:@"Method: %s", __FUNCTION__];
     return nil;
 }
+
 @end

@@ -102,7 +102,10 @@
             // I might certainly need to do different things for different error conditions
             [self performSelectorOnMainThread:@selector(authFailed:) withObject:[e reason] waitUntilDone:YES];
             NSLog(@"Failed to initialize CryptoManager: %@", e.reason);
-            [[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Failed to initialize CryptoManager: %@", e.reason];
+            //[[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Failed to initialize CryptoManager: %@", e.reason];
+            [appDelegate.tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:
+                                       [NSString stringWithFormat:@"Failed to initialize CryptoManager: %@",e.reason]
+                                                                                 withFatal:@NO] build]];
         }
         
         @finally
@@ -120,12 +123,12 @@
 	[alert show];
     [CryptoUtils deletePrivateKeys];
     
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"Manual"
-                                                     withLabel:@"Fail"
-                                                     withValue:nil];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Setup"
+                                                                      action:@"Manual"
+                                                                       label:@"Fail"
+                                                                       value:nil] build]];
 }
-  
+
 /**
  * This is called when we have succesfully logged in. Call back to the delegate.
  */
@@ -142,11 +145,10 @@
 	[Stockboy restock];
 
 	[_delegate manualSetupViewControllerDidLogin: self];
-    
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"Manual"
-                                                     withLabel:@"Success"
-                                                     withValue:nil];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Setup"
+                                                                      action:@"Manual"
+                                                                       label:@"Success"
+                                                                       value:nil] build]];
 }
 
 #pragma mark - Keyboard 
@@ -216,19 +218,20 @@
     [super viewDidUnload];
 }
 
-- (void) viewDidAppear:(BOOL)animated
-{
+- (void) viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:)
 		name:UIKeyboardDidShowNotification object:nil];
 		
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:)
 		name:UIKeyboardWillHideNotification object:nil];
     
-    [[GAI sharedInstance].defaultTracker sendView:@"ManualSetupViewController"];
+    [appDelegate.tracker set:kGAIScreenName value:@"ManualSetupViewController"];    
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
-- (void) viewDidDisappear:(BOOL)animated
-{
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
 	[[NSNotificationCenter defaultCenter] removeObserver: self];
 }
 

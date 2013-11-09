@@ -49,6 +49,7 @@
 }
 
 - (void)viewDidLoad {
+    [super viewDidLoad];
     self.title = NSLocalizedString(@"Instructions", @"Instructions title");
     
     __strong UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc]
@@ -67,10 +68,13 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    [[GAI sharedInstance].defaultTracker sendView:@"AccountHelp"];
+    [super viewWillAppear:animated];
+    [appDelegate.tracker set:kGAIScreenName value:@"AccountHelp"];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
     self.webView.delegate = nil;
 }
 

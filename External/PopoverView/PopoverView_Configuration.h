@@ -53,7 +53,7 @@
 // DIVIDERS BETWEEN VIEWS
 
 //Bool that turns off/on the dividers
-#define kShowDividersBetweenViews YES
+#define kShowDividersBetweenViews NO
 
 //color for the divider fill
 #define kDividerColor [UIColor colorWithRed:0.329 green:0.341 blue:0.353 alpha:0.15f]
@@ -83,7 +83,7 @@
 // FONTS
 
 //normal text font
-#define kTextFont [UIFont fontWithName:@"HelveticaNeue" size:18.f]
+#define kTextFont [UIFont fontWithName:@"HelveticaNeue" size:16.f]
 
 //normal text color
 #define kTextColor [UIColor colorWithRed:0.329 green:0.341 blue:0.353 alpha:1]
@@ -98,3 +98,15 @@
 
 //title text color
 #define kTitleColor [UIColor colorWithRed:0.329 green:0.341 blue:0.353 alpha:1]
+
+
+// BORDER
+
+//bool that turns off/on the border
+#define kDrawBorder NO
+
+//border color
+#define kBorderColor [UIColor blackColor]
+
+//border width
+#define kBorderWidth 1.f

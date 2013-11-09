@@ -65,10 +65,10 @@ NSString *kWeavePrivateMode = @"privateMode";
     NSString *urlString = [NSString stringWithFormat:searchEngine, [self urlEncode:string], locale];
     NSURL *url = [NSURL URLWithUnicodeString:urlString];
     
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Toolbar"
-                                                    withAction:@"Search"
-                                                     withLabel:url.host
-                                                     withValue:nil];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Toolbar"
+                                                                      action:@"Search"
+                                                                       label:url.host
+                                                                       value:nil] build]];
     return url;
 }
 

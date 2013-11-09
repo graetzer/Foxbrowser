@@ -77,7 +77,7 @@ static NSArray* gFreshSearchHits = nil;
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
             cell.accessoryType = UITableViewCellAccessoryNone;
             cell.textLabel.textColor = [UIColor blueColor];
-            cell.textLabel.textAlignment = UITextAlignmentLeft;
+            cell.textLabel.textAlignment = NSTextAlignmentLeft;
             cell.imageView.image = [UIImage imageNamed:@"goto"];
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
@@ -97,7 +97,7 @@ static NSArray* gFreshSearchHits = nil;
             if (searchHits) {
                 if ([searchHits count]) {
                     cell.textLabel.textColor = [UIColor blackColor];
-                    cell.textLabel.textAlignment = UITextAlignmentLeft;
+                    cell.textLabel.textAlignment = NSTextAlignmentLeft;
                     
                     NSDictionary* matchItem = searchHits[[indexPath row]];
                     // Set up the cell...

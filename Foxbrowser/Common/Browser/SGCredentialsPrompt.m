@@ -79,7 +79,6 @@
 			self.rememberCredentials.selectedSegmentIndex  = 1;
 			break;
 	}
-	self.rememberCredentials.segmentedControlStyle = UISegmentedControlStyleBar;
 	[self addSubview: self.rememberCredentials];
     
     if (challenge.proposedCredential) {

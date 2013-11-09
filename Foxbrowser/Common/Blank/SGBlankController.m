@@ -76,8 +76,8 @@
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.showsVerticalScrollIndicator = NO;
     scrollView.delegate = self;
-    [self.view addSubview:scrollView];
-    self.scrollView = scrollView;
+    [self.view insertSubview:scrollView belowSubview:_bottomView];
+    _scrollView = scrollView;
     
     SGPreviewPanel *previewPanel = [[SGPreviewPanel alloc] initWithFrame:scrollFrame];
     previewPanel.delegate = self;
@@ -87,7 +87,7 @@
     
     TabBrowserController *tabBrowser = [[TabBrowserController alloc] initWithStyle:UITableViewStylePlain];
     [self addChildViewController:tabBrowser];
-    tabBrowser.view.frame = CGRectMake(self.view.bounds.size.width, 0, SG_TAB_WIDTH, self.view.bounds.size.height);
+    tabBrowser.view.frame = CGRectMake(self.view.bounds.size.width, 0, SG_TAB_WIDTH, _scrollView.bounds.size.height);
     tabBrowser.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
     [self.scrollView addSubview:tabBrowser.view];
     [tabBrowser didMoveToParentViewController:self];
@@ -107,16 +107,25 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
-    [self.browserViewController updateChrome];
+    [self.browserViewController updateInterface];
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
+    [super willMoveToParentViewController:parent];
     if (parent == nil) {
         [self.tabBrowser willMoveToParentViewController:nil];
         [self.tabBrowser removeFromParentViewController];
         self.tabBrowser = nil;
     }
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    
+    _scrollView.frame = CGRectMake(0, 0, self.view.bounds.size.width,
+                                   self.view.bounds.size.height - _bottomView.frame.size.height);
 }
 
 - (void)refresh {

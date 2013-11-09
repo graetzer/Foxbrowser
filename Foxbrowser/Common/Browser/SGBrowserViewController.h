@@ -21,13 +21,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SGURLProtocol.h"
+#import "CustomHTTPProtocol.h"
 
 
 @class SGCredentialsPrompt;
 
 // Container for SGWebViewController & SGBlankViewController
-@interface SGBrowserViewController : UIViewController <SGHTTPURLProtocolDelegate, UIAlertViewDelegate>
+@interface SGBrowserViewController : UIViewController <CustomHTTPProtocolDelegate, UIAlertViewDelegate>
 
 // =========== Abstract =============
 
@@ -44,7 +44,7 @@
 // Swap the current view controller. Used to replace the blankView with the webView
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController;
 
-- (void)updateChrome;
+- (void)updateInterface;
 
 - (UIViewController *)viewControllerAtIndex:(NSUInteger)index;
 
@@ -62,7 +62,7 @@
 - (void)addTab;
 
 // Add a new SGWebViewController, title can be nil
-- (void)addTabWithURLRequest:(NSMutableURLRequest *)request title:(NSString *)title;
+- (void)addTabWithURLRequest:(NSURLRequest *)request title:(NSString *)title;
 
 - (void)reload;
 - (void)stop;

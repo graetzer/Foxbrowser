@@ -21,6 +21,7 @@
 //
 
 #import "SGTabsViewController.h"
+#import "SGTabsToolbar.h"
 #import "SGTabsView.h"
 #import "SGTabView.h"
 #import "SGAddButton.h"
@@ -28,6 +29,7 @@
 #import "SGWebViewController.h"
 #import "UIWebView+WebViewAdditions.h"
 #import "SGBlankController.h"
+
 
 
 @interface SGTabsViewController ()
@@ -58,22 +60,21 @@
 
 - (void)loadView {
     [super loadView];
-    self.view.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
+    
     
     CGRect bounds = self.view.bounds;
-    
-    CGRect head = CGRectMake(0, 0, bounds.size.width, kTabsToolbarHeigth + kTabsHeigth);
+    CGRect head = CGRectMake(0, 0, bounds.size.width, kSGToolbarHeight + kTabsHeigth);
     self.headerView = [[UIView alloc] initWithFrame:head];
     self.headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     self.headerView.backgroundColor = [UIColor clearColor];
     
-    CGRect frame = CGRectMake(0, 0, head.size.width, kTabsToolbarHeigth);
+    CGRect frame = CGRectMake(0, 0, head.size.width, kSGToolbarHeight);
     _toolbar = [[SGTabsToolbar alloc] initWithFrame:frame browser:self];
     
-    frame = CGRectMake(0, kTabsToolbarHeigth, head.size.width - kAddButtonWidth, kTabsHeigth);
+    frame = CGRectMake(0, kSGToolbarHeight, head.size.width - kAddButtonWidth, kTabsHeigth);
     _tabsView = [[SGTabsView alloc] initWithFrame:frame];
     
-    frame = CGRectMake(head.size.width - kAddButtonWidth, kTabsToolbarHeigth, kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
+    frame = CGRectMake(head.size.width - kAddButtonWidth, kSGToolbarHeight, kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
     _addButton = [[SGAddButton alloc] initWithFrame:frame];
     _addButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     [_addButton.button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
@@ -81,12 +82,12 @@
     [self.headerView addSubview:_toolbar];
     [self.headerView addSubview:_tabsView];
     [self.headerView addSubview:_addButton];
-     
     [self.view addSubview:self.headerView];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = kSGBrowserBackgroundColor;
     self.tabsView.tabsController = self;
     [self loadSavedTabs];
 }
@@ -99,24 +100,26 @@
     self.addButton = nil;
 }
 
-- (CGRect)contentFrame {
-    CGRect head = self.headerView.frame;
-    CGRect bounds = self.view.bounds;
-    return CGRectMake(bounds.origin.x,
-                      bounds.origin.y + head.size.height,
-                      bounds.size.width,
-                      bounds.size.height - head.size.height);
-}
-
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    self.selectedViewController.view.frame = self.contentFrame;
+    
+    CGFloat topOffset = 0;
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        topOffset = self.topLayoutGuide.length;
+    }
+    CGRect b = self.view.bounds;
+    _headerView.frame = CGRectMake(0, 0, b.size.width, kSGToolbarHeight + kTabsHeigth + topOffset);
+    _toolbar.frame = CGRectMake(0, 0, b.size.width, kSGToolbarHeight + topOffset);
+    _tabsView.frame = CGRectMake(0, kSGToolbarHeight + topOffset, b.size.width - kAddButtonWidth, kTabsHeigth);
+    _addButton.frame = CGRectMake(b.size.width - kAddButtonWidth, kSGToolbarHeight + topOffset,
+                                  kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
+    self.selectedViewController.view.frame = [self _contentFrame];
 }
 
 #pragma mark - Tab stuff
 
 - (void)addViewController:(UIViewController *)childController {
-    childController.view.frame = self.contentFrame;
+    childController.view.frame = [self _contentFrame];
     [self addChildViewController:childController];
     
     if (self.tabsView.tabs.count == 0) {
@@ -144,7 +147,7 @@
     if (viewController == current || [self.tabsView indexOfViewController:viewController] == NSNotFound)
         return;
     
-    viewController.view.frame = self.contentFrame;
+    viewController.view.frame = [self _contentFrame];
     [viewController.view setNeedsLayout];
     [self transitionFromViewController:current
                       toViewController:viewController
@@ -154,7 +157,7 @@
                                 self.tabsView.selected = index;
                             }
                             completion:^(BOOL finished) {
-                                [self updateChrome];
+                                [self updateInterface];
                             }];
 }
 
@@ -178,7 +181,7 @@
             to = [self.tabsView viewControllerAtIndex:newIndex];
         } else to  = [self.tabsView viewControllerAtIndex:newIndex+1];
         
-        to.view.frame = self.contentFrame;
+        to.view.frame = [self _contentFrame];
         [self transitionFromViewController:viewController
                           toViewController:to
                                   duration:kRemoveTabDuration
@@ -189,7 +192,7 @@
                                 }
                                 completion:^(BOOL finished){
                                     [viewController removeFromParentViewController];
-                                    [self updateChrome];
+                                    [self updateInterface];
                                 }];
     } else {
         [UIView transitionWithView:self.tabsView
@@ -201,7 +204,7 @@
                         completion:^(BOOL finished){
                             [viewController.view removeFromSuperview];//Just in case
                             [viewController removeFromParentViewController];
-                            [self updateChrome];
+                            [self updateInterface];
                         }];
     }
 }
@@ -220,7 +223,7 @@
     if (!old) {
         [self addViewController:viewController];
     } else if (![self.childViewControllers containsObject:viewController]) {
-        viewController.view.frame = self.contentFrame;
+        viewController.view.frame = [self _contentFrame];
         [self addChildViewController:viewController];
         NSUInteger index = [self selectedIndex];
         
@@ -239,7 +242,7 @@
                                     tab.closeButton.hidden = ![self canRemoveTab:viewController];
                                     
                                     [viewController didMoveToParentViewController:self];
-                                    [self updateChrome];
+                                    [self updateInterface];
                                 }];
     }
 }
@@ -270,9 +273,9 @@
     return self.tabsView.tabs.count;
 }
 
-- (void)updateChrome {
+- (void)updateInterface {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:self.isLoading];
-    [self.toolbar updateChrome];
+    [self.toolbar updateInterface];
 }
 
 - (BOOL)canRemoveTab:(UIViewController *)viewController {
@@ -280,6 +283,17 @@
         return NO;
     }
     return YES;
+}
+
+#pragma mark - Utility
+
+- (CGRect)_contentFrame {
+    CGRect head = self.headerView.frame;
+    CGRect bounds = self.view.bounds;
+    return CGRectMake(bounds.origin.x,
+                      bounds.origin.y + head.size.height,
+                      bounds.size.width,
+                      bounds.size.height - head.size.height);
 }
 
 @end

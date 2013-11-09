@@ -52,6 +52,7 @@
 }
 
 - (void)layoutSubviews{
+    [super layoutSubviews];
     [self resizeTabs];
 }
 
@@ -61,7 +62,8 @@
     
     // Float the subview in from rigth
     CGRect frame = CGRectMake(self.bounds.size.width, 0, width, self.bounds.size.height - kTabsBottomMargin);
-    SGTabView *newTab = [[SGTabView alloc] initWithFrame:frame viewController:viewController];
+    SGTabView *newTab = [[SGTabView alloc] initWithFrame:frame];
+    newTab.viewController = viewController;
     newTab.closeButton.hidden = YES;
     
     // Setup gesture recognizers

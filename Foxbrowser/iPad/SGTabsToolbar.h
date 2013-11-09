@@ -22,26 +22,29 @@
 
 #import <UIKit/UIKit.h>
 
-#import "SGSearchViewController.h"
 #import "SGActivityView.h"
+#import "SGSearchViewController.h"
 
 @class SGSearchViewController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
 
-@interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate,
-UIActionSheetDelegate, SGSearchDelegate>
+@interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate, UIActionSheetDelegate, SGSearchDelegate>
 
-@property (nonatomic, weak, readonly) SGBrowserViewController *browser;
+@property (strong, nonatomic, readonly) SGSearchField *searchField;
+@property (strong, nonatomic, readonly) SGSearchViewController *searchController;
 
-@property (nonatomic, strong) SGSearchField *searchField;
-@property (nonatomic, strong) SGSearchViewController *searchController;
+@property (weak, readonly, nonatomic) UIButton *forwardItem;
+@property (weak, readonly, nonatomic) UIButton *backItem;
+@property (weak, readonly, nonatomic) UIButton *bookmarksItem;
+@property (weak, readonly, nonatomic) UIButton *systemItem;
 
-@property (nonatomic, strong) SGProgressCircleView *progressView;
+@property (weak, readonly, nonatomic) SGProgressCircleView *progressView;
 
-@property (nonatomic, strong) UINavigationController *bookmarks;
-@property (strong, nonatomic) UIPopoverController *popoverController;
-@property (nonatomic, strong) UIActionSheet *actionSheet;
+@property (strong, nonatomic, readonly) UINavigationController *bookmarks;
+@property (strong, nonatomic, readonly) UIPopoverController *popoverController;
+@property (strong, nonatomic, readonly) UIActionSheet *actionSheet;
+@property (weak, nonatomic, readonly) SGBrowserViewController *browser;
 
 - (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
-- (void)updateChrome;
+- (void)updateInterface;
 
 @end

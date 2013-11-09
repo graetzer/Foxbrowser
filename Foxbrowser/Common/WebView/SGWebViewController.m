@@ -33,10 +33,11 @@
 
 #import "GAI.h"
 
-
 @implementation SGWebViewController {
-    NSTimer *_updateTimer;
+    //NSTimer *_updateTimer;
     NSDictionary *_selected;
+    
+    BOOL _animating;
 }
 
 // TODO Allow to change this preferences in the Settings App
@@ -72,12 +73,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-        
+    
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.webView.backgroundColor = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [UIColor colorWithWhite:1 alpha:0.2] : [UIColor clearColor];
-    UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc] 
-                                        initWithTarget:self action:@selector(handleLongPress:)];
+    self.webView.backgroundColor = [UIColor whiteColor];
+    //UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [UIColor colorWithWhite:1 alpha:0.2] : [UIColor clearColor];
+    UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc]
+                                        initWithTarget:self action:@selector(_handleLongPressGesture:)];
     gr.delegate = self;
     [self.webView addGestureRecognizer:gr];
     self.webView.delegate = self;
@@ -104,7 +106,6 @@
         [self.webView stopLoading];
         [self.webView clearContent];
         
-        [_updateTimer invalidate];
         _loading = NO;
     }
 }
@@ -114,48 +115,26 @@
     if (!self.webView.request) {
         [self openRequest:nil];
     }
-    
-    // Starts the update timer
-    [self updateInterfaceTimer:nil];
 }
+
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
+    if (!_animating) [self _layout];
+}
+
+- (void)_layout {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         UIActivityIndicatorView *ind = self.indicator;
         ind.center = CGPointMake(self.view.bounds.size.width - ind.frame.size.width/2 - 10, ind.frame.size.height/2 + 10);
     }
 }
 
-- (void)updateInterfaceTimer:(NSTimer *)timer {
-    if (timer == _updateTimer) {
-        _updateTimer = nil;
-    } else if (_updateTimer != nil) {
-        [_updateTimer invalidate];
-    }
-    
-    //if (_loading) {
-    if (self.browserViewController.selectedViewController == self) {
-        _updateTimer = [NSTimer scheduledTimerWithTimeInterval:0.5
-                                                        target:self
-                                                      selector:@selector(updateInterfaceTimer:)
-                                                      userInfo:nil
-                                                       repeats:NO];
-        if (timer != nil) {// Just perform an actual update if this was called from a timer
-            [self.webView disableTouchCallout];
-            
-            NSString *webLoc = [self.webView location];
-            if (!_loading && webLoc.length && ![webLoc hasPrefix:@"file:///"]) {
-                self.request.URL = [NSURL URLWithUnicodeString:webLoc];
-            }
-            self.title = [self.webView title];
-            [self.browserViewController updateChrome];
-        }
-    }
-}
+
 
 #pragma mark - UILongPressGesture
-- (IBAction)handleLongPress:(UILongPressGestureRecognizer *)sender {
+
+- (IBAction)_handleLongPressGesture:(UILongPressGestureRecognizer *)sender {
     if (sender.state == UIGestureRecognizerStateBegan) {
         CGPoint at = [sender locationInView:self.webView];
         CGPoint pt = at;
@@ -169,7 +148,7 @@
         pt.x = pt.x * f ;//+ offset.x;
         pt.y = pt.y * f ;//+ offset.y;
         
-        [self contextMenuFor:pt showAt:at];
+        [self _showContextMenuFor:pt atPoint:at];
     }
 }
 
@@ -180,7 +159,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 #pragma mark - Contextual menu
 
-- (void)contextMenuFor:(CGPoint)pt showAt:(CGPoint) at {
+- (void)_showContextMenuFor:(CGPoint)pt atPoint:(CGPoint) at {
     if (![self.webView JSToolsLoaded]) {
         [self.webView loadJSTools];
     }
@@ -199,9 +178,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     
     if (link && imageSrc) {
         sheet = [[UIActionSheet alloc] initWithTitle:link
-                                            delegate:self 
+                                            delegate:self
                                    cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                              destructiveButtonTitle:nil 
+                              destructiveButtonTitle:nil
                                    otherButtonTitles:
                  NSLocalizedString(@"Open", @"Open a link"),
                  NSLocalizedString(@"Open in a new Tab", nil),
@@ -209,25 +188,25 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                  NSLocalizedString(@"Copy URL", nil), nil];
     } else if (link) {
         sheet = [[UIActionSheet alloc] initWithTitle:link
-                                            delegate:self 
+                                            delegate:self
                                    cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                              destructiveButtonTitle:nil 
+                              destructiveButtonTitle:nil
                                    otherButtonTitles:
                  NSLocalizedString(@"Open", @"Open a link"),
-                 NSLocalizedString(@"Open in a new Tab", nil), 
+                 NSLocalizedString(@"Open in a new Tab", nil),
                  NSLocalizedString(@"Copy URL", nil), nil];
     } else if (imageSrc) {
         sheet = [[UIActionSheet alloc] initWithTitle:imageSrc
-                                            delegate:self 
+                                            delegate:self
                                    cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                              destructiveButtonTitle:nil 
+                              destructiveButtonTitle:nil
                                    otherButtonTitles:
-                 NSLocalizedString(@"Save Picture", nil), 
+                 NSLocalizedString(@"Save Picture", nil),
                  NSLocalizedString(@"Copy URL", nil), nil];
-
+        
     }
     
-    if (sheet) {
+    if (sheet != nil) {
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
             [sheet showFromRect:CGRectMake(at.x, at.y, 2.5, 2.5) inView:self.webView animated:YES];
         else
@@ -240,27 +219,30 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     NSString *imageSrc = _selected[@"IMG"];
     
     NSString *prefix = @"javascript:";
-    if ([link hasPrefix:prefix])
-        return;
+    if ([link hasPrefix:prefix]) return;
     
-    NSMutableURLRequest *request = [self linkRequestForURL:[NSURL URLWithString:link]];
+    NSURLRequest *nextRequest = [self _nextRequestForURL:[NSURL URLWithString:link]];
     
     if (link && imageSrc) {
         if (buttonIndex == 0) {
-            [self openRequest:request];
-        } else if (buttonIndex == 1) {
-            [self.browserViewController addTabWithURLRequest:request title:nil];
-        } else if (buttonIndex == 2) {
+            [self openRequest:nextRequest];
+        }
+        else if (buttonIndex == 1) {
+            [self.browserViewController addTabWithURLRequest:nextRequest title:nil];
+        }
+        else if (buttonIndex == 2) {
             [self performSelectorInBackground:@selector(saveImageURL:) withObject:[NSURL URLWithString:imageSrc]];
         } else if (buttonIndex == 3) {
             [UIPasteboard generalPasteboard].string = link;
         }
     } else if (link) {
         if (buttonIndex == 0) {
-            [self openRequest:request];
-        } else if (buttonIndex == 1) {
-            [self.browserViewController addTabWithURLRequest:request title:nil];
-        } else if (buttonIndex == 2) {
+            [self openRequest:nextRequest];
+        }
+        else if (buttonIndex == 1) {
+            [self.browserViewController addTabWithURLRequest:nextRequest title:nil];
+        }
+        else if (buttonIndex == 2) {
             [UIPasteboard generalPasteboard].string = link;
         }
     } else if (imageSrc) {
@@ -278,19 +260,19 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
         if (data) {
             UIImage *img = [UIImage imageWithData:data];
             UIImageWriteToSavedPhotosAlbum(img, self,
-                                           @selector(image:didFinishSavingWithError:contextInfo:), nil);
+                                           @selector(_image:didFinishSavingWithError:contextInfo:), nil);
         }
     }
 }
 
-- (void)               image: (UIImage *) image
+- (void)              _image: (UIImage *) image
     didFinishSavingWithError: (NSError *) error
                  contextInfo: (void *) contextInfo {
     if (error) {
         [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Submit", nil)
-                                   message:NSLocalizedString(@"Error Retrieving Data", nil)
-                                  delegate:nil
-                         cancelButtonTitle:NSLocalizedString(@"OK", nil)
+                                    message:NSLocalizedString(@"Error Retrieving Data", nil)
+                                   delegate:nil
+                          cancelButtonTitle:NSLocalizedString(@"OK", nil)
                           otherButtonTitles:nil] show];
     }
 }
@@ -310,17 +292,21 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     }
     
     if (navigationType != UIWebViewNavigationTypeOther) {
-        return [[WeaveOperations sharedOperations] handleURLInternal:request.URL];
+        if (![[WeaveOperations sharedOperations] handleURLInternal:request.URL]) {
+            return NO;
+        } else if (![request.mainDocumentURL isEqual:self.request.mainDocumentURL]) {
+            self.request = request;
+        }
     }
     return YES;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     _loading = YES;
-    [self dismissSearchToolbar];
+    [self _dismissSearchToolbar];
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.indicator startAnimating];
+    [self.indicator startAnimating];
     }
 }
 
@@ -334,14 +320,13 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     [self.webView disableTouchCallout];
     self.title = [webView title];
     
-    NSString *webLoc = [self.webView location];
-    if (webLoc.length && ![webLoc hasPrefix:@"file:///"]) {
-        self.request.URL = [NSURL URLWithUnicodeString:webLoc];
+    if (![self.webView.request.URL.scheme isEqualToString:@"file"]) {
+        self.request = self.webView.request;
     }
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.track"]) {
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableDoNotTrackKey]) {
         [self.webView enableDoNotTrack];
     }
-    [self.browserViewController updateChrome];
     
     [[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
@@ -353,64 +338,46 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [self.indicator stopAnimating];
     }
-    [_updateTimer invalidate];
-//    [self.browserViewController updateChrome];
     
     DLog(@"WebView error code: %d", error.code);
     //ignore these
-    if ([error.domain isEqual:NSURLErrorDomain] && error.code == NSURLErrorCancelled)
-        return;
-        
+    if ([error.domain isEqual:NSURLErrorDomain]
+        && error.code == NSURLErrorCancelled) return;
+    
     if (error.code == NSURLErrorCannotFindHost
         || error.code == NSURLErrorDNSLookupFailed
         || ([(id)kCFErrorDomainCFNetwork isEqualToString:error.domain] && error.code == 2)) {
         
         // Host not found, try adding www. in front?
         if ([self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
-            NSMutableString *url = [self.request.URL.absoluteString mutableCopy];
-            NSRange range = [url rangeOfString:@"://"];
+            NSMutableString *urlS = [self.request.URL.absoluteString mutableCopy];
+            NSRange range = [urlS rangeOfString:@"://"];
             if (range.location != NSNotFound) {
-                [url insertString:@"www." atIndex:range.location+range.length];
-                self.request.URL = [NSURL URLWithString:url];
-                [self openRequest:nil];
+                [urlS insertString:@"www." atIndex:range.location+range.length];
+                NSMutableURLRequest *next = [self.request mutableCopy];
+                next.URL = [NSURL URLWithString:urlS];
+                [self openRequest:next];
                 return;
             }
         }
     }
     
     NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
-    // If the webpage contains stuff we don't want to delete  it
-    if (![self.webView isEmpty] && self.browserViewController.selectedViewController == self) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
-                                                        message:error.localizedDescription
-                                                       delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
-                                              otherButtonTitles: nil];
-        [alert show];
-    } else {
-        [self.webView showPlaceholder:error.localizedDescription title:title];
-    }
+    [self.webView showPlaceholder:error.localizedDescription title:title];
 }
 
 #pragma mark - Networking
 
-- (NSMutableURLRequest *)linkRequestForURL:(NSURL *)url {
-    if (!url) return nil;
+/*! Build a request that contains the referrer etc */
+- (NSURLRequest *)_nextRequestForURL:(NSURL *)url {
+    if (url == nil) return nil;
     
-    DLog(@"WebView URL: %@", self.webView.request.URL);
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    if (self.request) {
-        NSString *webLoc = [self.webView location];
-        if (webLoc.length && ![webLoc hasPrefix:@"file:///"]) {
-            self.request.URL = [NSURL URLWithUnicodeString:webLoc];
-        }
-        DLog(@"WebController URL: %@", self.request.URL);
-        [request setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
-    }
+    [request setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
     return request;
 }
 
-- (void)openRequest:(NSMutableURLRequest *)request {
+- (void)openRequest:(NSURLRequest *)request {
     if (request) self.request = request;
     if (![self isViewLoaded]) return;
     
@@ -424,23 +391,15 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
             NSString *version = [NSBundle mainBundle].infoDictionary[(NSString*)kCFBundleVersionKey];
             NSString *text = [NSString stringWithFormat:@"Version %@<br/>Developer simon@graetzer.org<br/>Thanks for using Foxbrowser!", version];
             [self.webView showPlaceholder:text title:@"Foxbrowser Configuration"];
-            [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Various"
-                                                            withAction:@"about:config"
-                                                             withLabel:nil
-                                                             withValue:nil];
         } else {
             _loading = YES;
             [self.webView loadRequest:self.request];
-            [self.browserViewController updateChrome];
         }
     }
 }
 
-- (void)reload {
-    [self openRequest:nil];
-}
-
 #pragma mark - Search on page
+
 - (NSInteger)search:(NSString *)searchString {
     if (self.searchToolbar) [self.searchToolbar removeFromSuperview];
     
@@ -448,7 +407,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     DLog(@"Found the string %@ %i times", searchString, count);
     
     __strong UIToolbar *searchToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 44,
-                                                                       self.view.bounds.size.width, 44)];
+                                                                                    self.view.bounds.size.width, 44)];
     searchToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     searchToolbar.translucent = YES;
     
@@ -462,7 +421,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     button.backgroundColor = [UIColor clearColor];
     button.showsTouchWhenHighlighted = YES;
     [button setImage:up forState:UIControlStateNormal];
-    [button addTarget:self action:@selector(lastHighlightedWord:) forControlEvents:UIControlEventTouchUpInside];
+    [button addTarget:self action:@selector(_lastHighlightedWord:) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *last = [[UIBarButtonItem alloc] initWithCustomView:button];
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -470,12 +429,12 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     button.backgroundColor = [UIColor clearColor];
     button.showsTouchWhenHighlighted = YES;
     [button setImage:down forState:UIControlStateNormal];
-    [button addTarget:self action:@selector(nextHighlightedWord:) forControlEvents:UIControlEventTouchUpInside];
+    [button addTarget:self action:@selector(_nextHighlightedWord:) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *next = [[UIBarButtonItem alloc] initWithCustomView:button];
     
     UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                           target:self
-                                                                          action:@selector(dismissSearchToolbar)];
+                                                                          action:@selector(_dismissSearchToolbar)];
     
     UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                            target:nil action:nil];
@@ -487,9 +446,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     label.textAlignment = NSTextAlignmentCenter;
     label.text = [NSString stringWithFormat:@"Found: %i", count];
     UIBarButtonItem *textItem = [[UIBarButtonItem alloc] initWithCustomView:label];
-
+    
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        searchToolbar.tintColor = kTabColor;
+        searchToolbar.tintColor = kSGBrowserBarColor;
         done.tintColor = [UIColor lightGrayColor];
     }
     
@@ -500,15 +459,15 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     return count;
 }
 
-- (IBAction)lastHighlightedWord:(id)sender {
+- (IBAction)_lastHighlightedWord:(id)sender {
     [self.webView showLastHighlight];
 }
 
-- (IBAction)nextHighlightedWord:(id)sender {
+- (IBAction)_nextHighlightedWord:(id)sender {
     [self.webView showNextHighlight];
 }
 
-- (IBAction)dismissSearchToolbar {
+- (IBAction)_dismissSearchToolbar {
     if (self.searchToolbar) {
         [self.webView removeHighlights];
         [UIView animateWithDuration:0.3
@@ -523,3 +482,4 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 @end
+

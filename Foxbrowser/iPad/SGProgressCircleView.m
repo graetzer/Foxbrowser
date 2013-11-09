@@ -79,8 +79,7 @@
 
 - (void)setHidden:(BOOL)hidden {
     [super setHidden:hidden];
-    if (!hidden)
-        [self startAnimating];
+    if (!hidden) [self startAnimating];
 }
 
 - (void)didMoveToSuperview {

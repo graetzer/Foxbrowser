@@ -100,7 +100,9 @@
 		[self performSelectorOnMainThread:@selector(authFailed:) withObject:[e reason] waitUntilDone:YES];
         
 		NSLog(@"Failed to initialize CryptoManager: %@", e.reason);
-        [[GAI sharedInstance].defaultTracker sendException:NO withDescription:@"Failed to initialize CryptoManager: %@", e.reason];
+        [appDelegate.tracker send:[[GAIDictionaryBuilder createExceptionWithDescription:
+                                    [NSString stringWithFormat:@"Failed to initialize CryptoManager: %@", e.reason]
+                                                                              withFatal:@NO] build]];
 	} @finally  {
 		//stop the spinner, regardless
 		[self performSelectorOnMainThread:@selector(stopLoginSpinner) withObject:nil waitUntilDone:YES];
@@ -115,10 +117,10 @@
 	[alert release];
     [CryptoUtils deletePrivateKeys];
     
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"Easy"
-                                                     withLabel:@"Fail"
-                                                    withValue:nil];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Setup"
+                                                                      action:@"Easy"
+                                                                       label:@"Fail"
+                                                                       value:nil] build]];
 }
 
 /**
@@ -136,16 +138,16 @@
 	[Stockboy restock];
 
 	[_delegate easySetupViewControllerDidLogin: self];
-    
-    [[GAI sharedInstance].defaultTracker sendEventWithCategory:@"Setup"
-                                                    withAction:@"Easy"
-                                                     withLabel:@"Success"
-                                                     withValue:nil];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Setup"
+                                                                      action:@"Easy"
+                                                                       label:@"Success"
+                                                                       value:nil] build]];
 }
 
 #pragma mark -
 
 - (void) viewDidLoad {
+    [super viewDidLoad];
     self.title = NSLocalizedString(@"Sign In", @"re-authenticate");
     
 	_passwordView1.layer.cornerRadius = 7;
@@ -170,8 +172,8 @@
 	
 	else if ([languagesThatNeedMoreSpace containsObject: language]) {
 		_manualSetupButton.titleLabel.font = [UIFont fontWithName: _manualSetupButton.titleLabel.font.fontName size: _manualSetupButton.titleLabel.font.pointSize - 1.5];
-		_manualSetupButton.titleLabel.lineBreakMode = UILineBreakModeWordWrap;
-		_manualSetupButton.titleLabel.textAlignment = UITextAlignmentCenter;
+		_manualSetupButton.titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
+		_manualSetupButton.titleLabel.textAlignment = NSTextAlignmentCenter;
 		_manualSetupButton.titleLabel.numberOfLines = 2;
 		CGRect frame = _manualSetupButton.frame; frame.origin.y -= 4; frame.size.height += 8;
 		if ([language isEqualToString: @"fr"]) {
@@ -182,6 +184,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
     _passwordLabel1.text = nil;
@@ -191,22 +194,24 @@
     _client = [[JPAKEClient alloc] initWithServer: _server delegate: self reporter: _reporter];
     [_client start];
     
-    [[GAI sharedInstance].defaultTracker sendView:@"EasySetupViewController"];
+    [appDelegate.tracker set:kGAIScreenName value:@"EasySetupViewController"];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
-- (void) viewDidAppear:(BOOL)animated
-{
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
 	[[UIApplication sharedApplication] setIdleTimerDisabled: YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
     [_client cancel];
     [_client release];
     _client = nil;
 }
 
-- (void) viewDidDisappear:(BOOL)animated
-{
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
 	[[UIApplication sharedApplication] setIdleTimerDisabled: NO];
 }
 

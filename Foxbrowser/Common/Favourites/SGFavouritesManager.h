@@ -28,18 +28,19 @@
 @interface SGFavouritesManager : NSObject
 + (SGFavouritesManager *)sharedManager;
 
-// Array of URL's
+// Array of NSDictionarys
 - (NSArray *)favourites;
 
 // Returns the replacement
-- (NSURL *)blockURL:(NSURL *)url;
+- (NSDictionary *)blockItem:(NSDictionary *)item;
 
-- (NSString *)titleWithURL:(NSURL *)url;
 - (UIImage *)imageWithURL:(NSURL *)url;
 
 - (void)resetFavourites;
 - (CGSize)imageSize;
 - (NSUInteger)maxFavs;
+
+//- (void)setFavouriteWithURL:(NSURL *)url title:(NSString *)title atIndex:(NSUInteger)index;
 
 // Call this after each webView call
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController;

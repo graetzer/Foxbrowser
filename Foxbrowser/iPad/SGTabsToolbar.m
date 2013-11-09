@@ -35,103 +35,105 @@
 
 #import "GAI.h"
 
-@interface SGTabsToolbar ()
-@property (nonatomic, strong) UIButton *forwardItem;
-@property (nonatomic, strong) UIButton *backItem;
-@property (nonatomic, strong) UIButton *bookmarksItem;
-@property (nonatomic, strong) UIButton *systemItem;
+@implementation SGTabsToolbar
 
-@end
-
-@implementation SGTabsToolbar {
-    UIColor *_bottomColor;
-}
-
-- (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser;
-{
-    self = [super initWithFrame:frame];
-    if (self) {
+- (id)initWithFrame:(CGRect)frame browser:(SGBrowserViewController *)browser {
+    
+    if (self = [super initWithFrame:frame]) {
         _browser = browser;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        _bottomColor = kTabColor;
+        self.backgroundColor = kSGBrowserBarColor;
         
         CGRect btnRect = CGRectMake(0, 0, 30, 30);
 
-        self.backItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.backItem.frame = btnRect;
-        self.backItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        self.backItem.backgroundColor = [UIColor clearColor];
-        self.backItem.showsTouchWhenHighlighted = YES;
-        [self.backItem setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
-        [self.backItem addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.backItem];
+        UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.frame = btnRect;
+        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.showsTouchWhenHighlighted = YES;
+        [btn setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
+        [btn addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _backItem = btn;
         
-        self.forwardItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.forwardItem.frame = btnRect;
-        self.forwardItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        self.forwardItem.backgroundColor = [UIColor clearColor];
-        self.forwardItem.showsTouchWhenHighlighted = YES;
-        [self.forwardItem setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
-        [self.forwardItem addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.forwardItem];
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.frame = btnRect;
+        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.showsTouchWhenHighlighted = YES;
+        [btn setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
+        [btn addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _forwardItem = btn;
         
-        self.bookmarksItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.bookmarksItem.frame = btnRect;
-        self.bookmarksItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        self.bookmarksItem.backgroundColor = [UIColor clearColor];
-        self.bookmarksItem.showsTouchWhenHighlighted = YES;
-        [self.bookmarksItem setImage:[UIImage imageNamed:@"bookmark"] forState:UIControlStateNormal];
-        [self.bookmarksItem addTarget:self action:@selector(showLibrary:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.bookmarksItem];
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.frame = btnRect;
+        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.showsTouchWhenHighlighted = YES;
+        [btn setImage:[UIImage imageNamed:@"bookmark"] forState:UIControlStateNormal];
+        [btn addTarget:self action:@selector(showLibrary:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _bookmarksItem = btn;
         
-        self.systemItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        self.systemItem.frame = btnRect;
-        self.systemItem.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        self.systemItem.backgroundColor = [UIColor clearColor];
-        self.systemItem.showsTouchWhenHighlighted = YES;
-        [self.systemItem setImage:[UIImage imageNamed:@"system"] forState:UIControlStateNormal];
-        [self.systemItem addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.systemItem];
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.frame = btnRect;
+        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.showsTouchWhenHighlighted = YES;
+        [btn setImage:[UIImage imageNamed:@"system"] forState:UIControlStateNormal];
+        [btn addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _systemItem = btn;
         
-        self.progressView = [[SGProgressCircleView alloc] init];
-        [self addSubview:self.progressView];
+        __strong SGProgressCircleView *progView = [[SGProgressCircleView alloc] init];
+        [self addSubview:progView];
+        _progressView = progView;
         
-        self.searchField = [[SGSearchField alloc] initWithDelegate:self];
-        [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
-        [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:self.searchField];
+        __strong SGSearchField* search = [[SGSearchField alloc] initWithFrame:CGRectMake(0, 0, 200., 30.)];
+        search.delegate = self;
+        [search.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [search.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:search];
+        _searchField = search;
         
-        self.searchController = [[SGSearchViewController alloc] initWithStyle:UITableViewStylePlain];
-        self.searchController.delegate = self;
+        __strong SGSearchViewController *searchC = [[SGSearchViewController alloc] initWithStyle:UITableViewStylePlain];
+        searchC.delegate = self;
+        _searchController = searchC;
                 
-        [self updateChrome];
+        [self updateInterface];
     }
     return self;
 }
 
-- (void)drawRect:(CGRect)rect {
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGPoint topCenter = CGPointMake(CGRectGetMidX(self.bounds), 0.0f);
-    CGPoint bottomCenter = CGPointMake(CGRectGetMidX(self.bounds), self.bounds.size.height);
-    CGFloat locations[2] = { 0.00, 1.0};
-    
-    CGFloat redEnd, greenEnd, blueEnd, alphaEnd;
-    [_bottomColor getRed:&redEnd green:&greenEnd blue:&blueEnd alpha:&alphaEnd];
-    //Two colour components, the start and end colour both set to opaque. Red Green Blue Alpha
-    CGFloat components[8] = { 244./255., 245./255., 247./255., 1.0, redEnd, greenEnd, blueEnd, 1.0};
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    
-    CGGradientRef gradient = CGGradientCreateWithColorComponents(colorspace, components, locations, 2);
-    CGContextDrawLinearGradient(context, gradient, topCenter, bottomCenter, 0);
-    CGGradientRelease(gradient);
-    CGColorSpaceRelease(colorspace);
-}
+//- (void)drawRect:(CGRect)rect {
+//    CGContextRef context = UIGraphicsGetCurrentContext();
+//    CGPoint topCenter = CGPointMake(CGRectGetMidX(self.bounds), 0.0f);
+//    CGPoint bottomCenter = CGPointMake(CGRectGetMidX(self.bounds), self.bounds.size.height);
+//    CGFloat locations[2] = { 0.00, 1.0};
+//    
+//    CGFloat redEnd, greenEnd, blueEnd, alphaEnd;
+//    [_bottomColor getRed:&redEnd green:&greenEnd blue:&blueEnd alpha:&alphaEnd];
+//    //Two colour components, the start and end colour both set to opaque. Red Green Blue Alpha
+//    CGFloat components[8] = { 244./255., 245./255., 247./255., 1.0, redEnd, greenEnd, blueEnd, 1.0};
+//    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+//    
+//    CGGradientRef gradient = CGGradientCreateWithColorComponents(colorspace, components, locations, 2);
+//    CGContextDrawLinearGradient(context, gradient, topCenter, bottomCenter, 0);
+//    CGGradientRelease(gradient);
+//    CGColorSpaceRelease(colorspace);
+//}
 
 - (void)layoutSubviews {
+    [super layoutSubviews];
     CGFloat diff = 5.;
     CGFloat length = 40.;
+    CGFloat topOffset = 0;
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        topOffset = self.browser.topLayoutGuide.length;
+    }
     
-    CGRect btnR = CGRectMake(diff, (self.bounds.size.height - length)/2, length, length);
+    CGRect btnR = CGRectMake(diff, (self.bounds.size.height - length + topOffset)/2, length, length);
     self.backItem.frame = btnR;
     
     btnR.origin.x += length + diff;
@@ -146,7 +148,7 @@
     CGRect org = self.searchField.frame;
     org.size.width = self.bounds.size.width - (btnR.origin.x + 2*length + 3*diff);
     org.origin.x = self.bounds.size.width - 2*diff - org.size.width;
-    org.origin.y = (self.bounds.size.height - org.size.height)/2;
+    org.origin.y = (self.bounds.size.height - org.size.height + topOffset)/2;
     self.searchField.frame = org;
     
     btnR.origin.x = org.origin.x - diff - length;
@@ -156,13 +158,13 @@
 #pragma mark - Libary
 
 - (IBAction)showLibrary:(UIButton *)sender {
-    [self destroyPopovers];
+    [self _destroyOverlays];
     
     if (!self.bookmarks) {
-        self.bookmarks = [[UINavigationController alloc] initWithRootViewController:[BookmarkPage new]];
+        _bookmarks = [[UINavigationController alloc] initWithRootViewController:[BookmarkPage new]];
     }
     
-    self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.bookmarks];
+    _popoverController = [[UIPopoverController alloc] initWithContentViewController:self.bookmarks];
     self.popoverController.delegate = self;
     [self.popoverController presentPopoverFromRect:sender.frame
                                             inView:self
@@ -171,13 +173,13 @@
 }
 
 - (IBAction)showOptions:(UIButton *)sender {
-    [self destroyPopovers];
+    [self _destroyOverlays];
     
-    self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                   delegate:self
-                                          cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                                     destructiveButtonTitle:nil
-                                          otherButtonTitles:
+    _actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                               delegate:self
+                                      cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
+                                 destructiveButtonTitle:nil
+                                      otherButtonTitles:
                         NSLocalizedString(@"Share Page", @"Share url of page"),
                         NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                         NSLocalizedString(@"Settings", nil), nil];
@@ -185,16 +187,16 @@
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    [self destroyPopovers];
+    [self _destroyOverlays];
     NSURL *url = [self.browser URL];
     
     if (buttonIndex == 0 && url != nil) {
         SGActivityView *share = [[SGActivityView alloc] initWithActivityItems:@[url] applicationActivities:nil];
         share.completionHandler = ^(NSString *activity, BOOL completed) {
             if (completed) {
-                [[GAI sharedInstance].defaultTracker sendSocial:activity
-                                                     withAction:@"Share URL"
-                                                     withTarget:nil];
+                [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activity
+                                                                                  action:@"Share URL"
+                                                                                  target:url.absoluteString] build]];
             }
         };
         [share show];
@@ -219,14 +221,14 @@
     }
 }
 
-- (void)updateChrome {
-    if (![self.searchField isFirstResponder])
+- (void)updateInterface {
+    if (![self.searchField isFirstResponder]) {
             self.searchField.text = [self.browser URL].absoluteString;
-        
+    }
+    
     self.forwardItem.enabled = [self.browser canGoForward];
     self.backItem.enabled = [self.browser canGoBack];
     
-
     BOOL canStopOrReload = [self.browser canStopOrReload];
     if (canStopOrReload) {
         if ([self.browser isLoading]) {
@@ -242,10 +244,9 @@
     }
 }
 
-- (void)createPopover {
-    if (!self.popoverController) // create the popover if not already open
-    {
-        self.popoverController = [[UIPopoverController alloc] initWithContentViewController:self.searchController];
+- (void)_createPopoverOverlay {
+    if (!self.popoverController) {// create the popover if not already open
+        _popoverController = [[UIPopoverController alloc] initWithContentViewController:self.searchController];
         self.popoverController.delegate = self;
         
         // Ensure the popover is not dismissed if the user taps in the search bar.
@@ -253,25 +254,21 @@
     }
 }
 
-- (void)destroyPopovers {
+- (void)_destroyOverlays {
     if (self.popoverController) {
         [self.popoverController dismissPopoverAnimated:YES];
-        self.popoverController = nil;
-    }
-    if (self.popoverController) {
-        [self.popoverController dismissPopoverAnimated:YES];
-        self.popoverController = nil;
+        _popoverController = nil;
     }
     if (self.actionSheet) {
         [self.actionSheet dismissWithClickedButtonIndex:-1 animated:YES];
-        self.actionSheet = nil;
+        _actionSheet = nil;
     }
 }
 
 #pragma mark - UITextFieldDelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-    [self createPopover];
+    [self _createPopoverOverlay];
 }
 
 - (BOOL)textFieldShouldClear:(UITextField *)textField {
@@ -300,7 +297,7 @@
 - (void)textFieldDidEndEditing:(UITextField *)textField {
     // If the user finishes editing text in the search bar by, for example:
     // tapping away rather than selecting from the recents list, then just dismiss the popover
-    [self destroyPopovers];
+    [self _destroyOverlays];
     
     if ([self.browser respondsToSelector:@selector(URL)]) {
         self.searchField.text = [self.browser URL].absoluteString;
@@ -324,12 +321,12 @@
     [self.browser handleURLString:searchString title:title];
     
     // Conduct the search. In this case, simply report the search term used.
-    [self destroyPopovers];
+    [self _destroyOverlays];
     [self.searchField resignFirstResponder];
 }
 
 - (void)finishPageSearch:(NSString *)searchString {
-    [self destroyPopovers];
+    [self _destroyOverlays];
     [self.searchField resignFirstResponder];
     [self.browser findInPage:searchString];
 }
@@ -340,7 +337,7 @@
     
     // Remove focus from the search bar without committing the search.
     [self resignFirstResponder];
-    self.popoverController = nil;
+    _popoverController = nil;
 }
 
 @end

@@ -26,5 +26,4 @@
 @interface SGAddButton : UIView
 
 @property (strong, nonatomic) UIButton *button;
-@property (nonatomic, strong) UIColor *tabColor;
 @end

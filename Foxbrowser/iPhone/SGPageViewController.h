@@ -27,12 +27,14 @@
 @class SGPageToolbar;
 
 @interface SGPageViewController : SGBrowserViewController <UIScrollViewDelegate, UIGestureRecognizerDelegate>
-@property (readonly, nonatomic) SGPageToolbar *toolbar;
-@property (readonly, nonatomic) UIScrollView *scrollView;
-@property (readonly, nonatomic) UIPageControl *pageControl;
-@property (readonly, nonatomic) UIButton *closeButton;
-@property (readonly, nonatomic) UIButton *tabsButton;
-@property (readonly, nonatomic) UILabel *titleLabel;
+@property (weak, readonly, nonatomic) SGPageToolbar *toolbar;
+@property (weak, readonly, nonatomic) UIScrollView *scrollView;
+@property (weak, readonly, nonatomic) UIPageControl *pageControl;
+@property (weak, readonly, nonatomic) UIButton *closeButton;
+@property (weak, readonly, nonatomic) UIButton *addTabButton;
+@property (weak, readonly, nonatomic) UIButton *optionsButton;
+@property (weak, readonly, nonatomic) UIButton *tabsButton;
+@property (weak, readonly, nonatomic) UILabel *titleLabel;
 @property (assign, nonatomic) BOOL exposeMode;
 
 - (void)setExposeMode:(BOOL)exposeMode animated:(BOOL)animated;

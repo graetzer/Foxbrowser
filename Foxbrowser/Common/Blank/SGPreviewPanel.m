@@ -22,35 +22,48 @@
 
 #import "SGPreviewPanel.h"
 #import "SGFavouritesManager.h"
-#import "Store.h"
+#import "NSURL+IFUnicodeURL.h"
 
 @implementation SGPreviewTile
 
-- (id)initWithURL:(NSURL *)url {
+- (id)initWithItem:(NSDictionary *)item {
+    NSURL *url = [NSURL URLWithUnicodeString:item[@"url"]];
+    if (url == nil) return nil;
+    
     UIFont *font;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         font = [UIFont fontWithName:@"HelveticaNeue" size:12];
-    else
+    } else {
         font = [UIFont fontWithName:@"HelveticaNeue-Light" size:15];
-
+    }
+    
     
     SGFavouritesManager *fm = [SGFavouritesManager sharedManager];
     CGSize size = [fm imageSize];
     if (self = [super initWithFrame:CGRectMake(0, 0, size.width, size.height + 5 + font.lineHeight)]) {
+        _item = item;
         _url = url;
         
         _label = [[UILabel alloc] initWithFrame:CGRectMake(0, size.height + 5, size.width, font.lineHeight)];
         _label.backgroundColor = [UIColor clearColor];
         _label.font = font;
         _label.textColor = [UIColor darkTextColor];
-        _label.text = [fm titleWithURL:url];
+        _label.text = _item[@"title"];
         [self addSubview:_label];
         
         UIImage *image = [fm imageWithURL:url];
+
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-        _imageView.contentMode = UIViewContentModeScaleAspectFit;
-        _imageView.backgroundColor = image ? [UIColor whiteColor]:[UIColor colorWithWhite:0.8 alpha:1.];
-        _imageView.image = image;
+        
+        _imageView.backgroundColor = [UIColor clearColor];
+        if (image == nil) {
+            _imageView.image = [UIImage imageNamed:@"default_thumbnail"];
+            _imageView.contentMode = UIViewContentModeScaleToFill;
+        } else {
+            _imageView.image = image;
+            _imageView.contentMode = UIViewContentModeScaleAspectFit;
+        }
+        
         _imageView.layer.borderColor = [UIColor grayColor].CGColor;
         _imageView.layer.borderWidth = 1.f;
         [self addSubview:_imageView];
@@ -78,25 +91,24 @@
 }
 
 - (void)layout {
-    if (self.tiles.count == 0)
-        return;
+    if (self.tiles.count == 0) return;
     
     SGPreviewTile *tile = self.tiles[0];
+    CGRect b = self.bounds;
     CGSize tileSize = tile.frame.size;
     
     NSUInteger columns, lines;
-    if (self.bounds.size.width > self.bounds.size.height) {
-        columns = self.bounds.size.width/tileSize.width;
+    if (b.size.width > b.size.height) {
+        columns = b.size.width/tileSize.width;
         lines = MAX((self.tiles.count + (columns-1)) / columns, 1);
     } else {
-        lines = self.bounds.size.height/tileSize.height;
+        lines = b.size.height/tileSize.height;
         columns = MAX((self.tiles.count + (lines-1)) / lines, 1);
     }
     
+    CGFloat paddingX = (b.size.width - columns*tileSize.width)/(columns + 1);
+    CGFloat paddingY = (b.size.height - lines*tileSize.height)/(lines + 1);
     
-    CGFloat paddingX = (self.bounds.size.width - columns*tileSize.width)/(columns + 1);
-    CGFloat paddingY = (self.bounds.size.height - lines*tileSize.height)/(lines + 1);
-
     for (NSUInteger i = 0; i < self.tiles.count; i++) {
         NSUInteger line = i / columns;
         NSUInteger column = i % columns;
@@ -110,10 +122,12 @@
 }
 
 - (void)layoutSubviews {
+    [super layoutSubviews];
     [self layout];
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
+    [super willMoveToWindow:newWindow];
     if (newWindow) {
         if (self.tiles.count < [SGFavouritesManager sharedManager].maxFavs) {
             [self refresh];
@@ -131,13 +145,14 @@
     self.tiles = [NSMutableArray arrayWithCapacity:favsMngr.maxFavs];
     
     NSArray *favs = [favsMngr favourites];
-    for (NSURL *url in favs) {
-        [self addTileWithURL:url];
+    for (NSDictionary *item in favs) {
+        [self addTileWithItem:item];
     }
 }
 
-- (void)addTileWithURL:(NSURL *)url {
-    SGPreviewTile *tile = [[SGPreviewTile alloc] initWithURL:url];
+- (void)addTileWithItem:(NSDictionary *)item {
+    SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item];
+    if (tile == nil) return;
     tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
     
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
@@ -173,10 +188,12 @@
                                                       otherButtonTitles:
                                     NSLocalizedString(@"Open", @"Open a link"),
                                     NSLocalizedString(@"Open in a new Tab", nil),nil];
-            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+            
+            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
                 [sheet showFromRect:recognizer.view.frame inView:self animated:YES];
-            else
+            } else {
                 [sheet showInView:self.window.rootViewController.view];
+            }
         }
     }
 }
@@ -193,7 +210,7 @@
             
         case 0:
         {
-            NSURL *next = [[SGFavouritesManager sharedManager] blockURL:self.selected.url];
+            NSDictionary *next = [[SGFavouritesManager sharedManager] blockItem:self.selected.item];
             [self.tiles removeObject:self.selected];
             
            [UIView transitionWithView:self
@@ -201,7 +218,7 @@
                               options:UIViewAnimationOptionAllowAnimatedContent
                            animations:^{
                                [self.selected removeFromSuperview];
-                               [self addTileWithURL:next];
+                               [self addTileWithItem:next];
                                [self layout];
                            }
                            completion:^(BOOL finished) {

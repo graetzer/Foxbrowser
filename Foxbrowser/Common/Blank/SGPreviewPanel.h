@@ -28,8 +28,9 @@
 @property (readonly, nonatomic) UIImageView *imageView;
 @property (readonly, nonatomic) UILabel *label;
 @property (readonly, nonatomic) NSURL *url;
+@property (readonly, nonatomic) NSDictionary *item;
 
-- (id)initWithURL:(NSURL *)url;
+- (id)initWithItem:(NSDictionary *)item;
 
 @end
 

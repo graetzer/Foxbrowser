@@ -38,6 +38,7 @@
     return SGActivityTypePostToTwitter;
 }
 
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_6_0
 - (BOOL)canPerformWithActivityItems:(NSArray *)activityItems {
     BOOL can = NO;
     for (id item in activityItems) {
@@ -77,6 +78,11 @@
 - (UIViewController *)activityViewController {
     return _viewController;
 }
+#else 
+- (NSString *)serviceType {
+    return SLServiceTypeTwitter;
+}
 
+#endif
 
 @end

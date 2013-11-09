@@ -34,7 +34,6 @@
 #import "GAI.h"
 
 @implementation SGPageToolbar {
-    UIColor *_bottomColor;
     BOOL _searchMaskVisible;
 }
 
@@ -42,12 +41,11 @@
     self = [super initWithFrame:frame];
     if (self) {
         _browser = browser;
-        _bottomColor = kTabColor;
+        //_bottomColor = kSGInterfaceColor;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        self.backgroundColor = kSGBrowserBarColor;
         
-        CGRect btnRect = CGRectMake(0, 0, 30, 30);
         _backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _backButton.frame = btnRect;
         _backButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
         _backButton.backgroundColor = [UIColor clearColor];
         _backButton.showsTouchWhenHighlighted = YES;
@@ -56,7 +54,6 @@
         [self addSubview:_backButton];
         
         _forwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _forwardButton.frame = btnRect;
         _forwardButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
         _forwardButton.backgroundColor = [UIColor clearColor];
         _forwardButton.showsTouchWhenHighlighted = YES;
@@ -65,100 +62,104 @@
         _forwardButton.enabled = self.browser.canGoForward;
         [self addSubview:_forwardButton];
         
-        btnRect = CGRectMake(0, (frame.size.height - 36)/2, 36, 36);
-        btnRect.origin.x = frame.size.width - 80;
         _optionsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _optionsButton.frame = btnRect;
         _optionsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         _optionsButton.backgroundColor = [UIColor clearColor];
         [_optionsButton setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
         [_optionsButton setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
-        [_optionsButton addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
+        [_optionsButton addTarget:self action:@selector(_showOptions:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_optionsButton];
         
-        btnRect.origin.x = frame.size.width - 40;
         _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _tabsButton.frame = btnRect;
         _tabsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         _tabsButton.backgroundColor = [UIColor clearColor];
-        _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(5, 5, 0, 0);
+        _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(6, 5, 0, 0);
         _tabsButton.titleLabel.font = [UIFont systemFontOfSize:12.5];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose"] forState:UIControlStateNormal];
         [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose-pressed"] forState:UIControlStateHighlighted];
         [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
         [_tabsButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
-        [_tabsButton addTarget:self action:@selector(pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
+        [_tabsButton addTarget:self action:@selector(_pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_tabsButton];
         
-        btnRect = CGRectMake(0, (frame.size.height - 36)/2, 77, 36);
-        btnRect.origin.x = frame.size.width - 80;
         _cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _cancelButton.frame = btnRect;
         _cancelButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         _cancelButton.backgroundColor = [UIColor clearColor];
         _cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15];
+        _cancelButton.titleLabel.minimumFontSize = 13;
+        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+            [_cancelButton setTitleColor:UIColorFromHEX(0x007FFF) forState:UIControlStateNormal];
+        } else {
+            [_cancelButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
+        }
         [_cancelButton setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
-        [_cancelButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
-        [_cancelButton addTarget:self action:@selector(cancelSearchButton:) forControlEvents:UIControlEventTouchUpInside];
+        [_cancelButton addTarget:self action:@selector(_cancelSearchButton:) forControlEvents:UIControlEventTouchUpInside];
         _cancelButton.hidden = YES;
         [self addSubview:_cancelButton];
         
-        _searchField = [[SGSearchField alloc] initWithDelegate:self];
-        [self.searchField.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
-        [self.searchField.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_searchField];
+        __strong SGSearchField *field = [[SGSearchField alloc] initWithFrame:CGRectMake(0, 0, 200., 30.)];
+        field.delegate = self;
+        [field.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
+        [field.reloadItem addTarget:self.browser action:@selector(reload) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:field];
+        _searchField = field;
         
         _searchController = [SGSearchViewController new];
         _searchController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-
         _searchController.delegate = self;
+        
+        [self _layout];
     }
     return self;
 }
 
 - (void)layoutSubviews {
+    [super layoutSubviews];
+    [self _layout];
+}
+
+- (void)_layout {
     const CGFloat margin = 5;
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     
     CGFloat posX = margin;
-    
+    CGFloat topOffset = 0;
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        topOffset = [self.browser.topLayoutGuide length];
+    }
+
     if (!_searchMaskVisible) {
-        _backButton.frame = CGRectMake(posX, (height - _backButton.frame.size.height)/2,
-                                       _backButton.frame.size.width, _backButton.frame.size.height);
+        CGFloat buttonSize = 30;
+        _backButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2, buttonSize, buttonSize);
         
         posX += _backButton.frame.size.width + margin;
-        _forwardButton.frame = CGRectMake(posX, (height - _forwardButton.frame.size.height)/2,
-                                          _forwardButton.frame.size.width, _forwardButton.frame.size.height);
+        _forwardButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2, buttonSize, buttonSize);
         
-        if (_forwardButton.enabled)
-            posX += _forwardButton.frame.size.width + margin;
+        if (_forwardButton.enabled) {
+            posX += buttonSize + margin;
+        }
     }
     
     CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
-    _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height)/2,
+    _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height + topOffset)/2,
                                     searchWidth, _searchField.frame.size.height);
+    
+    _optionsButton.frame = CGRectMake(width - 80, (height - 36 + topOffset)/2, 36, 36);
+    _tabsButton.frame = CGRectMake(width - 40, (height - 36 + topOffset)/2, 36, 36);
+    _cancelButton.frame = CGRectMake(width - 80, (height - 36 + topOffset)/2, 77, 36);
 }
 
 - (void)drawRect:(CGRect)rect {
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGPoint topCenter = CGPointMake(CGRectGetMidX(self.bounds), 0.0f);
-    CGPoint bottomCenter = CGPointMake(CGRectGetMidX(self.bounds), self.bounds.size.height);
-    CGFloat locations[2] = {0.00, 1.0};
-    
-    CGFloat redEnd, greenEnd, blueEnd, alphaEnd;
-    [_bottomColor getRed:&redEnd green:&greenEnd blue:&blueEnd alpha:&alphaEnd];
-    //Two colour components, the start and end colour both set to opaque. Red Green Blue Alpha
-    CGFloat components[8] = { 244./255., 245./255., 247./255., 1.0, redEnd, greenEnd, blueEnd, 1.0};
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    
-    CGGradientRef gradient = CGGradientCreateWithColorComponents(colorspace, components, locations, 2);
-    CGContextDrawLinearGradient(context, gradient, topCenter, bottomCenter, 0);
-    CGGradientRelease(gradient);
-    CGColorSpaceRelease(colorspace);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetLineWidth(ctx, 1.0);
+    CGContextSetStrokeColorWithColor(ctx, UIColorFromHEX(0xA9A9A9).CGColor);
+    CGContextMoveToPoint(ctx, 0, self.bounds.size.height);
+    CGContextAddLineToPoint(ctx, self.bounds.size.width, self.bounds.size.height);
+    CGContextStrokePath(ctx);
 }
 
-- (void)updateChrome {
+- (void)updateInterface {
     if (!([self.searchField isFirstResponder] || _searchMaskVisible))
         self.searchField.text = [self.browser URL].absoluteString;
     
@@ -169,7 +170,7 @@
     if (_forwardButton.enabled != self.browser.canGoForward)
         [UIView animateWithDuration:0.2 animations:^{
             _forwardButton.enabled = self.browser.canGoForward;
-            [self layoutSubviews];
+            [self _layout];
         }];
     
     if (self.browser.canStopOrReload) {
@@ -183,24 +184,30 @@
     }
 }
 
+- (void)setSubviewsAlpha:(CGFloat)alpha {
+    for (UIView *view in self.subviews) {
+        view.alpha = alpha;
+    }
+}
+
 #pragma mark - IBAction
 
-- (IBAction)cancelSearchButton:(id)sender {
-    [self dismissSearchController];
+- (IBAction)_cancelSearchButton:(id)sender {
+    [self _dismissSearchController];
     [self.searchField resignFirstResponder];
 }
 
-- (IBAction)pressedTabsButton:(id)sender {
+- (IBAction)_pressedTabsButton:(id)sender {
     [self.browser setExposeMode:YES animated:YES];
 }
 
-- (IBAction)showOptions:(UIButton *)sender {
+- (IBAction)_showOptions:(UIButton *)sender {
     
     NSArray *titles = @[NSLocalizedString(@"Bookmarks", @"Bookmarks"),
                         NSLocalizedString(@"Share Page", @"Share url of page"),
                         NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                         NSLocalizedString(@"Settings", nil)];
-    PopoverView *pop = [PopoverView showPopoverAtPoint:CGPointMake(CGRectGetMidX(sender.frame), CGRectGetMaxY(sender.frame))
+    PopoverView *pop = [PopoverView showPopoverAtPoint:CGPointMake(CGRectGetMidX(sender.frame), CGRectGetMaxY(sender.frame)-7)
                              inView:sender.superview
                     withStringArray:titles
                            delegate:self];
@@ -215,7 +222,6 @@
         if (!self.bookmarks) {
             BookmarkPage *bookmarksPage = [BookmarkPage new];
             self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
-            self.bookmarks.navigationBar.tintColor = kTabColor;
         }
         [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
     } else if (index == 1 && url) {
@@ -223,9 +229,9 @@
                                                         applicationActivities:nil];
         share.completionHandler = ^(NSString *activity, BOOL completed) {
             if (completed) {
-                [[GAI sharedInstance].defaultTracker sendSocial:activity
-                                                     withAction:@"Share URL"
-                                                     withTarget:nil];
+                [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activity
+                                                                                  action:@"Share URL"
+                                                                                  target:url.absoluteString] build]];
             }
         };
         [share show];
@@ -250,7 +256,7 @@
 #pragma mark - UITextFieldDelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-    [self presentSearchController];
+    [self _presentSearchController];
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
@@ -272,14 +278,14 @@
 
 #pragma mark - SGSearchController
 
-- (void)presentSearchController {
+- (void)_presentSearchController {
     if (!_searchMaskVisible) {
         _searchMaskVisible = YES;
         self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
                                                       self.frame.size.width, self.superview.bounds.size.height - self.frame.size.height);
         [UIView animateWithDuration:0.25
                          animations:^{
-                             [self layoutSubviews];
+                             [self _layout];
                              _cancelButton.alpha = 1.0;
                              _optionsButton.alpha = 0;
                              _tabsButton.alpha = 0;
@@ -292,7 +298,7 @@
     }
 }
 
-- (void)dismissSearchController {
+- (void)_dismissSearchController {
     if (_searchMaskVisible) {
         _searchMaskVisible = NO;
         // If the user finishes editing text in the search bar by, for example:
@@ -300,7 +306,7 @@
         self.searchField.text = [self.browser URL].absoluteString;
         [UIView animateWithDuration:0.25
                          animations:^{
-                             [self layoutSubviews];
+                             [self _layout];
                              _optionsButton.alpha = 1.0;
                              _tabsButton.alpha = 1.0;
                              _cancelButton.alpha = 0;
@@ -313,11 +319,6 @@
     }
 }
 
-- (void)userScrolledSuggestions {
-    if ([self.searchField isFirstResponder])
-        [self.searchField resignFirstResponder];
-}
-
 #pragma mark - SGSearchControllerDelegate
 
 - (NSString *)text {
@@ -328,14 +329,19 @@
     if (searchString.length > 0)// Conduct the search. In this case, simply report the search term used.
         [self.browser handleURLString:searchString title:title];
     
-    [self dismissSearchController];
+    [self _dismissSearchController];
     [self.searchField resignFirstResponder];
 }
 
 - (void)finishPageSearch:(NSString *)searchString {
-    [self dismissSearchController];
+    [self _dismissSearchController];
     [self.searchField resignFirstResponder];
     [self.browser findInPage:searchString];
+}
+
+- (void)userScrolledSuggestions {
+    if ([self.searchField isFirstResponder])
+        [self.searchField resignFirstResponder];
 }
 
 @end

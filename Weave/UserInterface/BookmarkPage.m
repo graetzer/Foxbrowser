@@ -53,10 +53,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = NSLocalizedString(@"Bookmarks", @"Bookmarks");
+    if (self.title == nil) {
+        self.title = NSLocalizedString(@"Bookmarks", @"Bookmarks");
+    }
+    
     self.view.autoresizesSubviews = YES;
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.contentSizeForViewInPopover = CGSizeMake(320., 660.);
+    // self.contentSizeForViewInPopover = CGSizeMake(320., 660.);
 
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
@@ -99,7 +102,7 @@
         
         // Add a history object
         NSString *title = [NSLocalizedString(@"history", @"history") capitalizedStringWithLocale:[NSLocale currentLocale]];
-        [topLevelBookmarks addObject:@[@{@"title":title, @"icon":@"history", @"type":@"history",@"id":@"history"}]];
+        [topLevelBookmarks addObject:@[@{@"title":title, @"icon":@"history", @"type":@"history", @"id":@"history"}]];
         
         [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"toolbar"]];
         [topLevelBookmarks addObject: [[Store getStore] getBookmarksWithParent:@"menu"]];
@@ -184,8 +187,7 @@
 }
 
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath 
-{
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSDictionary* bookmarkItem = nil;
 	if (parentid == nil) {
 		bookmarkItem = topLevelBookmarks[indexPath.section][indexPath.row];
@@ -195,22 +197,16 @@
 
 	if ([bookmarkItem[@"type"] isEqualToString:@"folder"]
         || [bookmarkItem[@"type"] isEqualToString:@"history"]) {
+        
 		BookmarkPage *newPage = [[BookmarkPage alloc] initWithNibName:nil bundle:nil];
-		newPage.navigationItem.title = bookmarkItem[@"title"];
+		newPage.title = bookmarkItem[@"title"];
 		[newPage setParent:bookmarkItem[@"id"]];
-
 		[self.navigationController pushViewController: newPage animated:YES];
 	} else { //bookmark
-//		if ([weaveService canConnectToInternet]) {
-            [appDelegate.browserViewController handleURLString:bookmarkItem[@"url"] title:bookmarkItem[@"title"]];
-            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        [appDelegate.browserViewController handleURLString:bookmarkItem[@"url"] title:bookmarkItem[@"title"]];
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
                 [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
-//		} else {
-//			//no connectivity, put up alert
-//			NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"), 
-//				@"message": NSLocalizedString(@"No internet connection available", "no internet connection")};
-//			[weaveService performSelectorOnMainThread:@selector(reportErrorWithInfo:) withObject:errInfo waitUntilDone:NO];      
-//		}
+        }
 	}
 
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];

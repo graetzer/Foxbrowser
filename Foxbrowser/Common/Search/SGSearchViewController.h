@@ -21,7 +21,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SGTabsToolbar.h"
 
 @protocol SGSearchDelegate <NSObject>
 

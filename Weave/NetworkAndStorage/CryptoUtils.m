@@ -724,9 +724,8 @@ static CryptoUtils* _cryptoManager = nil;
 	NSMutableDictionary* payload = [NSMutableDictionary dictionary];
 	payload[@"id"] = myID;
     NSString *name = [[UIDevice currentDevice] name];
-    if (!name.length)
-        name = @"iPad";
-	payload[@"name"] = name;
+    if (!name.length) name = @"iPhone";
+	//payload[@"name"] = @"iPhone";
 	payload[@"type"] = @"mobile";
 
 	NSDictionary* encryptedPayload = nil;

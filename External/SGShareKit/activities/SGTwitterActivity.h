@@ -20,8 +20,14 @@
 //  limitations under the License.
 
 #import <Twitter/Twitter.h>
-#import "SGActivity.h"
+#import "SGSocialActivity.h"
 
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_6_0
 @interface SGTwitterActivity : SGActivity
 
 @end
+#else 
+@interface SGTwitterActivity : SGSocialActivity
+
+@end
+#endif
