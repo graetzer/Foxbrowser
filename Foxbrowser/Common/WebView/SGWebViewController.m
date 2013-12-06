@@ -54,6 +54,14 @@
                                                           diskCapacity:1024*1024*30
                                                               diskPath:path];
         [NSURLCache setSharedURLCache:cache];
+        
+        AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+        BOOL ok;
+        NSError *setCategoryError = nil;
+        ok = [audioSession setCategory:AVAudioSessionCategoryPlayback error:&setCategoryError];
+        if (!ok) {
+            ELog(setCategoryError);
+        }
     }
 }
 
@@ -84,6 +92,7 @@
     [self.webView addGestureRecognizer:gr];
     self.webView.delegate = self;
     self.webView.scalesPageToFit = YES;
+    self.webView.allowsInlineMediaPlayback = YES;
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         __strong UIActivityIndicatorView *ind = [[UIActivityIndicatorView alloc]
@@ -137,7 +146,7 @@
 - (IBAction)_handleLongPressGesture:(UILongPressGestureRecognizer *)sender {
     if (sender.state == UIGestureRecognizerStateBegan) {
         CGPoint at = [sender locationInView:self.webView];
-        CGPoint pt = at;
+        //CGPoint pt = at;
         
         // convert point from view to HTML coordinate system
         //CGPoint offset  = [self.webView scrollOffset];
@@ -145,8 +154,9 @@
         CGSize windowSize = [self.webView windowSize];
         
         CGFloat f = windowSize.width / viewSize.width;
-        pt.x = pt.x * f ;//+ offset.x;
-        pt.y = pt.y * f ;//+ offset.y;
+        CGPoint pt = CGPointMake(at.x*f, at.y*f);
+//        pt.x = pt.x * f ;//+ offset.x;
+//        pt.y = pt.y * f ;//+ offset.y;
         
         [self _showContextMenuFor:pt atPoint:at];
     }

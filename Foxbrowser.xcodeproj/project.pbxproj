@@ -28,6 +28,7 @@
 		F417482F1706212600CCB139 /* sina_weibo-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F41748251706212600CCB139 /* sina_weibo-icon@2x.png */; };
 		F41748301706212600CCB139 /* twitter-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = F41748261706212600CCB139 /* twitter-icon.png */; };
 		F41748311706212600CCB139 /* twitter-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F41748271706212600CCB139 /* twitter-icon@2x.png */; };
+		F419E75818423E75007EE996 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F419E75718423E75007EE996 /* AVFoundation.framework */; };
 		F41E7FEC16937DB90036AE81 /* monitor.png in Resources */ = {isa = PBXBuildFile; fileRef = F41E7FEA16937DB90036AE81 /* monitor.png */; };
 		F41E7FED16937DB90036AE81 /* monitor@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F41E7FEB16937DB90036AE81 /* monitor@2x.png */; };
 		F4266391181DDCAE0008D672 /* closebox.png in Resources */ = {isa = PBXBuildFile; fileRef = F426638F181DDCAE0008D672 /* closebox.png */; };
@@ -253,6 +254,7 @@
 		F41748251706212600CCB139 /* sina_weibo-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sina_weibo-icon@2x.png"; sourceTree = "<group>"; };
 		F41748261706212600CCB139 /* twitter-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "twitter-icon.png"; sourceTree = "<group>"; };
 		F41748271706212600CCB139 /* twitter-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "twitter-icon@2x.png"; sourceTree = "<group>"; };
+		F419E75718423E75007EE996 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		F41E7FEA16937DB90036AE81 /* monitor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = monitor.png; sourceTree = "<group>"; };
 		F41E7FEB16937DB90036AE81 /* monitor@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "monitor@2x.png"; sourceTree = "<group>"; };
 		F426638F181DDCAE0008D672 /* closebox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = closebox.png; sourceTree = "<group>"; };
@@ -670,6 +672,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F419E75818423E75007EE996 /* AVFoundation.framework in Frameworks */,
 				F467007B15A64CD500EACFBD /* libsqlite3.dylib in Frameworks */,
 				F4BB5B0C16C32B7F00275E31 /* StoreKit.framework in Frameworks */,
 				F48A732716BFFF8B006B25CB /* CoreData.framework in Frameworks */,
@@ -1405,6 +1408,7 @@
 		F4FE2C48159B6C58001B04D7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F419E75718423E75007EE996 /* AVFoundation.framework */,
 				F4BB5B0B16C32B7F00275E31 /* StoreKit.framework */,
 				F48A732616BFFF8B006B25CB /* CoreData.framework */,
 				F46700FD15A651FA00EACFBD /* libicucore.dylib */,
@@ -1482,6 +1486,11 @@
 				CLASSPREFIX = SG;
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Simon Peter Grätzer";
+				TargetAttributes = {
+					F4FE2C44159B6C58001B04D7 = {
+						DevelopmentTeam = AQR4MQXUPM;
+					};
+				};
 			};
 			buildConfigurationList = F4FE2C3F159B6C58001B04D7 /* Build configuration list for PBXProject "Foxbrowser" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1861,8 +1870,8 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Simon Graetzer (5H923A2WFF)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Simon Graetzer (5H923A2WFF)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1874,7 +1883,7 @@
 					"/Users/simon/Dropbox/Development/Cocoa/Foxbrowser/External/ios-openssl/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "40E3F7F1-9C7B-49D3-A7B6-98D738AE677A";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1886,8 +1895,8 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Simon Graetzer (5H923A2WFF)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Simon Graetzer (5H923A2WFF)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1899,7 +1908,7 @@
 					"/Users/simon/Dropbox/Development/Cocoa/Foxbrowser/External/ios-openssl/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "40E3F7F1-9C7B-49D3-A7B6-98D738AE677A";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};

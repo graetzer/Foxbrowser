@@ -23,6 +23,7 @@
 
 #import <UIKit/UIKit.h>
 #import <Security/Security.h>
+#import <AVFoundation/AVFoundation.h>
 
 @class SGTabsViewController;
 
