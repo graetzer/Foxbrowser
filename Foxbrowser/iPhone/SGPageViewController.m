@@ -172,10 +172,6 @@ CGFloat const kSGMinXScale = 0.825;
     return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
 }
 
-- (UIStatusBarStyle)preferredStatusBarStyle {
-    return _exposeMode ? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
-}
-
 #pragma mark - Methods
 
 - (void)addViewController:(UIViewController *)childController {
@@ -503,6 +499,7 @@ CGFloat const kSGMinXScale = 0.825;
         [self.toolbar.searchField resignFirstResponder];
         [self _disableInteractions];
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
             [self setNeedsStatusBarAppearanceUpdate];
         }
         
@@ -523,7 +520,7 @@ CGFloat const kSGMinXScale = 0.825;
         
         [self _setCloseButtonHidden:YES];
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
-            [self setNeedsStatusBarAppearanceUpdate];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
         }
         
         _animating = YES;

@@ -106,34 +106,21 @@
     return self;
 }
 
-//- (void)drawRect:(CGRect)rect {
-//    CGContextRef context = UIGraphicsGetCurrentContext();
-//    CGPoint topCenter = CGPointMake(CGRectGetMidX(self.bounds), 0.0f);
-//    CGPoint bottomCenter = CGPointMake(CGRectGetMidX(self.bounds), self.bounds.size.height);
-//    CGFloat locations[2] = { 0.00, 1.0};
-//    
-//    CGFloat redEnd, greenEnd, blueEnd, alphaEnd;
-//    [_bottomColor getRed:&redEnd green:&greenEnd blue:&blueEnd alpha:&alphaEnd];
-//    //Two colour components, the start and end colour both set to opaque. Red Green Blue Alpha
-//    CGFloat components[8] = { 244./255., 245./255., 247./255., 1.0, redEnd, greenEnd, blueEnd, 1.0};
-//    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-//    
-//    CGGradientRef gradient = CGGradientCreateWithColorComponents(colorspace, components, locations, 2);
-//    CGContextDrawLinearGradient(context, gradient, topCenter, bottomCenter, 0);
-//    CGGradientRelease(gradient);
-//    CGColorSpaceRelease(colorspace);
-//}
+- (void)drawRect:(CGRect)rect {
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetLineWidth(ctx, 1.0);
+    CGContextSetStrokeColorWithColor(ctx, UIColorFromHEX(0xA9A9A9).CGColor);
+    CGContextMoveToPoint(ctx, 0, self.bounds.size.height);
+    CGContextAddLineToPoint(ctx, self.bounds.size.width, self.bounds.size.height);
+    CGContextStrokePath(ctx);
+}
 
 - (void)layoutSubviews {
     [super layoutSubviews];
     CGFloat diff = 5.;
     CGFloat length = 40.;
-    CGFloat topOffset = 0;
-    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
-        topOffset = self.browser.topLayoutGuide.length;
-    }
     
-    CGRect btnR = CGRectMake(diff, (self.bounds.size.height - length + topOffset)/2, length, length);
+    CGRect btnR = CGRectMake(diff, (self.bounds.size.height - length)/2, length, length);
     self.backItem.frame = btnR;
     
     btnR.origin.x += length + diff;
@@ -148,7 +135,7 @@
     CGRect org = self.searchField.frame;
     org.size.width = self.bounds.size.width - (btnR.origin.x + 2*length + 3*diff);
     org.origin.x = self.bounds.size.width - 2*diff - org.size.width;
-    org.origin.y = (self.bounds.size.height - org.size.height + topOffset)/2;
+    org.origin.y = (self.bounds.size.height - org.size.height)/2;
     self.searchField.frame = org;
     
     btnR.origin.x = org.origin.x - diff - length;

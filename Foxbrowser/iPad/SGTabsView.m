@@ -36,7 +36,7 @@
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = [UIColor clearColor];
+        self.backgroundColor = [UIColor blackColor];
         self.opaque = NO;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.autoresizesSubviews = YES;
@@ -61,7 +61,7 @@
     CGFloat width = [self tabWidth:self.tabs.count+1];
     
     // Float the subview in from rigth
-    CGRect frame = CGRectMake(self.bounds.size.width, 0, width, self.bounds.size.height - kTabsBottomMargin);
+    CGRect frame = CGRectMake(self.bounds.size.width, 0, width, self.bounds.size.height);
     SGTabView *newTab = [[SGTabView alloc] initWithFrame:frame];
     newTab.viewController = viewController;
     newTab.closeButton.hidden = YES;
@@ -90,7 +90,7 @@
     for (int i = 0; i < self.tabs.count; i++) {
         SGTabView *tab = (self.tabs)[i];
         // By setting the real position after the view is added, we create a float from rigth transition
-        tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height - kTabsBottomMargin);
+        tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height);
         [tab setNeedsDisplay];
     }
     [self bringSubviewToFront:self.tabs[self.selected]];
@@ -158,7 +158,7 @@
     CGFloat width = [self tabWidth:self.tabs.count];
     for (int i = 0; i < self.tabs.count; i++) {
         SGTabView *tab = (self.tabs)[i];
-        tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height - kTabsBottomMargin);
+        tab.frame = CGRectMake(width*i, 0, width, self.bounds.size.height);
     }
 }
                                     
@@ -209,7 +209,7 @@
                 [self.tabs exchangeObjectAtIndex:panPosition withObjectAtIndex:nextPos];
                 
                 [UIView animateWithDuration:0.5 animations:^{// Move the item on the old position of the panTab
-                    next.frame = CGRectMake(width*panPosition, 0, width, self.bounds.size.height - kTabsBottomMargin);
+                    next.frame = CGRectMake(width*panPosition, 0, width, self.bounds.size.height);
                 }];                
             }
         }

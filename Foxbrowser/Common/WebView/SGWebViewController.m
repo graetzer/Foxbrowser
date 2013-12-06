@@ -305,6 +305,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
         if (![[WeaveOperations sharedOperations] handleURLInternal:request.URL]) {
             return NO;
         } else if (![request.mainDocumentURL isEqual:self.request.mainDocumentURL]) {
+            // Change of webpage
             self.request = request;
         }
     }

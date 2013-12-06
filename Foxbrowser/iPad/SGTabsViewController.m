@@ -68,16 +68,16 @@
     self.headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     self.headerView.backgroundColor = [UIColor clearColor];
     
-    CGRect frame = CGRectMake(0, 0, head.size.width, kSGToolbarHeight);
-    _toolbar = [[SGTabsToolbar alloc] initWithFrame:frame browser:self];
-    
-    frame = CGRectMake(0, kSGToolbarHeight, head.size.width - kAddButtonWidth, kTabsHeigth);
+    CGRect frame = CGRectMake(0, 0, head.size.width - kAddButtonWidth, kTabsHeigth);
     _tabsView = [[SGTabsView alloc] initWithFrame:frame];
     
-    frame = CGRectMake(head.size.width - kAddButtonWidth, kSGToolbarHeight, kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
+    frame = CGRectMake(head.size.width - kAddButtonWidth, 0, kAddButtonWidth, kTabsHeigth);
     _addButton = [[SGAddButton alloc] initWithFrame:frame];
     _addButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     [_addButton.button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
+    
+    frame = CGRectMake(0, kTabsHeigth, head.size.width, kSGToolbarHeight);
+    _toolbar = [[SGTabsToolbar alloc] initWithFrame:frame browser:self];
     
     [self.headerView addSubview:_toolbar];
     [self.headerView addSubview:_tabsView];
@@ -88,6 +88,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = kSGBrowserBackgroundColor;
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
+    
     self.tabsView.tabsController = self;
     [self loadSavedTabs];
 }
@@ -109,11 +111,14 @@
     }
     CGRect b = self.view.bounds;
     _headerView.frame = CGRectMake(0, 0, b.size.width, kSGToolbarHeight + kTabsHeigth + topOffset);
-    _toolbar.frame = CGRectMake(0, 0, b.size.width, kSGToolbarHeight + topOffset);
-    _tabsView.frame = CGRectMake(0, kSGToolbarHeight + topOffset, b.size.width - kAddButtonWidth, kTabsHeigth);
-    _addButton.frame = CGRectMake(b.size.width - kAddButtonWidth, kSGToolbarHeight + topOffset,
-                                  kAddButtonWidth, kTabsHeigth - kTabsBottomMargin);
+    _tabsView.frame = CGRectMake(0, topOffset, b.size.width - kAddButtonWidth, kTabsHeigth);
+    _addButton.frame = CGRectMake(b.size.width - kAddButtonWidth, topOffset, kAddButtonWidth, kTabsHeigth);
+    _toolbar.frame = CGRectMake(0, kTabsHeigth + topOffset, b.size.width, kSGToolbarHeight);
     self.selectedViewController.view.frame = [self _contentFrame];
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
 }
 
 #pragma mark - Tab stuff

@@ -27,11 +27,10 @@
 #define kRemoveTabDuration 0.3
 
 #define kTabsHeigth  35.0
-#define kTabsBottomMargin 1.0
 
 #define kAddButtonWidth 40.
 
-#define kCornerRadius 6.5
+#define kCornerRadius 5
 #define kShadowRadius 5.0
 
 #endif

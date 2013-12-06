@@ -39,15 +39,15 @@
     
     CGMutablePathRef path = CGPathCreateMutable();
     
-    CGPathMoveToPoint(path, NULL, tabLeft, tabTop);
-    // Top left
-    CGPathAddArc(path, NULL, tabLeft, tabTop + kCornerRadius, kCornerRadius, -M_PI_2, 0, NO);
-    CGPathAddLineToPoint(path, NULL, tabLeft + kCornerRadius, tabBottom - kCornerRadius);
-    
+    CGPathMoveToPoint(path, NULL, tabLeft, tabBottom);
     // Bottom left
-    CGPathAddArc(path, NULL, tabLeft + 2*kCornerRadius, tabBottom - kCornerRadius, kCornerRadius, M_PI, M_PI_2, YES);
-    CGPathAddLineToPoint(path, NULL, tabRight, tabBottom);
+    CGPathAddArc(path, NULL, tabLeft, tabBottom - kCornerRadius, kCornerRadius, M_PI_2, 0, YES);
+    CGPathAddLineToPoint(path, NULL, tabLeft + kCornerRadius, tabTop + kCornerRadius);
+    
+    // Top left
+    CGPathAddArc(path, NULL, tabLeft + 2*kCornerRadius, tabTop + kCornerRadius, kCornerRadius, M_PI, -M_PI_2, NO);
     CGPathAddLineToPoint(path, NULL, tabRight, tabTop);
+    CGPathAddLineToPoint(path, NULL, tabRight, tabBottom);
     CGPathCloseSubpath(path);
     
     CGContextRef ctx = UIGraphicsGetCurrentContext();
