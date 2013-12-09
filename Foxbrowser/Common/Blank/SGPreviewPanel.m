@@ -151,6 +151,8 @@
 }
 
 - (void)addTileWithItem:(NSDictionary *)item {
+    if (item == nil) return;
+    
     SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item];
     if (tile == nil) return;
     tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);

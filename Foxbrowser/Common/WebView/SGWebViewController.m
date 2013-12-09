@@ -48,12 +48,12 @@
                                               sharedHTTPCookieStorage];
         [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
         
-        NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-        path = [path stringByAppendingPathComponent:@"WebCache"];
-        NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024*1024*5
-                                                          diskCapacity:1024*1024*30
-                                                              diskPath:path];
-        [NSURLCache setSharedURLCache:cache];
+//        NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
+//        path = [path stringByAppendingPathComponent:@"WebCache"];
+//        NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024*1024*5
+//                                                          diskCapacity:1024*1024*30
+//                                                              diskPath:path];
+//        [NSURLCache setSharedURLCache:cache];
         
         AVAudioSession *audioSession = [AVAudioSession sharedInstance];
         BOOL ok;
@@ -389,7 +389,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 - (void)openRequest:(NSURLRequest *)request {
-    if (request) self.request = request;
+    if (request != nil) self.request = request;
     if (![self isViewLoaded]) return;
     
     // In case the webView is not empty, show the error on the site
@@ -407,6 +407,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
             [self.webView loadRequest:self.request];
         }
     }
+}
+
+- (void)reload {
+    [self openRequest:nil];
 }
 
 #pragma mark - Search on page

@@ -23,7 +23,6 @@
 #import "SGBrowserViewController.h"
 #import "SGBlankController.h"
 #import "SGWebViewController.h"
-#import "SGCredentialsPrompt.h"
 #import "SGAppDelegate.h"
 #import "GAI.h"
 
@@ -175,7 +174,7 @@
 - (void)reload; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        [webC.webView reload];
+        [webC reload];
         [self updateInterface];
     }
 }
@@ -394,7 +393,18 @@
     // The protocol states you shall execute the response on the same thread.
     // So show the prompt on the main thread and wait until the result is finished
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.credentialsPrompt = [[SGCredentialsPrompt alloc] initWithChallenge:challenge delegate:self];
+        self.credentialsPrompt = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Authorizing", @"Authorizing")
+                                                            message:NSLocalizedString(@"Please enter your credentials", @"HTTP Basic auth")
+                                                           delegate:self
+                                                  cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
+                                                  otherButtonTitles:NSLocalizedString(@"OK", @"ok"), nil];
+        self.credentialsPrompt.alertViewStyle = UIAlertViewStyleLoginAndPasswordInput;
+        if (challenge.proposedCredential != nil) {
+            [self.credentialsPrompt textFieldAtIndex:0].text = challenge.proposedCredential.user;
+            if (challenge.previousFailureCount == 0) {
+                [self.credentialsPrompt textFieldAtIndex:1].text = challenge.proposedCredential.password;
+            }
+        }
         [self.credentialsPrompt show];
     });
     
@@ -403,13 +413,15 @@
     while ((_dialogResult==-1) && ([[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode beforeDate:LoopUntil]))
         LoopUntil = [NSDate dateWithTimeIntervalSinceNow:0.5];
     
-    SGCredentialsPrompt *creds = self.credentialsPrompt;
+    NSString *user = [self.credentialsPrompt textFieldAtIndex:0].text;
+    NSString *password = [self.credentialsPrompt textFieldAtIndex:1].text;
+    
     if (_dialogResult == 1) {
-        NSURLCredential *credential = [NSURLCredential credentialWithUser:creds.usernameField.text
-                                                                 password:creds.passwordField.text
-                                                              persistence:creds.persistence];
+        NSURLCredential *credential = [NSURLCredential credentialWithUser:user
+                                                                 password:password
+                                                              persistence:NSURLCredentialPersistenceForSession];
         [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
-                                                            forProtectionSpace:creds.challenge.protectionSpace];
+                                                            forProtectionSpace:challenge.protectionSpace];
         [protocol resolveAuthenticationChallenge:challenge withCredential:credential];
     } else {
         DLog(@"Cancel authenctication");

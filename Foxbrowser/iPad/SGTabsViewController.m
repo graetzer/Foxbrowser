@@ -66,7 +66,7 @@
     CGRect head = CGRectMake(0, 0, bounds.size.width, kSGToolbarHeight + kTabsHeigth);
     self.headerView = [[UIView alloc] initWithFrame:head];
     self.headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    self.headerView.backgroundColor = [UIColor clearColor];
+    self.headerView.backgroundColor = [UIColor blackColor];
     
     CGRect frame = CGRectMake(0, 0, head.size.width - kAddButtonWidth, kTabsHeigth);
     _tabsView = [[SGTabsView alloc] initWithFrame:frame];
@@ -87,7 +87,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = kSGBrowserBackgroundColor;
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
     
     self.tabsView.tabsController = self;

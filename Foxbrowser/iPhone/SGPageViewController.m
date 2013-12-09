@@ -26,8 +26,9 @@
 #import "SGSearchField.h"
 #import "SGWebViewController.h"
 
-CGFloat const kSGMinYScale = 0.825;
-CGFloat const kSGMinXScale = 0.825;
+CGFloat const kSGMinYScale = 0.85;
+CGFloat const kSGMinXScale = 0.85;
+#define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(0.7, 0.7))
 
 #define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
 #define SG_DURATION 0.25
@@ -49,12 +50,17 @@ CGFloat const kSGMinXScale = 0.825;
     _containerViews = [NSMutableArray arrayWithCapacity:10];
     _viewControllers = [NSMutableArray arrayWithCapacity:10];
     self.view.backgroundColor = kSGBrowserBackgroundColor;
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
     
     CGRect b = self.view.bounds;
     
     _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self
                                                           action:@selector(_moveWebView:)];
     _panGesture.delegate = self;
+    
+    __strong SGPageToolbar *toolbar = [[SGPageToolbar alloc] initWithFrame:CGRectMake(0, 0, b.size.width, kSGToolbarHeight) browser:self];
+    toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    _toolbar = toolbar;
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
@@ -71,9 +77,10 @@ CGFloat const kSGMinXScale = 0.825;
     _addTabButton = button;
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(self.view.bounds.size.width - 80, 4, 36, 36);
     button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     button.backgroundColor = [UIColor clearColor];
-    //button.enabled = NO;
+    button.enabled = NO;
     [button setImage:[UIImage imageNamed:@"grip-white"] forState:UIControlStateNormal];
     [button setImage:[UIImage imageNamed:@"grip-white-pressed"] forState:UIControlStateHighlighted];
     [button addTarget:self.toolbar action:@selector(_showOptions:) forControlEvents:UIControlEventTouchUpInside];
@@ -81,7 +88,6 @@ CGFloat const kSGMinXScale = 0.825;
     _optionsButton = button;
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(self.view.bounds.size.width - 40, 4, 36, 36);
     button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     button.enabled = NO;
     button.backgroundColor = [UIColor clearColor];
@@ -134,10 +140,8 @@ CGFloat const kSGMinXScale = 0.825;
     _pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [_pageControl addTarget:self action:@selector(_updatePage) forControlEvents:UIControlEventValueChanged];
     
-    __strong SGPageToolbar *toolbar = [[SGPageToolbar alloc] initWithFrame:CGRectMake(0, 0, b.size.width, kSGToolbarHeight) browser:self];
-    toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    
     [self.view addSubview:toolbar];
-    _toolbar = toolbar;
     
     [self loadSavedTabs];
 }
@@ -212,7 +216,8 @@ CGFloat const kSGMinXScale = 0.825;
         if (!_exposeMode) {
             [self _enableInteractions];
         } else {
-            viewController.view.userInteractionEnabled = NO;
+            UIView *container = _containerViews[index];
+            container.userInteractionEnabled = NO;
         }
     }
 }
@@ -375,7 +380,7 @@ CGFloat const kSGMinXScale = 0.825;
                                                    self.scrollView.frame.size.width,
                                                    self.scrollView.frame.size.height-y);
             if (_exposeMode) {
-                container.transform = CGAffineTransformMakeScale(kSGMinXScale, kSGMinYScale);
+                container.transform = SG_EXPOSED_TRANSFORM;
             }
             if (!container.superview) {
                 [self.scrollView addSubview:container];
@@ -404,7 +409,7 @@ CGFloat const kSGMinXScale = 0.825;
     for (NSUInteger i = 0; i < _containerViews.count; i++) {
         UIView *view = _containerViews[i];
         if (_exposeMode) {
-            view.transform = CGAffineTransformMakeScale(kSGMinXScale, kSGMinYScale);;
+            view.transform = SG_EXPOSED_TRANSFORM;
         } else {
             
             CGFloat y = i * width;// Position of view
@@ -512,6 +517,7 @@ CGFloat const kSGMinXScale = 0.825;
                              _animating = NO;
                              UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                                    action:@selector(_tappedViewController:)];
+                             rec.cancelsTouchesInView = NO;
                              [self.view addGestureRecognizer:rec];
                              [self _setCloseButtonHidden:NO];
                          }];

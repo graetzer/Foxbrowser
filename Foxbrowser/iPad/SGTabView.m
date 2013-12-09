@@ -80,8 +80,12 @@
                         options:NSKeyValueObservingOptionNew
                         context:NULL];
     self.titleLabel.text = _viewController.title;
-    _tSize = [self.titleLabel.text sizeWithAttributes:@{NSFontAttributeName:self.titleLabel.font}];
-    //_tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        _tSize = [self.titleLabel.text sizeWithAttributes:@{NSFontAttributeName:self.titleLabel.font}];
+    } else {
+        _tSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font];
+    }
+    
     [self setNeedsLayout];
 }
 

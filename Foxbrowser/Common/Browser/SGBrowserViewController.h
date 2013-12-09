@@ -24,8 +24,6 @@
 #import "CustomHTTPProtocol.h"
 
 
-@class SGCredentialsPrompt;
-
 // Container for SGWebViewController & SGBlankViewController
 @interface SGBrowserViewController : UIViewController <CustomHTTPProtocolDelegate, UIAlertViewDelegate>
 
@@ -56,7 +54,7 @@
 
 // ========== Implemented =================
 
-@property (strong, atomic) SGCredentialsPrompt *credentialsPrompt;
+@property (strong, atomic) UIAlertView *credentialsPrompt;
 
 // Add and show a SGBlankViewController
 - (void)addTab;

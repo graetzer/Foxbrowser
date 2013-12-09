@@ -154,13 +154,13 @@ static NSString * kOurRequestProperty = @"com.apple.dts.CustomHTTPProtocol";
         [self customHTTPProtocol:nil logWithFormat:@"decline request %@ (recursive)", request];
     } else {
         scheme = [[url scheme] lowercaseString];
-        assert(scheme != nil);
+        if (scheme == nil) return NO;
         
         result = [scheme isEqual:@"https"];
 
         // Flip the following to YES to have all requests go through the custom protocol.
         
-        if ( ! result && YES ) {
+        if ( !result && YES ) {
             result = [scheme isEqual:@"http"];
         }
 

@@ -84,14 +84,14 @@ NSString *kWeavePrivateMode = @"privateMode";
     // When an application implements this UIWebView delegate method, it loses automatic handling of
     // 'special' urls. Like mailto: or app store links. We try to compensate for that here.
     if (IsNativeAppURLWithoutChoice(url)) {
-        [[UIApplication sharedApplication] openURL:url];
+        [self _openURLExternal:url];
         return NO;
     }
     
     // If the link is to a native app and we have turned that on, let the OS open the link
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     if ([defaults boolForKey: kWeaveUseNativeApps] && IsNativeAppURL(url)) {
-        [[UIApplication sharedApplication] openURL:url];
+        [self _openURLExternal:url];
         return NO;
     }
     
@@ -119,6 +119,27 @@ NSString *kWeavePrivateMode = @"privateMode";
                      @"icon": @"history.png"};
     }
     [[Store getStore] addTempHistoryObject:item];
+}
+
+#pragma mark - Utility
+
+static NSURL *_urlPass;
+- (void)_openURLExternal:(NSURL *)url {
+    _urlPass = url;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[[UIAlertView alloc] initWithTitle:[NSLocalizedString(@"Open", @"Open a link") stringByAppendingString:@"?"]
+                                    message:url.absoluteString
+                                   delegate:self
+                          cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
+                          otherButtonTitles:NSLocalizedString(@"OK", @"ok"), nil] show];
+    });
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 1) {
+        [[UIApplication sharedApplication] openURL:_urlPass];
+        _urlPass = nil;
+    }
 }
 
 @end
@@ -184,16 +205,6 @@ BOOL IsNativeAppURL(NSURL* url)
         }
 	}
 	return NO;
-}
-
-/**
- * Returns TRUE is the url is one that should be opened in Safari. These are HTTP URLs that we do not
- * recogize as URLs to native applications.
- */
-
-BOOL IsSafariURL(NSURL* url)
-{
-	return (url != nil) && IsNativeAppURL(url) == NO && ([url.scheme isEqualToString: @"http"] || [url.scheme isEqualToString: @"https"]);
 }
 
 /**

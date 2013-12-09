@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @protocol WeaveService <NSObject>
 
@@ -29,22 +30,21 @@
 - (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait;
 @end
 
-extern NSString *kWeaveDataRefreshNotification;
-extern NSString *kWeaveBackgroundedAtTime;
-extern NSString *kWeaveSyncStatusChangedNotification;
-extern NSString *kWeaveMessageKey;
-extern NSString *kWeaveShowedFirstRunPage;
-extern NSString *kWeaveUseNativeApps;
-extern NSString *kWeavePrivateMode;
+FOUNDATION_EXTERN NSString *kWeaveDataRefreshNotification;
+FOUNDATION_EXTERN NSString *kWeaveBackgroundedAtTime;
+FOUNDATION_EXTERN NSString *kWeaveSyncStatusChangedNotification;
+FOUNDATION_EXTERN NSString *kWeaveMessageKey;
+FOUNDATION_EXTERN NSString *kWeaveShowedFirstRunPage;
+FOUNDATION_EXTERN NSString *kWeaveUseNativeApps;
+FOUNDATION_EXTERN NSString *kWeavePrivateMode;
 
 BOOL IsNativeAppURLWithoutChoice(NSURL* link);
 BOOL IsNativeAppURL(NSURL* url);
-BOOL IsSafariURL(NSURL* url);
 BOOL IsBlockedURL(NSURL* url);
 
 extern id<WeaveService> weaveService;
 
-@interface WeaveOperations : NSObject
+@interface WeaveOperations : NSObject <UIAlertViewDelegate>
 
 - (NSURL *)parseURLString:(NSString *)input;
 - (NSString *)urlEncode:(NSString *)string;

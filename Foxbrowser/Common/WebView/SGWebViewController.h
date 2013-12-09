@@ -41,5 +41,6 @@ UIActionSheetDelegate, UIAlertViewDelegate>
 /// If parameter request is nil, the last loaded request will be reloaded
 - (void)openRequest:(NSURLRequest *)request;
 - (NSInteger)search:(NSString *)searchString;
+- (void)reload;
 
 @end

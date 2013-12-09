@@ -35,8 +35,8 @@
         self.autocorrectionType = UITextAutocorrectionTypeNo;
         self.borderStyle = UITextBorderStyleRoundedRect;
         self.clearButtonMode = UITextFieldViewModeWhileEditing;
-        self.backgroundColor = UIColorFromHEX(0xDEDEDE);
         self.textColor = [UIColor darkTextColor];
+        self.backgroundColor = UIColorFromHEX(0xDEDEDE);
         
         self.leftView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"magnify"]];
         self.leftViewMode = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ?
@@ -57,7 +57,6 @@
         [self.stopItem setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
         
         self.state = SGSearchFieldStateDisabled;
-         //*/
         
         self.inputAccessoryView = [self _generateInputAccessoryView];
     }

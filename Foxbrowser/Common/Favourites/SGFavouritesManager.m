@@ -186,8 +186,10 @@
         NSString *urlS = item[@"url"];
         NSURL *url = [NSURL URLWithUnicodeString:urlS];
         
-        if (!url || [self _containsHost:url.host] || [_blocked containsObject:url.absoluteString])
+        if (!url || [self _containsHost:url.host] || [_blocked containsObject:url.absoluteString]) {
+            item = nil;
             continue;
+        }
         
         // We just need url and title.
         [_favourites addObject:@{@"url":item[@"url"], @"title":item[@"title"]}];

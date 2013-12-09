@@ -177,7 +177,6 @@
 		F4C3906C161093D500349AA4 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F4C3906B161093D500349AA4 /* Settings.bundle */; };
 		F4CE241915B616340025EC07 /* BookmarkPage.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFD915A6446B00EACFBD /* BookmarkPage.m */; };
 		F4D03D5316C6A9BA00A67B9F /* SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */; };
-		F4D03D5416C6A9BA00A67B9F /* SGCredentialsPrompt.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4916C6A9BA00A67B9F /* SGCredentialsPrompt.m */; };
 		F4D03D5516C6A9BA00A67B9F /* SGNavViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */; };
 		F4D03D5616C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */; };
 		F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */; };
@@ -220,7 +219,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F401260317F19F5000BEABE0 /* SGCommons.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGCommons.h; sourceTree = "<group>"; };
 		F407FAB517E622D6008179F4 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F407FAB817E6231E008179F4 /* GAI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAI.h; sourceTree = "<group>"; };
 		F407FAB917E6231E008179F4 /* GAIDictionaryBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAIDictionaryBuilder.h; sourceTree = "<group>"; };
@@ -604,8 +602,6 @@
 		F4C3906B161093D500349AA4 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		F4D03D4616C6A9BA00A67B9F /* SGBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGBrowserViewController.h; sourceTree = "<group>"; };
 		F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
-		F4D03D4816C6A9BA00A67B9F /* SGCredentialsPrompt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGCredentialsPrompt.h; sourceTree = "<group>"; };
-		F4D03D4916C6A9BA00A67B9F /* SGCredentialsPrompt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGCredentialsPrompt.m; sourceTree = "<group>"; };
 		F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
 		F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
 		F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SGBrowserViewController.h"; sourceTree = "<group>"; };
@@ -1322,11 +1318,8 @@
 				F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */,
 				F4D03D4616C6A9BA00A67B9F /* SGBrowserViewController.h */,
 				F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */,
-				F4D03D4816C6A9BA00A67B9F /* SGCredentialsPrompt.h */,
-				F4D03D4916C6A9BA00A67B9F /* SGCredentialsPrompt.m */,
 				F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */,
 				F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */,
-				F401260317F19F5000BEABE0 /* SGCommons.h */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -1705,7 +1698,6 @@
 				F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */,
 				F4BB5B1116C32C8300275E31 /* Appirater.m in Sources */,
 				F4D03D5316C6A9BA00A67B9F /* SGBrowserViewController.m in Sources */,
-				F4D03D5416C6A9BA00A67B9F /* SGCredentialsPrompt.m in Sources */,
 				F4D03D5516C6A9BA00A67B9F /* SGNavViewController.m in Sources */,
 				F4D03D5616C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m in Sources */,
 				F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */,
@@ -1883,7 +1875,7 @@
 					"/Users/simon/Dropbox/Development/Cocoa/Foxbrowser/External/ios-openssl/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "B3D7B115-25B9-4276-9573-2EE24B5BE82D";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1896,7 +1888,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Simon Graetzer (AQR4MQXUPM)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Foxbrowser/Foxbrowser-Prefix.pch";
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/External/ios-openssl/include/**";
@@ -1908,7 +1900,7 @@
 					"/Users/simon/Dropbox/Development/Cocoa/Foxbrowser/External/ios-openssl/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "B3D7B115-25B9-4276-9573-2EE24B5BE82D";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
