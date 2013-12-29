@@ -63,28 +63,29 @@
     return self;
 }
 
-//- (void)drawTextInRect:(CGRect)rect {
-//    if (self.editing) {
-//        [super drawTextInRect:rect];
-//    } else {
-//        NSString *text = [self.text stringByReplacingOccurrencesOfString:@"http://" withString:@""];
-//        text = [text stringByReplacingOccurrencesOfString:@"https://" withString:@""];
-//        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
-//            
-//            CGRect nRect = CGRectMake(rect.origin.x, (rect.size.height- self.font.pointSize)/2, rect.size.width, self.font.pointSize);
-//            NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
-//            para.alignment = self.textAlignment;
-//            [text drawInRect:nRect withAttributes:@{NSFontAttributeName:self.font,
-//                                                   NSForegroundColorAttributeName:self.textColor,
-//                                                   NSParagraphStyleAttributeName:para}];
-//        } else {
-//            [self.textColor setFill];
-//            [text drawInRect:rect withFont:self.font
-//               lineBreakMode:NSLineBreakByTruncatingTail
-//                   alignment:self.textAlignment];
-//        }
-//    }
-//}
+- (void)drawTextInRect:(CGRect)rect {
+    if (self.editing) {
+        [super drawTextInRect:rect];
+    } else {
+        NSString *text = [self.text stringByReplacingOccurrencesOfString:@"http://" withString:@""];
+        text = [text stringByReplacingOccurrencesOfString:@"https://" withString:@""];
+        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+            
+            rect.origin.y = [self editingRectForBounds:self.bounds].origin.y;
+            //CGRect nRect = CGRectMake(rect.origin.x, (rect.size.height- self.font.pointSize)/2, rect.size.width, self.font.pointSize);
+            NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
+            para.alignment = self.textAlignment;
+            [text drawInRect:rect withAttributes:@{NSFontAttributeName:self.font,
+                                                   NSForegroundColorAttributeName:self.textColor,
+                                                   NSParagraphStyleAttributeName:para}];
+        } else {
+            [self.textColor setFill];
+            [text drawInRect:rect withFont:self.font
+               lineBreakMode:NSLineBreakByTruncatingTail
+                   alignment:self.textAlignment];
+        }
+    }
+}
 
 - (CGRect)rightViewRectForBounds:(CGRect)bounds {
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {

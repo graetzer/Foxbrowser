@@ -45,6 +45,10 @@ CGFloat const kSGMinXScale = 0.85;
     CGPoint _panTranslation;
 }
 
+- (UIViewController *)_viewControllerForFullScreenPresentationFromView:(UIView *)view {
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     _containerViews = [NSMutableArray arrayWithCapacity:10];
@@ -125,7 +129,7 @@ CGFloat const kSGMinXScale = 0.85;
     _scrollView = scroller;
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(0, 0, 30, 30);
+    button.frame = CGRectMake(0, 0, 36, 36);
     button.hidden = YES;
     button.autoresizingMask = (UIViewAutoresizing)0b101101;
     button.backgroundColor  = [UIColor clearColor];
@@ -616,8 +620,8 @@ CGFloat const kSGMinXScale = 0.85;
         
         //check for the vertical gesture
         return fabsf(trans.y) > fabsf(trans.x)
-        && next.origin.y > -kSGToolbarHeight
-        && next.origin.y < 0;
+        && next.origin.y >= -kSGToolbarHeight
+        && next.origin.y <= 0;
     }
     return YES;
 }
@@ -704,7 +708,8 @@ CGFloat const kSGMinXScale = 0.85;
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         UIView *view = [self selectedViewController].view;
         CGPoint pos = [recognizer locationInView:view];
-        if (CGRectContainsPoint(view.bounds, pos)) {
+        CGRect rect = CGRectInset(view.bounds, 20, 20);
+        if (CGRectContainsPoint(rect, pos)) {
             [self setExposeMode:NO animated:YES];
             [self.view removeGestureRecognizer:recognizer];
         }
