@@ -22,7 +22,7 @@
 
 #import "SGPreviewPanel.h"
 #import "SGFavouritesManager.h"
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 
 @implementation SGPreviewTile
 

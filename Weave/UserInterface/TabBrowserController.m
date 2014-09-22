@@ -37,7 +37,7 @@
 
 #import "TabBrowserController.h"
 
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 #import "WeaveService.h"
 #import "SGAppDelegate.h"
 #import "SGBrowserViewController.h"

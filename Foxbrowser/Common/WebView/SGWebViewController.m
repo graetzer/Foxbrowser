@@ -27,7 +27,7 @@
 #import "SGTabsViewController.h"
 #import "SGAppDelegate.h"
 #import "WeaveService.h"
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 #import "SGFavouritesManager.h"
 #import "SGTabDefines.h"
 
@@ -43,18 +43,37 @@
 // TODO Allow to change this preferences in the Settings App
 + (void)load {
     // Enable cookies
-    @autoreleasepool { // TODO private mode
+    @autoreleasepool {
+        NSDictionary *useragents = @{@7 : @{@"iPhone" :
+                                                @"Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) "
+                                            "AppleWebKit/546.10 (KHTML, like Gecko) Version/6.0 Mobile/7E18WD Safari/8536.25",
+                                            @"iPad":@"Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X) AppleWebKit/537.51.1 "
+                                            "(KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53"},
+                                     @8 : @{@"iPhone" :
+                                                @"Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) "
+                                            "AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4",
+                                            @"iPad":@"Mozilla/5.0 (iPad; CPU iPad OS 8_0 like Mac OS X) "
+                                            "AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4"}};
+        NSNumber *version = @7;
+        NSInteger val = [[[UIDevice currentDevice] systemVersion] integerValue];
+        if (val > 7) {
+            version = @8;
+        }
+        NSString *device = @"iPhone";
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+            device = @"iPad";
+        }
+        NSDictionary *dictionary = @{@"UserAgent":useragents[version][device]};
+        [[NSUserDefaults standardUserDefaults] registerDefaults:dictionary];
+        
+        
+        // TODO private mode
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage
                                               sharedHTTPCookieStorage];
         [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
         
-//        NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-//        path = [path stringByAppendingPathComponent:@"WebCache"];
-//        NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024*1024*5
-//                                                          diskCapacity:1024*1024*30
-//                                                              diskPath:path];
-//        [NSURLCache setSharedURLCache:cache];
         
+        // Setting Audio so it plays while silent mode is on
         AVAudioSession *audioSession = [AVAudioSession sharedInstance];
         BOOL ok;
         NSError *setCategoryError = nil;
@@ -292,12 +311,16 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 -  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request
   navigationType:(UIWebViewNavigationType)navigationType {
     
-    if ([request.URL.scheme isEqualToString:@"newtab"]) {
+    NSString *scheme = request.URL.scheme;
+    if ([scheme isEqualToString:@"newtab"]) {
         NSString *urlString = [request.URL.resourceSpecifier stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
         NSMutableURLRequest *mutableReq = [request mutableCopy];
         mutableReq.URL = [NSURL URLWithString:urlString relativeToURL:self.request.URL];
         [self.browserViewController addTabWithURLRequest:mutableReq title:nil];
+        return NO;
+    } else if ([scheme isEqualToString:@"closetab"]) {
+        [self.browserViewController removeViewController:self];
         return NO;
     }
     
@@ -350,7 +373,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
         [self.indicator stopAnimating];
     }
     
-    DLog(@"WebView error code: %d", error.code);
+    DLog(@"WebView error code: %ld", (long)error.code);
     //ignore these
     if ([error.domain isEqual:NSURLErrorDomain]
         && error.code == NSURLErrorCancelled) return;
@@ -419,7 +442,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (self.searchToolbar) [self.searchToolbar removeFromSuperview];
     
     NSInteger count = [self.webView highlightOccurencesOfString:searchString];
-    DLog(@"Found the string %@ %i times", searchString, count);
+    DLog(@"Found the string %@ %d times", searchString, count);
     
     __strong UIToolbar *searchToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 44,
                                                                                     self.view.bounds.size.width, 44)];
@@ -459,7 +482,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     label.font = [UIFont boldSystemFontOfSize:18];
     label.textColor = [UIColor darkGrayColor];
     label.textAlignment = NSTextAlignmentCenter;
-    label.text = [NSString stringWithFormat:@"Found: %i", count];
+    label.text = [NSString stringWithFormat:@"Found: %li", (long)count];
     UIBarButtonItem *textItem = [[UIBarButtonItem alloc] initWithCustomView:label];
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {

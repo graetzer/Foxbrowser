@@ -129,20 +129,7 @@
     if (self.count >= self.maxCount)
         return;
     
-    UIViewController *viewC;
-    
-    NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpageURLKey];
-    NSURL *url = [NSURL URLWithString:startpage];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpageKey] && url) {
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-        SGWebViewController *webC = [SGWebViewController new];
-        webC.title = request.URL.absoluteString;
-        [webC openRequest:request];
-        viewC = webC;
-    } else {
-        viewC = [SGBlankController new];
-    }
-    
+    UIViewController *viewC = [self createNewTabViewController];
     [self addViewController:viewC];
     [self showViewController:viewC];
     [self updateInterface];

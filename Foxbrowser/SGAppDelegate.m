@@ -36,8 +36,9 @@
 
 #import "SGActivityView.h"
 
-
 #import "Appirater.h"
+
+#import "FXSyncEngine.h"
 
 SGAppDelegate *appDelegate;
 id<WeaveService> weaveService;
@@ -73,57 +74,62 @@ NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
     
     [self evaluateDefaultSettings];
     // Weave stuff. 0.5 delay as a workaround so that modal views work
-    [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
+//    [self performSelector:@selector(setupWeave) withObject:nil afterDelay:0.5];
     
     //-------------- Marketing stuff -------------------------
+//    
+//    [GAI sharedInstance].trackUncaughtExceptions = YES;
+//    [GAI sharedInstance].dispatchInterval = 60*5;
+//    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
+//    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
+////#ifdef DEBUG
+////    [GAI sharedInstance].debug =  YES;
+////#endif
+//    
+//    [Appirater setAppId:@"550365886"];
+//    [Appirater setDelegate:self];
+//    [Appirater setDaysUntilPrompt:1];
+//    [Appirater setUsesUntilPrompt:3];
+//    [Appirater setTimeBeforeReminding:2];
+//    
+//    [Appirater appLaunched:YES];
+//
     
-    [GAI sharedInstance].trackUncaughtExceptions = YES;
-    [GAI sharedInstance].dispatchInterval = 60*5;
-    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
-    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
-//#ifdef DEBUG
-//    [GAI sharedInstance].debug =  YES;
-//#endif
+    [[FXSyncEngine sharedInstance] startSync];
     
-    [Appirater setAppId:@"550365886"];
-    [Appirater setDelegate:self];
-    [Appirater setDaysUntilPrompt:1];
-    [Appirater setUsesUntilPrompt:5];
-    [Appirater setTimeBeforeReminding:2];
-    
-    [Appirater appLaunched:YES];
     return YES;
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	if ([defaults boolForKey: @"needsFullReset"]) {
-		[self eraseAllUserData];
-		return;
-	}
-    //check to see if we were suspended for 5 minutes or more, and refresh if true
-    double slept = [defaults doubleForKey:kWeaveBackgroundedAtTime];
-    double now = [[NSDate date] timeIntervalSince1970];
-    if ((now - slept) >= 60 * 5) {
-        [Stockboy restock];
-    }
-    
-    // Analytics Opt out
-    [GAI sharedInstance].optOut = [defaults boolForKey:@"org.graetzer.analytics"];
-    [Appirater appEnteredForeground:YES];
-}
+//- (void)applicationWillEnterForeground:(UIApplication *)application {
+//    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+//	if ([defaults boolForKey: @"needsFullReset"]) {
+//		[self eraseAllUserData];
+//		return;
+//	}
+//    //check to see if we were suspended for 5 minutes or more, and refresh if true
+//    double slept = [defaults doubleForKey:kWeaveBackgroundedAtTime];
+//    double now = [[NSDate date] timeIntervalSince1970];
+//    if ((now - slept) >= 60 * 5) {
+//        [Stockboy restock];
+//    }
+//    
+//    // Analytics Opt out
+//    [GAI sharedInstance].optOut = [defaults boolForKey:@"org.graetzer.analytics"];
+//    [Appirater appEnteredForeground:YES];
+//}
 
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    [Stockboy cancel];
+//    [Stockboy cancel];
     [self.browserViewController saveCurrentTabs];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     //stop timers, threads, spinner animations, etc.
     // note the time we were suspended, so we can decide whether to do a refresh when we are resumed
-    [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970] forKey:kWeaveBackgroundedAtTime];
-    [Stockboy cancel];
+    [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970]
+                                              forKey:kWeaveBackgroundedAtTime];
+//    [Stockboy cancel];
     [self stopProgressSpinners];
     [self.browserViewController saveCurrentTabs];
     [[GAI sharedInstance] dispatch];
@@ -135,7 +141,7 @@ NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         if (identifier != UIBackgroundTaskInvalid) {
-            [[Store getStore] saveChanges];
+//            [[Store getStore] saveChanges];
             [[UIApplication sharedApplication] endBackgroundTask:identifier];
         }
     });
@@ -206,7 +212,7 @@ NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
         [self login];
     } else {
         //show the main page, and start up the Stockboy to get fresh data
-        [Stockboy restock];
+//        [Stockboy restock];
     }
 }
 

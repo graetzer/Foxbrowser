@@ -1371,7 +1371,7 @@ static CryptoUtils* _cryptoManager = nil;
 	//Step 1: turn the dictionary of properties into JSON, then into a utf8 string, then bytes
 	NSString* plaintext = [dataObject JSONRepresentation];
 	const char* utf8String = [plaintext UTF8String];
-	int len = strlen(utf8String);
+	size_t len = strlen(utf8String);
 	NSData* plaintextBytes = [NSData dataWithBytes:utf8String length:len];
 	//Step 3: get the appropriate symmetric key to encrypt this data type with.
 	// this is up to the caller to get correct, by passing in the proper Url

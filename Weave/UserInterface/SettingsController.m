@@ -101,8 +101,8 @@
 	}
 
 	numTabs.text = [NSString stringWithFormat: @"%d", totalTabs];
-	numBmks.text = [NSString stringWithFormat: @"%d", [[[Store getStore] getBookmarks] count]];
-	numHist.text = [NSString stringWithFormat: @"%d", [[[Store getStore] getHistory] count]];
+	numBmks.text = [NSString stringWithFormat: @"%lu", (unsigned long)[[[Store getStore] getBookmarks] count]];
+	numHist.text = [NSString stringWithFormat: @"%lu", (unsigned long)[[[Store getStore] getHistory] count]];
 }
 
 - (void)syncStatusChanged:(NSNotification *)note {

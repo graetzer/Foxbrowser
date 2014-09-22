@@ -45,57 +45,62 @@
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.backgroundColor = kSGBrowserBarColor;
         
-        _backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _backButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        _backButton.backgroundColor = [UIColor clearColor];
-        _backButton.showsTouchWhenHighlighted = YES;
-        [_backButton setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
-        [_backButton addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_backButton];
+        __strong UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.showsTouchWhenHighlighted = YES;
+        [btn setImage:[UIImage imageNamed:@"left"] forState:UIControlStateNormal];
+        [btn addTarget:self.browser action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _backButton = btn;
         
-        _forwardButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _forwardButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        _forwardButton.backgroundColor = [UIColor clearColor];
-        _forwardButton.showsTouchWhenHighlighted = YES;
-        [_forwardButton setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
-        [_forwardButton addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
-        _forwardButton.enabled = self.browser.canGoForward;
-        [self addSubview:_forwardButton];
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.showsTouchWhenHighlighted = YES;
+        [btn setImage:[UIImage imageNamed:@"right"] forState:UIControlStateNormal];
+        [btn addTarget:self.browser action:@selector(goForward) forControlEvents:UIControlEventTouchUpInside];
+        btn.enabled = self.browser.canGoForward;
+        [self addSubview:btn];
+        _forwardButton = btn;
         
-        _optionsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _optionsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-        _optionsButton.backgroundColor = [UIColor clearColor];
-        [_optionsButton setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
-        [_optionsButton setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
-        [_optionsButton addTarget:self action:@selector(_showOptions:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_optionsButton];
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        [btn setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
+        [btn setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
+        [btn addTarget:self action:@selector(_showOptions:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _optionsButton = btn;
         
-        _tabsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _tabsButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-        _tabsButton.backgroundColor = [UIColor clearColor];
-        _tabsButton.titleEdgeInsets = UIEdgeInsetsMake(6, 5, 0, 0);
-        _tabsButton.titleLabel.font = [UIFont systemFontOfSize:12.5];
-        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose"] forState:UIControlStateNormal];
-        [_tabsButton setBackgroundImage:[UIImage imageNamed:@"expose-pressed"] forState:UIControlStateHighlighted];
-        [_tabsButton setTitle:@"0" forState:UIControlStateNormal];
-        [_tabsButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
-        [_tabsButton addTarget:self action:@selector(_pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:_tabsButton];
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.titleEdgeInsets = UIEdgeInsetsMake(6, 5, 0, 0);
+        btn.titleLabel.font = [UIFont systemFontOfSize:12.5];
+        [btn setBackgroundImage:[UIImage imageNamed:@"expose"] forState:UIControlStateNormal];
+        [btn setBackgroundImage:[UIImage imageNamed:@"expose-pressed"] forState:UIControlStateHighlighted];
+        [btn setTitle:@"0" forState:UIControlStateNormal];
+        [btn setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
+        [btn addTarget:self action:@selector(_pressedTabsButton:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:btn];
+        _tabsButton = btn;
         
-        _cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _cancelButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-        _cancelButton.backgroundColor = [UIColor clearColor];
-        _cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15];
-        _cancelButton.titleLabel.minimumFontSize = 13;
+        btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+        btn.backgroundColor = [UIColor clearColor];
+        btn.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15];
+        btn.titleLabel.minimumScaleFactor = 0.75;
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
-            [_cancelButton setTitleColor:UIColorFromHEX(0x007FFF) forState:UIControlStateNormal];
+            [btn setTitleColor:UIColorFromHEX(0x007FFF) forState:UIControlStateNormal];
         } else {
-            [_cancelButton setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
+            [btn setTitleColor:UIColorFromHEX(0x2E2E2E) forState:UIControlStateNormal];
         }
-        [_cancelButton setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
-        [_cancelButton addTarget:self action:@selector(_cancelSearchButton:) forControlEvents:UIControlEventTouchUpInside];
-        _cancelButton.hidden = YES;
-        [self addSubview:_cancelButton];
+        [btn setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
+        [btn addTarget:self action:@selector(_cancelSearchButton:) forControlEvents:UIControlEventTouchUpInside];
+        btn.hidden = YES;
+        [self addSubview:btn];
+        _cancelButton = btn;
         
         __strong SGSearchField *field = [[SGSearchField alloc] initWithFrame:CGRectMake(0, 0, 200., 30.)];
         field.delegate = self;
@@ -141,13 +146,13 @@
         }
     }
     
-    CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
-    _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height + topOffset)/2,
-                                    searchWidth, _searchField.frame.size.height);
-    
     _optionsButton.frame = CGRectMake(width - 80, (height - 36 + topOffset)/2, 36, 36);
     _tabsButton.frame = CGRectMake(width - 40, (height - 36 + topOffset)/2, 36, 36);
     _cancelButton.frame = CGRectMake(width - 80, (height - 36 + topOffset)/2, 77, 36);
+    
+    CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
+    _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height + topOffset)/2,
+                                    searchWidth, _searchField.frame.size.height);
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -163,7 +168,7 @@
     if (!([self.searchField isFirstResponder] || _searchMaskVisible))
         self.searchField.text = [self.browser URL].absoluteString;
     
-    NSString *text = [NSString stringWithFormat:@"%d", self.browser.count];
+    NSString *text = [NSString stringWithFormat:@"%lu", (unsigned long)_browser.count];
     [_tabsButton setTitle:text forState:UIControlStateNormal];
     
     self.backButton.enabled = self.browser.canGoBack;

@@ -10,7 +10,7 @@
 #import "Stockboy.h"
 #import "Store.h"
 #import "UIWebView+WebViewAdditions.h"
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 #import "GAI.h"
 
 NSString *kWeaveDataRefreshNotification = @"kWeaveDataRefreshNotification";
@@ -112,7 +112,7 @@ NSString *kWeavePrivateMode = @"privateMode";
     
     if (!item) {
         NSString *titleSrc = title != nil ? title : [NSString stringWithFormat:@"%@", url.host];
-        item = @{@"id" : [NSString stringWithFormat:@"org.graetzer.%i", url.hash],
+        item = @{@"id" : [NSString stringWithFormat:@"org.graetzer.%lu", (unsigned long)url.hash],
                      @"url" : urlText,
                      @"title" : titleSrc,
                      @"sortindex" : @0,

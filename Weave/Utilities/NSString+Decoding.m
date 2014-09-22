@@ -174,7 +174,7 @@ static int base32_decode_into(const char *base32Buffer, unsigned int base32BufLe
 
 static void *base32_decode(const char *buf, unsigned int *outlen)
 {
-    unsigned int len = strlen(buf);
+    size_t len = strlen(buf);
     char *tmp = malloc(base32_decode_length(len));
     unsigned int x = base32_decode_into(buf, len, tmp);
     if(outlen)

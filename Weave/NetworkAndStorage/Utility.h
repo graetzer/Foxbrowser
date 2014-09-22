@@ -53,7 +53,7 @@
 
 
 //used to sort weave objects by frecency
-static int compareSearchResults(id left,  id right, void* ctx)
+static NSInteger compareSearchResults(id left,  id right, void* ctx)
 {
   NSNumber *leftVal = left[@"sortindex"];
   NSNumber *rightVal = right[@"sortindex"];

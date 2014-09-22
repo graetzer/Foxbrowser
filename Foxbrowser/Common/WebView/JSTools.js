@@ -39,11 +39,12 @@ function FoxbrowserModifyLinkTargets() {
     }
 }
 
-function FoxbrowserModifyOpen() {
+
+function FoxbrowserModifyWindow() {
     if (!window.FoxbrowserOpen) {
         window.FoxbrowserOpen = window.open;
     }
-
+    
     window.open = function(url,target,param) {
         if (url && url.length > 0) {
             if (!target) target = '_blank';
@@ -54,7 +55,11 @@ function FoxbrowserModifyOpen() {
             }
         }
     }
+    
+    window.close = function() {
+        window.FoxbrowserOpen('closetab://about:blank');
+    }
 }
 
 FoxbrowserModifyLinkTargets();
-FoxbrowserModifyOpen();
+FoxbrowserModifyWindow();

@@ -35,7 +35,7 @@
  
  ***** END LICENSE BLOCK *****/
 
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 #import "BookmarkPage.h"
 #import "WeaveService.h"
 #import "Store.h"

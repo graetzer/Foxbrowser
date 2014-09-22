@@ -21,7 +21,7 @@
 //
 
 #import "UIWebView+WebViewAdditions.h"
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 #import "UIImage+Scaling.h"
 
 // Caching the most frequently used javascript code
@@ -158,7 +158,7 @@ static NSString *JSSearchTools;
     
     // get the Tags at the touch location
     NSString *tagString = [self stringByEvaluatingJavaScriptFromString:
-                      [NSString stringWithFormat:@"FoxbrowserGetHTMLElementsAtPoint(%i,%i);",(NSInteger)pt.x,(NSInteger)pt.y]];
+                      [NSString stringWithFormat:@"FoxbrowserGetHTMLElementsAtPoint(%li,%li);",(long)pt.x,(long)pt.y]];
     
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithCapacity:2];
     NSArray *tags = [tagString componentsSeparatedByString:@"|&|"];

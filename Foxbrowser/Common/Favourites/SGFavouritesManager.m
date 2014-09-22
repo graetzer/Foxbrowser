@@ -25,7 +25,7 @@
 #import "SGWebViewController.h"
 #import "Store.h"
 #import "WeaveService.h"
-#import "NSURL+IFUnicodeURL.h"
+#import "NSStringPunycodeAdditions.h"
 
 @implementation SGFavouritesManager {
     NSMutableArray *_userFavourites;

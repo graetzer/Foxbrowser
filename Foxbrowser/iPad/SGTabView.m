@@ -49,10 +49,8 @@
         label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         label.backgroundColor = [UIColor clearColor];
         label.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14.0];
-        
-        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_5_1) label.minimumScaleFactor = 0.6;
-        else label.minimumFontSize = 8.0;
-        
+        label.minimumScaleFactor = 0.6;
+
         label.textColor = [UIColor darkGrayColor];
         [self addSubview:label];
         _titleLabel = label;
