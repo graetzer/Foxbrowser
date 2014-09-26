@@ -190,6 +190,7 @@
 		F4D03D5616C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */; };
 		F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */; };
 		F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5216C6A9BA00A67B9F /* UIImage+Scaling.m */; };
+		F4D410E319D2641200E22491 /* SGSyncStock.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D410E219D2641200E22491 /* SGSyncStock.m */; };
 		F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */; };
 		F4E2F99815AF82C000A56DCB /* WeaveService.m in Sources */ = {isa = PBXBuildFile; fileRef = F4E2F99715AF82C000A56DCB /* WeaveService.m */; };
 		F4EA92D91689CAD100CA9154 /* bookmark.png in Resources */ = {isa = PBXBuildFile; fileRef = F4EA92C71689CAD100CA9154 /* bookmark.png */; };
@@ -629,6 +630,8 @@
 		F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
 		F4D03D5116C6A9BA00A67B9F /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
 		F4D03D5216C6A9BA00A67B9F /* UIImage+Scaling.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Scaling.m"; sourceTree = "<group>"; };
+		F4D410E119D2641200E22491 /* SGSyncStock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGSyncStock.h; sourceTree = "<group>"; };
+		F4D410E219D2641200E22491 /* SGSyncStock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGSyncStock.m; sourceTree = "<group>"; };
 		F4D6B067167FBEAF00BF8D4A /* SGPageToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageToolbar.h; sourceTree = "<group>"; };
 		F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageToolbar.m; sourceTree = "<group>"; };
 		F4DACE8615AC86C400131DED /* WeaveService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeaveService.h; sourceTree = "<group>"; };
@@ -725,6 +728,8 @@
 				F406C023195F25A300A84C76 /* FXSyncEngine.m */,
 				F406C020195F25A300A84C76 /* FXSyncStore.h */,
 				F406C021195F25A300A84C76 /* FXSyncStore.m */,
+				F4D410E119D2641200E22491 /* SGSyncStock.h */,
+				F4D410E219D2641200E22491 /* SGSyncStock.m */,
 				F406C024195F25A300A84C76 /* FXSyncItem.h */,
 				F406C025195F25A300A84C76 /* FXSyncItem.m */,
 				F406C026195F25A300A84C76 /* NSData+Ext.h */,
@@ -1772,6 +1777,7 @@
 				F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */,
 				F44D3D3416D6BFE700918D4E /* DejalActivityView.m in Sources */,
 				F406C036195F25A300A84C76 /* FXSyncStore.m in Sources */,
+				F4D410E319D2641200E22491 /* SGSyncStock.m in Sources */,
 				F44178BF16DBFEC60041FB00 /* SGActivityView.m in Sources */,
 				F417477E1705FA0300CCB139 /* SGActivity.m in Sources */,
 				F4174810170605D400CCB139 /* SGFacebookActivity.m in Sources */,

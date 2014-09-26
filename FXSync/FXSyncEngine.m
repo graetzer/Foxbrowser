@@ -12,6 +12,7 @@
 #import "FXSyncItem.h"
 #import "NSData+Ext.h"
 #import "NSString+Base64.h"
+#import "NSData+Base64.h"
 #import "Reachability.h"
 #import "HawkCredentials.h"
 
@@ -95,35 +96,46 @@ NSString *const kFXFormsCollectionKey = @"forms";
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [self _downloadChanges];
         [self _uploadChanges];
+        
+        
         [self cancelSync];
     });
 }
 
 - (void)_downloadChanges {
-    NSArray *collections = [FXSyncEngine collectionNames];
     FXSyncStore *store = [FXSyncStore sharedInstance];
     
-    [self _downloadChanges:kFXTabsCollectionKey modified:0 offset:nil];
-//    for (NSString *cName in collections) {
-//        NSTimeInterval lastModified = [store lastModifiedForCollection:cName];
-//        
-//        [self _downloadChanges:cName modified:lastModified offset:nil];
-//    }
+    // TODO load the info collection instead
+    
+    NSArray *collections = @[kFXTabsCollectionKey, kFXBookmarksCollectionKey];
+    for (NSString *cName in collections) {
+        NSTimeInterval lastModified = [store lastModifiedForCollection:cName];
+        [self _downloadChanges:cName modified:lastModified offset:nil limit:NSIntegerMax];
+    }
+    
+    NSTimeInterval lastModified = [store lastModifiedForCollection:kFXHistoryCollectionKey];
+    [self _downloadChanges:kFXHistoryCollectionKey modified:lastModified offset:nil limit:2000];
 }
 
-- (void)_downloadChanges:(NSString *)cName modified:(NSTimeInterval)modified offset:(NSString *)offset {
+- (void)_downloadChanges:(NSString *)cName
+                modified:(NSTimeInterval)modified
+                  offset:(NSString *)offset
+                   limit:(NSInteger) limit {
+    
     NSString *url = [NSString stringWithFormat:@"/storage/%@?newer=%.2f&full=1&limit=500", cName, modified];
     if (offset != nil) {
         url = [url stringByAppendingFormat:@"&offset=%@", offset];
     }
-    
     [self _sendRequest:url
                 method:@"GET"
                payload:nil
-            completion:^(NSDictionary *headers, id json, NSError *err){
+            completion:^(NSHTTPURLResponse *resp, id json, NSError *err){
                 
-                NSDictionary *keyBundle = [self _collectionKeyForCollection:cName];
+                FXSyncStore *store = [FXSyncStore sharedInstance];
+                NSDictionary *keyBundle = [self _keysForCollection:cName];
                 NSArray *arr = json;
+                NSUInteger count = 0;
+                
                 for (NSDictionary *bso in arr) {
                     NSData *payload = [self _decryptBSO:bso keyBundle:keyBundle];
                     if (payload != nil) {
@@ -137,14 +149,19 @@ NSString *const kFXFormsCollectionKey = @"forms";
                                                                                   options:0 error:NULL]);
                         
                         item.collection = cName;
-                        [[FXSyncStore sharedInstance] saveItem:item];
+                        [store saveItem:item];
+                        count++;
                     }
                 }
                 
-//                NSTimeInterval nextMod = [headers[kFXHeaderLastModified] doubleValue];
-                NSString *nextOff = headers[kFXHeaderNextOffset];
-                if (nextOff != nil) {
-                    [self _downloadChanges:cName modified:modified offset:nil];
+                NSString *nextOff = [resp allHeaderFields][kFXHeaderNextOffset];
+                NSTimeInterval nextMod = [[resp allHeaderFields][kFXHeaderLastModified] doubleValue];
+                NSInteger nextLimit = limit - count;
+                
+                if ([nextOff length] > 0 && nextLimit > 0) {
+                    [self _downloadChanges:cName modified:modified offset:nextOff limit:nextLimit];
+                } else if(nextMod > modified) {
+                    [store setLastModifiedForCollection:cName modified:nextMod];
                 }
             }];
 }
@@ -153,9 +170,76 @@ NSString *const kFXFormsCollectionKey = @"forms";
     
 }
 
+/*!
+ * Contains information about the global storage version, should be 5
+ * This should be queried to detect breaking updates
+ */
+- (void)_loadMetarecord:(void(^)(NSInteger))callback {
+    [self _sendRequest:@"/storage/meta/global"
+                method:@"GET"
+               payload:nil
+            completion:^(NSHTTPURLResponse *resp, id json, NSError *err){
+                if (json != nil && resp.statusCode == 200) {
+                    NSData *src = [json[@"payload"] dataUsingEncoding:NSUTF8StringEncoding];
+                    NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:src
+                                                                            options:0
+                                                                              error:NULL];
+                    NSInteger storageVersion = [payload[@"storageVersion"] integerValue];
+                    callback(storageVersion);
+                }
+                
+            }];
+}
+
+- (void)_updateClientRecord {
+    NSUUID *uuid = [UIDevice currentDevice].identifierForVendor;
+    NSString *myID = [uuid UUIDString];
+    NSString *url = [NSString stringWithFormat:@"/storage/clients/%@", myID];
+    
+    [self _sendRequest:url
+                method:@"GET"
+               payload:nil
+            completion:^(NSHTTPURLResponse *resp, id bso, NSError *err){
+                if (bso != nil && resp.statusCode == 200) {
+                    NSData *src = [self _decryptBSO:bso keyBundle:[self _keysForCollection:@"clients"]];
+                    NSDictionary *payload;
+                    @try {
+                        payload = [NSJSONSerialization JSONObjectWithData:src
+                                                                  options:0
+                                                                    error:NULL];
+                    } @catch (...) {
+                        // Workaround for 622046 - Decryption failure on client record
+                        // If decryptDataObject:mustVerify: throws an exception then we are using the incorrect
+                        // sync key. We should handle this better, but for now we are simply going to ignore this
+                        // exception so that the code below will upload a new client record. We will still fail
+                        // later on when we try to decrypt a collection, but at least we will not leave incorrect
+                        // client records on the server from which Home cannot recover.
+                    }
+                    if ([payload[@"id"] isEqualToString:myID]) {
+                        DLog(@"found matching mobile client record");
+                        return;
+                    }
+                }
+                
+                NSString *name = [[UIDevice currentDevice] name];
+                if (!name.length) name = @"iOS Foxbrowser";
+                
+                NSDictionary *client = @{@"id" : myID, @"name":name, @"type" : @"mobile",
+                                         @"version" : @"3.0", @"protocols": @[@"1.5"]};
+                NSString *payload = [self _encryptJSON:client keyBundle:[self _keysForCollection:@"clients"]];
+                NSDictionary *json = @{@"id":myID, @"payload" : payload};
+                
+                [self _sendRequest:url
+                            method:@"PUT"
+                           payload:json
+                        completion:NULL];
+            }];
+}
+
 #pragma mark - Crypto
 
 - (void)_prepareKeys:(void(^)(void))callback {
+    NSParameterAssert(callback);
     
     // _deriveKeys
     NSString *syncKey = _syncInfo[@"syncKey"];
@@ -172,20 +256,25 @@ NSString *const kFXFormsCollectionKey = @"forms";
     // _fetchCollectionKeys
     if (_collectionKeys == nil && _keyBundle != nil) {
         [self _sendRequest:@"/storage/crypto/keys" method:@"GET" payload:nil
-                completion:^(NSDictionary *headers, id json, NSError *err){
+                completion:^(NSHTTPURLResponse *resp, id json, NSError *err){
                     if(json) {
                         NSData *payload = [self _decryptBSO:json keyBundle:_keyBundle];
-                        NSDictionary *decrypted = [NSJSONSerialization JSONObjectWithData:payload options:0 error:NULL];
-                        NSString *encKey = decrypted[@"default"][0];
-                        NSString *hmacKey = decrypted[@"default"][1];
-                            
-                        if (encKey && hmacKey) {
-                            DLog(@"Collection Keys: %@", decrypted);
-                            _collectionKeys = @{@"default" : @{
-                                                        @"encKey" : [encKey base64DecodedData],
-                                                        @"hmacKey":[hmacKey base64DecodedData]}
-                                                };
+                        NSDictionary *decrypted = [NSJSONSerialization JSONObjectWithData:payload
+                                                                                  options:NSJSONReadingMutableContainers
+                                                                                    error:NULL];
+                        
+                        NSMutableDictionary *cols = decrypted[@"collections"];
+                        cols[@"default"] = decrypted[@"default"];
+                        
+                        NSMutableDictionary *keys = [NSMutableDictionary dictionaryWithCapacity:[cols count]];
+                        for (NSString *key in cols) {
+                            NSArray *arr = cols[key];
+                            if ([arr count] == 2) {
+                                keys[key] =  @{@"encKey" : [arr[0] base64DecodedData],
+                                               @"hmacKey": [arr[1] base64DecodedData]};
+                            }
                         }
+                        _collectionKeys = keys;
                     }
                     callback();
                 }];
@@ -194,7 +283,7 @@ NSString *const kFXFormsCollectionKey = @"forms";
     }
 }
 
-- (NSDictionary *)_collectionKeyForCollection:(NSString *)cName {
+- (NSDictionary *)_keysForCollection:(NSString *)cName {
     return _collectionKeys[cName] != nil ? _collectionKeys[cName] : _collectionKeys[@"default"];
 }
 
@@ -251,20 +340,60 @@ NSString *const kFXFormsCollectionKey = @"forms";
                                               &dataOutMoved);
         
         if (cryptStatus == kCCSuccess) {
-            decrypted = [NSData dataWithBytesNoCopy: buffer length: dataOutMoved freeWhenDone: YES];
+            decrypted = [NSData dataWithBytesNoCopy:buffer length: dataOutMoved freeWhenDone: YES];
+        } else {
+            free(buffer);
+        }
+    }
+
+    return decrypted;
+}
+
+- (NSString *)_encryptJSON:(id)json keyBundle:(NSDictionary *)bundle {
+    NSData *plaintext = [NSJSONSerialization dataWithJSONObject:json options:0 error:NULL];
+    if (!plaintext) return nil;
+    
+    NSData *encKey = bundle[@"encKey"];
+    NSData *hmacKey = bundle[@"hmacKey"];
+    
+    // AES blocksize is always 128 bit
+    NSData *IV = [RandomString(16) dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSData *ciphertext = nil;
+    size_t bufferSize = [plaintext length];
+    void *buffer = calloc(bufferSize, sizeof(uint8_t));
+    if (buffer != nil) {
+        size_t dataOutMoved = 0;
+        BOOL padding = YES;
+        CCCryptorStatus cryptStatus = CCCrypt(kCCEncrypt,
+                                              kCCAlgorithmAES,
+                                              padding ? kCCOptionPKCS7Padding : 0,
+                                              [encKey bytes],
+                                              kCCKeySizeAES256,
+                                              [IV bytes],
+                                              [plaintext bytes],
+                                              [plaintext length],
+                                              buffer,
+                                              bufferSize,
+                                              &dataOutMoved);
+        
+        if (cryptStatus == kCCSuccess) {
+            ciphertext = [NSData dataWithBytesNoCopy:buffer length: dataOutMoved freeWhenDone: YES];
         } else {
             free(buffer);
         }
     }
     
-//    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:decrypted options:0 error:NULL];
-//    if (![result[@"id"] isEqual:bso[@"id"]]) {
-//        @throw [NSException exceptionWithName:kFXSyncEngineException
-//                                       reason:@"Record id mismatch"
-//                                     userInfo:result];
-//    }
+    unsigned char hmac[CC_SHA256_DIGEST_LENGTH];
+    CCHmac(kCCHmacAlgSHA256, hmacKey.bytes, hmacKey.length, ciphertext.bytes, (CC_LONG)ciphertext.length, hmac);
+    NSString *computedHMAC = [[NSData dataWithBytes:hmac length:CC_SHA256_DIGEST_LENGTH] hexadecimalString];
+    
+    NSDictionary *payload = @{@"IV" : [IV base64EncodedString],
+                              @"hmac" : computedHMAC,
+                              @"ciphertext" : [ciphertext base64EncodedString]};
 
-    return decrypted;
+    NSData *jsonPayload = [NSJSONSerialization dataWithJSONObject:payload options:0 error:NULL];
+    return [[NSString alloc] initWithData:jsonPayload encoding:NSUTF8StringEncoding];
 }
 
 
@@ -274,7 +403,7 @@ NSString *const kFXFormsCollectionKey = @"forms";
 - (void)_sendRequest:(NSString *)path
               method:(NSString *)method
              payload:(NSDictionary *)json
-          completion:(void (^)(NSDictionary *, id, NSError *))completion {
+          completion:(void (^)(NSHTTPURLResponse *resp, id, NSError *))completion {
     
     NSString *base = _syncInfo[@"token"][@"api_endpoint"];
     NSString *url = [NSString stringWithFormat:@"%@%@", base, path];
@@ -287,6 +416,8 @@ NSString *const kFXFormsCollectionKey = @"forms";
                                                            options:0
                                                              error:NULL];
     } else {
+        // For some reason a genius at mozilla decided that even a GET request without body content needs to
+        // have a hash for the body in it's hawk auth, but of course just on the sync service and nowhere else
         request.HTTPBody = [NSData data];
     }
     [_userAuth sendHawkRequest:request credentials:_credentials completion:completion];

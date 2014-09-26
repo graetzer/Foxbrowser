@@ -21,7 +21,10 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 @property (nonatomic, strong) NSString *syncId;
 @property (nonatomic, assign) NSTimeInterval modified;
 @property (nonatomic, assign) NSInteger sortindex;
+
+/*! Setting this invalidates jsonPayload */
 @property (nonatomic, strong) NSData *payload;
+/*! JSON version of payload, uses mutable containers */
 @property (strong, nonatomic, readonly) NSDictionary *jsonPayload;
 
 @property (nonatomic, strong) NSString *collection;

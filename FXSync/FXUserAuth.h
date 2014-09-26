@@ -16,6 +16,7 @@
  * Extends the fxaccounts client with logic to
  * handle the syncstorage specific stuff like aquiring tokens etc
  * https://docs.services.mozilla.com/token/apis.html
+ * https://docs.services.mozilla.com/sync/storageformat5.html 
  */
 @interface FXUserAuth : FXAccountClient
 

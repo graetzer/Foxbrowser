@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <sqlite3.h>
+
 
 @class FXSyncItem;
 
@@ -17,6 +17,13 @@
 /*! Asynchronously saves item to db, does not change any values */
 - (void)saveItem:(FXSyncItem *)item;
 - (void)deleteItem:(FXSyncItem *)item;
+
+- (void)deletCollection:(NSString *)collection;
+
+/*! Sorted by sortindex */
+- (void)loadCollection:(NSString *)cName
+                 limit:(int)limit
+              callback:(void(^)(NSArray *))callback;
 
 - (NSArray *)modifiedItems:(NSString *)collection;
 

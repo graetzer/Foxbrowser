@@ -89,7 +89,7 @@
 /*! Helper method to send an hawk request, content type defaults the to application/json */
 - (void)sendHawkRequest:(NSMutableURLRequest *)req
             credentials:(HawkCredentials *)creds
-             completion:(void(^)(NSDictionary *, id, NSError *))completion;
+             completion:(void(^)(NSHTTPURLResponse *, id, NSError *))completion;
 @end
 
 

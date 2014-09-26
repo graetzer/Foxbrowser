@@ -10,7 +10,9 @@
 
 @class FXUserAuth, Reachability;
 /*! Supposed to do the actual sync process. 
- * I call it Thomas the little sync engine
+ *
+ * https://docs.services.mozilla.com/sync/storageformat5.html
+ * https://docs.services.mozilla.com/storage/apis-1.5.html
  */
 @interface FXSyncEngine : NSObject
 

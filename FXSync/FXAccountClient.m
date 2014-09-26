@@ -24,11 +24,14 @@ NSString *const kFXNamespace = @"identity.mozilla.com/picl/v1/";
 uint const PBKDF2_ROUNDS = 1000;
 uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 
-@implementation FXAccountClient
+@implementation FXAccountClient {
+    NSOperationQueue *_queue;
+}
 
 - (instancetype)init {
     if (self = [super init]) {
         _localTimeOffsetSec = @0;
+        _queue = [NSOperationQueue new];
     }
     return self;
 }
@@ -51,15 +54,15 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
     
     [self sendHawkRequest:req
               credentials:nil
-               completion:^(NSDictionary *headers, id json, NSError *error) {
+               completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
                    if (error == nil && json[@"error"] == nil) {
                        NSMutableDictionary *accountData = [json mutableCopy];
                        accountData[@"unwrapBKey"] = setup[@"unwrapBKey"];
                        
                        // json[@"email"] == nil] && [json[@"errno"] isEqual:@(INVALID_TIMESTAMP) && json[@"skipCaseError"] == @NO
-                       //                                   if (options.keys) {
-                       //                                       accountData.unwrapBKey = sjcl.codec.hex.fromBits(result.unwrapBKey);
-                       //                                   }
+                       //    if (options.keys) {
+                       //       accountData.unwrapBKey = sjcl.codec.hex.fromBits(result.unwrapBKey);
+                       //   }
                        completion(accountData);
                    } else {
                        DLog(@"%@\n%@", json, error);
@@ -77,13 +80,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                        method:@"GET"
                       payload:nil
                   credentials:creds
-                   completion:^(NSDictionary *headers, id json, NSError *error) {
-                       if (error == nil) {
-                           // TODO is this an object?
+                   completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
                            callback(json);
-                       } else {
-                           callback(nil);
-                       }
                    }];
     
 }
@@ -99,8 +97,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                        method:@"GET"
                       payload:nil
                   credentials:creds
-                   completion:^(NSDictionary *headers, id json, NSError *error) {
-                       if (error == nil) {
+                   completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
+                       if (error == nil && json != nil) {
                            NSString *bundle = json[@"bundle"];
                            NSDictionary *keys = [self _unbundleKeyFetchResponseWithKey:creds.bundleKey
                                                                                 bundle:bundle];
@@ -130,7 +128,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                        method:@"GET"
                       payload:nil
                   credentials:creds
-                   completion:^(NSDictionary *headers, id json, NSError *error) {
+                   completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
                        if (error == nil) {
                            // TODO is this an object?
                            callback(json);
@@ -147,12 +145,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                        method:@"GET"
                       payload:nil
                   credentials:nil
-                   completion:^(NSDictionary *headers, id json, NSError *error) {
-                       if (error == nil) {
-                           callback(json);
-                       } else {
-                           callback(nil);
-                       }
+                   completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
+                       callback(json);
                    }];
 }
 
@@ -167,7 +161,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                        method:@"POST"
                       payload:data
                   credentials:creds
-                   completion:^(NSDictionary *header, NSDictionary *json, NSError *error) {
+                   completion:^(NSHTTPURLResponse *resp, NSDictionary *json, NSError *error) {
                        callback(json, error);
                    }];
 }
@@ -261,7 +255,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                      method:(NSString *)method
                     payload:(NSDictionary *)json
                 credentials:(HawkCredentials *)creds
-                 completion:(void (^)(NSDictionary *, id, NSError *))completion {
+                 completion:(void (^)(NSHTTPURLResponse *, id, NSError *))completion {
     
     NSString *url = [NSString stringWithFormat:@"%@%@", kFXAccountsServerUrl, path];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]
@@ -278,8 +272,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 
 - (void)sendHawkRequest:(NSMutableURLRequest *)req
             credentials:(HawkCredentials *)creds
-             completion:(void(^)(NSDictionary *, id, NSError *))completion {
-    NSParameterAssert(req && completion);
+             completion:(void(^)(NSHTTPURLResponse *, id, NSError *))completion {
+    NSParameterAssert(req);
     
     NSString *contentType = [req valueForHTTPHeaderField:@"Content-Type"];
     if (contentType == nil || contentType.length == 0) {
@@ -320,7 +314,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
     }
     
     [NSURLConnection sendAsynchronousRequest:req
-                                       queue:[NSOperationQueue mainQueue]
+                                       queue:_queue
                            completionHandler:^(NSURLResponse *resp, NSData *body, NSError *error){
                                NSHTTPURLResponse *http = (NSHTTPURLResponse *)resp;
                                NSDictionary *json = nil;
@@ -332,7 +326,9 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                                    ELog(json);
                                    NSInteger code = [json[@"errno"] integerValue];
                                    error = [NSError errorWithDomain:@"com.mozilla.identity" code:code userInfo:json];
-                                   completion(nil, nil, error);
+                                   if (completion) {
+                                       completion(http, nil, error);
+                                   }
                                    
                                    // Let's try this
                                    if (code == INVALID_TIMESTAMP) {
@@ -342,8 +338,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                                        DLog(@"Resetting local time offset to: %.2f s", offset);
                                        // TODO retry
                                    }
-                               } else {
-                                   completion(http.allHeaderFields, json, error);
+                               } else if (completion) {
+                                   completion(http, json, error);
                                }
                            }];
 }

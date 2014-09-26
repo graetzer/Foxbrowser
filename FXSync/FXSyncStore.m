@@ -7,6 +7,7 @@
 //
 
 #import "FXSyncStore.h"
+#import <sqlite3.h>
 #import "FXSyncEngine.h"
 #import "FXSyncItem.h"
 
@@ -73,27 +74,26 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     });
 }
 
-//- (void)_loadData {
-//    NSArray *all = [FXSync collectionNames];
-//    for (NSString *name in all) {
-//        [self _loadCollection:name limit:0];
-//    }
-//}
-
-- (NSArray *)_loadCollection:(NSString *)cName limit:(int)limit {
-    const char sql[] = "SELECT * FROM ? ORDER BY sortindex DESC LIMIT ?;";
+- (void)loadCollection:(NSString *)cName
+                 limit:(int)limit
+              callback:(void(^)(NSArray *))callback {
+    NSParameterAssert(cName && callback);
     
-    sqlite3_stmt *stmnt = nil;
-	if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
-        sqlite3_bind_text(stmnt, 1, [cName UTF8String],
-                          (int)cName.length, SQLITE_TRANSIENT);
-        sqlite3_bind_int(stmnt, 2, limit);
+    dispatch_async(_queue, ^{
+        const char sql[] = "SELECT * FROM ? ORDER BY sortindex DESC LIMIT ?;";
         
-        return [self _readSyncItems:stmnt collection:cName];
-	} else {
-        [self _throwDBError];
-        return nil;
-    }
+        sqlite3_stmt *stmnt = nil;
+        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(stmnt, 1, [cName UTF8String],
+                              (int)cName.length, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmnt, 2, limit);
+            
+            NSArray *arr = [self _readSyncItems:stmnt collection:cName];
+            callback(arr);
+        } else {
+            [self _throwDBError];
+        }
+    });
 }
 
 - (void)_createTables {
@@ -159,15 +159,30 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
                               (int)[item.collection length], SQLITE_TRANSIENT);
             sqlite3_bind_text(stmnt, 2, [item.syncId UTF8String],
                               (int)item.syncId.length, SQLITE_TRANSIENT);
-            if (sqlite3_step(stmnt) != SQLITE_DONE) {
-                [self _throwDBError];
-            }
+            sqlite3_step(stmnt);
         }
         if (sqlite3_finalize(stmnt) != SQLITE_OK) {
             [self _throwDBError];
         }
     });
 }
+
+- (void)deletCollection:(NSString *)collection {
+    dispatch_async(_queue, ^{
+        const char sql[] = "DELETE FROM ?";
+        sqlite3_stmt *stmnt = nil;
+        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
+            
+            sqlite3_bind_text(stmnt, 1, [collection UTF8String],
+                              (int)[collection length], SQLITE_TRANSIENT);
+            sqlite3_step(stmnt);
+        }
+        if (sqlite3_finalize(stmnt) != SQLITE_OK) {
+            [self _throwDBError];
+        }
+    });
+}
+
 - (NSArray *)modifiedItems:(NSString *)cName {
     __block NSArray *result;
     dispatch_sync(_queue, ^{
@@ -251,10 +266,5 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
                                    reason:reason
                                  userInfo:nil];
 }
-
-@end
-
-@implementation FXSyncAction
-
 
 @end

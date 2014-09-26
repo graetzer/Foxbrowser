@@ -142,21 +142,17 @@ static NSData* getPublicKeyMod(NSData *pk);
     req.allHTTPHeaderFields = @{@"Authorization":[NSString stringWithFormat:@"BrowserID %@", assertion],
                                 @"X-Client-State":state,
                                 @"Accept":@"application/json"};
-    
-    [NSURLConnection sendAsynchronousRequest:req
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response, NSData *body, NSError *error) {
-                               NSDictionary *json = nil;
-                               if (body != nil) {
-                                   json = [NSJSONSerialization JSONObjectWithData:body options:0 error:&error];
-                               }
-                               ELog(error);
-                               if (error != nil && json != nil) {
-                                   NSHTTPURLResponse *resp = (NSHTTPURLResponse *)response;
-                                   error = [NSError errorWithDomain:@"com.mozilla.token" code:resp.statusCode userInfo:json];
-                               }
-                               completion(json, error);
-                           }];
+
+    [self sendHawkRequest:req
+              credentials:nil
+               completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
+                   if (error != nil && json != nil) {
+                       error = [NSError errorWithDomain:@"com.mozilla.token"
+                                                   code:resp.statusCode
+                                               userInfo:json];
+                   }
+                   completion(json, error);
+               }];
 }
 
 /*!
