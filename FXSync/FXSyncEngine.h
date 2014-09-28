@@ -16,19 +16,18 @@
  */
 @interface FXSyncEngine : NSObject
 
-+ (instancetype)sharedInstance;
-+ (NSArray *)collectionNames;
+/*! Map collections to sync sizes*/
++ (NSDictionary *)collectionNames;
 
 @property (nonatomic, copy) NSNumber *localTimeOffsetSec;
-@property (strong, nonatomic, readonly) FXUserAuth *userAuth;
-@property (strong, nonatomic, readonly) NSDictionary *syncInfo;
+@property (strong, nonatomic) FXUserAuth *userAuth;
 @property (strong, nonatomic, readonly) Reachability *reachability;
 
-@property (readonly) BOOL syncRunning;
+@property (readonly, getter=isSyncRunning) BOOL syncRunning;
 - (void)startSync;
-- (void)cancelSync;
 
 @end
+
 
 FOUNDATION_EXPORT NSString *const kFXTabsCollectionKey;
 FOUNDATION_EXPORT NSString *const kFXBookmarksCollectionKey;

@@ -25,8 +25,9 @@
                  limit:(int)limit
               callback:(void(^)(NSArray *))callback;
 
-- (NSArray *)modifiedItems:(NSString *)collection;
+- (NSArray *)changedItemsForCollection:(NSString *)collection;
 
-- (NSTimeInterval)lastModifiedForCollection:(NSString *)collection;
-- (void)setLastModifiedForCollection:(NSString *)collection  modified:(NSTimeInterval)modified;
+/*! Should be the last time this collection was synced */
+- (NSTimeInterval)syncTimeForCollection:(NSString *)collection;
+- (void)setSyncTime:(NSTimeInterval)modified forCollection:(NSString *)collection;
 @end

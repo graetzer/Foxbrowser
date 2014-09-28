@@ -11,7 +11,7 @@
 #import "NSData+Ext.h"
 #import "HawkAuth.h"
 
-NSString *const kFXAccountsServerUrl = @"https://api.accounts.firefox.com/v1";
+NSString *const kFXAccountsServerDefault = @"https://api.accounts.firefox.com/v1";
 NSTimeInterval const kFXConnectionTimeout = 120.0;
 
 
@@ -45,7 +45,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
     NSDictionary *body = @{@"email" : email,
                            @"authPW" : setup[@"authPW"]};
     
-    NSString *urlStr = [NSString stringWithFormat:@"%@%@?keys=true", kFXAccountsServerUrl, @"/account/login"];
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@?keys=true", kFXAccountsServerDefault, @"/account/login"];
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlStr]
                                                        cachePolicy:NSURLRequestUseProtocolCachePolicy
                                                    timeoutInterval:kFXConnectionTimeout];
@@ -257,7 +257,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                 credentials:(HawkCredentials *)creds
                  completion:(void (^)(NSHTTPURLResponse *, id, NSError *))completion {
     
-    NSString *url = [NSString stringWithFormat:@"%@%@", kFXAccountsServerUrl, path];
+    NSString *url = [NSString stringWithFormat:@"%@%@", kFXAccountsServerDefault, path];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]
                                                            cachePolicy:NSURLRequestUseProtocolCachePolicy
                                                        timeoutInterval:kFXConnectionTimeout];

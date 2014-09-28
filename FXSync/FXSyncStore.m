@@ -38,7 +38,8 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 
 - (void)dealloc {
     dispatch_sync(_queue, ^{
-        [self _closeDB];
+        sqlite3_close(_db);
+        _db = NULL;
     });
     _queue = NULL;
 }
@@ -65,13 +66,6 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
                                        reason:@"Could not open database!"
                                      userInfo:nil];
     }
-}
-
-- (void)_closeDB {
-    dispatch_sync(_queue, ^{
-        sqlite3_close(_db);
-        _db = NULL;
-    });
 }
 
 - (void)loadCollection:(NSString *)cName
@@ -105,7 +99,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 		DLog(@"Could not prepare history item statement");
 	} else {
         
-        NSArray *all = [FXSyncEngine collectionNames];
+        NSArray *all = [FXSyncEngine collectionNames].allKeys;
         for (NSString *name in all) {
             sqlite3_bind_text(stmnt, 1, [name UTF8String], -1, SQLITE_TRANSIENT);
             
@@ -183,7 +177,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     });
 }
 
-- (NSArray *)modifiedItems:(NSString *)cName {
+- (NSArray *)changedItemsForCollection:(NSString *)cName {
     __block NSArray *result;
     dispatch_sync(_queue, ^{
         const char sql[] = "SELECT * FROM ? WHERE modified < 0;";
@@ -221,7 +215,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     return items;
 }
 
-- (NSTimeInterval)lastModifiedForCollection:(NSString *)collection {
+- (NSTimeInterval)syncTimeForCollection:(NSString *)collection {
     __block NSTimeInterval result = 0;
     dispatch_sync(_queue, ^{
         const char sql[] = "SELECT * FROM syncinfo WHERE collection = ?";
@@ -242,7 +236,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     return result;
 }
 
-- (void)setLastModifiedForCollection:(NSString *)collection modified:(NSTimeInterval)modified {
+- (void)setSyncTime:(NSTimeInterval)modified forCollection:(NSString *)collection; {
     dispatch_async(_queue, ^{
         const char sql[] = "INSERT OR REPLACE INTO syncinfo (collection, modified) VALUES (?, ?);";
         sqlite3_stmt *stmnt = nil;

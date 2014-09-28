@@ -23,6 +23,9 @@
 @property (nonatomic, strong) NSString *email;
 @property (nonatomic, strong) NSString *password;
 
+@property (nonatomic, strong, readonly) NSDictionary *accountCreds;
+@property (nonatomic, strong, readonly) NSDictionary *accountKeys;
+@property (nonatomic, strong, readonly) NSDictionary *syncInfo;
 
 - (instancetype)initEmail:(NSString *)email password:(NSString *)pass;
 - (void)requestSyncInfo:(void(^)(NSDictionary *))callback;

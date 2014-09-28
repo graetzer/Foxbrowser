@@ -25,10 +25,6 @@ static NSData* getPublicKeyExp(NSData *pk);
 static NSData* getPublicKeyMod(NSData *pk);
 
 @implementation FXUserAuth {
-    NSDictionary *_accountCreds;
-    NSDictionary *_accountKeys;
-    NSDictionary *_token;
-    
     // My keys
     SecKeyRef publicKeyRef;
     SecKeyRef privateKeyRef;
@@ -102,11 +98,10 @@ static NSData* getPublicKeyMod(NSData *pk);
                                                               clientState:clientState
                                                                completion:^(NSDictionary *token, NSError *error) {
                                                                    if (error == nil) {
-                                                                       _token = token;
-                                                                       NSDictionary *authState = @{@"token":token,
-                                                                                                   @"syncKey":_accountKeys[@"kB"],
-                                                                                                   @"sessionToken":sessionToken};
-                                                                       callback(authState);
+                                                                       _syncInfo  = @{@"token":token,
+                                                                                      @"syncKey":_accountKeys[@"kB"],
+                                                                                      @"sessionToken":sessionToken};
+                                                                       callback(_syncInfo);
                                                                    } else {
                                                                        ELog(error);
                                                                        callback(nil);
@@ -203,7 +198,7 @@ static NSData* getPublicKeyMod(NSData *pk);
     int64_t now = (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
     NSDictionary *header = @{@"alg":@"RS64"};
     NSDictionary *payload = @{@"aud": audience,
-                             @"iss": kFXAccountsServerUrl,
+                             @"iss": kFXAccountsServerDefault,
                              @"exp": @(now + duration)};
     
     

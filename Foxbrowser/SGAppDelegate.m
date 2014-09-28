@@ -38,7 +38,7 @@
 
 #import "Appirater.h"
 
-#import "FXSyncEngine.h"
+#import "FXSyncStock.h"
 
 SGAppDelegate *appDelegate;
 id<WeaveService> weaveService;
@@ -95,7 +95,7 @@ NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
 //    [Appirater appLaunched:YES];
 //
     
-    [[FXSyncEngine sharedInstance] startSync];
+    [[FXSyncStock sharedInstance] restock];
     
     return YES;
 }

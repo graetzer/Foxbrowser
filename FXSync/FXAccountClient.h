@@ -92,11 +92,14 @@
              completion:(void(^)(NSHTTPURLResponse *, id, NSError *))completion;
 @end
 
+/*! identity.mozilla.com/picl/v1/ */
+FOUNDATION_EXPORT NSString *const kFXNamespace;
+/*! Default endpoint for accounts server */
+FOUNDATION_EXPORT NSString *const kFXAccountsServerDefault;
+/*! Default timeout 120 seconds*/
+FOUNDATION_EXPORT NSTimeInterval const kFXConnectionTimeout;
 
 NSString * RandomString(NSUInteger length);
 NSData * CreateDataWithHexString(NSString *inputString);
 NSData * PBKDF2_HMAC_SHA256(NSData *data,NSData *salt, int iter, int keylen);
 NSData * HKDF_SHA256(NSData *seed, NSData *info, NSData *salt, int outputSize);
-
-FOUNDATION_EXPORT NSString *const kFXAccountsServerUrl;
-FOUNDATION_EXPORT NSTimeInterval const kFXConnectionTimeout;

@@ -32,17 +32,5 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 - (void)save;
 
 /*
-@property (nonatomic, strong) NSString *urlString;
-@property (nonatomic, strong) NSString *title;
-@property (nonatomic, strong) NSString *favicon;
-@property (nonatomic, strong) NSString *modified;
-@property (nonatomic, assign) NSInteger sortindex;
-
-// Valid for bookmarks
-@property (nonatomic, strong) NSString *predecessorId;
-@property (nonatomic, strong) NSString *description;
-@property (nonatomic, strong) NSString *bookmarkType;
-
-// Valid for tabs
-@property (nonatomic, strong) NSString *client;*/
+*/
 @end
