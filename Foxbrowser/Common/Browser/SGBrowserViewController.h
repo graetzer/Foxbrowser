@@ -77,6 +77,7 @@
 
 
 - (NSURL *)URL;
+- (NSURLRequest *)request;
 // Open a webPage in the current tab, title can be nil
 - (void)openURLRequest:(NSMutableURLRequest *)request title:(NSString *)title;
 - (void)handleURLString:(NSString*)input title:(NSString *)title;

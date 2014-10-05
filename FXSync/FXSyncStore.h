@@ -18,12 +18,14 @@
 - (void)saveItem:(FXSyncItem *)item;
 - (void)deleteItem:(FXSyncItem *)item;
 
-- (void)deletCollection:(NSString *)collection;
+//- (void)deletCollection:(NSString *)collection;
 
-/*! Sorted by sortindex */
+/*! Sorted by sortindex, pass something negative into limit for unlimited */
 - (void)loadCollection:(NSString *)cName
-                 limit:(int)limit
               callback:(void(^)(NSArray *))callback;
+- (void)loadItem:(NSString *)syncId
+  fromCollection:(NSString *)cName
+        callback:(void(^)(FXSyncItem *))block;
 
 - (NSArray *)changedItemsForCollection:(NSString *)collection;
 

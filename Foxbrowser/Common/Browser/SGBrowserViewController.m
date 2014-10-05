@@ -24,33 +24,28 @@
 #import "SGBlankController.h"
 #import "SGWebViewController.h"
 #import "SGAppDelegate.h"
+#import "FXSyncStock.h"
 #import "GAI.h"
-
-#define HTTP_AGENT6 @"Mozilla/5.0 (iPad; CPU OS 6_1_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10B146 Safari/8536.25"
 
 @implementation SGBrowserViewController {
     NSTimer *_saveTimer;
     NSTimer *_interfaceTimer;
     
-    int _dialogResult;
+    NSInteger _dialogResult;
     NSMutableArray *_httpsHosts;
 }
 
 + (void)initialize {
     NSMutableDictionary *dictionary;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        dictionary[@"User-Agent"] = HTTP_AGENT6;
-    }
     if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableDoNotTrackKey]) {
         dictionary[@"X-Do-Not-Track"] = @"1";
         dictionary[@"DNT"] = @"1";
         dictionary[@"X-Tracking-Choice"] = @"do-not-track";
     }
     [CustomHTTPProtocol setHeaders:dictionary];
-    [CustomHTTPProtocol start];
 }
 
-- (void)willEnterForeground {
+- (void)_willEnterForeground {
     if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableHTTPStackKey]) {
         [CustomHTTPProtocol setDelegate:self];
         [CustomHTTPProtocol start];
@@ -62,8 +57,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self willEnterForeground];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground)
+    [self _willEnterForeground];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_willEnterForeground)
                                                  name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
@@ -71,9 +67,9 @@
     [super viewWillAppear:animated];
     
     _saveTimer = [NSTimer scheduledTimerWithTimeInterval:10
-                                              target:self
-                                            selector:@selector(saveCurrentTabs)
-                                            userInfo:nil repeats:YES];
+                                                  target:self
+                                                selector:@selector(saveCurrentTabs)
+                                                userInfo:nil repeats:YES];
     _interfaceTimer = [NSTimer scheduledTimerWithTimeInterval:0.3
                                                        target:self
                                                      selector:@selector(updateInterface)
@@ -126,13 +122,12 @@
 #pragma mark - Implemented
 
 - (void)addTab; {
-    if (self.count >= self.maxCount)
-        return;
-    
-    UIViewController *viewC = [self createNewTabViewController];
-    [self addViewController:viewC];
-    [self showViewController:viewC];
-    [self updateInterface];
+    if (self.count < self.maxCount) {
+        UIViewController *viewC = [self createNewTabViewController];
+        [self addViewController:viewC];
+        [self showViewController:viewC];
+        [self updateInterface];
+    }
 }
 
 - (void)addTabWithURLRequest:(NSURLRequest *)request title:(NSString *)title {
@@ -146,8 +141,9 @@
     [webC openRequest:request];
     [self addViewController:webC];
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"org.graetzer.tabs.foreground"])
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGOpenPagesInForegroundKey]) {
         [self showViewController:webC];
+    }
     
     if (self.count >= self.maxCount) {
         if ([self selectedIndex] != 0)
@@ -222,9 +218,13 @@
 }
 
 - (NSURL *)URL {
+    return [[self request] URL];
+}
+
+- (NSURLRequest *)request {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        return webC.request.URL;
+        return webC.request;
     }
     return nil;
 }
@@ -259,72 +259,54 @@
     }
 }
 
-- (NSString *)savedTabsCacheFile {
-    NSString* path = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).lastObject;
-    return [path stringByAppendingPathComponent:@"latestURLs.plist"];
-}
-
 - (void)loadSavedTabs {
-    NSArray *latest = [NSArray arrayWithContentsOfFile:[self savedTabsCacheFile]];
-    if (latest.count > 1) {
+    NSArray *latest = [[FXSyncStock sharedInstance] localTabs];
+    if (latest.count > 0) {
         
-        for (id item in latest) {
-            if (![item isKindOfClass:[NSString class]]) continue;
+        for (NSInteger i = 0; i < latest.count; i++) {
+            NSUInteger x = i;
+            if (i > 0 && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+                x = latest.count - i - 1;// Workaround for iPhone, reverse everything but the first
+            }
             
-            NSURL *url = [NSURL URLWithString:item];
-            id viewC;
+            NSDictionary *tab = latest[x];
+            NSURL *url = [NSURL URLWithString:tab[@"urlHistory"][0]];
+            
             if ([url.scheme hasPrefix:@"http"]) {
                 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-                SGWebViewController *webC = [[SGWebViewController alloc] initWithNibName:nil bundle:nil];
-                webC.title = request.URL.absoluteString;
+                SGWebViewController *webC = [SGWebViewController new];
+                webC.title = tab[@"title"];
                 [webC openRequest:request];
                 [self addViewController:webC];
-                viewC = webC;
             } else {
                 SGBlankController *blank = [SGBlankController new];
                 [self addViewController:blank];
-                viewC = blank;
-            }
-            if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-                [self showViewController:viewC];
             }
         }
+        
     } else {
-        NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpageURLKey];
-        NSURL *url = [NSURL URLWithString:startpage];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpageKey] && url) {
-            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-            SGWebViewController *webC = [SGWebViewController new];
-            webC.title = request.URL.absoluteString;
-            [webC openRequest:request];
-            [self addViewController:webC];
-        } else {
-            SGBlankController *latest = [SGBlankController new];
-            [self addViewController:latest];
-        }
+        [self addViewController:[self createNewTabViewController]];
     }
-    
-    if ([latest.lastObject isKindOfClass:[NSNumber class]])
-        self.selectedIndex = [latest.lastObject unsignedIntegerValue];
 }
 
 - (void)saveCurrentTabs {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+    NSMutableArray *tabs = [NSMutableArray arrayWithCapacity:self.count];
+    for (NSUInteger i = 0; i < self.count; i++) {
+        UIViewController *controller = [self viewControllerAtIndex:i];
         
-        NSMutableArray *latest = [NSMutableArray arrayWithCapacity:self.count];
-        
-        for (NSUInteger i = 0; i < self.count; i++) {
-            UIViewController *controller = [self viewControllerAtIndex:i];
-
-            if ([controller isKindOfClass:[SGWebViewController class]]) {
-                NSURL *url = ((SGWebViewController *)controller).request.URL;
-                if ([url.scheme hasPrefix:@"http"]) [latest addObject:[NSString stringWithFormat:@"%@",url]];
-                
-            } else [latest addObject:@"empty://about:blank"];
+        if ([controller isKindOfClass:[SGWebViewController class]]) {
+            NSURL *url = ((SGWebViewController *)controller).request.URL;
+            if ([url.scheme hasPrefix:@"http"]) {
+                NSString *str = [NSString stringWithFormat:@"%@", url];
+                NSTimeInterval time = [[NSDate date] timeIntervalSince1970];
+                [tabs addObject:@{@"title":controller.title,
+                                  @"lastUsed":[NSString stringWithFormat:@"%ld", (long)time],
+                                  @"icon":@"",
+                                  @"urlHistory":@[str]}];
+            }
         }
-        [latest addObject:@(self.selectedIndex)];
-        [latest writeToFile:[self savedTabsCacheFile] atomically:YES];
-    });
+    }
+    [[FXSyncStock sharedInstance] setLocalTabs:tabs];
 }
 
 - (UIViewController *)createNewTabViewController {
@@ -429,7 +411,8 @@
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *warning = NSLocalizedString(@"Failed to verify the identity of \"%@\"\nThis is potentially dangerous. Would you like to continue anyway?", nil);
+        NSString *warning = NSLocalizedString(@"Failed to verify the identity of \"%@\"\n"
+                                              "This is potentially dangerous. Would you like to continue anyway?", nil);
         NSString *message = [NSString stringWithFormat:warning, host];
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Verify Server Identity", @"Untrusted certificate")
                                                         message:message

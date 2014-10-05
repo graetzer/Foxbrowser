@@ -6,12 +6,13 @@
 //  Copyright (c) 2014 Simon Peter Grätzer. All rights reserved.
 //
 
-#import "FXSyncStore.h"
 #import <sqlite3.h>
+
+#import "FXSyncStore.h"
 #import "FXSyncEngine.h"
 #import "FXSyncItem.h"
 
-NSString *const kFXSyncStoreFile = @"storage.db";
+NSString *const kFXSyncStoreFile = @"fxstore.db";
 NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 
 @implementation FXSyncStore {
@@ -69,73 +70,79 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 }
 
 - (void)loadCollection:(NSString *)cName
-                 limit:(int)limit
-              callback:(void(^)(NSArray *))callback {
-    NSParameterAssert(cName && callback);
+              callback:(void(^)(NSArray *))block {
+    NSParameterAssert(cName && block);
     
     dispatch_async(_queue, ^{
-        const char sql[] = "SELECT * FROM ? ORDER BY sortindex DESC LIMIT ?;";
+        // TODO allow a flexible limit
+        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ ORDER BY sortindex DESC LIMIT 2000", cName];
         
         sqlite3_stmt *stmnt = nil;
-        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
-            sqlite3_bind_text(stmnt, 1, [cName UTF8String],
-                              (int)cName.length, SQLITE_TRANSIENT);
-            sqlite3_bind_int(stmnt, 2, limit);
-            
+        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
             NSArray *arr = [self _readSyncItems:stmnt collection:cName];
-            callback(arr);
+            block(arr);
         } else {
             [self _throwDBError];
         }
     });
 }
 
-- (void)_createTables {
-    const char sql[] = "CREATE TABLE ? (syncId TEXT PRIMARY KEY, "
-    "modified REAL, sortindex INTEGER, payload TEXT);";
+- (void)loadItem:(NSString *)syncId
+  fromCollection:(NSString *)cName
+        callback:(void (^)(FXSyncItem *))block {
+    NSParameterAssert(syncId && cName && block);
     
-    sqlite3_stmt *stmnt = nil;
-	if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) != SQLITE_OK) {
-		DLog(@"Could not prepare history item statement");
-	} else {
+    dispatch_async(_queue, ^{
+        // TODO allow a flexible limit
+        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE syncId = ?", cName];
         
-        NSArray *all = [FXSyncEngine collectionNames].allKeys;
-        for (NSString *name in all) {
-            sqlite3_bind_text(stmnt, 1, [name UTF8String], -1, SQLITE_TRANSIENT);
-            
-            int res = sqlite3_step(stmnt);
-            if (res != SQLITE_ROW || res != SQLITE_DONE) {
-                [self _throwDBError];
-            }
-            sqlite3_reset(stmnt);
+        sqlite3_stmt *stmnt = nil;
+        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(stmnt, 1, [syncId UTF8String],
+                              (int)syncId.length, SQLITE_TRANSIENT);
+            NSArray *arr = [self _readSyncItems:stmnt collection:cName];
+            block([arr lastObject]);
+        } else {
+            [self _throwDBError];
         }
-        sqlite3_finalize(stmnt);
-    }
+    });
 
+}
+
+- (void)_createTables {
+    
+    NSArray *all = [FXSyncEngine collectionNames].allKeys;
+    for (NSString *cName in all) {
+        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (syncId TEXT PRIMARY KEY, "
+                         "modified REAL, sortindex INTEGER, payload TEXT)", cName];
+        char *err = NULL;
+        sqlite3_exec(_db, sql.UTF8String, NULL, NULL, &err);
+        if (err != NULL) {
+            ELog([NSString stringWithCString:err encoding:NSUTF8StringEncoding]);
+        }
+    }
+    
     const char sql2[] = "CREATE TABLE syncinfo (collection TEXT PRIMARY KEY, modified REAL)";
     sqlite3_exec(_db, sql2, NULL, NULL, NULL);
 }
 
 - (void)saveItem:(FXSyncItem *)item {
+    NSParameterAssert(item.collection && item.syncId);
     dispatch_async(_queue, ^{
         
-        const char sql[] = "INSERT OR REPLACE INTO ? (syncId, modified, sortindex, payload)"
-        " VALUES (?, ?, ?, ?, ?);";
+        NSString *sql = [NSString stringWithFormat:@"INSERT OR REPLACE INTO %@ (syncId, modified, sortindex, payload)"
+                         " VALUES (?, ?, ?, ?)", item.collection];
+        
         sqlite3_stmt *stmnt = nil;
-        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
             
-            sqlite3_bind_text(stmnt, 1, [item.collection UTF8String],
-                              (int)[item.collection length], SQLITE_TRANSIENT);
-            
-            sqlite3_bind_text(stmnt, 2, [item.syncId UTF8String],
+            sqlite3_bind_text(stmnt, 1, [item.syncId UTF8String],
                               (int)item.syncId.length, SQLITE_TRANSIENT);
-            sqlite3_bind_double(stmnt, 3, item.modified);
-            sqlite3_bind_int(stmnt, 4, (int)item.sortindex);
-            sqlite3_bind_text(stmnt, 5, [item.payload bytes],
+            sqlite3_bind_double(stmnt, 2, item.modified);
+            sqlite3_bind_int(stmnt, 3, (int)item.sortindex);
+            sqlite3_bind_text(stmnt, 4, [item.payload bytes],
                               (int)[item.payload length], SQLITE_TRANSIENT);
-            if (sqlite3_step(stmnt) != SQLITE_DONE) {
-                [self _throwDBError];
-            }
+            sqlite3_step(stmnt);
         }
         if (sqlite3_finalize(stmnt) != SQLITE_OK) {
             [self _throwDBError];
@@ -145,13 +152,11 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 
 - (void)deleteItem:(FXSyncItem *)item {
     dispatch_async(_queue, ^{
-        const char sql[] = "DELETE FROM ? WHERE syncId = ?";
+        NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@ WHERE syncId = ?", item.collection];
+
         sqlite3_stmt *stmnt = nil;
-        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
-            
-            sqlite3_bind_text(stmnt, 1, [item.collection UTF8String],
-                              (int)[item.collection length], SQLITE_TRANSIENT);
-            sqlite3_bind_text(stmnt, 2, [item.syncId UTF8String],
+        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
+            sqlite3_bind_text(stmnt, 1, [item.syncId UTF8String],
                               (int)item.syncId.length, SQLITE_TRANSIENT);
             sqlite3_step(stmnt);
         }
@@ -161,31 +166,31 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     });
 }
 
-- (void)deletCollection:(NSString *)collection {
-    dispatch_async(_queue, ^{
-        const char sql[] = "DELETE FROM ?";
-        sqlite3_stmt *stmnt = nil;
-        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
-            
-            sqlite3_bind_text(stmnt, 1, [collection UTF8String],
-                              (int)[collection length], SQLITE_TRANSIENT);
-            sqlite3_step(stmnt);
-        }
-        if (sqlite3_finalize(stmnt) != SQLITE_OK) {
-            [self _throwDBError];
-        }
-    });
-}
+// TODO add where modified
+//- (void)deletCollection:(NSString *)cName {
+//    dispatch_async(_queue, ^{
+//        NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@", cName];
+//
+//        sqlite3_stmt *stmnt = nil;
+//        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
+//            
+//            sqlite3_bind_text(stmnt, 1, [collection UTF8String],
+//                              (int)[collection length], SQLITE_TRANSIENT);
+//            sqlite3_step(stmnt);
+//        }
+//        if (sqlite3_finalize(stmnt) != SQLITE_OK) {
+//            [self _throwDBError];
+//        }
+//    });
+//}
 
 - (NSArray *)changedItemsForCollection:(NSString *)cName {
     __block NSArray *result;
     dispatch_sync(_queue, ^{
-        const char sql[] = "SELECT * FROM ? WHERE modified < 0;";
+        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE modified < 0", cName];
         
         sqlite3_stmt *stmnt = nil;
-        if (sqlite3_prepare_v2(_db, sql, -1, &stmnt, NULL) == SQLITE_OK) {
-            sqlite3_bind_text(stmnt, 1, [cName UTF8String],
-                              (int)cName.length, SQLITE_TRANSIENT);
+        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
             result = [self _readSyncItems:stmnt collection:cName];
         }
     });
@@ -199,6 +204,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     while (sqlite3_step(stmnt) == SQLITE_ROW) {
         
         FXSyncItem *item = [FXSyncItem new];
+        item.collection = cName;
         item.syncId = [[NSString alloc] initWithBytes:sqlite3_column_text(stmnt, 0)
                                                length:sqlite3_column_bytes(stmnt, 0)
                                              encoding:NSUTF8StringEncoding];
@@ -206,7 +212,6 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
         item.sortindex = sqlite3_column_int(stmnt, 2);
         item.payload = [NSData dataWithBytes:sqlite3_column_text(stmnt, 3)
                                       length:sqlite3_column_bytes(stmnt, 3)];
-        item.collection = cName;
         [items addObject:item];
     }
     if (sqlite3_finalize(stmnt) != SQLITE_OK) {

@@ -55,7 +55,7 @@ static NSData* getPublicKeyMod(NSData *pk);
         NSString *sessionToken = _accountCreds[@"sessionToken"];
         //[self recoveryEmailStatusWithToken:sessionToken callback:^(NSDictionary *status)
         NSNumber *verified = _accountCreds[@"verified"];
-        if (sessionToken && [verified boolValue]) {
+        if ([sessionToken length] && [verified boolValue]) {
             
             [self _generateKeyPair];
             NSData* keyData = [self _getPublicKeyBits];
@@ -79,37 +79,45 @@ static NSData* getPublicKeyMod(NSData *pk);
                 }
             }
             
-            NSDictionary *public = @{@"algorithm":@"RS",
-                                     @"n":[modulus decimalString],
-                                     @"e":[exponent decimalString]};
-            DLog(@"Public Key %@", public);
-            
-            [self certificateSignWithToken:sessionToken
-                                 publicKey:public
-                                  duration:kFXCertDurationSeconds
-                                  callback:^(NSDictionary *json, NSError *error) {
-                                      _cert = json[@"cert"];
-                                      
-                                      NSString *assert = [self _assertionWithAudience:kFXSyncAuthUrl
-                                                                             duration:kFXCertDurationSeconds];
-                                      NSString *clientState = [self _computeClientState];
-                                      
-                                      [self _authTokenWithBrowserIDAssert:assert
-                                                              clientState:clientState
-                                                               completion:^(NSDictionary *token, NSError *error) {
-                                                                   if (error == nil) {
-                                                                       _syncInfo  = @{@"token":token,
-                                                                                      @"syncKey":_accountKeys[@"kB"],
-                                                                                      @"sessionToken":sessionToken};
-                                                                       callback(_syncInfo);
-                                                                   } else {
-                                                                       ELog(error);
-                                                                       callback(nil);
-                                                                   }
-                                                               }];
-                                  }];
+            if (exponent != nil && modulus != nil) {
+                NSDictionary *public = @{@"algorithm":@"RS",
+                                         @"n":[modulus decimalString],
+                                         @"e":[exponent decimalString]};
+                [self _requestTokenWithKey:public
+                                  callback:callback];
+            }
         }
     }];
+}
+
+- (void)_requestTokenWithKey:(NSDictionary *)publicKey
+                    callback:(void(^)(NSDictionary *))callback {
+    
+    NSString *sessionToken = _accountCreds[@"sessionToken"];
+    [self certificateSignWithToken:sessionToken
+                         publicKey:publicKey
+                          duration:kFXCertDurationSeconds
+                          callback:^(NSDictionary *json, NSError *error) {
+                              _cert = json[@"cert"];
+                              
+                              NSString *assert = [self _assertionWithAudience:kFXSyncAuthUrl
+                                                                     duration:kFXCertDurationSeconds];
+                              NSString *clientState = [self _computeClientState];
+                              
+                              [self _authTokenWithBrowserIDAssert:assert
+                                                      clientState:clientState
+                                                       completion:^(NSDictionary *token, NSError *error) {
+                                                           if (error == nil) {
+                                                               _syncInfo  = @{@"token":token,
+                                                                              @"syncKey":_accountKeys[@"kB"],
+                                                                              @"sessionToken":sessionToken};
+                                                               callback(_syncInfo);
+                                                           } else {
+                                                               ELog(error);
+                                                               callback(nil);
+                                                           }
+                                                       }];
+                          }];
 }
 
 /* Auth with the token server

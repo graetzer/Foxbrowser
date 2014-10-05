@@ -25,6 +25,7 @@
 		F407FABF17E6231E008179F4 /* libGoogleAnalyticsServices.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F407FABE17E6231E008179F4 /* libGoogleAnalyticsServices.a */; };
 		F40AF1E516D2C9AB00EDFD02 /* JSSearchTools.js in Resources */ = {isa = PBXBuildFile; fileRef = F40AF1E416D2C9AA00EDFD02 /* JSSearchTools.js */; };
 		F41084D719CB46FD0064A9B3 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = F41084D619CB46FD0064A9B3 /* Reachability.m */; };
+		F410E96519E19FEC001F0112 /* FXFolderSelectorController.m in Sources */ = {isa = PBXBuildFile; fileRef = F410E96419E19FEC001F0112 /* FXFolderSelectorController.m */; };
 		F415DCD518140ED40039803C /* default_thumbnail.png in Resources */ = {isa = PBXBuildFile; fileRef = F415DCD318140ED40039803C /* default_thumbnail.png */; };
 		F415DCD618140ED40039803C /* default_thumbnail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F415DCD418140ED40039803C /* default_thumbnail@2x.png */; };
 		F417477E1705FA0300CCB139 /* SGActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = F417477D1705FA0300CCB139 /* SGActivity.m */; };
@@ -142,7 +143,6 @@
 		F46A63B0167CCC1E0004BE43 /* SGSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63AD167CCC1E0004BE43 /* SGSearchField.m */; };
 		F46A63B1167CCC1E0004BE43 /* SGSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63AF167CCC1E0004BE43 /* SGSearchViewController.m */; };
 		F46A63B5167CE08F0004BE43 /* SGPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63B4167CE08F0004BE43 /* SGPageViewController.m */; };
-		F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */; };
 		F47E87ED18133C740083D944 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F47E87EA18133C740083D944 /* libcrypto.a */; };
 		F47E87EE18133C740083D944 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F47E87EB18133C740083D944 /* libssl.a */; };
 		F47E87EF18133C740083D944 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = F47E87EC18133C740083D944 /* LICENSE */; };
@@ -181,6 +181,11 @@
 		F4BF6F3B15B72F5F005FD2B6 /* AboutScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BF6F3915B72F5F005FD2B6 /* AboutScreen.xib */; };
 		F4BF6F4415B73062005FD2B6 /* LogoutController.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFDD15A6446B00EACFBD /* LogoutController.m */; };
 		F4BF6F4615B73D19005FD2B6 /* TabBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = F467FFE515A6446B00EACFBD /* TabBrowserController.m */; };
+		F4C0C0C319DDAD7D00EF8722 /* FXTabsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0C219DDAD7D00EF8722 /* FXTabsViewController.m */; };
+		F4C0C0C719DDADA300EF8722 /* FXLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0C619DDADA300EF8722 /* FXLoginViewController.m */; };
+		F4C0C0CA19DDAE0E00EF8722 /* FXBookmarkTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0C919DDAE0E00EF8722 /* FXBookmarkTableController.m */; };
+		F4C0C0CD19DDB00400EF8722 /* FXSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */; };
+		F4C0C0D319DDCC6200EF8722 /* FXBookmarkEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0D219DDCC6200EF8722 /* FXBookmarkEditController.m */; };
 		F4C1EE2215B07F9F00FB2B97 /* SGBlankController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C1EE2115B07F9F00FB2B97 /* SGBlankController.m */; };
 		F4C1EE2515B07FCB00FB2B97 /* SGPreviewPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */; };
 		F4C3906C161093D500349AA4 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F4C3906B161093D500349AA4 /* Settings.bundle */; };
@@ -268,6 +273,8 @@
 		F40AF1E416D2C9AA00EDFD02 /* JSSearchTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = JSSearchTools.js; sourceTree = "<group>"; };
 		F41084D519CB46FD0064A9B3 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		F41084D619CB46FD0064A9B3 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		F410E96319E19FEB001F0112 /* FXFolderSelectorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXFolderSelectorController.h; path = ui/FXFolderSelectorController.h; sourceTree = "<group>"; };
+		F410E96419E19FEC001F0112 /* FXFolderSelectorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXFolderSelectorController.m; path = ui/FXFolderSelectorController.m; sourceTree = "<group>"; };
 		F415DCD318140ED40039803C /* default_thumbnail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = default_thumbnail.png; sourceTree = "<group>"; };
 		F415DCD418140ED40039803C /* default_thumbnail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_thumbnail@2x.png"; sourceTree = "<group>"; };
 		F417477C1705FA0300CCB139 /* SGActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGActivity.h; sourceTree = "<group>"; };
@@ -302,6 +309,7 @@
 		F42CC1281956626A005411EA /* NSStringPunycodeAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringPunycodeAdditions.m; sourceTree = "<group>"; };
 		F44178B216DBFEC60041FB00 /* SGActivityView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGActivityView.h; sourceTree = "<group>"; };
 		F44178B316DBFEC60041FB00 /* SGActivityView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGActivityView.m; sourceTree = "<group>"; };
+		F442FD1E19D88B7E00298182 /* SGBrowserViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGBrowserViewController.h; sourceTree = "<group>"; };
 		F446638716A2E31F00047704 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		F44D3D3216D6BFE700918D4E /* DejalActivityView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DejalActivityView.h; sourceTree = "<group>"; };
 		F44D3D3316D6BFE700918D4E /* DejalActivityView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DejalActivityView.m; sourceTree = "<group>"; };
@@ -470,8 +478,6 @@
 		F46A63AF167CCC1E0004BE43 /* SGSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGSearchViewController.m; sourceTree = "<group>"; };
 		F46A63B3167CE08F0004BE43 /* SGPageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageViewController.h; sourceTree = "<group>"; };
 		F46A63B4167CE08F0004BE43 /* SGPageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageViewController.m; sourceTree = "<group>"; };
-		F476626B15C82BE600F5E1E5 /* SGProgressCircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGProgressCircleView.h; sourceTree = "<group>"; };
-		F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGProgressCircleView.m; sourceTree = "<group>"; };
 		F47E87EA18133C740083D944 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		F47E87EB18133C740083D944 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
 		F47E87EC18133C740083D944 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -615,12 +621,21 @@
 		F4BF6F3E15B72F6E005FD2B6 /* es */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = es; path = Foxbrowser/es.lproj/AboutScreen.xib; sourceTree = SOURCE_ROOT; };
 		F4BF6F4015B72F75005FD2B6 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = fr; path = Foxbrowser/fr.lproj/AboutScreen.xib; sourceTree = SOURCE_ROOT; };
 		F4BF6F4215B72F7D005FD2B6 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "zh-Hant"; path = "Foxbrowser/zh-Hant.lproj/AboutScreen.xib"; sourceTree = SOURCE_ROOT; };
+		F4C0C0C119DDAD7D00EF8722 /* FXTabsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXTabsViewController.h; path = UI/FXTabsViewController.h; sourceTree = "<group>"; };
+		F4C0C0C219DDAD7D00EF8722 /* FXTabsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXTabsViewController.m; path = UI/FXTabsViewController.m; sourceTree = "<group>"; };
+		F4C0C0C519DDADA300EF8722 /* FXLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXLoginViewController.h; path = UI/FXLoginViewController.h; sourceTree = "<group>"; };
+		F4C0C0C619DDADA300EF8722 /* FXLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXLoginViewController.m; path = UI/FXLoginViewController.m; sourceTree = "<group>"; };
+		F4C0C0C819DDAE0E00EF8722 /* FXBookmarkTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXBookmarkTableController.h; path = UI/FXBookmarkTableController.h; sourceTree = "<group>"; };
+		F4C0C0C919DDAE0E00EF8722 /* FXBookmarkTableController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXBookmarkTableController.m; path = UI/FXBookmarkTableController.m; sourceTree = "<group>"; };
+		F4C0C0CB19DDB00400EF8722 /* FXSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXSettingsViewController.h; path = UI/FXSettingsViewController.h; sourceTree = "<group>"; };
+		F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXSettingsViewController.m; path = UI/FXSettingsViewController.m; sourceTree = "<group>"; };
+		F4C0C0D119DDCC6200EF8722 /* FXBookmarkEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXBookmarkEditController.h; path = UI/FXBookmarkEditController.h; sourceTree = "<group>"; };
+		F4C0C0D219DDCC6200EF8722 /* FXBookmarkEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXBookmarkEditController.m; path = UI/FXBookmarkEditController.m; sourceTree = "<group>"; };
 		F4C1EE2015B07F9F00FB2B97 /* SGBlankController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGBlankController.h; sourceTree = "<group>"; };
 		F4C1EE2115B07F9F00FB2B97 /* SGBlankController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBlankController.m; sourceTree = "<group>"; };
 		F4C1EE2315B07FCB00FB2B97 /* SGPreviewPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPreviewPanel.h; sourceTree = "<group>"; };
 		F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPreviewPanel.m; sourceTree = "<group>"; };
 		F4C3906B161093D500349AA4 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
-		F4D03D4616C6A9BA00A67B9F /* SGBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGBrowserViewController.h; sourceTree = "<group>"; };
 		F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
 		F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGNavViewController.h; sourceTree = "<group>"; };
 		F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGNavViewController.m; sourceTree = "<group>"; };
@@ -720,20 +735,21 @@
 			isa = PBXGroup;
 			children = (
 				F406C001195F25A300A84C76 /* ext */,
+				F406C026195F25A300A84C76 /* NSData+Ext.h */,
+				F406C027195F25A300A84C76 /* NSData+Ext.m */,
 				F406C01C195F25A300A84C76 /* FXAccountClient.h */,
 				F406C01D195F25A300A84C76 /* FXAccountClient.m */,
 				F406C01E195F25A300A84C76 /* FXUserAuth.h */,
 				F406C01F195F25A300A84C76 /* FXUserAuth.m */,
+				F406C024195F25A300A84C76 /* FXSyncItem.h */,
+				F406C025195F25A300A84C76 /* FXSyncItem.m */,
 				F406C020195F25A300A84C76 /* FXSyncStore.h */,
 				F406C021195F25A300A84C76 /* FXSyncStore.m */,
 				F406C022195F25A300A84C76 /* FXSyncEngine.h */,
 				F406C023195F25A300A84C76 /* FXSyncEngine.m */,
 				F4D410E119D2641200E22491 /* FXSyncStock.h */,
 				F4D410E219D2641200E22491 /* FXSyncStock.m */,
-				F406C024195F25A300A84C76 /* FXSyncItem.h */,
-				F406C025195F25A300A84C76 /* FXSyncItem.m */,
-				F406C026195F25A300A84C76 /* NSData+Ext.h */,
-				F406C027195F25A300A84C76 /* NSData+Ext.m */,
+				F4C0C0C419DDAD8000EF8722 /* UI */,
 			);
 			path = FXSync;
 			sourceTree = "<group>";
@@ -800,6 +816,19 @@
 				F41084D619CB46FD0064A9B3 /* Reachability.m */,
 			);
 			path = Reachability;
+			sourceTree = "<group>";
+		};
+		F410E96619E1AC82001F0112 /* Bookmarks */ = {
+			isa = PBXGroup;
+			children = (
+				F4C0C0C819DDAE0E00EF8722 /* FXBookmarkTableController.h */,
+				F4C0C0C919DDAE0E00EF8722 /* FXBookmarkTableController.m */,
+				F4C0C0D119DDCC6200EF8722 /* FXBookmarkEditController.h */,
+				F4C0C0D219DDCC6200EF8722 /* FXBookmarkEditController.m */,
+				F410E96319E19FEB001F0112 /* FXFolderSelectorController.h */,
+				F410E96419E19FEC001F0112 /* FXFolderSelectorController.m */,
+			);
+			name = Bookmarks;
 			sourceTree = "<group>";
 		};
 		F417477F170605B600CCB139 /* activities */ = {
@@ -1305,8 +1334,6 @@
 			isa = PBXGroup;
 			children = (
 				F4641A2F16029FE200AF0E18 /* TabsBar */,
-				F476626B15C82BE600F5E1E5 /* SGProgressCircleView.h */,
-				F476626C15C82BE600F5E1E5 /* SGProgressCircleView.m */,
 				F4FE7F1E15B48F8900471BD1 /* SGAddButton.h */,
 				F4FE7F1F15B48F8900471BD1 /* SGAddButton.m */,
 				F49EE8A415A24426001B4D5F /* SGTabDefines.h */,
@@ -1359,6 +1386,20 @@
 			path = WebView;
 			sourceTree = "<group>";
 		};
+		F4C0C0C419DDAD8000EF8722 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				F410E96619E1AC82001F0112 /* Bookmarks */,
+				F4C0C0C119DDAD7D00EF8722 /* FXTabsViewController.h */,
+				F4C0C0C219DDAD7D00EF8722 /* FXTabsViewController.m */,
+				F4C0C0C519DDADA300EF8722 /* FXLoginViewController.h */,
+				F4C0C0C619DDADA300EF8722 /* FXLoginViewController.m */,
+				F4C0C0CB19DDB00400EF8722 /* FXSettingsViewController.h */,
+				F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */,
+			);
+			name = UI;
+			sourceTree = "<group>";
+		};
 		F4C1EE1F15B07F9F00FB2B97 /* Blank */ = {
 			isa = PBXGroup;
 			children = (
@@ -1377,7 +1418,7 @@
 			children = (
 				F4D03D4A16C6A9BA00A67B9F /* SGNavViewController.h */,
 				F4D03D4B16C6A9BA00A67B9F /* SGNavViewController.m */,
-				F4D03D4616C6A9BA00A67B9F /* SGBrowserViewController.h */,
+				F442FD1E19D88B7E00298182 /* SGBrowserViewController.h */,
 				F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */,
 				F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */,
 				F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */,
@@ -1697,6 +1738,7 @@
 				F49EE8AF15A24426001B4D5F /* SGTabsViewController.m in Sources */,
 				F49EE8B015A24426001B4D5F /* SGTabsToolbar.m in Sources */,
 				F49EE8B815A246AE001B4D5F /* SGWebViewController.m in Sources */,
+				F4C0C0D319DDCC6200EF8722 /* FXBookmarkEditController.m in Sources */,
 				F48AF7BA15A39632003A8DF0 /* UIWebView+WebViewAdditions.m in Sources */,
 				F406C02D195F25A300A84C76 /* HawkAuth.m in Sources */,
 				F467FFA915A6446300EACFBD /* JPAKEClient.m in Sources */,
@@ -1705,6 +1747,7 @@
 				F406C02F195F25A300A84C76 /* HawkError.m in Sources */,
 				F467FFAC15A6446300EACFBD /* JPAKEReporter.m in Sources */,
 				F467FFAF15A6446300EACFBD /* jpake.c in Sources */,
+				F4C0C0C719DDADA300EF8722 /* FXLoginViewController.m in Sources */,
 				F467FFB015A6446300EACFBD /* jpake_err.c in Sources */,
 				F467FFC315A6446300EACFBD /* RegexKitLite.m in Sources */,
 				F467001815A6446B00EACFBD /* NSData+AES.m in Sources */,
@@ -1721,6 +1764,7 @@
 				F467006115A64C9500EACFBD /* CryptoUtils.m in Sources */,
 				F467006215A64C9500EACFBD /* Fetcher.m in Sources */,
 				F406C02A195F25A300A84C76 /* CryptoProxy.m in Sources */,
+				F4C0C0CD19DDB00400EF8722 /* FXSettingsViewController.m in Sources */,
 				F467006915A64C9500EACFBD /* NSObject+SBJSON.m in Sources */,
 				F467006A15A64C9500EACFBD /* NSString+SBJSON.m in Sources */,
 				F467006B15A64C9500EACFBD /* SBJSON.m in Sources */,
@@ -1753,13 +1797,13 @@
 				F45E1ED01819923000786048 /* CacheStoragePolicy.m in Sources */,
 				F4ADE13D19AF9C8D00A5B380 /* tommath.c in Sources */,
 				F406C039195F25A300A84C76 /* NSData+Ext.m in Sources */,
-				F476626D15C82BE600F5E1E5 /* SGProgressCircleView.m in Sources */,
 				F46A6387167C31CE0004BE43 /* ASIAuthenticationDialog.m in Sources */,
 				F46A6388167C31CE0004BE43 /* ASIDataCompressor.m in Sources */,
 				F46A6389167C31CE0004BE43 /* ASIDataDecompressor.m in Sources */,
 				F46A638A167C31CE0004BE43 /* ASIDownloadCache.m in Sources */,
 				F46A638B167C31CE0004BE43 /* ASIFormDataRequest.m in Sources */,
 				F46A638C167C31CE0004BE43 /* ASIHTTPRequest.m in Sources */,
+				F410E96519E19FEC001F0112 /* FXFolderSelectorController.m in Sources */,
 				F406C031195F25A300A84C76 /* NSString+Trim.m in Sources */,
 				F46A638D167C31CE0004BE43 /* ASIInputStream.m in Sources */,
 				F46A638E167C31CE0004BE43 /* ASINetworkQueue.m in Sources */,
@@ -1767,6 +1811,7 @@
 				F46A63B1167CCC1E0004BE43 /* SGSearchViewController.m in Sources */,
 				F46A63B5167CE08F0004BE43 /* SGPageViewController.m in Sources */,
 				F406C038195F25A300A84C76 /* FXSyncItem.m in Sources */,
+				F4C0C0CA19DDAE0E00EF8722 /* FXBookmarkTableController.m in Sources */,
 				F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */,
 				F4BB5B1116C32C8300275E31 /* Appirater.m in Sources */,
 				F4D03D5316C6A9BA00A67B9F /* SGBrowserViewController.m in Sources */,
@@ -1785,6 +1830,7 @@
 				F417481617060B0200CCB139 /* SGMailActivity.m in Sources */,
 				F45E1ED21819923000786048 /* CustomHTTPProtocol.m in Sources */,
 				F417481917061ED500CCB139 /* SGSinaWeiboActivity.m in Sources */,
+				F4C0C0C319DDAD7D00EF8722 /* FXTabsViewController.m in Sources */,
 				F417481C17061F2D00CCB139 /* SGTwitterActivity.m in Sources */,
 				F406C037195F25A300A84C76 /* FXSyncEngine.m in Sources */,
 				F4A7A3D9170AE33500E5A0E8 /* PopoverView.m in Sources */,

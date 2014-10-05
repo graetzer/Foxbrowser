@@ -24,12 +24,8 @@
 #import "SGPageViewController.h"
 #import "SGTabDefines.h"
 #import "SGSearchField.h"
-#import "SGActivityView.h"
 
-#import "BookmarkPage.h"
-#import "SettingsController.h"
-#import "WelcomePage.h"
-#import "SGNavViewController.h"
+#import "FXBookmarkTableController.h"
 
 #import "GAI.h"
 
@@ -90,7 +86,7 @@
         btn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         btn.backgroundColor = [UIColor clearColor];
         btn.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15];
-        btn.titleLabel.minimumScaleFactor = 0.75;
+        btn.titleLabel.minimumScaleFactor = 0.5;
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
             [btn setTitleColor:UIColorFromHEX(0x007FFF) forState:UIControlStateNormal];
         } else {
@@ -102,6 +98,11 @@
         [self addSubview:btn];
         _cancelButton = btn;
         
+        __strong UIProgressView *prV = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, 100, 3)];
+        prV.progressViewStyle = UIProgressViewStyleBar;
+        [self addSubview:prV];
+        _progressView = prV;
+        
         __strong SGSearchField *field = [[SGSearchField alloc] initWithFrame:CGRectMake(0, 0, 200., 30.)];
         field.delegate = self;
         [field.stopItem addTarget:self.browser action:@selector(stop) forControlEvents:UIControlEventTouchUpInside];
@@ -109,6 +110,7 @@
         [self addSubview:field];
         _searchField = field;
         
+        _searchMaskVisible = NO;
         _searchController = [SGSearchViewController new];
         _searchController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _searchController.delegate = self;
@@ -133,12 +135,12 @@
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
         topOffset = [self.browser.topLayoutGuide length];
     }
-
+    
     if (!_searchMaskVisible) {
         CGFloat buttonSize = 30;
         _backButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2, buttonSize, buttonSize);
         
-        posX += _backButton.frame.size.width + margin;
+        posX += buttonSize + margin;
         _forwardButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2, buttonSize, buttonSize);
         
         if (_forwardButton.enabled) {
@@ -153,6 +155,7 @@
     CGFloat searchWidth = width - posX - _tabsButton.frame.size.width - _optionsButton.frame.size.width - 3*margin;
     _searchField.frame = CGRectMake(posX, (height - _searchField.frame.size.height + topOffset)/2,
                                     searchWidth, _searchField.frame.size.height);
+    _progressView.frame = CGRectMake(0, height-3, width, 3);
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -165,33 +168,66 @@
 }
 
 - (void)updateInterface {
-    if (!([self.searchField isFirstResponder] || _searchMaskVisible))
-        self.searchField.text = [self.browser URL].absoluteString;
+    if (!([_searchField isFirstResponder] || _searchMaskVisible)) {
+        _searchField.text = [_browser URL].absoluteString;
+    }
     
-    NSString *text = [NSString stringWithFormat:@"%lu", (unsigned long)_browser.count];
+    NSString *text = [NSString stringWithFormat:@"%lu", (unsigned long)self.browser.count];
     [_tabsButton setTitle:text forState:UIControlStateNormal];
     
-    self.backButton.enabled = self.browser.canGoBack;
-    if (_forwardButton.enabled != self.browser.canGoForward)
+    _backButton.enabled = _browser.canGoBack;
+    if (_forwardButton.enabled != self.browser.canGoForward) {
         [UIView animateWithDuration:0.2 animations:^{
             _forwardButton.enabled = self.browser.canGoForward;
             [self _layout];
         }];
-    
-    if (self.browser.canStopOrReload) {
-        if ([self.browser isLoading]) {
-            self.searchField.state = SGSearchFieldStateStop;
-        } else {
-            self.searchField.state = SGSearchFieldStateReload;
-        }
-    } else {
-        self.searchField.state = SGSearchFieldStateDisabled;
     }
+    
+    if ([_browser canStopOrReload]) {
+        BOOL loading = [_browser isLoading];
+        if (loading) {
+            _searchField.state = SGSearchFieldStateStop;
+        } else {
+            _searchField.state = SGSearchFieldStateReload;
+        }
+        
+        static BOOL loadingOld;
+        float p = _progressView.progress;
+        NSInteger tag = (NSInteger)[_browser request];
+        if (loading && loadingOld) {
+            
+            // Make sure we haven't changed the website while we are loading
+            if (_progressView.tag != tag) {
+                _progressView.tag = tag;
+                _progressView.progress = 0;
+                _progressView.hidden = YES;
+            } else if (p < 0.8f) {
+                _progressView.hidden = NO;
+                [_progressView setProgress:p + 0.2f animated:YES];
+            }
+            
+        } else if (!loading && !loadingOld) {
+            if (0.f < p && p < 1.f) {
+                _progressView.hidden = NO;
+                [_progressView setProgress:1.f animated:YES];
+            } else if (p != 0.f) {
+                _progressView.hidden = YES;
+                _progressView.progress = 0.f;
+            }
+        }        loadingOld = loading;
+        
+    } else {
+        _searchField.state = SGSearchFieldStateDisabled;
+        _progressView.hidden = YES;
+    }
+    
 }
 
 - (void)setSubviewsAlpha:(CGFloat)alpha {
     for (UIView *view in self.subviews) {
-        view.alpha = alpha;
+        if (view != _progressView) {
+            view.alpha = alpha;
+        }
     }
 }
 
@@ -213,9 +249,9 @@
                         NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
                         NSLocalizedString(@"Settings", nil)];
     PopoverView *pop = [PopoverView showPopoverAtPoint:CGPointMake(CGRectGetMidX(sender.frame), CGRectGetMaxY(sender.frame)-7)
-                             inView:sender.superview
-                    withStringArray:titles
-                           delegate:self];
+                                                inView:sender.superview
+                                       withStringArray:titles
+                                              delegate:self];
     pop.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
 }
 
@@ -224,37 +260,36 @@
     
     NSURL *url = [self.browser URL];
     if (index == 0) {
-        if (!self.bookmarks) {
-            BookmarkPage *bookmarksPage = [BookmarkPage new];
-            self.bookmarks = [[UINavigationController alloc] initWithRootViewController:bookmarksPage];
+        if (!_bookmarks) {
+            _bookmarks = [[UINavigationController alloc] initWithRootViewController:[FXBookmarkTableController new]];
         }
-        [self.browser presentViewController:self.bookmarks animated:YES completion:NULL];
+        [_browser presentViewController:_bookmarks animated:YES completion:NULL];
     } else if (index == 1 && url) {
-        SGActivityView *share = [[SGActivityView alloc] initWithActivityItems:@[url]
-                                                        applicationActivities:nil];
-        share.completionHandler = ^(NSString *activity, BOOL completed) {
+        UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:@[url]
+                                                                                 applicationActivities:nil];
+        activityVC.completionHandler = ^(NSString *activityType, BOOL completed) {
             if (completed) {
-                [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activity
+                [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activityType
                                                                                   action:@"Share URL"
                                                                                   target:url.absoluteString] build]];
             }
         };
-        [share show];
+        [_browser presentViewController:activityVC animated:YES completion:NULL];
     } else if (index == 2) {
         [[UIApplication sharedApplication] openURL:url];
     } else if (index == 3) {
-        BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
-        if (!showedFirstRunPage) {
-            WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
-            UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
-            navController.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentViewController:navController animated:YES completion:NULL];
-        } else {
-            SettingsController *settings = [SettingsController new];
-            UINavigationController *nav = [[SGNavViewController alloc] initWithRootViewController:settings];
-            nav.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentViewController:nav animated:YES completion:NULL];
-        }
+//        BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
+//        if (!showedFirstRunPage) {
+//            WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
+//            UINavigationController *navController = [[SGNavViewController alloc] initWithRootViewController:welcomePage];
+//            navController.modalPresentationStyle = UIModalPresentationFormSheet;
+//            [self.browser presentViewController:navController animated:YES completion:NULL];
+//        } else {
+//            SettingsController *settings = [SettingsController new];
+//            UINavigationController *nav = [[SGNavViewController alloc] initWithRootViewController:settings];
+//            nav.modalPresentationStyle = UIModalPresentationFormSheet;
+//            [self.browser presentViewController:nav animated:YES completion:NULL];
+//        }
     }
 }
 
@@ -262,6 +297,7 @@
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     [self _presentSearchController];
+    [textField selectAll:self];
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {

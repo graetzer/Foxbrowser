@@ -8,6 +8,23 @@
 
 #import <Foundation/Foundation.h>
 
+@class FXSyncEngine;
+
+FOUNDATION_EXPORT NSString *const kFXSyncEngineErrorDomain;
+typedef NS_ENUM(NSUInteger, kFXSyncEngineError) {
+    kFXSyncEngineErrorUnsupportedStorageVersion,
+    kFXSyncEngineErrorEncryption,
+    kFXSyncEngineErrorEndOfLife,
+    kFXSyncEngineErrorMaintenance
+};
+
+@protocol FXSyncEngineDelegate <NSObject>
+@required
+- (void)syncEngine:(FXSyncEngine *)engine didLoadCollection:(NSString *)cName;
+- (void)syncEngine:(FXSyncEngine *)engine didFailWithError:(NSError *)error;
+- (void)syncEngine:(FXSyncEngine *)engine alertWithString:(NSString *)alert;
+@end
+
 @class FXUserAuth, Reachability;
 /*! Supposed to do the actual sync process. 
  *
@@ -19,15 +36,19 @@
 /*! Map collections to sync sizes*/
 + (NSDictionary *)collectionNames;
 
-@property (nonatomic, copy) NSNumber *localTimeOffsetSec;
 @property (strong, nonatomic) FXUserAuth *userAuth;
 @property (strong, nonatomic, readonly) Reachability *reachability;
 
+@property (weak, nonatomic) id<FXSyncEngineDelegate> delegate;
+
 @property (readonly, getter=isSyncRunning) BOOL syncRunning;
+/*! Uses the iOS vendor identifier */
+@property (nonatomic, readonly) NSString *clientID;
+@property (nonatomic, readonly) NSString *clientName;
+
 - (void)startSync;
 
 @end
-
 
 FOUNDATION_EXPORT NSString *const kFXTabsCollectionKey;
 FOUNDATION_EXPORT NSString *const kFXBookmarksCollectionKey;

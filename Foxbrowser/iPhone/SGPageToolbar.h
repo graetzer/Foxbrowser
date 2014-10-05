@@ -38,6 +38,8 @@
 @property (weak, readonly, nonatomic) UIButton *tabsButton;
 @property (weak, readonly, nonatomic) UIButton *cancelButton;
 
+@property (weak, nonatomic) UIProgressView *progressView;
+
 @property (strong, nonatomic) UINavigationController *bookmarks;
 @property (weak, nonatomic) SGPageViewController *browser;
 

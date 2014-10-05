@@ -21,10 +21,10 @@
 //
 
 #import "SGBlankController.h"
-#import "SGTabsViewController.h"
 #import "UIViewController+SGBrowserViewController.h"
-#import "TabBrowserController.h"
+#import "FXTabsViewController.h"
 #import "SGBottomView.h"
+#import "SGBrowserViewController.h"
 
 @implementation SGBlankController
 
@@ -85,16 +85,17 @@
     [scrollView addSubview:previewPanel];
     _previewPanel = previewPanel;
     
-    TabBrowserController *tabBrowser = [[TabBrowserController alloc] initWithStyle:UITableViewStylePlain];
+    FXTabsViewController *tabBrowser = [[FXTabsViewController alloc] initWithStyle:UITableViewStylePlain];
     [self addChildViewController:tabBrowser];
     tabBrowser.view.frame = CGRectMake(self.view.bounds.size.width, 0, SG_TAB_WIDTH, _scrollView.bounds.size.height);
     tabBrowser.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
     [self.scrollView addSubview:tabBrowser.view];
     [tabBrowser didMoveToParentViewController:self];
-    self.tabBrowser = tabBrowser;
+    self.tabsController = tabBrowser;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(refresh)
                                                  name:kWeaveDataRefreshNotification
@@ -110,15 +111,6 @@
     [super viewDidAppear:animated];
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
     [self.browserViewController updateInterface];
-}
-
-- (void)willMoveToParentViewController:(UIViewController *)parent {
-    [super willMoveToParentViewController:parent];
-    if (parent == nil) {
-        [self.tabBrowser willMoveToParentViewController:nil];
-        [self.tabBrowser removeFromParentViewController];
-        self.tabBrowser = nil;
-    }
 }
 
 - (void)viewWillLayoutSubviews {

@@ -6,7 +6,7 @@
 //
 //
 //  Copyright (c) 2012-2013 Simon PEter Grätzer
-//  
+//
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -21,11 +21,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
-#import "SGActivityView.h"
+#import <CoreGraphics/CoreGraphics.h>
 #import "SGSearchViewController.h"
 
-@class SGSearchViewController, SGProgressCircleView, BookmarkPage, SGSearchField, SGBrowserViewController;
+@class SGSearchViewController, SGProgressCircleView, SGBrandViewController, SGSearchField, SGBrowserViewController;
 
 @interface SGTabsToolbar : UIView <UITextFieldDelegate, UIPopoverControllerDelegate, UIActionSheetDelegate, SGSearchDelegate>
 
@@ -34,10 +33,9 @@
 
 @property (weak, readonly, nonatomic) UIButton *forwardItem;
 @property (weak, readonly, nonatomic) UIButton *backItem;
-@property (weak, readonly, nonatomic) UIButton *bookmarksItem;
 @property (weak, readonly, nonatomic) UIButton *systemItem;
 
-@property (weak, readonly, nonatomic) SGProgressCircleView *progressView;
+@property (weak, nonatomic) UIProgressView *progressView;
 
 @property (strong, nonatomic, readonly) UINavigationController *bookmarks;
 @property (strong, nonatomic, readonly) UIPopoverController *popoverController;

@@ -34,10 +34,7 @@
 #import "GAI.h"
 
 @implementation SGWebViewController {
-    //NSTimer *_updateTimer;
     NSDictionary *_selected;
-    
-    BOOL _animating;
 }
 
 // TODO Allow to change this preferences in the Settings App
@@ -112,15 +109,6 @@
     self.webView.delegate = self;
     self.webView.scalesPageToFit = YES;
     self.webView.allowsInlineMediaPlayback = YES;
-    
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        __strong UIActivityIndicatorView *ind = [[UIActivityIndicatorView alloc]
-                                                 initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        ind.transform = CGAffineTransformMakeScale(2, 2);
-        self.indicator = ind;
-        ind.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin;
-        [self.view addSubview:ind];
-    }
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
@@ -144,21 +132,6 @@
         [self openRequest:nil];
     }
 }
-
-
-- (void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
-    if (!_animating) [self _layout];
-}
-
-- (void)_layout {
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        UIActivityIndicatorView *ind = self.indicator;
-        ind.center = CGPointMake(self.view.bounds.size.width - ind.frame.size.width/2 - 10, ind.frame.size.height/2 + 10);
-    }
-}
-
-
 
 #pragma mark - UILongPressGesture
 
@@ -338,17 +311,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     _loading = YES;
     [self _dismissSearchToolbar];
-    
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-    [self.indicator startAnimating];
-    }
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     _loading = NO;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.indicator stopAnimating];
-    }
     
     [self.webView loadJSTools];
     [self.webView disableTouchCallout];
@@ -369,9 +335,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     // If an error oocured, disable the loading stuff
     _loading = NO;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        [self.indicator stopAnimating];
-    }
     
     DLog(@"WebView error code: %ld", (long)error.code);
     //ignore these

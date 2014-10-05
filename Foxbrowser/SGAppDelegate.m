@@ -300,9 +300,6 @@ NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
     
 	// Workaround for #602419 - If the wifi is turned off, it acts as if a blank account is signed in
 	// See a more detailed description in LogoutController
-	
-    //	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useCustomServer"];
-    //	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"customServerURL"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveShowedFirstRunPage];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"needsFullReset"];
 	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveBackgroundedAtTime];

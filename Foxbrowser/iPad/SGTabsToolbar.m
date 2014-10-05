@@ -6,33 +6,18 @@
 //
 //
 //  Copyright (c) 2012-2013 Simon Peter Grätzer
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-//
+
 
 #import "SGTabsToolbar.h"
 #import "SGTabDefines.h"
 #import "SGAppDelegate.h"
 #import "SGTabsViewController.h"
-#import "SGProgressCircleView.h"
 #import "SGSearchField.h"
 #import "SGBrowserViewController.h"
-#import "SGActivityView.h"
-
-#import "BookmarkPage.h"
 #import "SettingsController.h"
 #import "WelcomePage.h"
-
+#import "BookmarkPage.h"
 #import "GAI.h"
 
 @implementation SGTabsToolbar
@@ -45,7 +30,7 @@
         self.backgroundColor = kSGBrowserBarColor;
         
         CGRect btnRect = CGRectMake(0, 0, 30, 30);
-
+        
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
         btn.frame = btnRect;
         btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
@@ -71,24 +56,11 @@
         btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
         btn.backgroundColor = [UIColor clearColor];
         btn.showsTouchWhenHighlighted = YES;
-        [btn setImage:[UIImage imageNamed:@"bookmark"] forState:UIControlStateNormal];
-        [btn addTarget:self action:@selector(showLibrary:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:btn];
-        _bookmarksItem = btn;
-        
-        btn = [UIButton buttonWithType:UIButtonTypeCustom];
-        btn.frame = btnRect;
-        btn.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
-        btn.backgroundColor = [UIColor clearColor];
-        btn.showsTouchWhenHighlighted = YES;
-        [btn setImage:[UIImage imageNamed:@"system"] forState:UIControlStateNormal];
+        [btn setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
+        [btn setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
         [btn addTarget:self action:@selector(showOptions:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:btn];
         _systemItem = btn;
-        
-        __strong SGProgressCircleView *progView = [[SGProgressCircleView alloc] init];
-        [self addSubview:progView];
-        _progressView = progView;
         
         __strong SGSearchField* search = [[SGSearchField alloc] initWithFrame:CGRectMake(0, 0, 200., 30.)];
         search.delegate = self;
@@ -100,7 +72,12 @@
         __strong SGSearchViewController *searchC = [[SGSearchViewController alloc] initWithStyle:UITableViewStylePlain];
         searchC.delegate = self;
         _searchController = searchC;
-                
+        
+        __strong UIProgressView *progressV = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, 100, 3)];
+        progressV.progressViewStyle = UIProgressViewStyleBar;
+        [self addSubview:progressV];
+        _progressView = progressV;
+        
         [self updateInterface];
     }
     return self;
@@ -121,43 +98,25 @@
     CGFloat length = 40.;
     
     CGRect btnR = CGRectMake(diff, (self.bounds.size.height - length)/2, length, length);
-    self.backItem.frame = btnR;
+    _backItem.frame = btnR;
     
     btnR.origin.x += length + diff;
-    self.forwardItem.frame = btnR;
+    _forwardItem.frame = btnR;
     
-    btnR.origin.x += length + 2*diff;
-    self.bookmarksItem.frame = btnR;
-    
-    btnR.origin.x += length + diff;
-    self.systemItem.frame = btnR;
-    
-    CGRect org = self.searchField.frame;
-    org.size.width = self.bounds.size.width - (btnR.origin.x + 2*length + 3*diff);
-    org.origin.x = self.bounds.size.width - 2*diff - org.size.width;
+    CGRect org = _searchField.frame;
+    org.size.width = self.bounds.size.width - (btnR.origin.x + 3*diff + 2*length);
+    org.origin.x = btnR.origin.x + length + diff;
     org.origin.y = (self.bounds.size.height - org.size.height)/2;
-    self.searchField.frame = org;
+    _searchField.frame = org;
     
-    btnR.origin.x = org.origin.x - diff - length;
-    self.progressView.frame = btnR;
+    btnR.origin.x = CGRectGetMaxX(org) + diff;
+    _systemItem.frame = btnR;
+    
+    CGRect b = self.bounds;
+    _progressView.frame = CGRectMake(0, b.size.height-3, b.size.width, 3);
 }
 
 #pragma mark - Libary
-
-- (IBAction)showLibrary:(UIButton *)sender {
-    [self _destroyOverlays];
-    
-    if (!self.bookmarks) {
-        _bookmarks = [[UINavigationController alloc] initWithRootViewController:[BookmarkPage new]];
-    }
-    
-    _popoverController = [[UIPopoverController alloc] initWithContentViewController:self.bookmarks];
-    self.popoverController.delegate = self;
-    [self.popoverController presentPopoverFromRect:sender.frame
-                                            inView:self
-                          permittedArrowDirections:UIPopoverArrowDirectionAny
-                                          animated:YES];
-}
 
 - (IBAction)showOptions:(UIButton *)sender {
     [self _destroyOverlays];
@@ -167,77 +126,96 @@
                                       cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
                                  destructiveButtonTitle:nil
                                       otherButtonTitles:
-                        NSLocalizedString(@"Share Page", @"Share url of page"),
-                        NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-                        NSLocalizedString(@"Settings", nil), nil];
+                    NSLocalizedString(@"Notifications", @"Notifications"),
+                    NSLocalizedString(@"Share Page", @"Share url of page"),
+                    NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
+                    // NSLocalizedString(@"Settings", nil),
+                    nil];
     [self.actionSheet showFromRect:sender.frame inView:self animated:YES];
 }
 
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    [self _destroyOverlays];
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
     NSURL *url = [self.browser URL];
     
-    if (buttonIndex == 0 && url != nil) {
-        SGActivityView *share = [[SGActivityView alloc] initWithActivityItems:@[url] applicationActivities:nil];
-        share.completionHandler = ^(NSString *activity, BOOL completed) {
-            if (completed) {
-                [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activity
-                                                                                  action:@"Share URL"
-                                                                                  target:url.absoluteString] build]];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (buttonIndex == 0) {
+            if (!_bookmarks) {
+                _bookmarks = [[UINavigationController alloc] initWithRootViewController:[BookmarkPage new]];
             }
-        };
-        [share show];
-    }
-    
-    if (buttonIndex == 1) // Open in mobile safari
-        [[UIApplication sharedApplication] openURL:url];
-    
-    if (buttonIndex == 2) {// Show settings or welcome page
-        BOOL showedFirstRunPage = [[NSUserDefaults standardUserDefaults] boolForKey:kWeaveShowedFirstRunPage];
-        if (!showedFirstRunPage) {
-            WelcomePage* welcomePage = [[WelcomePage alloc] initWithNibName:nil bundle:nil];
-            UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:welcomePage];
-            navController.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentViewController:navController animated:YES completion:NULL];
-        } else {
-            SettingsController *settings = [SettingsController new];
-            UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:settings];
-            nav.modalPresentationStyle = UIModalPresentationFormSheet;
-            [self.browser presentViewController:nav animated:YES completion:NULL];
+            _popoverController = [[UIPopoverController alloc] initWithContentViewController:_bookmarks];
+            _popoverController.delegate = self;
+            [_popoverController presentPopoverFromRect:_systemItem.frame
+                                                inView:self
+                              permittedArrowDirections:UIPopoverArrowDirectionAny
+                                              animated:YES];
+        } else if (buttonIndex == 1 && url != nil) {
+            UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:@[url]
+                                                                                     applicationActivities:nil];
+            activityVC.completionHandler = ^(NSString *activityType, BOOL completed) {
+                if (completed) {
+                    [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activityType
+                                                                                      action:@"Share URL"
+                                                                                      target:url.absoluteString] build]];
+                }
+            };
+            
+            _popoverController = [[UIPopoverController alloc] initWithContentViewController:activityVC];
+            _popoverController.delegate = self;
+            [_popoverController presentPopoverFromRect:_systemItem.frame
+                                                inView:self
+                              permittedArrowDirections:UIPopoverArrowDirectionAny
+                                              animated:YES];
+        } else if (buttonIndex == 2) {// Open in mobile safari
+            [[UIApplication sharedApplication] openURL:url];
         }
-    }
+    });
 }
 
 - (void)updateInterface {
-    if (![self.searchField isFirstResponder]) {
-            self.searchField.text = [self.browser URL].absoluteString;
+    if (![_searchField isFirstResponder]) {
+        _searchField.text = [_browser URL].absoluteString;
     }
     
-    self.forwardItem.enabled = [self.browser canGoForward];
-    self.backItem.enabled = [self.browser canGoBack];
+    _forwardItem.enabled = [_browser canGoForward];
+    _backItem.enabled = [_browser canGoBack];
     
-    BOOL canStopOrReload = [self.browser canStopOrReload];
+    BOOL canStopOrReload = [_browser canStopOrReload];
     if (canStopOrReload) {
-        if ([self.browser isLoading]) {
-            self.searchField.state = SGSearchFieldStateStop;
-            self.progressView.hidden = NO;
+        BOOL loading = [_browser isLoading];
+        if (loading) {
+            _searchField.state = SGSearchFieldStateStop;
         } else {
-            self.searchField.state = SGSearchFieldStateReload;
-            self.progressView.hidden = YES;
+            _searchField.state = SGSearchFieldStateReload;
         }
-    } else {
-        self.searchField.state = SGSearchFieldStateDisabled;
-        self.progressView.hidden = YES;
-    }
-}
-
-- (void)_createPopoverOverlay {
-    if (!self.popoverController) {// create the popover if not already open
-        _popoverController = [[UIPopoverController alloc] initWithContentViewController:self.searchController];
-        self.popoverController.delegate = self;
         
-        // Ensure the popover is not dismissed if the user taps in the search bar.
-        self.popoverController.passthroughViews = @[self, self.searchField];
+        static BOOL loadingOld;
+        float p = _progressView.progress;
+        NSInteger tag = (NSInteger)[_browser request];
+        if (loading && loadingOld) {
+            
+            // Make sure we haven't changed the website while we are loading
+            if (_progressView.tag != tag) {
+                _progressView.tag = tag;
+                _progressView.progress = 0;
+                _progressView.hidden = YES;
+            } else if (p < 0.8f) {
+                _progressView.hidden = NO;
+                [_progressView setProgress:p + 0.2f animated:YES];
+            }
+        } else if (!loading && !loadingOld) {
+            if (0.f < p && p < 1.f) {
+                _progressView.hidden = NO;
+                [_progressView setProgress:1.f animated:YES];
+            } else if (p != 0.f) {
+                _progressView.hidden = YES;
+                _progressView.progress = 0.f;
+            }
+        }
+        //DLog(@"wait_count: %i", wait_count);
+        loadingOld = loading;
+    } else {
+        _searchField.state = SGSearchFieldStateDisabled;
+        _progressView.hidden = YES;
     }
 }
 
@@ -255,11 +233,19 @@
 #pragma mark - UITextFieldDelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-    [self _createPopoverOverlay];
+    if (!_popoverController) {// create the popover if not already open
+        _popoverController = [[UIPopoverController alloc] initWithContentViewController:_searchController];
+        _popoverController.delegate = self;
+        
+        // Ensure the popover is not dismissed if the user taps in the search bar.
+        _popoverController.passthroughViews = @[self, self.searchField];
+    }
+    
+    [textField selectAll:self];
 }
 
 - (BOOL)textFieldShouldClear:(UITextField *)textField {
-    [self.popoverController dismissPopoverAnimated:YES];
+    [_popoverController dismissPopoverAnimated:YES];
     return YES;
 }
 
@@ -321,7 +307,6 @@
 #pragma mark - UIPopoverControllerDelegate
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
-    
     // Remove focus from the search bar without committing the search.
     [self resignFirstResponder];
     _popoverController = nil;

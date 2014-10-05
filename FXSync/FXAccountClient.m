@@ -72,7 +72,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 }
 
 - (void)recoveryEmailStatusWithToken:(NSString *)sessionToken
-                            callback:(void(^)(NSDictionary *))callback {
+                            callback:(void(^)(NSDictionary *, NSError*))callback {
     
     HawkCredentials *creds = [self _deriveHawkCredentials:sessionToken context:@"sessionToken" size:2 * 32];
     
@@ -81,7 +81,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                       payload:nil
                   credentials:creds
                    completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
-                           callback(json);
+                           callback(json, error);
                    }];
     
 }
@@ -129,12 +129,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                       payload:nil
                   credentials:creds
                    completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
-                       if (error == nil) {
-                           // TODO is this an object?
-                           callback(json);
-                       } else {
-                           callback(nil);
-                       }
+                       callback(error == nil ? json : nil);
                    }];
 
 }
@@ -318,27 +313,31 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                            completionHandler:^(NSURLResponse *resp, NSData *body, NSError *error){
                                NSHTTPURLResponse *http = (NSHTTPURLResponse *)resp;
                                NSDictionary *json = nil;
-                               if (body != nil && body.length > 1) {
+                               //Workaround, because PUT gets a timestamp response and auth errors a '0'
+                               if ([body length] > 1 && ![[req HTTPMethod] isEqualToString:@"PUT"]) {
                                    json = [NSJSONSerialization JSONObjectWithData:body options:0 error:&error];
                                }
-                               ELog(error);
-                               if (error != nil && json != nil){
-                                   ELog(json);
-                                   NSInteger code = [json[@"errno"] integerValue];
-                                   error = [NSError errorWithDomain:@"com.mozilla.identity" code:code userInfo:json];
-                                   if (completion) {
-                                       completion(http, nil, error);
+                               
+                               if (error != nil) {
+                                   ELog(error);
+                                   if (json != nil && json[@"errno"]){
+                                       ELog(json);
+                                       NSInteger code = [json[@"errno"] integerValue];
+                                       error = [NSError errorWithDomain:@"com.mozilla.identity" code:code userInfo:json];
+                                       
+                                       // Let's try this
+                                       if (code == INVALID_TIMESTAMP) {
+                                           NSTimeInterval serverTime = [json[@"serverTime"] doubleValue];
+                                           NSTimeInterval offset = serverTime - [[NSDate date] timeIntervalSince1970];
+                                           _localTimeOffsetSec = @(offset);
+                                           DLog(@"Resetting local time offset to: %.2f s", offset);
+                                           // TODO retry
+                                       }
+                                   } else if (body != nil) {// in case of a json error
+                                       DLog(@"Body %@", [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding]);
                                    }
-                                   
-                                   // Let's try this
-                                   if (code == INVALID_TIMESTAMP) {
-                                       NSTimeInterval serverTime = [json[@"serverTime"] doubleValue];
-                                       NSTimeInterval offset = serverTime - [[NSDate date] timeIntervalSince1970];
-                                       _localTimeOffsetSec = @(offset);
-                                       DLog(@"Resetting local time offset to: %.2f s", offset);
-                                       // TODO retry
-                                   }
-                               } else if (completion) {
+                               }
+                               if (completion) {
                                    completion(http, json, error);
                                }
                            }];
@@ -347,7 +346,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 @end
 
 NSString * RandomString(NSUInteger length) {
-    static NSString *letters = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    // urlsafe alphabet
+    static NSString *letters = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
     
     NSMutableString *randomString = [NSMutableString stringWithCapacity:length];
     for (NSUInteger i=0; i < length; i++) {

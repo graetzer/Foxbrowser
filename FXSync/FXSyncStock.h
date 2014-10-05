@@ -7,20 +7,49 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "FXSyncEngine.h"
+#import "FXSyncItem.h"
 
-@class FXSyncEngine;
 /*!
- * Should work as specified in https://docs.services.mozilla.com/sync/objectformats.html
+ * Should help with the object formats https://docs.services.mozilla.com/sync/objectformats.html
+ * Implements common tasks that do not realy fit into the other parts
  */
-@interface FXSyncStock : NSObject
+@interface FXSyncStock : NSObject <FXSyncEngineDelegate>
 
 @property (readonly, strong, nonatomic) FXSyncEngine *syncEngine;
 
 @property (readonly, strong, nonatomic) NSArray *history;
 @property (readonly, strong, nonatomic) NSArray *bookmarks;
-@property (readonly, strong, nonatomic) NSArray *tabs;
+@property (readonly, strong, nonatomic) NSArray *clientTabs;
 
 + (instancetype)sharedInstance;
 - (void)restock;
 
+- (BOOL)hasCredentials;
+- (void)loginUser:(NSString *)user password:(NSString *)pass completion:(void(^)(void))block;
+
+/*! Store the tabs for the local client. They will get synced */
+- (void)setLocalTabs:(NSArray *)urls;
+/*! Blocks until the client data from the db is fetched */
+- (NSArray *)localTabs;
+
+
+// ======= Helper methods to work with the prefetched bookmarks ======
+
+/*! Includes the top folders and fakes one for the unfiled items */
+- (NSArray *)topBookmarkFolders;
+/*! Get's bookmarks for a specfic parent folder, arbitarily sorted */
+- (NSArray *)bookmarksWithParent:(NSString *)parentId;
+/*! Get's bookmarks for a specfic parent folder. Prefer this one, because on
+ * storageversion 5 the bookmark order is determinded by the childrens array in the parent folder
+ */
+- (NSArray *)bookmarksWithParentFolder:(FXSyncItem *)folder;
+/*! Recursively delete bookmarks, resets the prefetched stuff */
+- (void)deleteBookmark:(FXSyncItem *)bookmark;
+
 @end
+
+FOUNDATION_EXPORT NSString *const kFXDataChangedNotification;
+FOUNDATION_EXPORT NSString *const kFXErrorNotification;
+
+

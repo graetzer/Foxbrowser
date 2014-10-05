@@ -36,7 +36,7 @@
  * @return {Promise} A promise that will be fulfilled with JSON `xhr.responseText` of the request
  */
 - (void)recoveryEmailStatusWithToken:(NSString *)sessionToken
-                            callback:(void(^)(NSDictionary *))callback;
+                            callback:(void(^)(NSDictionary *, NSError*))callback;
 
 /**
  * Get the base16 bundle of encrypted kA|wrapKb.
@@ -99,6 +99,7 @@ FOUNDATION_EXPORT NSString *const kFXAccountsServerDefault;
 /*! Default timeout 120 seconds*/
 FOUNDATION_EXPORT NSTimeInterval const kFXConnectionTimeout;
 
+/*! Should generate an urlsafe random string http://en.wikipedia.org/wiki/Base64#RFC_4648 */
 NSString * RandomString(NSUInteger length);
 NSData * CreateDataWithHexString(NSString *inputString);
 NSData * PBKDF2_HMAC_SHA256(NSData *data,NSData *salt, int iter, int keylen);

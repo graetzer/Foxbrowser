@@ -6,7 +6,7 @@
 //
 //
 //  Copyright (c) 2012-2013 Simon Grätzer
-//  
+//
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -233,8 +233,8 @@
         
         [old willMoveToParentViewController:nil];
         [self transitionFromViewController:old
-                          toViewController:viewController 
-                                  duration:0 
+                          toViewController:viewController
+                                  duration:0
                                    options:UIViewAnimationOptionAllowAnimatedContent
                                 animations:NULL
                                 completion:^(BOOL finished){

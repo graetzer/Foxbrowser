@@ -31,7 +31,6 @@
 UIActionSheetDelegate, UIAlertViewDelegate>
 
 @property (weak, nonatomic) UIWebView *webView;
-@property (weak, nonatomic) UIActivityIndicatorView *indicator;
 @property (weak, nonatomic) UIToolbar *searchToolbar;
 
 @property (strong, nonatomic) NSURLRequest *request;

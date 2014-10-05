@@ -18,8 +18,7 @@
 
 #include <libkern/OSAtomic.h>
 
-NSString *const kFXSyncEngineException = @"org.graetzer.fxsync.engine";
-NSString *const kFXLocalTimeOffsetKey = @"org.graetzer.fxsync.localtimeoffset";
+NSString *const kFXSyncEngineErrorDomain = @"org.graetzer.fxsync.engine";
 
 NSString *const kFXHeaderLastModified = @"X-Last-Modified";
 NSString *const kFXHeaderTimestamp = @"X-Weave-Timestamp";
@@ -41,9 +40,12 @@ NSString *const kFXFormsCollectionKey = @"forms";
     NSDictionary *_keyBundle;
     NSDictionary *_collectionKeys;
     
-    int32_t _networkOps;
+    BOOL _foundClientRecord;
+    NSInteger _storageVersion;
+    
+    int32_t _networkOpsCount;
 }
-@dynamic localTimeOffsetSec, syncRunning;
+@dynamic syncRunning, clientID, clientName;
 
 - (instancetype)init {
     if (self = [super init]) {
@@ -52,23 +54,32 @@ NSString *const kFXFormsCollectionKey = @"forms";
     return self;
 }
 
-- (void)startSync {    
+- (void)startSync {
     if (![self isSyncRunning]
         && _userAuth != nil
         && [_reachability isReachable]) {
         
+        // Any of these methods will ideally call the next one
         if (_userAuth.syncInfo == nil) {
             [self _requestSyncInfo];
-        } else if (_keyBundle != nil && _collectionKeys != nil) {
+        } else if (_keyBundle == nil || _collectionKeys == nil) {
             [self _prepareKeys];
-        } else {
+        } else if (!_foundClientRecord) {
+            [self _loadMetarecord];
+        } else if (_storageVersion == 5) {
             [self _performSync];
+        } else {
+            NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                               code:kFXSyncEngineErrorUnsupportedStorageVersion
+                                           userInfo:nil];
+            [_delegate syncEngine:self didFailWithError:err];
         }
     }
 }
 
+/*! Get the reuired authorization credentials and the sync key */
 - (void)_requestSyncInfo {
-    OSAtomicIncrement32(&_networkOps);
+    OSAtomicIncrement32(&_networkOpsCount);
     [_userAuth requestSyncInfo:^(NSDictionary *syncInfo) {
         DLog(@"Sync Token %@", syncInfo);
         if (syncInfo[@"token"] != nil) {
@@ -79,17 +90,17 @@ NSString *const kFXFormsCollectionKey = @"forms";
             
             [self _prepareKeys];
         }
-        OSAtomicDecrement32(&_networkOps);
+        OSAtomicDecrement32(&_networkOpsCount);
     }];
 }
 
 - (void)_performSync {
     if (_keyBundle != nil && _collectionKeys != nil) {
-        OSAtomicIncrement32(&_networkOps);
+        OSAtomicIncrement32(&_networkOpsCount);
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [self _downloadChanges];
             [self _uploadChanges];
-            OSAtomicDecrement32(&_networkOps);
+            OSAtomicDecrement32(&_networkOpsCount);
         });
     }
 }
@@ -117,47 +128,31 @@ NSString *const kFXFormsCollectionKey = @"forms";
                   offset:(NSString *)offset
                    maximum:(NSInteger)limit {
     
-    // Always sort by newest, we need all objects anyway expect with history items.
+    // Always sort by newest, we need all objects anyway, expect for history items.
     NSString *url = [NSString stringWithFormat:@"/storage/%@?newer=%.2f&sort=newest&full=1&limit=250",
                      cName, newer];
     NSDictionary *headers = nil;
     if (offset != nil) {
         url = [url stringByAppendingFormat:@"&offset=%@", offset];
-        headers = @{kFXHeaderIfUnmodifiedSince : @(unmodified)};
+        headers = @{kFXHeaderIfUnmodifiedSince : [NSString stringWithFormat:@"%.2f", unmodified]};
     }
     
     [self _sendRequest:url
                 method:@"GET"
                headers:headers
                payload:nil
-            completion:^(NSHTTPURLResponse *resp, id json, NSError *err){
+            completion:^(NSHTTPURLResponse *resp, id json, NSError *err) {
                 
                 if (resp.statusCode == 200
                            && [json isKindOfClass:[NSArray class]]) {
                     
-                    FXSyncStore *store = [FXSyncStore sharedInstance];
-                    NSDictionary *keyBundle = [self _keysForCollection:cName];
-                    NSUInteger count = 0;// Successfull inserts
                     for (NSDictionary *bso in json) {
-                        NSData *payload = [self _decryptBSO:bso keyBundle:keyBundle];
-                        if (payload != nil) {
-                            FXSyncItem *item = [[FXSyncItem alloc] init];
-                            item.syncId = bso[@"id"];
-                            item.modified = [bso[@"modified"] doubleValue];
-                            item.sortindex = [bso[@"sortindex"] integerValue];
-                            item.payload = payload;
-                            item.collection = cName;
-                            [store saveItem:item];
-                            count++;
-                            
-                            DLog(@"Storing item: %@", [NSJSONSerialization JSONObjectWithData:payload
-                                                                                      options:0 error:NULL]);
-                        }
+                        [self _handleReceivedBSO:bso forCollection:cName];
                     }
                     
                     NSString *nextOff = [resp allHeaderFields][kFXHeaderNextOffset];
                     NSTimeInterval nextMod = [[resp allHeaderFields][kFXHeaderLastModified] doubleValue];
-                    NSInteger nextLimit = limit - count;
+                    NSInteger nextLimit = limit - [json count];
                     
                     if ([nextOff length] > 0 && nextLimit > 0) {
                         // Guard this query with nexMod, so we do not miss an insert
@@ -167,13 +162,19 @@ NSString *const kFXFormsCollectionKey = @"forms";
                                unmodifiedSince:nextMod
                                         offset:nextOff
                                        maximum:nextLimit];
-                    } else if(nextMod > newer) {
-                        // Check (nextMod > newer) so that we make sure
-                        // that this is monotone increasing
-                        [store setSyncTime:nextMod forCollection:cName];
+                    } else {
+                        if(nextMod > newer) {
+                            // Check (nextMod > newer) so that we make sure
+                            // that this is monotone increasing
+                            [[FXSyncStore sharedInstance] setSyncTime:nextMod forCollection:cName];
+                        }
+                        
+                        if (_delegate != nil) {
+                            [_delegate syncEngine:self didLoadCollection:cName];
+                        }
                     }
                 } else if (resp.statusCode == 412 && [offset length] > 0) {
-                    DLog(@"Concurrent modification, retrying loading");
+                    DLog(@"Concurrent modification, retry loading");
                     // Plus 500, because we are at least one recursion in
                     [self _downloadChanges:cName newerThan:newer
                            unmodifiedSince:0 offset:nil maximum:limit+500];
@@ -203,19 +204,22 @@ NSString *const kFXFormsCollectionKey = @"forms";
     NSDictionary *json = @{@"id":item.syncId,
                            @"sortindex":@(item.sortindex),
                            @"payload" : payload};
-    
+
     [self _sendRequest:url
                 method:@"PUT"
-               headers:@{kFXHeaderIfUnmodifiedSince : @(unmodified)}
+               headers:@{kFXHeaderIfUnmodifiedSince : [NSString stringWithFormat:@"%.2f", unmodified]}
                payload:json
             completion:^(NSHTTPURLResponse *resp, id json, NSError *err){
                 if (resp.statusCode == 200) {
                     NSTimeInterval modified = [resp.allHeaderFields[kFXHeaderLastModified] doubleValue];
                     if (modified > unmodified) {
+                        DLog(@"Successfully pushed: %@/%@", item.collection, item.syncId);
                         item.modified = modified;
                         [[FXSyncStore sharedInstance] saveItem:item];
+                        [[FXSyncStore sharedInstance] setSyncTime:modified forCollection:item.collection];
                     }
                 } else if (resp.statusCode == 412) {
+                    DLog(@"Discarding outdated: %@/%@", item.collection, item.syncId);
                     // Just overwrite the local changes for now
                     [self _sendRequest:url
                                 method:@"GET"
@@ -224,18 +228,7 @@ NSString *const kFXFormsCollectionKey = @"forms";
                             completion:^(NSHTTPURLResponse *resp, id bso, NSError *err) {
                                 if (resp.statusCode == 200
                                     && [bso isKindOfClass:[NSDictionary class]]) {
-                                    
-                                    NSDictionary *keyBundle = [self _keysForCollection:item.collection];
-                                    NSData *payload = [self _decryptBSO:bso keyBundle:keyBundle];
-                                    if (payload != nil) {
-                                        FXSyncItem *item = [[FXSyncItem alloc] init];
-                                        item.syncId = bso[@"id"];
-                                        item.modified = [bso[@"modified"] doubleValue];
-                                        item.sortindex = [bso[@"sortindex"] integerValue];
-                                        item.payload = payload;
-                                        item.collection = item.collection;
-                                        [[FXSyncStore sharedInstance] saveItem:item];
-                                    }
+                                    [self _handleReceivedBSO:bso forCollection:item.collection];
                                 }
                             }];
                 }
@@ -243,51 +236,73 @@ NSString *const kFXFormsCollectionKey = @"forms";
 }
 
 /*!
- * Contains information about the global storage version, should be 5
+ * Load the global meta record which
+ * contains information about the global storage version (it should be 5)
  * This should be queried to detect breaking updates
  */
-- (void)_loadMetarecord:(void(^)(NSInteger))callback {
+- (void)_loadMetarecord {
+    
     [self _sendRequest:@"/storage/meta/global"
                 method:@"GET"
                headers:nil
                payload:nil
             completion:^(NSHTTPURLResponse *resp, id json, NSError *err){
                 if (json != nil && resp.statusCode == 200) {
+                    // This data should not be encrypted
                     NSData *src = [json[@"payload"] dataUsingEncoding:NSUTF8StringEncoding];
                     NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:src
                                                                             options:0
                                                                               error:NULL];
-                    NSInteger storageVersion = [payload[@"storageVersion"] integerValue];
-                    callback(storageVersion);
+                    _storageVersion = [payload[@"storageVersion"] integerValue];
+                    
+                    if (_storageVersion == 5) {
+                        [self _updateClientRecord];
+                    } else {
+                        NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                                           code:kFXSyncEngineErrorUnsupportedStorageVersion
+                                                       userInfo:nil];
+                        [_delegate syncEngine:self didFailWithError:err];
+                    }
                 }
             }];
 }
 
+/*! 
+ *
+ * Only supports storage version 5 
+ */
 - (void)_updateClientRecord {
-    NSUUID *uuid = [UIDevice currentDevice].identifierForVendor;
-    NSString *myID = [uuid UUIDString];
+    NSString *myID = [self clientID];
     NSString *url = [NSString stringWithFormat:@"/storage/clients/%@", myID];
     
     [self _sendRequest:url
                 method:@"GET"
                headers:nil
                payload:nil
-            completion:^(NSHTTPURLResponse *resp, id bso, NSError *err){
-                if (bso != nil && resp.statusCode == 200) {
-                    NSData *src = [self _decryptBSO:bso keyBundle:[self _keysForCollection:@"clients"]];
-                    NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:src
+            completion:^(NSHTTPURLResponse *resp, id bso, NSError *err) {
+                _foundClientRecord = YES;
+                
+                NSString *rawPayload;
+                if (resp.statusCode == 200
+                    && [bso isKindOfClass:[NSDictionary class]]
+                    && (rawPayload = bso[@"payload"]) != nil) {
+                    
+                    NSData *decrypted = [self _decryptPayload:rawPayload keyBundle:[self _keysForCollection:@"clients"]];
+                    NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:decrypted
                                                                   options:0
                                                                     error:NULL];
                     if ([payload[@"id"] isEqualToString:myID]) {
-                        DLog(@"found matching mobile client record");
+                        DLog(@"Found matching mobile client record");
+                        
+                        [self _performSync];
                         return;
                     }
                 }
                 
-                NSString *name = [[UIDevice currentDevice] name];
-                if (!name.length) name = @"iOS Foxbrowser";
+                DLog(@"Did not find matching client record, updateing");
                 
-                NSDictionary *client = @{@"id" : myID, @"name":name, @"type" : @"mobile",
+                
+                NSDictionary *client = @{@"id" : myID, @"name":[self clientName], @"type" : @"mobile",
                                          @"version" : @"3.0", @"protocols": @[@"1.5"]};
                 NSData *plaintext = [NSJSONSerialization dataWithJSONObject:client options:0 error:NULL];
                 if (plaintext != nil) {
@@ -305,6 +320,45 @@ NSString *const kFXFormsCollectionKey = @"forms";
 
 #pragma mark - Crypto
 
+- (void)_handleReceivedBSO:(NSDictionary *)bso forCollection:(NSString *)cName {
+    NSDictionary *keyBundle = [self _keysForCollection:cName];
+    NSString *rawPayload = bso[@"payload"];
+    if (rawPayload != nil) {
+        NSData *decrypted = [self _decryptPayload:rawPayload keyBundle:keyBundle];
+        if (decrypted == nil) {
+            // TODO do some error handling
+            return;
+        }
+        
+        NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:decrypted
+                                                                options:0 error:NULL];
+        if (![bso[@"id"] isEqual:payload[@"id"]]) {
+            // TODO do some error handling
+            return;
+//            @throw [NSException exceptionWithName:@"org.graetzer.fxsync.engine"
+//                                           reason:@"Record id mismatch"
+//                                         userInfo:bso];
+        }
+        
+        FXSyncItem *item = [[FXSyncItem alloc] init];
+        item.collection = cName;
+        item.syncId = bso[@"id"];
+        if ([payload[@"deleted"] boolValue]) {
+            [[FXSyncStore sharedInstance] deleteItem:item];
+            DLog(@"Deleting item: %@", payload);
+        } else {
+            item.modified = [bso[@"modified"] doubleValue];
+            item.sortindex = [bso[@"sortindex"] integerValue];
+            item.payload = decrypted;
+            
+            [[FXSyncStore sharedInstance] saveItem:item];
+            DLog(@"Storing item: %@", payload);
+        }
+    }
+}
+
+
+/*! Create the keys necesary to encrypt the BSO payloads */
 - (void)_prepareKeys {
     
     // _deriveKeys
@@ -323,16 +377,21 @@ NSString *const kFXFormsCollectionKey = @"forms";
     if (_collectionKeys == nil && _keyBundle != nil) {
         [self _sendRequest:@"/storage/crypto/keys"
                     method:@"GET" headers:nil payload:nil
-                completion:^(NSHTTPURLResponse *resp, id json, NSError *err) {
+                completion:^(NSHTTPURLResponse *resp, id bso, NSError *err) {
                     
-                    if(json) {
-                        NSData *payload = [self _decryptBSO:json keyBundle:_keyBundle];
-                        NSDictionary *decrypted = [NSJSONSerialization JSONObjectWithData:payload
-                                                                                  options:NSJSONReadingMutableContainers
-                                                                                    error:NULL];
+                    NSString *rawPayload;
+                    if (err != nil) {
+                        [_delegate syncEngine:self didFailWithError:err];
+                    } else if([bso isKindOfClass:[NSDictionary class]]
+                              && (rawPayload = bso[@"payload"]) != nil) {
                         
-                        NSMutableDictionary *cols = decrypted[@"collections"];
-                        cols[@"default"] = decrypted[@"default"];
+                        NSData *decrypted = [self _decryptPayload:rawPayload keyBundle:_keyBundle];
+                        NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:decrypted
+                                                                                options:NSJSONReadingMutableContainers
+                                                                                  error:NULL];
+                        // Let's put the default keybundle in there, so it is processed by the loop
+                        NSMutableDictionary *cols = payload[@"collections"];
+                        cols[@"default"] = payload[@"default"];
                         
                         NSMutableDictionary *keys = [NSMutableDictionary dictionaryWithCapacity:[cols count]];
                         for (NSString *key in cols) {
@@ -343,33 +402,40 @@ NSString *const kFXFormsCollectionKey = @"forms";
                             }
                         }
                         _collectionKeys = keys;
+                        [self _performSync];
                     }
-                    [self _performSync];
                 }];
     } else {
         [self _performSync];
     }
 }
 
+/*! Every collection could have an individual key bundle, currently not implemented in Firefox
+ * Only the default key is used, but let's implement it anyway.
+ */
 - (NSDictionary *)_keysForCollection:(NSString *)cName {
     return _collectionKeys[cName] != nil ? _collectionKeys[cName] : _collectionKeys[@"default"];
 }
 
-- (NSData *)_decryptBSO:(NSDictionary *)bso keyBundle:(NSDictionary *)bundle {
-    NSParameterAssert(bundle);
-    if (bso[@"payload"] == nil) {
-        @throw [NSException exceptionWithName:kFXSyncEngineException
-                                       reason:@"BSO has no payload: nothing to decrypt?"
-                                     userInfo:bso];
-    }
-    NSData *src = [bso[@"payload"] dataUsingEncoding:NSUTF8StringEncoding];
+// https://docs.services.mozilla.com/sync/storageformat5.html
+- (NSData *)_decryptPayload:(NSString *)rawPayload keyBundle:(NSDictionary *)bundle {
+    NSParameterAssert(rawPayload && bundle);
+//    if (bso[@"payload"] == nil) {
+//        @throw [NSException exceptionWithName:kFXSyncEngineErrorDomain
+//                                       reason:@"BSO has no payload: nothing to decrypt?"
+//                                     userInfo:bso];
+//    }
+    NSData *src = [rawPayload dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:src
                                                             options:0
                                                               error:NULL];
     if (payload[@"ciphertext"] == nil) {
-        @throw [NSException exceptionWithName:kFXSyncEngineException
-                                       reason:@"BSO has no ciphertext: nothing to decrypt?"
-                                     userInfo:bso];
+        DLog(@"BSO has no ciphertext: nothing to decrypt?");
+        return nil;
+        // TODO error handling
+//        @throw [NSException exceptionWithName:kFXSyncEngineErrorDomain
+//                                       reason:@"BSO has no ciphertext: nothing to decrypt?"
+//                                     userInfo:payload];
     }
     NSData *encKey = bundle[@"encKey"];
     NSData *hmacKey = bundle[@"hmacKey"];
@@ -378,12 +444,14 @@ NSString *const kFXFormsCollectionKey = @"forms";
     // Security check
     unsigned char hmac[CC_SHA256_DIGEST_LENGTH];
     CCHmac(kCCHmacAlgSHA256, hmacKey.bytes, hmacKey.length, ciphertext.bytes, (CC_LONG)ciphertext.length, hmac);
-    NSString *computedHMAC = [[NSData dataWithBytes:hmac length:CC_SHA256_DIGEST_LENGTH] hexadecimalString];
     
+    NSString *computedHMAC = [[NSData dataWithBytes:hmac length:CC_SHA256_DIGEST_LENGTH] hexadecimalString];
     if (![computedHMAC isEqualToString:payload[@"hmac"]]) {
-        @throw [NSException exceptionWithName:kFXSyncEngineException
-                                       reason:@"Incorrect HMAC"
-                                     userInfo:bso];
+        NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                           code:kFXSyncEngineErrorEncryption
+                                       userInfo:nil];
+        [_delegate syncEngine:self didFailWithError:err];
+        return nil;
     }
     
     NSData *IV = [payload[@"IV"] base64DecodedData];
@@ -418,6 +486,7 @@ NSString *const kFXFormsCollectionKey = @"forms";
 }
 
 - (NSString *)_encryptPayload:(NSData *)plaintext keyBundle:(NSDictionary *)bundle {
+    NSParameterAssert(plaintext && bundle);
 
     NSData *encKey = bundle[@"encKey"];
     NSData *hmacKey = bundle[@"hmacKey"];
@@ -425,7 +494,7 @@ NSString *const kFXFormsCollectionKey = @"forms";
     NSData *IV = [RandomString(16) dataUsingEncoding:NSUTF8StringEncoding];
     
     NSData *ciphertext = nil;
-    size_t bufferSize = [plaintext length];
+    size_t bufferSize = [plaintext length] + [encKey length];
     void *buffer = calloc(bufferSize, sizeof(uint8_t));
     if (buffer != nil) {
         size_t dataOutMoved = 0;
@@ -448,22 +517,27 @@ NSString *const kFXFormsCollectionKey = @"forms";
             free(buffer);
         }
     }
-    
-    unsigned char hmac[CC_SHA256_DIGEST_LENGTH];
-    CCHmac(kCCHmacAlgSHA256, hmacKey.bytes, hmacKey.length, ciphertext.bytes, (CC_LONG)ciphertext.length, hmac);
-    NSString *computedHMAC = [[NSData dataWithBytes:hmac length:CC_SHA256_DIGEST_LENGTH] hexadecimalString];
-    
-    NSDictionary *payload = @{@"IV" : [IV base64EncodedString],
-                              @"hmac" : computedHMAC,
-                              @"ciphertext" : [ciphertext base64EncodedString]};
-
-    NSData *jsonPayload = [NSJSONSerialization dataWithJSONObject:payload options:0 error:NULL];
-    return [[NSString alloc] initWithData:jsonPayload encoding:NSUTF8StringEncoding];
+    if (ciphertext != nil) {
+        NSString *ciphertextString = [ciphertext base64EncodedString];
+        
+        // Ciphertext is calculated from the base64 encoded string
+        ciphertext = [ciphertextString dataUsingEncoding:NSUTF8StringEncoding];
+        unsigned char hmac[CC_SHA256_DIGEST_LENGTH];
+        CCHmac(kCCHmacAlgSHA256, hmacKey.bytes, hmacKey.length, ciphertext.bytes, (CC_LONG)ciphertext.length, hmac);
+        NSString *computedHMAC = [[NSData dataWithBytes:hmac length:CC_SHA256_DIGEST_LENGTH] hexadecimalString];
+        
+        NSDictionary *payload = @{@"IV" : [IV base64EncodedString],
+                                  @"hmac" : computedHMAC,
+                                  @"ciphertext" : ciphertextString};
+        
+        NSData *jsonPayload = [NSJSONSerialization dataWithJSONObject:payload options:0 error:NULL];
+        return [[NSString alloc] initWithData:jsonPayload encoding:NSUTF8StringEncoding];
+    }
+    return nil;
 }
 
 
 #pragma mark - Helper Methods
-
 
 - (void)_sendRequest:(NSString *)path
               method:(NSString *)method
@@ -489,18 +563,20 @@ NSString *const kFXFormsCollectionKey = @"forms";
         // have a hash for the body in it's hawk auth (but of course just on the sync service and nowhere else)
         request.HTTPBody = [NSData data];
     }
-    OSAtomicIncrement32(&_networkOps);
+    OSAtomicIncrement32(&_networkOpsCount);
     [_userAuth sendHawkRequest:request credentials:_credentials completion:^(NSHTTPURLResponse *resp, id json, NSError *err) {
-        if (completion) {
+        BOOL cntn = [self _handleSpecialResponses:resp];
+        
+        if (cntn && completion) {
             completion(resp, json, err);
         }
-        OSAtomicDecrement32(&_networkOps);
+        OSAtomicDecrement32(&_networkOpsCount);
     }];
 }
 
 /*! Handle Alerts, Backoff, timestamp + offset calculations */
-- (void)_handleSpecialHeaders:(NSHTTPURLResponse *)headers {
-    
+- (BOOL)_handleSpecialResponses:(NSHTTPURLResponse *)headers {
+    return YES;
 }
 
 + (NSDictionary *)collectionNames {
@@ -514,18 +590,21 @@ NSString *const kFXFormsCollectionKey = @"forms";
 //             kFXHistoryCollectionKey, kFXPasswordsCollectionKey, kFXFormsCollectionKey];
 }
 
-- (void)setLocalTimeOffsetSec:(NSNumber *)localTimeOffsetSec {
-    [[NSUserDefaults standardUserDefaults] setObject:localTimeOffsetSec
-                                              forKey:kFXLocalTimeOffsetKey];
-}
-
-- (NSNumber *)localTimeOffsetSec {
-    NSNumber *num = [[NSUserDefaults standardUserDefaults] objectForKey:kFXLocalTimeOffsetKey];
-    return num != nil ? num : @0;
-}
-
 - (BOOL)isSyncRunning {
-    return _networkOps > 0;
+    return _networkOpsCount > 0;
+}
+
+- (NSString *)clientID {
+    NSUUID *uuid = [UIDevice currentDevice].identifierForVendor;
+    NSString *myID = [uuid UUIDString];
+    return [myID substringWithRange:NSMakeRange([myID length] - 13, 12)];
+}
+
+- (NSString *)clientName {
+    NSString *name = [[UIDevice currentDevice] name];
+    if (!name.length) name = @"iOS Foxbrowser";
+    
+    return name;
 }
 
 @end
