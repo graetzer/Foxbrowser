@@ -87,9 +87,9 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     });
 }
 
-- (void)loadItem:(NSString *)syncId
-  fromCollection:(NSString *)cName
-        callback:(void (^)(FXSyncItem *))block {
+- (void)loadSyncId:(NSString *)syncId
+    fromCollection:(NSString *)cName
+          callback:(void (^)(FXSyncItem *))block {
     NSParameterAssert(syncId && cName && block);
     
     dispatch_async(_queue, ^{
@@ -111,7 +111,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 
 - (void)_createTables {
     
-    NSArray *all = [FXSyncEngine collectionNames].allKeys;
+    NSArray *all = [FXSyncEngine collectionNames];
     for (NSString *cName in all) {
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (syncId TEXT PRIMARY KEY, "
                          "modified REAL, sortindex INTEGER, payload TEXT)", cName];

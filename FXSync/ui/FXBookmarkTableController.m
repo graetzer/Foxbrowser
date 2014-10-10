@@ -68,7 +68,8 @@
 - (void)_refresh {
     if (_parentFolder == nil) {
         _bookmarks = [[FXSyncStock sharedInstance] topBookmarkFolders];
-    } else if ([_parentFolder.syncId length]) {
+    } else if ([_parentFolder.syncId length]
+               && ![_parentFolder.collection isEqualToString:kFXHistoryCollectionKey]) {
         _bookmarks = [[FXSyncStock sharedInstance] bookmarksWithParentFolder:_parentFolder];
     }
     [self.tableView reloadData];
@@ -100,7 +101,11 @@
 }
 
 - (IBAction)_addFolder:(id)sender {
-    // TODO create this stuff
+    if (_parentFolder != nil) {
+        FXBookmarkEditController *edit = [FXBookmarkEditController new];
+        edit.bookmark = [[FXSyncStock sharedInstance] folderWithParent:_parentFolder];
+        [self.navigationController pushViewController:edit animated:YES];
+    }
 }
 
 #pragma mark - Table view data source
@@ -138,24 +143,25 @@
         FXSyncItem *item = _bookmarks[indexPath.row];
         cell.textLabel.text = [item title];
         
-        // Just in case we display the history
-        if ([_parentFolder.syncId isEqualToString:@"history"]) {
+        // Just in case we display an history item
+        if ([item.collection isEqualToString:kFXHistoryCollectionKey]) {
             cell.imageView.image = [UIImage imageNamed:@"history"];
-            if ([cell.textLabel.text length]) {
+            if ([cell.textLabel.text length] == 0) {
                 cell.textLabel.text = [item histUri];
             }
-        } else {
+        } else {// A bookmark record
             // In any other case the bookmark has a type field
             // We should have a corresponding image for that
             cell.imageView.image = [UIImage imageNamed:[item type]];
-        }
-        
-        if ([[item type] isEqualToString:@"folder"]) {
-            cell.detailTextLabel.text = nil;
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-        } else {
-            cell.detailTextLabel.text = [item bmkUri];
-            cell.accessoryType = UITableViewCellAccessoryNone;
+            
+            if ([[item type] isEqualToString:@"folder"]) {
+                cell.detailTextLabel.text = nil;
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            } else {
+                cell.detailTextLabel.text = [item bmkUri];
+                cell.accessoryType = UITableViewCellAccessoryNone;
+            }
+
         }
         return cell;
     }
@@ -191,7 +197,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
                        capitalizedStringWithLocale:[NSLocale currentLocale]];
         // Workaround, so that this is treated as subfolder
         table.parentFolder = [FXSyncItem new];
-        table.parentFolder.syncId = @"history";
+        table.parentFolder.collection = kFXHistoryCollectionKey;
         table.bookmarks = [FXSyncStock sharedInstance].history;
         [self.navigationController pushViewController:table animated:YES];
     
@@ -201,8 +207,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         if (self.editing) {
             // Editing shouldn't be possible on the top level
             if (_parentFolder != nil) {
-                FXBookmarkEditController *edit = [[FXBookmarkEditController alloc]
-                                                  initWithStyle:UITableViewStyleGrouped];
+                FXBookmarkEditController *edit = [FXBookmarkEditController new];
                 edit.bookmark = item;
                 [self.navigationController pushViewController:edit animated:YES];
             }
@@ -217,10 +222,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 //            // TODO
 //        }
         else {
-            NSString *uri = [item bmkUri];
-            if ([uri length] == 0) uri = [item histUri];
-            if ([uri length] == 0) uri = [item siteUri];
-            
+            NSString *uri = [item urlString];
             if ([uri length]) {
                 [appDelegate.browserViewController handleURLString:uri title:[item title]];
                 if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {

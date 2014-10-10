@@ -52,6 +52,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
+NSString *templateReviewURLiOS8 = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
 
 static NSString *_appId;
 static double _daysUntilPrompt = 30;
@@ -70,8 +71,16 @@ static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
 
 @interface Appirater ()
+@property (nonatomic, copy) NSString *alertTitle;
+@property (nonatomic, copy) NSString *alertMessage;
+@property (nonatomic, copy) NSString *alertCancelTitle;
+@property (nonatomic, copy) NSString *alertRateTitle;
+@property (nonatomic, copy) NSString *alertRateLaterTitle;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
+- (void)showPromptWithChecks:(BOOL)withChecks
+      displayRateLaterButton:(BOOL)displayRateLaterButton;
+- (void)showRatingAlert:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
@@ -100,6 +109,31 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void) setTimeBeforeReminding:(double)value {
     _timeBeforeReminding = value;
+}
+
++ (void) setCustomAlertTitle:(NSString *)title
+{
+    [self sharedInstance].alertTitle = title;
+}
+
++ (void) setCustomAlertMessage:(NSString *)message
+{
+    [self sharedInstance].alertMessage = message;
+}
+
++ (void) setCustomAlertCancelButtonTitle:(NSString *)cancelTitle
+{
+    [self sharedInstance].alertCancelTitle = cancelTitle;
+}
+
++ (void) setCustomAlertRateButtonTitle:(NSString *)rateTitle
+{
+    [self sharedInstance].alertRateTitle = rateTitle;
+}
+
++ (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
+{
+    [self sharedInstance].alertRateLaterTitle = rateLaterTitle;
 }
 
 + (void) setDebug:(BOOL)debug {
@@ -144,6 +178,35 @@ static BOOL _alwaysUseMainBundle = NO;
     return bundle;
 }
 
+- (NSString *)alertTitle
+{
+    return _alertTitle ? _alertTitle : APPIRATER_MESSAGE_TITLE;
+}
+
+- (NSString *)alertMessage
+{
+    return _alertMessage ? _alertMessage : APPIRATER_MESSAGE;
+}
+
+- (NSString *)alertCancelTitle
+{
+    return _alertCancelTitle ? _alertCancelTitle : APPIRATER_CANCEL_BUTTON;
+}
+
+- (NSString *)alertRateTitle
+{
+    return _alertRateTitle ? _alertRateTitle : APPIRATER_RATE_BUTTON;
+}
+
+- (NSString *)alertRateLaterTitle
+{
+    return _alertRateLaterTitle ? _alertRateLaterTitle : APPIRATER_RATE_LATER;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (id)init {
     self = [super init];
     if (self) {
@@ -168,7 +231,7 @@ static BOOL _alwaysUseMainBundle = NO;
     SCNetworkReachabilityRef defaultRouteReachability = SCNetworkReachabilityCreateWithAddress(NULL, (struct sockaddr *)&zeroAddress);
     SCNetworkReachabilityFlags flags;
 	
-    BOOL didRetrieveFlags = SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags);
+    Boolean didRetrieveFlags = SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags);
     CFRelease(defaultRouteReachability);
 	
     if (!didRetrieveFlags)
@@ -204,12 +267,22 @@ static BOOL _alwaysUseMainBundle = NO;
 	return appirater;
 }
 
-- (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+- (void)showRatingAlert:(BOOL)displayRateLaterButton {
+  UIAlertView *alertView = nil;
+  if (displayRateLaterButton) {
+  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                           message:self.alertMessage
+                                          delegate:self
+                                 cancelButtonTitle:self.alertCancelTitle
+                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+  } else {
+  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                           message:self.alertMessage
+                                          delegate:self
+                                 cancelButtonTitle:self.alertCancelTitle
+                                 otherButtonTitles:self.alertRateTitle, nil];
+  }
+
 	self.ratingAlert = alertView;
     [alertView show];
 
@@ -217,6 +290,11 @@ static BOOL _alwaysUseMainBundle = NO;
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
              [delegate appiraterDidDisplayAlert:self];
     }
+}
+
+- (void)showRatingAlert
+{
+  [self showRatingAlert:true];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -233,12 +311,12 @@ static BOOL _alwaysUseMainBundle = NO;
 	
 	// check if the app has been used enough
 	NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount <= _usesUntilPrompt)
+	if (useCount < _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
 	NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-	if (sigEventCount <= _significantEventsUntilPrompt)
+	if (sigEventCount < _significantEventsUntilPrompt)
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
@@ -391,9 +469,12 @@ static BOOL _alwaysUseMainBundle = NO;
     return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRatedCurrentVersion];
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-implementations"
 + (void)appLaunched {
 	[Appirater appLaunched:YES];
 }
+#pragma GCC diagnostic pop
 
 + (void)appLaunched:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
@@ -430,12 +511,34 @@ static BOOL _alwaysUseMainBundle = NO;
                    });
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-implementations"
 + (void)showPrompt {
-    if ([[Appirater sharedInstance] connectedToNetwork]
-        && ![[Appirater sharedInstance] userHasDeclinedToRate]
-        && ![[Appirater sharedInstance] userHasRatedCurrentVersion]) {
-        [[Appirater sharedInstance] showRatingAlert];
-    }
+  [Appirater tryToShowPrompt];
+}
+#pragma GCC diagnostic pop
+
++ (void)tryToShowPrompt {
+  [[Appirater sharedInstance] showPromptWithChecks:true
+                            displayRateLaterButton:true];
+}
+
++ (void)forceShowPrompt:(BOOL)displayRateLaterButton {
+  [[Appirater sharedInstance] showPromptWithChecks:false
+                            displayRateLaterButton:displayRateLaterButton];
+}
+
+- (void)showPromptWithChecks:(BOOL)withChecks
+      displayRateLaterButton:(BOOL)displayRateLaterButton {
+  bool showPrompt = true;
+  if (withChecks) {
+    showPrompt = ([self connectedToNetwork]
+              && ![self userHasDeclinedToRate]
+              && ![self userHasRatedCurrentVersion]);
+  } 
+  if (showPrompt) {
+    [self showRatingAlert:displayRateLaterButton];
+  }
 }
 
 + (id)getRootViewController {
@@ -511,9 +614,14 @@ static BOOL _alwaysUseMainBundle = NO;
 		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 
 		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
-		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
+		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 && [[[UIDevice currentDevice] systemVersion] floatValue] < 7.1) {
 			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 		}
+        // iOS 8 needs a different templateReviewURL also @see https://github.com/arashpayan/appirater/issues/182
+        else if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)
+        {
+            reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+        }
 
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 		#endif

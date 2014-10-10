@@ -33,8 +33,7 @@ typedef NS_ENUM(NSUInteger, kFXSyncEngineError) {
  */
 @interface FXSyncEngine : NSObject
 
-/*! Map collections to sync sizes*/
-+ (NSDictionary *)collectionNames;
++ (NSArray *)collectionNames;
 
 @property (strong, nonatomic) FXUserAuth *userAuth;
 @property (strong, nonatomic, readonly) Reachability *reachability;

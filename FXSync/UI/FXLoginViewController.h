@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FXLoginViewController : UIViewController
+@interface FXLoginViewController : UIViewController <UITextFieldDelegate>
+@property (weak, nonatomic) IBOutlet UITextField *emailField;
+@property (weak, nonatomic) IBOutlet UITextField *passwordField;
+- (IBAction)startLogin:(id)sender;
+@property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
+@property (weak, nonatomic) IBOutlet UIView *contentView;
 
 @end

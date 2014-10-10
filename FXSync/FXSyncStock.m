@@ -10,11 +10,13 @@
 #import "FXUserAuth.h"
 #import "FXSyncEngine.h"
 #import "FXSyncStore.h"
+#include "UICKeyChainStore.h"
 
 NSString *const kFXDataChangedNotification = @"kFXDataChangedNotification";
 NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 @implementation FXSyncStock
+@synthesize bookmarks = _bookmarks;
 
 + (instancetype)sharedInstance {
     static FXSyncStock *instance;
@@ -29,8 +31,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     if (self = [super init]) {
         _syncEngine = [FXSyncEngine new];
         _syncEngine.delegate = self;
-        _syncEngine.userAuth = [[FXUserAuth alloc] initEmail:@"simon@graetzer.org"
-                                                    password:@"foochic923"];
+        _syncEngine.userAuth = [FXUserAuth new];
+        [self _unarchiveKeys];
     }
     return self;
 }
@@ -43,7 +45,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                             } else if ([kFXHistoryCollectionKey isEqualToString:cName]) {
                                                 _history = arr;
                                             } else if ([kFXTabsCollectionKey isEqualToString:cName]) {
-                                                NSPredicate *pred = [NSPredicate predicateWithFormat:@"syncId != %@", _syncEngine.clientID];
+                                                NSPredicate *pred = [NSPredicate predicateWithFormat:
+                                                                     @"syncId != %@", _syncEngine.clientID];
                                                 _clientTabs = [arr filteredArrayUsingPredicate:pred];
                                             }
                                             
@@ -53,7 +56,40 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                         }];
 }
 
-#pragma mar
+- (void)_unarchiveKeys {
+    NSData *data = [UICKeyChainStore dataForKey:@"accountCreds"];
+    if (data != nil) {
+        _syncEngine.userAuth.accountCreds = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        
+        data = [UICKeyChainStore dataForKey:@"accountKeys"];
+        if (data != nil) {
+            _syncEngine.userAuth.accountKeys = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        }
+    }
+}
+
+- (void)_archiveKeys {
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:
+                    _syncEngine.userAuth.accountCreds];
+    if (data != nil) {
+        [UICKeyChainStore setData:data forKey:@"accountCreds"];
+        
+        data = [NSKeyedArchiver archivedDataWithRootObject:
+                _syncEngine.userAuth.accountKeys];
+        if (data != nil) {
+            [UICKeyChainStore setData:data forKey:@"accountKeys"];
+        }
+    }
+}
+
+#pragma mark - Properties;
+
+- (NSArray *)bookmarks {
+    if (_bookmarks == nil) {
+        [self _prefetchCollection:kFXBookmarksCollectionKey];
+    }
+    return _bookmarks;
+}
 
 #pragma mark - FXSyncEngineDelegate
 
@@ -78,16 +114,37 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 #pragma mark - Methods
 
 - (void)restock {
-    [_syncEngine startSync];
+    if ([self hasUserCredentials]) {
+        [_syncEngine startSync];
+    }
 }
 
-- (BOOL)hasCredentials {
-    return YES;
+- (BOOL)hasUserCredentials {
+    return _syncEngine.userAuth != nil
+    && _syncEngine.userAuth.accountCreds != nil
+    && _syncEngine.userAuth.accountKeys != nil;
 }
 
-- (void)loginUser:(NSString *)user password:(NSString *)pass completion:(void(^)(void))block {
+- (void)loginEmail:(NSString *)email
+         password:(NSString *)pass
+       completion:(void(^)(BOOL))block {
+    NSParameterAssert(email && pass && block);
+    
+    [_syncEngine.userAuth signInFetchKeysEmail:email
+                                      password:pass
+                           completion:^(BOOL success) {
+                               if (success) {
+                                   [self _archiveKeys];
+                               }
+                               block(success);
+                           }];
+}
+
+- (void)logout {
     
 }
+
+#pragma mark - Tabs
 
 - (void)setLocalTabs:(NSArray *)tabs {
     FXSyncItem *item = [FXSyncItem new];
@@ -120,9 +177,28 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     return nil;
 }
 
+#pragma mark - Bookmarks
+
 - (NSArray *)topBookmarkFolders {
-    // parentid of menu, mobile and toolbar is 'places'
-    return [self bookmarksWithParent:@"places"];
+    if ([_bookmarks count] > 0) {
+        // parentid of menu, mobile and toolbar is 'places'
+        return [self bookmarksWithParent:@"places"];
+    } else {
+        // Workaround for 
+        FXSyncItem *toolbar = [FXSyncItem new];
+        toolbar.syncId = @"toolbar";
+        toolbar.jsonPayload = [NSMutableDictionary new];
+        [toolbar setType:@"folder"];
+        [toolbar setTitle:NSLocalizedString(@"Bookmarks Toolbar", @"bookmarks toolbar")];
+        
+        FXSyncItem *unfiled = [FXSyncItem new];
+        unfiled.syncId = @"unfiled";
+        unfiled.jsonPayload = [NSMutableDictionary new];
+        [unfiled setType:@"folder"];
+        [unfiled setTitle:NSLocalizedString(@"Unsorted Bookmarks", @"unsorted bookmarks")];
+        
+        return @[toolbar, unfiled];
+    }
 }
 
 - (NSArray *)bookmarksWithParent:(NSString *)parentId {
@@ -153,15 +229,49 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     if ([[bookmark type] isEqualToString:@"folder"]) {
         NSArray *children = bookmark.jsonPayload[@"children"];
         for (NSString *syncId in children) {
-            [[FXSyncStore sharedInstance] loadItem:syncId
-                                    fromCollection:bookmark.collection
-                                          callback:^(FXSyncItem *item) {
+            [[FXSyncStore sharedInstance] loadSyncId:syncId
+                                      fromCollection:bookmark.collection
+                                            callback:^(FXSyncItem *item) {
                                               [self deleteBookmark:item];
-                                          }];
+                                            }];
         }
     }
     [bookmark deleteItem];
     _bookmarks = nil;
+}
+
+- (FXSyncItem *)bookmarkWithTitle:(NSString *)title url:(NSURL *)url; {
+    NSParameterAssert(title && url);
+    
+    FXSyncItem *item = [FXSyncItem new];
+    item.syncId = RandomString(12);
+    item.collection = kFXBookmarksCollectionKey;
+    item.sortindex = 100;
+    item.jsonPayload = [@{@"id":item.syncId,
+                          @"title":title,
+                          @"bmkUri":[NSString stringWithFormat:@"%@", url],
+                          @"type":@"bookmark",
+                          @"parentid":@"unfiled",
+                          @"parentName":NSLocalizedString(@"Unsorted Bookmarks",
+                                                          @"unsorted bookmarks")
+                          } mutableCopy];
+    [item save];
+    [[FXSyncStore sharedInstance] loadSyncId:@"unfiled"
+                              fromCollection:kFXBookmarksCollectionKey
+                                    callback:^(FXSyncItem *unfiled) {
+                                        [unfiled addChild:item.syncId];
+                                    }];
+    
+    return item;
+}
+
+- (FXSyncItem *)folderWithParent:(FXSyncItem *)folder; {
+    FXSyncItem *item = [self bookmarkWithTitle:NSLocalizedString(@"New Folder",
+                                                                 @"Create a new folder")
+                                           url:[NSURL URLWithString:@"about:blank"]];
+    [item setType:@"folder"];
+    [item.jsonPayload removeObjectForKey:@"bmkUri"];
+    return item;
 }
 
 @end

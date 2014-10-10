@@ -25,14 +25,19 @@
 + (instancetype)sharedInstance;
 - (void)restock;
 
-- (BOOL)hasCredentials;
-- (void)loginUser:(NSString *)user password:(NSString *)pass completion:(void(^)(void))block;
+- (BOOL)hasUserCredentials;
+- (void)loginEmail:(NSString *)user
+          password:(NSString *)pass
+        completion:(void(^)(BOOL))block;
+- (void)logout;
+
+
+// ======= Helper methods to work the tabs for the current device ======
 
 /*! Store the tabs for the local client. They will get synced */
 - (void)setLocalTabs:(NSArray *)urls;
 /*! Blocks until the client data from the db is fetched */
 - (NSArray *)localTabs;
-
 
 // ======= Helper methods to work with the prefetched bookmarks ======
 
@@ -46,6 +51,11 @@
 - (NSArray *)bookmarksWithParentFolder:(FXSyncItem *)folder;
 /*! Recursively delete bookmarks, resets the prefetched stuff */
 - (void)deleteBookmark:(FXSyncItem *)bookmark;
+
+/*! Create a new bookmark, located in unfiled */
+- (FXSyncItem *)bookmarkWithTitle:(NSString *)title url:(NSURL *)url;
+- (FXSyncItem *)folderWithParent:(FXSyncItem *)folder;
+
 
 @end
 

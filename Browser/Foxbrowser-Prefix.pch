@@ -1,0 +1,43 @@
+//
+// Prefix header for all source files of the 'Foxbrowser' target in the 'Foxbrowser' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_7_0
+#warning "This project uses features only available in iOS SDK 7.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+
+    #import "SGAppDelegate.h"
+    #import "SGBrowserViewController.h"
+    #import "GAI.h"
+    #import "GAIDictionaryBuilder.h"
+    #import "GAIFields.h"
+
+    #define UIColorFromHEX(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+
+    #ifdef DEBUG
+    #   define DLog(fmt, ...) {NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);}
+    #   define ELog(err) {if(err) DLog(@"%@", err)}
+    #else
+    #   define DLog(...)
+    #   define ELog(err)
+    #endif
+
+// iOS 6 Colors
+//#define kSGInterfaceColor  UIColorFromHEX(0xD0D4E1)
+//#define kSGInterfaceDarkerColor UIColorFromHEX(0x8A8E9B)
+
+// iOS 7 Colors
+#define kSGBrowserBarColor UIColorFromHEX(0xF7F7F7)
+#define kSGBrowserBarSelectedColor UIColorFromHEX(0xB3B3B3)
+#define kSGBrowserBackgroundColor [UIColor colorWithWhite:0.2 alpha:1.0]
+
+/*! Standart height for a toolbar, excluding offset for toplayout etc */
+#define kSGToolbarHeight (44.0f)
+
+#endif

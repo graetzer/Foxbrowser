@@ -35,6 +35,8 @@ NSString *const kFXPasswordsCollectionKey = @"passwords";
 NSString *const kFXPrefsCollectionKey = @"prefs";
 NSString *const kFXFormsCollectionKey = @"forms";
 
+NSInteger const SEVEN_DAYS = 7*24*60*60;
+
 @implementation FXSyncEngine  {
     HawkCredentials *_credentials;
     NSDictionary *_keyBundle;
@@ -110,15 +112,16 @@ NSString *const kFXFormsCollectionKey = @"forms";
     
     // TODO load the info collection instead
     
-    NSDictionary *cols = [FXSyncEngine collectionNames];
+    NSArray *cols = [FXSyncEngine collectionNames];
     for (NSString *cName in cols) {
+        NSInteger max = [cName isEqualToString:kFXHistoryCollectionKey] ? 1500 : NSIntegerMax;
+        
         NSTimeInterval newer = [store syncTimeForCollection:cName];
-        NSNumber *max = cols[cName];
         [self _downloadChanges:cName
                      newerThan:newer
                unmodifiedSince:0
                         offset:nil
-                       maximum:[max integerValue]];
+                       maximum:max];
     }
 }
 
@@ -126,11 +129,11 @@ NSString *const kFXFormsCollectionKey = @"forms";
                 newerThan:(NSTimeInterval)newer
            unmodifiedSince:(NSTimeInterval)unmodified
                   offset:(NSString *)offset
-                   maximum:(NSInteger)limit {
+                   maximum:(NSUInteger)limit {
     
     // Always sort by newest, we need all objects anyway, expect for history items.
-    NSString *url = [NSString stringWithFormat:@"/storage/%@?newer=%.2f&sort=newest&full=1&limit=250",
-                     cName, newer];
+    NSString *url = [NSString stringWithFormat:@"/storage/%@?newer=%.2f&"
+                     "sort=newest&full=1&limit=250", cName, newer];
     NSDictionary *headers = nil;
     if (offset != nil) {
         url = [url stringByAppendingFormat:@"&offset=%@", offset];
@@ -149,19 +152,17 @@ NSString *const kFXFormsCollectionKey = @"forms";
                     for (NSDictionary *bso in json) {
                         [self _handleReceivedBSO:bso forCollection:cName];
                     }
-                    
                     NSString *nextOff = [resp allHeaderFields][kFXHeaderNextOffset];
                     NSTimeInterval nextMod = [[resp allHeaderFields][kFXHeaderLastModified] doubleValue];
-                    NSInteger nextLimit = limit - [json count];
                     
-                    if ([nextOff length] > 0 && nextLimit > 0) {
+                    if ([nextOff length] > 0 && limit > [json count]) {
                         // Guard this query with nexMod, so we do not miss an insert
                         // by a different client
                         [self _downloadChanges:cName
                                      newerThan:newer
                                unmodifiedSince:nextMod
                                         offset:nextOff
-                                       maximum:nextLimit];
+                                       maximum:limit - [json count]];
                     } else {
                         if(nextMod > newer) {
                             // Check (nextMod > newer) so that we make sure
@@ -176,35 +177,52 @@ NSString *const kFXFormsCollectionKey = @"forms";
                 } else if (resp.statusCode == 412 && [offset length] > 0) {
                     DLog(@"Concurrent modification, retry loading");
                     // Plus 500, because we are at least one recursion in
-                    [self _downloadChanges:cName newerThan:newer
-                           unmodifiedSince:0 offset:nil maximum:limit+500];
+                    [self _downloadChanges:cName
+                                 newerThan:newer
+                           unmodifiedSince:0
+                                    offset:nil maximum:limit+500];
                 }
             }];
 }
 
 - (void)_uploadChanges {
     FXSyncStore *store = [FXSyncStore sharedInstance];
-    NSDictionary *cols = [FXSyncEngine collectionNames];
+    NSArray *cols = [FXSyncEngine collectionNames];
+    
     for (NSString *cName in cols) {
         NSTimeInterval newer = [store syncTimeForCollection:cName];
         NSArray *uploads = [store changedItemsForCollection:cName];
         
+        // Not all data is forever relevant
+        // If the user deletes the app, data should disappear
+        NSInteger ttl = 0;
+        if ([cName isEqualToString:kFXHistoryCollectionKey]
+            || [cName isEqualToString:kFXTabsCollectionKey]) {
+            ttl = SEVEN_DAYS*3;
+        }
+        
         for (FXSyncItem *item in uploads) {
             // We use the upload time for the entire collection,
             // rather than item.modified
-            [self _uploadItem:item unmodifiedSince:newer];
+            [self _uploadItem:item
+                   timeToLive:ttl
+              unmodifiedSince:newer];
         }
     }
 }
 
-- (void)_uploadItem:(FXSyncItem *)item unmodifiedSince:(NSTimeInterval)unmodified  {
+- (void)_uploadItem:(FXSyncItem *)item
+         timeToLive:(NSInteger)ttl
+    unmodifiedSince:(NSTimeInterval)unmodified  {
+    
     NSString *url = [NSString stringWithFormat:@"/storage/%@/%@", item.collection, item.syncId];
     
     NSString *payload = [self _encryptPayload:item.payload keyBundle:[self _keysForCollection:@"clients"]];
-    NSDictionary *json = @{@"id":item.syncId,
-                           @"sortindex":@(item.sortindex),
-                           @"payload" : payload};
-
+    NSMutableDictionary *json = [@{@"id":item.syncId,
+                                   @"sortindex":@(item.sortindex),
+                                   @"payload" : payload} mutableCopy];
+    if (ttl > 0) json[@"ttl"] = @(ttl);
+    
     [self _sendRequest:url
                 method:@"PUT"
                headers:@{kFXHeaderIfUnmodifiedSince : [NSString stringWithFormat:@"%.2f", unmodified]}
@@ -280,7 +298,7 @@ NSString *const kFXFormsCollectionKey = @"forms";
                headers:nil
                payload:nil
             completion:^(NSHTTPURLResponse *resp, id bso, NSError *err) {
-                _foundClientRecord = YES;
+                _foundClientRecord = NO;
                 
                 NSString *rawPayload;
                 if (resp.statusCode == 200
@@ -291,29 +309,41 @@ NSString *const kFXFormsCollectionKey = @"forms";
                     NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:decrypted
                                                                   options:0
                                                                     error:NULL];
-                    if ([payload[@"id"] isEqualToString:myID]) {
-                        DLog(@"Found matching mobile client record");
+                    
+                    // Update the client record every 7 days
+                    NSTimeInterval modified = [bso[@"modified"] doubleValue];
+                    if ([payload[@"id"] isEqualToString:myID]
+                        && modified > [[NSDate date] timeIntervalSince1970] - SEVEN_DAYS) {
                         
+                        DLog(@"Found matching mobile client record");
+                        _foundClientRecord = YES;
                         [self _performSync];
-                        return;
                     }
                 }
                 
-                DLog(@"Did not find matching client record, updateing");
-                
-                
-                NSDictionary *client = @{@"id" : myID, @"name":[self clientName], @"type" : @"mobile",
-                                         @"version" : @"3.0", @"protocols": @[@"1.5"]};
-                NSData *plaintext = [NSJSONSerialization dataWithJSONObject:client options:0 error:NULL];
-                if (plaintext != nil) {
-                    NSString *payload = [self _encryptPayload:plaintext keyBundle:[self _keysForCollection:@"clients"]];
-                    NSDictionary *json = @{@"id":myID, @"payload" : payload};
+                if (!_foundClientRecord) {
+                    DLog(@"Did not find matching client record");
+                    NSDictionary *client = @{@"id" : myID,
+                                             @"name":[self clientName],
+                                             @"type" : @"mobile",
+                                             @"version" : @"3.0",
+                                             @"protocols": @[@"1.5"]};
                     
+                    NSData *plaintext = [NSJSONSerialization dataWithJSONObject:client options:0 error:NULL];
+                    NSString *payload = [self _encryptPayload:plaintext keyBundle:[self _keysForCollection:@"clients"]];
+                    NSDictionary *json = @{@"id":myID,
+                                           @"payload" : payload,
+                                           @"ttl":@(SEVEN_DAYS*3)};
                     [self _sendRequest:url
                                 method:@"PUT"
                                headers:nil
                                payload:json
-                            completion:NULL];
+                            completion:^(NSHTTPURLResponse *resp, id bso, NSError *err) {
+                                if (resp.statusCode == 200) {
+                                    _foundClientRecord = YES;
+                                    [self _performSync];
+                                }
+                            }];
                 }
             }];
 }
@@ -335,9 +365,6 @@ NSString *const kFXFormsCollectionKey = @"forms";
         if (![bso[@"id"] isEqual:payload[@"id"]]) {
             // TODO do some error handling
             return;
-//            @throw [NSException exceptionWithName:@"org.graetzer.fxsync.engine"
-//                                           reason:@"Record id mismatch"
-//                                         userInfo:bso];
         }
         
         FXSyncItem *item = [[FXSyncItem alloc] init];
@@ -579,15 +606,10 @@ NSString *const kFXFormsCollectionKey = @"forms";
     return YES;
 }
 
-+ (NSDictionary *)collectionNames {
-    return @{kFXTabsCollectionKey : @(NSIntegerMax),
-             kFXBookmarksCollectionKey : @(NSIntegerMax),
-             kFXHistoryCollectionKey : @(2000)
-             //kFXPasswordsCollectionKey : @(NSIntegerMax),
-             //kFXFormsCollectionKey : @(NSIntegerMax)
-             };
-//    return @[kFXTabsCollectionKey, kFXBookmarksCollectionKey,
-//             kFXHistoryCollectionKey, kFXPasswordsCollectionKey, kFXFormsCollectionKey];
++ (NSArray *)collectionNames {
+    return @[kFXTabsCollectionKey, kFXBookmarksCollectionKey,
+             kFXHistoryCollectionKey];
+    // , kFXPasswordsCollectionKey, kFXFormsCollectionKey
 }
 
 - (BOOL)isSyncRunning {

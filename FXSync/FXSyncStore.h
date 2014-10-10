@@ -23,7 +23,7 @@
 /*! Sorted by sortindex, pass something negative into limit for unlimited */
 - (void)loadCollection:(NSString *)cName
               callback:(void(^)(NSArray *))callback;
-- (void)loadItem:(NSString *)syncId
+- (void)loadSyncId:(NSString *)syncId
   fromCollection:(NSString *)cName
         callback:(void(^)(FXSyncItem *))block;
 

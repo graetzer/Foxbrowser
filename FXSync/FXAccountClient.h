@@ -17,7 +17,7 @@
 @interface FXAccountClient : NSObject
 
 // Interval in seconds
-@property (nonatomic, copy) NSNumber *localTimeOffsetSec;
+@property (nonatomic, assign) NSTimeInterval localTimeOffsetSec;
 
 /**
  * @method signIn
@@ -28,7 +28,7 @@
  */
 - (void)signInEmail:(NSString *)username
            password:(NSString *)password
-         completion:(void(^)(NSDictionary *))completion;
+         completion:(void(^)(NSDictionary *, NSError *))completion;
 
 /**
  * @method recoveryEmailStatus

@@ -31,14 +31,6 @@ static NSData* getPublicKeyMod(NSData *pk);
     NSString *_cert;// BrowserID cert
 }
 
-- (instancetype)initEmail:(NSString *)email password:(NSString *)pass {
-    if (self = [super init]) {
-        _email = email;
-        _password = pass;
-    }
-    return self;
-}
-
 - (void)dealloc {
     if (publicKeyRef != NULL) {
         CFRelease(publicKeyRef);
@@ -48,46 +40,84 @@ static NSData* getPublicKeyMod(NSData *pk);
     }
 }
 
+/*!
+ Get the users keys
+ 
+ return {
+ token: token,
+ keys: this.keys,
+ credentials: {
+ sessionToken: user.creds.sessionToken,
+ keyPair: user._keyPair
+ }
+ }
+ */
+- (void)signInFetchKeysEmail:(NSString *)email
+                    password:(NSString *)pass
+                  completion:(void(^)(BOOL))completion {
+    NSParameterAssert(email && pass && completion != nil);
+    
+    [self signInEmail:email password:pass completion:^(NSDictionary *creds, NSError *err) {
+        _accountCreds = creds;
+        NSString *keyFetchToken = _accountCreds[@"keyFetchToken"];
+        NSString *unwrapBKey = _accountCreds[@"unwrapBKey"];
+        
+        if (_accountCreds != nil
+            && [keyFetchToken length] > 0
+            && [unwrapBKey length] > 0) {
+            
+            [self accountKeysWithKeyFetchToken:keyFetchToken
+                                     unwrapKey:unwrapBKey
+                                    completion:^(NSDictionary *keys) {
+                                        _accountKeys = keys;
+                                        completion(_accountKeys != nil);
+                                    }];
+        } else {
+            completion(NO);
+        }
+    }];
+}
+
 - (void)requestSyncInfo:(void(^)(NSDictionary *))callback {
     NSParameterAssert(callback);
     
-    [self _signInFetchKeys:^{
-        NSString *sessionToken = _accountCreds[@"sessionToken"];
-        //[self recoveryEmailStatusWithToken:sessionToken callback:^(NSDictionary *status)
-        NSNumber *verified = _accountCreds[@"verified"];
-        if ([sessionToken length] && [verified boolValue]) {
-            
-            [self _generateKeyPair];
-            NSData* keyData = [self _getPublicKeyBits];
-            
-            // http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One#Example_encoded_in_DER
-            const char *buffer = keyData.bytes;
-            NSData* modulus;
-            NSData* exponent;
-            // Check for correct ASN.1 DER start
-            if (buffer && buffer[0] == 0x30 && buffer[1] == keyData.length - 2) {
-                if (buffer[2] == 0x02) {// Check for first int number,
-                                        // supposed to be the modulus
-                    NSUInteger length = buffer[3];
-                    modulus = [keyData subdataWithRange:NSMakeRange(4, length)];
-                    
-                    NSUInteger expOffset = 4+length;
-                    if (buffer[expOffset] == 0x02) {// Check for seconds integer
-                        length = buffer[expOffset + 1];
-                        exponent = [keyData subdataWithRange:NSMakeRange(expOffset+2, length)];
-                    }
+    
+    
+    NSString *sessionToken = _accountCreds[@"sessionToken"];
+    //[self recoveryEmailStatusWithToken:sessionToken callback:^(NSDictionary *status)
+    NSNumber *verified = _accountCreds[@"verified"];
+    if ([sessionToken length] && [verified boolValue]) {
+        
+        [self _generateKeyPair];
+        NSData* keyData = [self _getPublicKeyBits];
+        
+        // http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One#Example_encoded_in_DER
+        const char *buffer = keyData.bytes;
+        NSData* modulus;
+        NSData* exponent;
+        // Check for correct ASN.1 DER start
+        if (buffer && buffer[0] == 0x30 && buffer[1] == keyData.length - 2) {
+            if (buffer[2] == 0x02) {// Check for first int number,
+                // supposed to be the modulus
+                NSUInteger length = buffer[3];
+                modulus = [keyData subdataWithRange:NSMakeRange(4, length)];
+                
+                NSUInteger expOffset = 4+length;
+                if (buffer[expOffset] == 0x02) {// Check for seconds integer
+                    length = buffer[expOffset + 1];
+                    exponent = [keyData subdataWithRange:NSMakeRange(expOffset+2, length)];
                 }
             }
-            
-            if (exponent != nil && modulus != nil) {
-                NSDictionary *public = @{@"algorithm":@"RS",
-                                         @"n":[modulus decimalString],
-                                         @"e":[exponent decimalString]};
-                [self _requestTokenWithKey:public
-                                  callback:callback];
-            }
         }
-    }];
+        
+        if (exponent != nil && modulus != nil) {
+            NSDictionary *public = @{@"algorithm":@"RS",
+                                     @"n":[modulus decimalString],
+                                     @"e":[exponent decimalString]};
+            [self _requestTokenWithKey:public
+                              callback:callback];
+        }
+    }
 }
 
 - (void)_requestTokenWithKey:(NSDictionary *)publicKey
@@ -156,38 +186,6 @@ static NSData* getPublicKeyMod(NSData *pk);
                    }
                    completion(json, error);
                }];
-}
-
-/*!
- Get the users keys
- 
- return {
- token: token,
- keys: this.keys,
- credentials: {
- sessionToken: user.creds.sessionToken,
- keyPair: user._keyPair
- }
- }
- */
-- (void)_signInFetchKeys:(void(^)(void))completion {
-    NSParameterAssert(completion != nil);
-    
-    [self signInEmail:_email password:_password completion:^(NSDictionary *creds){
-        _accountCreds = creds;
-        if (_accountCreds == nil) {
-            completion();
-            return;
-        }
-        NSString *keyFetchToken = _accountCreds[@"keyFetchToken"];
-        NSString *unwrapBKey = _accountCreds[@"unwrapBKey"];
-        [self accountKeysWithKeyFetchToken:keyFetchToken
-                                 unwrapKey:unwrapBKey
-                                completion:^(NSDictionary *keys) {
-                                    _accountKeys = keys;
-                                    completion();
-                                }];
-    }];
 }
 
 - (NSString *)_computeClientState {

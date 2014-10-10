@@ -38,15 +38,19 @@
     int stringSize;
     mp_radix_size(&m_value, radix, &stringSize);
     char cString[stringSize];
-    mp_toradix(&m_value, cString, radix);
-    for (int i = 0; i < stringSize; ++i) {
-        cString[i] = (char)tolower(cString[i]);
+    
+    NSString *result = nil;
+    if (mp_toradix(&m_value, cString, radix) == MP_OKAY) {
+        for (int i = 0; i < stringSize; ++i) {
+            cString[i] = (char)tolower(cString[i]);
+        }
+        result = [[NSString alloc] initWithBytes:cString
+                                          length:stringSize
+                                        encoding:NSUTF8StringEncoding];
     }
     mp_clear(&m_value);
     
-    return [[NSString alloc] initWithBytes:cString
-                                    length:stringSize
-                                  encoding:NSUTF8StringEncoding];
+    return result;
 }
 
 - (NSData *)dataXORdWithData:(NSData *)data {

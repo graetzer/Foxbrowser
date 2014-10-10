@@ -20,7 +20,7 @@
 }
 
 - (NSMutableDictionary *)jsonPayload {
-    if (_jsonPayload == nil) {
+    if (_jsonPayload == nil && _payload != nil) {
         NSError *error = nil;
         _jsonPayload = [NSJSONSerialization JSONObjectWithData:_payload
                                                        options:NSJSONReadingMutableContainers
@@ -66,6 +66,16 @@
 }
 - (void)setTitle:(NSString *)title; {
     self.jsonPayload[@"title"] = title;
+}
+
+- (NSString *)urlString {
+    // We rely on the assumption that these are
+    // only present on different object types
+    NSString *urlS = [self bmkUri];// bookmark
+    if ([urlS length] == 0) urlS = [self histUri];// history entry
+    if ([urlS length] == 0) urlS = [self siteUri];// livemark
+    
+    return urlS;
 }
 
 - (BOOL)deleted; {
@@ -131,6 +141,9 @@
     id val = self.jsonPayload[@"type"];
     return val == [NSNull null] ? nil : val;
 }
+- (void)setType:(NSString *)type; {
+    self.jsonPayload[@"type"] = type;
+}
 
 /*! siteUri string: site associated with the livemark */
 - (NSString *)siteUri; {
@@ -147,6 +160,23 @@
 }
 - (void)setFeedUri:(NSString *)feedUri; {
     self.jsonPayload[@"feedUri"] = feedUri;
+}
+
+@end
+
+@implementation FXSyncItem (FolderFormat)
+
+- (NSArray *)children; {
+    id val = self.jsonPayload[@"children"];
+    return val == [NSNull null] ? nil : val;
+}
+- (void)addChild:(NSString *)syncId; {
+    if (self.jsonPayload[@"children"]
+        && self.jsonPayload[@"children"] != [NSNull null]) {
+        [self.jsonPayload[@"children"] addObject:syncId];
+    } else {
+        self.jsonPayload[@"children"] = @[syncId];
+    }
 }
 
 @end

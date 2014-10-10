@@ -44,6 +44,9 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 - (NSString *)title;
 - (void)setTitle:(NSString *)title;
 
+/*! Depending on the object type, will return the different url properties*/
+- (NSString *)urlString;
+
 - (BOOL)deleted;
 
 @end
@@ -74,6 +77,7 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 - (void)setParentName:(NSString *)parentName;
 /*! bookmark */
 - (NSString *)type;
+- (void)setType:(NSString *)type;
 
 /*! siteUri string: site associated with the livemark */
 - (NSString *)siteUri;
@@ -82,6 +86,11 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 - (NSString *)feedUri;
 - (void)setFeedUri:(NSString *)feedUri;
 
+@end
+
+@interface FXSyncItem (FolderFormat)
+- (NSArray *)children;
+- (void)addChild:(NSString *)syncId;
 @end
 
 @interface FXSyncItem (HistoryFormat)

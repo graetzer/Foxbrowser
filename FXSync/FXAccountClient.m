@@ -30,7 +30,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 
 - (instancetype)init {
     if (self = [super init]) {
-        _localTimeOffsetSec = @0;
+        _localTimeOffsetSec = 0;
         _queue = [NSOperationQueue new];
     }
     return self;
@@ -38,7 +38,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 
 - (void)signInEmail:(NSString *)email
            password:(NSString *)password
-         completion:(void(^)(NSDictionary *))completion {
+         completion:(void(^)(NSDictionary *, NSError *))completion {
     NSParameterAssert(email && password && completion);
     
     NSDictionary *setup = [self _setupEmail:email password:password];
@@ -52,23 +52,31 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
     req.HTTPMethod = @"POST";
     req.HTTPBody = [NSJSONSerialization dataWithJSONObject:body options:0 error:NULL];
     
-    [self sendHawkRequest:req
-              credentials:nil
-               completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
-                   if (error == nil && json[@"error"] == nil) {
-                       NSMutableDictionary *accountData = [json mutableCopy];
-                       accountData[@"unwrapBKey"] = setup[@"unwrapBKey"];
-                       
-                       // json[@"email"] == nil] && [json[@"errno"] isEqual:@(INVALID_TIMESTAMP) && json[@"skipCaseError"] == @NO
-                       //    if (options.keys) {
-                       //       accountData.unwrapBKey = sjcl.codec.hex.fromBits(result.unwrapBKey);
-                       //   }
-                       completion(accountData);
-                   } else {
+    [self _sendAccountRequest:@"/account/login?keys=true"
+                       method:@"POST"
+                      payload:body
+                  credentials:nil
+                   completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
+                       if (json != nil) {
+                           if (json[@"error"] == nil) {
+                               NSMutableDictionary *accountData = [json mutableCopy];
+                               accountData[@"unwrapBKey"] = setup[@"unwrapBKey"];
+                               
+                               // json[@"email"] == nil] && [json[@"errno"] isEqual:@(INVALID_TIMESTAMP) && json[@"skipCaseError"] == @NO
+                               //    if (options.keys) {
+                               //       accountData.unwrapBKey = sjcl.codec.hex.fromBits(result.unwrapBKey);
+                               //   }
+                               completion(accountData, nil);
+                               return;
+                           } else {
+                               error = [NSError errorWithDomain:@"org.graetzer.fxsync.auth"
+                                                           code:resp.statusCode
+                                                       userInfo:json];
+                           }
+                       }
                        DLog(@"%@\n%@", json, error);
-                       completion(nil);
-                   }
-               }];
+                       completion(nil, error);
+                   }];
 }
 
 - (void)recoveryEmailStatusWithToken:(NSString *)sessionToken
@@ -302,7 +310,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
             auth.requestUri = [req.URL path];
         }
         auth.nonce = RandomString(6);
-        auth.timestamp = [NSDate dateWithTimeIntervalSinceNow:[_localTimeOffsetSec doubleValue]];
+        auth.timestamp = [NSDate dateWithTimeIntervalSinceNow:_localTimeOffsetSec];
         
         NSString *authorizationHeader = [[auth requestHeader] substringFromIndex:15];
         [req addValue:authorizationHeader forHTTPHeaderField:@"Authorization"];
@@ -314,7 +322,8 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                                NSHTTPURLResponse *http = (NSHTTPURLResponse *)resp;
                                NSDictionary *json = nil;
                                //Workaround, because PUT gets a timestamp response and auth errors a '0'
-                               if ([body length] > 1 && ![[req HTTPMethod] isEqualToString:@"PUT"]) {
+                               if ([body length] > 1
+                                   && ![[req HTTPMethod] isEqualToString:@"PUT"]) {
                                    json = [NSJSONSerialization JSONObjectWithData:body options:0 error:&error];
                                }
                                
@@ -329,7 +338,7 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                                        if (code == INVALID_TIMESTAMP) {
                                            NSTimeInterval serverTime = [json[@"serverTime"] doubleValue];
                                            NSTimeInterval offset = serverTime - [[NSDate date] timeIntervalSince1970];
-                                           _localTimeOffsetSec = @(offset);
+                                           _localTimeOffsetSec = offset;
                                            DLog(@"Resetting local time offset to: %.2f s", offset);
                                            // TODO retry
                                        }

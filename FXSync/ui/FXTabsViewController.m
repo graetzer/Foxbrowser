@@ -110,12 +110,9 @@
 {
     UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
     
-    if ([weaveService canConnectToInternet])
-    {
+    if ([appDelegate canConnectToInternet]) {
         [appDelegate.browserViewController handleURLString:cell.detailTextLabel.text title:cell.textLabel.text];
-    }
-    else
-    {
+    } else {
         //no connectivity, put up alert
         NSDictionary* errInfo = @{@"title": NSLocalizedString(@"Cannot Load Page", @"unable to load page"),
                                   @"message": NSLocalizedString(@"No internet connection available", "no internet connection")};

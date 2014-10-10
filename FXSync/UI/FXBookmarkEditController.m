@@ -14,6 +14,11 @@
 
 @implementation FXBookmarkEditController
 
+- (instancetype)init {
+    self = [super initWithStyle:UITableViewStyleGrouped];
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.tableView registerClass:[UITableViewHeaderFooterView class] forHeaderFooterViewReuseIdentifier:@"HeaderIdentifier"];
@@ -70,24 +75,6 @@
         header.textLabel.text = NSLocalizedString(@"Containing Folder",
                                                   @"Location of Bookmark");
     }
-    
-//    // Display specific header title
-//    if (section == 0) {
-//        header.textLabel.text = NSLocalizedString(@"Bookmark ",
-//                                                  @"Name of the Bookmark");
-//    } else if (section == 1) {
-//        header.textLabel.text = NSLocalizedString(@"Description",
-//                                                  @"Description of the Bookmark");
-//    } else if (section == 2) {
-//        if ([[_bookmark type] isEqualToString:@"folder"]) {
-//            header.textLabel.text = NSLocalizedString(@"Location",
-//                                                      @"Description of the Bookmark");
-//        } else if ([[_bookmark type] isEqualToString:@"bookmark"]) {
-//            
-//        } else if ([[_bookmark type] isEqualToString:@"livemark"]) {
-//            
-//        }
-//    }
     
     return header;
 }

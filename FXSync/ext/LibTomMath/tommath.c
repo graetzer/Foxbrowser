@@ -4872,12 +4872,12 @@ int mp_fwrite(mp_int *a, int radix, FILE *stream)
 {
    char *buf = NULL;
    int err = 0, len = 0, x = 0;
-   
+    
    if ((err = mp_radix_size(a, radix, &len)) != MP_OKAY) {
       return err;
    }
 
-   buf = OPT_CAST(char) XMALLOC (len);
+   buf = OPT_CAST(char) XCALLOC (len, sizeof(char));
    if (buf == NULL) {
       return MP_MEM;
    }
@@ -4887,7 +4887,7 @@ int mp_fwrite(mp_int *a, int radix, FILE *stream)
       return err;
    }
    
-   for (x = 0; x < len; x++) {
+   for (x = 0; x < len; ++x) {
        if (fputc(buf[x], stream) == EOF) {
           XFREE (buf);
           return MP_VAL;
