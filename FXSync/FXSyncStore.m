@@ -70,7 +70,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 }
 
 - (void)loadCollection:(NSString *)cName
-              callback:(void(^)(NSArray *))block {
+              callback:(void(^)(NSMutableArray *))block {
     NSParameterAssert(cName && block);
     
     dispatch_async(_queue, ^{
@@ -79,7 +79,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
         
         sqlite3_stmt *stmnt = nil;
         if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
-            NSArray *arr = [self _readSyncItems:stmnt collection:cName];
+            NSMutableArray *arr = [self _readSyncItems:stmnt collection:cName];
             block(arr);
         } else {
             [self _throwDBError];
@@ -198,7 +198,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 }
 
 /*! Load all rows and put them into FXSyncItem objects. Calls sqlite3_finalize(stmnt) */
-- (NSArray *)_readSyncItems:(sqlite3_stmt *)stmnt collection:(NSString *)cName {
+- (NSMutableArray *)_readSyncItems:(sqlite3_stmt *)stmnt collection:(NSString *)cName {
     NSMutableArray *items = [NSMutableArray arrayWithCapacity:100];
     
     while (sqlite3_step(stmnt) == SQLITE_ROW) {

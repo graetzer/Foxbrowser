@@ -55,7 +55,7 @@
         btn.showsTouchWhenHighlighted = YES;
         [btn setImage:[UIImage imageNamed:@"grip"] forState:UIControlStateNormal];
         [btn setImage:[UIImage imageNamed:@"grip-pressed"] forState:UIControlStateHighlighted];
-        [btn addTarget:self action:@selector(showBrowserMenu) forControlEvents:UIControlEventTouchUpInside];
+        [btn addTarget:self action:@selector(showBrowserMenu:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:btn];
         _menuButton = btn;
         
@@ -81,7 +81,9 @@
     return self;
 }
 
-- (IBAction)showBrowserMenu {
+- (IBAction)showBrowserMenu:(id)sender; {
+    UIView *sv = sender;
+    
     
     NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:5];
     [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Bookmarks", @"Bookmarks")
@@ -89,7 +91,6 @@
                                        target:self
                                        action:@selector(_showBookmarks)]];
     NSURL *url = [_browser URL];
-    NSString *title = [_browser title];
     if (url) {
         [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Share Page",
                                                                     @"Share url of page")
@@ -97,13 +98,12 @@
                                            target:self
                                            action:@selector(_showSharingUI)]];
         
-        if ([title length]) {
-            [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Bookmark Page",
-                                                                        @"add a new bookmark")
-                                                image:[UIImage imageNamed:@"plus-gray"]
-                                               target:self
-                                               action:@selector(_addBookmark)]];
-        }
+        [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Bookmark Page",
+                                                                    @"add a new bookmark")
+                                            image:[UIImage imageNamed:@"favourite"]
+                                           target:self
+                                           action:@selector(_addBookmark)]];
+        
     }
     [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Settings", @"Settings")
                                         image:[UIImage imageNamed:@"settings"]
@@ -111,8 +111,10 @@
                                        action:@selector(_showSettings)]];
 
     
-    [KxMenu showMenuInView:self.superview
-                  fromRect:[self convertRect:[_menuButton frame] toView:self.superview]
+    CGRect rect = [_browser.view convertRect:sv.bounds fromView:sv];
+    rect.size.height -= 7.5;
+    [KxMenu showMenuInView:_browser.view
+                  fromRect:rect
                  menuItems:menuItems];
 }
 
@@ -122,7 +124,7 @@
 
 - (void)_addBookmark {
     NSURL *url = [_browser URL];
-    NSString *title = [_browser title];
+    NSString *title = [[_browser selectedViewController] title];
     if (url) {
         if (!title) {
             title = NSLocalizedString(@"Untitled", @"Untitled bookmark");

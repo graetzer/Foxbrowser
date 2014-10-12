@@ -436,7 +436,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (self.searchToolbar) [self.searchToolbar removeFromSuperview];
     
     NSInteger count = [self.webView highlightOccurencesOfString:searchString];
-    DLog(@"Found the string %@ %d times", searchString, count);
+    DLog(@"Found the string %@ %ld times", searchString, (long)count);
     
     __strong UIToolbar *searchToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 44,
                                                                                     self.view.bounds.size.width, 44)];

@@ -70,7 +70,6 @@ CGFloat const kSGMinXScale = 0.85;
     _pageControl.numberOfPages = _viewControllers.count;
     _pageControl.currentPage = i;
     [self _layout];
-    //[self showViewController:_viewControllers[i]];
 }
 
 #pragma mark - View initialization
@@ -119,7 +118,7 @@ CGFloat const kSGMinXScale = 0.85;
     button.enabled = NO;
     [button setImage:[UIImage imageNamed:@"grip-white"] forState:UIControlStateNormal];
     [button setImage:[UIImage imageNamed:@"grip-white-pressed"] forState:UIControlStateHighlighted];
-    [button addTarget:_toolbar action:@selector(showBrowserMenu) forControlEvents:UIControlEventTouchUpInside];
+    [button addTarget:_toolbar action:@selector(showBrowserMenu:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:button];
     _menuButton = button;
     
@@ -247,6 +246,7 @@ CGFloat const kSGMinXScale = 0.85;
         [_viewControllers addObject:childController];
         // If there are no pages we need to redisplay the button
         _closeButton.hidden = !_exposeMode;
+        container.userInteractionEnabled = !_exposeMode;
     } else {
         NSInteger index = _pageControl.currentPage+1;
         [_containerViews insertObject:container atIndex:index];

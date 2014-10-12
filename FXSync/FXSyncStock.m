@@ -15,8 +15,10 @@
 NSString *const kFXDataChangedNotification = @"kFXDataChangedNotification";
 NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
-@implementation FXSyncStock
-@synthesize bookmarks = _bookmarks, history = _history, clientTabs = _clientTabs;
+@implementation FXSyncStock {
+    NSMutableArray *_bookmarks;
+}
+@synthesize history = _history, clientTabs = _clientTabs;
 
 + (instancetype)sharedInstance {
     static FXSyncStock *instance;
@@ -39,7 +41,7 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 - (void)_prefetchCollection:(NSString *)cName {
     [[FXSyncStore sharedInstance] loadCollection:cName
-                                        callback:^(NSArray *arr) {
+                                        callback:^(NSMutableArray *arr) {
                                             if ([kFXBookmarksCollectionKey isEqualToString:cName]) {
                                                 _bookmarks = arr;
                                             } else if ([kFXHistoryCollectionKey isEqualToString:cName]) {
@@ -251,7 +253,7 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
         }
     }
     [bookmark deleteItem];
-    _bookmarks = nil;
+    [_bookmarks removeObject:bookmark];
 }
 
 - (FXSyncItem *)bookmarkWithTitle:(NSString *)title url:(NSURL *)url; {
@@ -270,6 +272,9 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                                           @"unsorted bookmarks")
                           } mutableCopy];
     [item save];
+    [_bookmarks addObject:item];
+    
+    // Add it to the chikdren subarray
     [[FXSyncStore sharedInstance] loadSyncId:@"unfiled"
                               fromCollection:kFXBookmarksCollectionKey
                                     callback:^(FXSyncItem *unfiled) {
@@ -285,6 +290,7 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                            url:[NSURL URLWithString:@"about:blank"]];
     [item setType:@"folder"];
     [item.jsonPayload removeObjectForKey:@"bmkUri"];
+    [item save];
     return item;
 }
 

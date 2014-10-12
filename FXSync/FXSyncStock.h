@@ -18,9 +18,10 @@
 
 @property (readonly, strong, nonatomic) FXSyncEngine *syncEngine;
 
+
 @property (readonly, strong, nonatomic) NSArray *history;
-@property (readonly, strong, nonatomic) NSArray *bookmarks;
 @property (readonly, strong, nonatomic) NSArray *clientTabs;
+- (NSArray *)bookmarks;
 
 + (instancetype)sharedInstance;
 - (void)restock;

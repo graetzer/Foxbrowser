@@ -29,7 +29,7 @@
 
 - (instancetype)initWithFrame:(CGRect)frame browserDelegate:(SGBrowserViewController *)browser;
 
-- (IBAction)showBrowserMenu;
+- (IBAction)showBrowserMenu:(id)sender;
 /*! Update the searchfield and the  */
 - (void)updateInterface;
 

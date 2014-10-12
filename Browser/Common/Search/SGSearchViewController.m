@@ -376,7 +376,7 @@ static NSArray* gFreshSearchHits = nil;
         NSMutableArray* SUBSTRING_matches = [NSMutableArray arrayWithArray:[newSubstringHits allValues]];
         [SUBSTRING_matches sortUsingComparator:cmp];
         
-        int needed = MAXPERLIST - [WORD_matches count];
+        NSInteger needed = MAXPERLIST - [WORD_matches count];
         
         //we need more than we have, so add them all
         if (needed > [newSubstringHits count])
