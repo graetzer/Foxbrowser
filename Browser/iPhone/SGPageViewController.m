@@ -46,14 +46,44 @@ CGFloat const kSGMinXScale = 0.85;
     CGPoint _panTranslation;
 }
 
+#pragma mark - State Preservation and Restoration
+
+- (void)encodeRestorableStateWithCoder:(NSCoder *)coder {
+    [super encodeRestorableStateWithCoder:coder];
+    [coder encodeObject:_viewControllers forKey:@"viewControllers"];
+    [coder encodeInteger:_pageControl.currentPage forKey:@"currentPage"];
+}
+
+- (void)decodeRestorableStateWithCoder:(NSCoder *)coder {
+    [super decodeRestorableStateWithCoder:coder];
+    _viewControllers = [coder decodeObjectForKey:@"viewControllers"];
+    NSInteger i = [coder decodeIntegerForKey:@"currentPage"];
+    
+    for (UIViewController *vc in _viewControllers) {
+        UIView *container = [[UIView alloc] initWithFrame:_scrollView.bounds];
+        [_containerViews addObject:container];
+        [self addChildViewController:vc];
+        [container addSubview:vc.view];
+        [vc didMoveToParentViewController:self];
+    }
+    
+    _pageControl.numberOfPages = _viewControllers.count;
+    _pageControl.currentPage = i;
+    [self _layout];
+    //[self showViewController:_viewControllers[i]];
+}
+
+#pragma mark - View initialization
+
 - (UIViewController *)_viewControllerForFullScreenPresentationFromView:(UIView *)view {
     return self;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.restorationIdentifier = NSStringFromClass([self class]);
+    
     _containerViews = [NSMutableArray arrayWithCapacity:10];
-    _viewControllers = [NSMutableArray arrayWithCapacity:10];
     self.view.backgroundColor = [UIColor blackColor];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:NO];
     
@@ -89,9 +119,9 @@ CGFloat const kSGMinXScale = 0.85;
     button.enabled = NO;
     [button setImage:[UIImage imageNamed:@"grip-white"] forState:UIControlStateNormal];
     [button setImage:[UIImage imageNamed:@"grip-white-pressed"] forState:UIControlStateHighlighted];
-    [button addTarget:_toolbar action:@selector(_showOptions:) forControlEvents:UIControlEventTouchUpInside];
+    [button addTarget:_toolbar action:@selector(showBrowserMenu) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:button];
-    _optionsButton = button;
+    _menuButton = button;
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
@@ -140,19 +170,29 @@ CGFloat const kSGMinXScale = 0.85;
     [self.view addSubview:button];
     _closeButton = button;
     
-    __strong UIPageControl *pageCtrl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, b.size.height - 25., b.size.width, 25.)];
+    __strong UIPageControl *pageCtrl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, b.size.height - 25.,
+                                                                                       b.size.width, 25.)];
     [self.view insertSubview:pageCtrl belowSubview:_scrollView];
     _pageControl = pageCtrl;
     _pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [_pageControl addTarget:self action:@selector(_updatePage) forControlEvents:UIControlEventValueChanged];
     
-    
     [self.view addSubview:toolbar];
-    [self loadSavedTabs];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    // Otherwise this is loaded during restoration
+    if (_viewControllers == nil) {
+        _viewControllers = [NSMutableArray arrayWithCapacity:10];
+        [self loadSavedTabs];
+    }
 }
 
 /*! Set the delegate to nil because the scrollview delegate gets weird scroll values */
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                duration:(NSTimeInterval)duration {
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     _scrollView.delegate = nil;
 }
@@ -168,6 +208,7 @@ CGFloat const kSGMinXScale = 0.85;
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     _scrollView.delegate = nil;
+    //_animatedScrolling = YES;
     [coordinator animateAlongsideTransition:NULL completion:^(id<UIViewControllerTransitionCoordinator> handler) {
         [self _layout];
         _scrollView.delegate = self;
@@ -357,10 +398,11 @@ CGFloat const kSGMinXScale = 0.85;
 /*! Internal layout function */
 - (void)_layout {
     CGRect b = self.view.bounds;
+    _pageControl.frame = CGRectMake(0, b.size.height - 25., b.size.width, 25.);
+    
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
         _topOffset = [self.topLayoutGuide length];
     }
-    
     CGFloat toolbarH = kSGToolbarHeight+_topOffset;
     if (_exposeMode) {
         _toolbar.frame = CGRectMake(0, -toolbarH, b.size.width, toolbarH);
@@ -373,12 +415,13 @@ CGFloat const kSGMinXScale = 0.85;
     CGSize size = [[_addTabButton titleForState:UIControlStateNormal]
                    sizeWithAttributes:@{NSFontAttributeName:_addTabButton.titleLabel.font}];
     _addTabButton.frame = CGRectMake(5, _topOffset + 10, 40 + size.width, size.height);
-    _optionsButton.frame = CGRectMake(b.size.width - 80, _topOffset + 4, 36, 36);
+    _menuButton.frame = CGRectMake(b.size.width - 80, _topOffset + 4, 36, 36);
     _tabsButton.frame = CGRectMake(b.size.width - 40, _topOffset + 4, 36, 36);
     _titleLabel.frame = CGRectMake(5, kSGToolbarHeight + _topOffset + 1, b.size.width - 5, _titleLabel.font.lineHeight);
     
     [self _layoutPages];
     NSUInteger current = _pageControl.currentPage;
+    // Workaround for iOS 8
     if (!_animatedScrolling) {
         _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * _viewControllers.count, 1);
         CGPoint off = CGPointMake(_scrollView.frame.size.width * current, 0);
@@ -386,15 +429,17 @@ CGFloat const kSGMinXScale = 0.85;
     }
     _animatedScrolling = NO;
     
-    UIView *container = _containerViews[current];
-    CGPoint point = container.frame.origin;
-    _closeButton.center = [self.view convertPoint:point fromView:_scrollView];
+    if ([_containerViews count] > 0) {
+        UIView *container = _containerViews[current];
+        CGPoint point = container.frame.origin;
+        _closeButton.center = [self.view convertPoint:point fromView:_scrollView];
+    }
 }
 
 /*! Managing the visible viewcontrollers, only 3 are added to the scrollview at a time */
 - (void)_layoutPages {
-    NSInteger current = _pageControl.currentPage;
     
+    NSInteger current = _pageControl.currentPage;
     for (NSInteger i = 0; i < _containerViews.count; i++) {
         UIView *container = _containerViews[i];
         if (current - 1  <= i && i <= current + 1) {// Just keep a max of 3 views around
@@ -570,7 +615,7 @@ CGFloat const kSGMinXScale = 0.85;
          ];
     }
     _addTabButton.enabled = exposeMode;
-    _optionsButton.enabled = exposeMode;
+    _menuButton.enabled = exposeMode;
     _tabsButton.enabled = exposeMode;
 }
 

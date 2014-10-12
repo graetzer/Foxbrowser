@@ -105,6 +105,7 @@ static NSArray* gFreshSearchHits = nil;
                         cell.detailTextLabel.text = uri;
                     } else {
                         cell.textLabel.text = uri;
+                        cell.detailTextLabel.text = nil;
                     }
                     //the item tells us which icon to use
                     if ([matchItem.collection isEqualToString:kFXHistoryCollectionKey]) {

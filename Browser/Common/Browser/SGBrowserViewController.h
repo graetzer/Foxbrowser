@@ -46,7 +46,7 @@
 
 - (UIViewController *)viewControllerAtIndex:(NSUInteger)index;
 
-@property (readonly, nonatomic) UIViewController *selectedViewController;
+- (UIViewController *)selectedViewController;
 @property (assign, nonatomic) NSUInteger selectedIndex;
 @property (readonly, nonatomic) NSUInteger count;
 @property (readonly, nonatomic) NSUInteger maxCount;

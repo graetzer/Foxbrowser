@@ -33,6 +33,7 @@
 
 @implementation SGWebViewController {
     NSDictionary *_selected;
+    BOOL _restoring;
 }
 
 // TODO Allow to change this preferences in the Settings App
@@ -79,9 +80,34 @@
     }
 }
 
+
 - (void)dealloc {
     self.webView.delegate = nil;
 }
+
+#pragma mark - State Preservation and Restoration
+
++ (UIViewController *) viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder {
+    SGWebViewController *vc = [SGWebViewController new];
+    vc.restorationIdentifier = [identifierComponents lastObject];
+    vc.restorationClass = [SGWebViewController class];
+    return vc;
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder *)coder {
+    [super encodeRestorableStateWithCoder:coder];
+    [coder encodeObject:_request forKey:@"request"];
+}
+
+- (void)decodeRestorableStateWithCoder:(NSCoder *)coder {
+    [super decodeRestorableStateWithCoder:coder];
+    _request = [coder decodeObjectForKey:@"request"];
+    // Workaround because after state restoration we need to reload,
+    // Otherwise you get a blank page
+    _restoring = YES;
+}
+
+#pragma mark - View initialization
 
 - (void)loadView {
     __strong UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectZero];
@@ -96,6 +122,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.restorationIdentifier = NSStringFromClass([self class]);
+    self.restorationClass = [self class];
+    self.view.restorationIdentifier = @"webView";
+    
     self.webView.frame = self.view.bounds;
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.webView.backgroundColor = [UIColor whiteColor];
@@ -106,7 +136,6 @@
     [self.webView addGestureRecognizer:gr];
     self.webView.delegate = self;
     self.webView.scalesPageToFit = YES;
-    self.webView.allowsInlineMediaPlayback = YES;
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
@@ -124,10 +153,17 @@
     }
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    if (!self.webView.request) {
-        [self openRequest:nil];
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    // We can't just load the request, this would add to the history
+    if (_restoring) {
+        [_webView reload];
+    } else {
+        // self.title == nil is a workaround, to get the uiwebview to load the page
+        if (_webView.request == nil || self.title == nil) {
+            [self openRequest:nil];
+        }
     }
 }
 

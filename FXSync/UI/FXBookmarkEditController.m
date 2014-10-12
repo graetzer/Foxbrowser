@@ -90,7 +90,8 @@
         
         UITextField *field = (UITextField *)[cell viewWithTag:indexPath.row + TAG_OFFSET];
         if (field == nil) {
-            field = [[UITextField alloc] initWithFrame:cell.contentView.bounds];
+            CGRect frame = CGRectInset(cell.contentView.bounds, 20, 0);
+            field = [[UITextField alloc] initWithFrame:frame];
             field.tag = indexPath.row + TAG_OFFSET;
             field.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
             [cell.contentView addSubview:field];

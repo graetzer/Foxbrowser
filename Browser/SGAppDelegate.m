@@ -51,51 +51,80 @@ NSString *const kSGBackgroundedAtTimeKey = @"kSGBackgroundedAtTimeKey";
     Reachability *_reachability;
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+- (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     appDelegate = self;
     _reachability = [Reachability reachabilityForInternetConnection];
     
-    SGBrowserViewController *browser;
+    __strong SGBrowserViewController *browser;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         browser = [SGPageViewController new];
     } else {
         browser = [SGTabsViewController new];
     }
-    self.browserViewController = browser;
+    _browserViewController = browser;
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
+    _window.restorationIdentifier = NSStringFromClass([UIWindow class]);
     self.window.rootViewController = browser;
-    [self.window makeKeyAndVisible];
     
     [self evaluateDefaultSettings];
+    
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    [self.window makeKeyAndVisible];
+    
     // 0.5 delay as a workaround so that modal views work
     [self performSelector:@selector(setupSync) withObject:nil afterDelay:0.5];
     
     //-------------- Marketing stuff -------------------------
-//    
-//    [GAI sharedInstance].trackUncaughtExceptions = YES;
-//    [GAI sharedInstance].dispatchInterval = 60*5;
-//    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
-//    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
-////#ifdef DEBUG
-////    [GAI sharedInstance].debug =  YES;
-////#endif
-//    
-//    [Appirater setAppId:@"550365886"];
-//    [Appirater setDelegate:self];
-//    [Appirater setDaysUntilPrompt:1];
-//    [Appirater setUsesUntilPrompt:3];
-//    [Appirater setTimeBeforeReminding:2];
-//    
-//    [Appirater appLaunched:YES];
-//
-        
+    //
+    //    [GAI sharedInstance].trackUncaughtExceptions = YES;
+    //    [GAI sharedInstance].dispatchInterval = 60*5;
+    //    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
+    //    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
+    ////#ifdef DEBUG
+    ////    [GAI sharedInstance].debug =  YES;
+    ////#endif
+    //
+    //    [Appirater setAppId:@"550365886"];
+    //    [Appirater setDelegate:self];
+    //    [Appirater setDaysUntilPrompt:1];
+    //    [Appirater setUsesUntilPrompt:3];
+    //    [Appirater setTimeBeforeReminding:2];
+    //
+    //    [Appirater appLaunched:YES];
+    //
+    
     return YES;
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application {
+- (UIViewController *)application:(UIApplication *)application
+viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
+                            coder:(NSCoder *)coder {
     
+    NSString *last = [identifierComponents lastObject];
+    if ([last isEqualToString:NSStringFromClass([SGTabsViewController class])]
+        || [last isEqualToString:NSStringFromClass([SGPageViewController class])] ) {
+        return _browserViewController;
+    }
+    return nil;
+}
+
+- (BOOL)application:(UIApplication *)application shouldSaveApplicationState:(NSCoder *)coder {
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)application shouldRestoreApplicationState:(NSCoder *)coder {
+    NSString* version = [[NSBundle mainBundle].infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
+    NSString* storedVersion = [coder decodeObjectForKey: UIApplicationStateRestorationBundleVersionKey];
+    return [version isEqualToString:storedVersion];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
     // Analytics Opt out
     [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
     [Appirater appEnteredForeground:YES];
@@ -189,32 +218,6 @@ NSString *const kSGBackgroundedAtTimeKey = @"kSGBackgroundedAtTimeKey";
     [def synchronize];
 }
 
-////put up an alert explaining what just went wrong
-//- (void) reportErrorWithInfo: (NSDictionary*)errInfo; {
-//    DLog(@"Error: %@", errInfo[@"message"]);
-//    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:errInfo[@"title"]
-//                                                    message:errInfo[@"message"]
-//                                                   delegate:nil
-//                                          cancelButtonTitle:NSLocalizedString(@"OK", @"ok") otherButtonTitles:nil];
-//    [alert show];
-//}
-//
-////put up an alert view specific to authentication issues, allowing the user to either ignore the problem, or sign out
-//- (void) reportAuthErrorWithMessage: (NSDictionary*)errInfo; {
-//    DLog(@"Error: %@", errInfo[@"message"]);
-//    UIAlertView* alert = [[UIAlertView alloc] initWithTitle: errInfo[@"title"]
-//                                                    message:errInfo[@"message"]
-//                                                   delegate:self
-//                                          cancelButtonTitle:NSLocalizedString(@"Not Now", @"Not Now")
-//                                          otherButtonTitles:NSLocalizedString(@"Sign In", @"re-authenticate"), nil];
-//	[alert show];
-//}
-//
-//- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-//    //this handler is only called by the alert made directly below, so we know that button 1 is the signout button
-//    if (buttonIndex == 1) //sign out
-//        [self login]; //also erases user data
-//}
 
 - (BOOL) canConnectToInternet; {
     return [_reachability isReachable];

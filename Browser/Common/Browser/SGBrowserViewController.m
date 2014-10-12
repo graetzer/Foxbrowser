@@ -291,7 +291,11 @@
             if ([url.scheme hasPrefix:@"http"]) {
                 NSString *str = [NSString stringWithFormat:@"%@", url];
                 NSTimeInterval time = [[NSDate date] timeIntervalSince1970];
-                [tabs addObject:@{@"title":controller.title,
+                NSString *title = controller.title;
+                if ([title length] == 0) {
+                    title = url.host;
+                }
+                [tabs addObject:@{@"title":title,
                                   @"lastUsed":[NSString stringWithFormat:@"%ld", (long)time],
                                   @"icon":@"",
                                   @"urlHistory":@[str]}];

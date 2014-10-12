@@ -28,7 +28,7 @@
 @class SGTabsViewController;
 
 @interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIAlertViewDelegate>
+UIActionSheetDelegate, UIViewControllerRestoration>
 
 @property (weak, nonatomic) UIWebView *webView;
 @property (weak, nonatomic) UIToolbar *searchToolbar;

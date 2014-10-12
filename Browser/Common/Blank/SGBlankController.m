@@ -29,6 +29,17 @@
 
 @implementation SGBlankController
 
+#pragma mark - State Preservation and Restoration
+
++ (UIViewController *) viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder {
+    SGBlankController *vc = [SGBlankController new];
+    vc.restorationIdentifier = [identifierComponents lastObject];
+    vc.restorationClass = [SGBlankController class];
+    return vc;
+}
+
+#pragma mark - State Preservation and Restoration
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
 }
@@ -47,6 +58,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.restorationIdentifier = NSStringFromClass([self class]);
+    self.restorationClass = [self class];
     
     self.title = NSLocalizedString(@"Untitled", @"Untitled tab");
     self.view.backgroundColor = [UIColor whiteColor];

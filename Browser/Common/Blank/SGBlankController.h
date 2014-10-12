@@ -26,7 +26,7 @@
 
 @class FXTabsViewController, SGBottomView;
 
-@interface SGBlankController : UIViewController <UIScrollViewDelegate, SGPanelDelegate>
+@interface SGBlankController : UIViewController <UIScrollViewDelegate, UIViewControllerRestoration, SGPanelDelegate>
 @property (weak, nonatomic) FXTabsViewController *tabsController;
 @property (weak, nonatomic) UIScrollView *scrollView;
 @property (weak, nonatomic) SGPreviewPanel *previewPanel;

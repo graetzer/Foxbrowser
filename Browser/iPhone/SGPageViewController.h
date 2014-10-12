@@ -32,7 +32,7 @@
 @property (weak, readonly, nonatomic) UIPageControl *pageControl;
 @property (weak, readonly, nonatomic) UIButton *closeButton;
 @property (weak, readonly, nonatomic) UIButton *addTabButton;
-@property (weak, readonly, nonatomic) UIButton *optionsButton;
+@property (weak, readonly, nonatomic) UIButton *menuButton;
 @property (weak, readonly, nonatomic) UIButton *tabsButton;
 @property (weak, readonly, nonatomic) UILabel *titleLabel;
 @property (assign, nonatomic) BOOL exposeMode;

@@ -16,7 +16,7 @@ NSString *const kFXDataChangedNotification = @"kFXDataChangedNotification";
 NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 @implementation FXSyncStock
-@synthesize bookmarks = _bookmarks;
+@synthesize bookmarks = _bookmarks, history = _history, clientTabs = _clientTabs;
 
 + (instancetype)sharedInstance {
     static FXSyncStock *instance;
@@ -89,6 +89,20 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
         [self _prefetchCollection:kFXBookmarksCollectionKey];
     }
     return _bookmarks;
+}
+
+- (NSArray *)history {
+    if (_history == nil) {
+        [self _prefetchCollection:kFXHistoryCollectionKey];
+    }
+    return _history;
+}
+
+- (NSArray *)clientTabs {
+    if (_clientTabs == nil) {
+        [self _prefetchCollection:kFXTabsCollectionKey];
+    }
+    return _clientTabs;
 }
 
 #pragma mark - FXSyncEngineDelegate
