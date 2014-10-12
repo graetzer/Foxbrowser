@@ -60,7 +60,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 40;
+    return 30;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
@@ -101,6 +101,7 @@
         if (indexPath.row == 0) {
             field.placeholder = NSLocalizedString(@"Name", @"Name of the Bookmark");
             field.text = [_bookmark title];
+            field.returnKeyType = UIReturnKeyDone;
         } else {
             if ([[_bookmark type] isEqualToString:@"bookmark"] && indexPath.row == 1) {
                 field.placeholder = NSLocalizedString(@"Website URL", @"URL of Bookmark");
@@ -162,6 +163,7 @@
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
     return YES;
 }
 

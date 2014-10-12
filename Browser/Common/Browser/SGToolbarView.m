@@ -112,7 +112,7 @@
 
     
     CGRect rect = [_browser.view convertRect:sv.bounds fromView:sv];
-    rect.size.height -= 7.5;
+    rect.size.height -= 10;
     [KxMenu showMenuInView:_browser.view
                   fromRect:rect
                  menuItems:menuItems];

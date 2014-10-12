@@ -246,7 +246,6 @@ CGFloat const kSGMinXScale = 0.85;
         [_viewControllers addObject:childController];
         // If there are no pages we need to redisplay the button
         _closeButton.hidden = !_exposeMode;
-        container.userInteractionEnabled = !_exposeMode;
     } else {
         NSInteger index = _pageControl.currentPage+1;
         [_containerViews insertObject:container atIndex:index];
@@ -258,7 +257,11 @@ CGFloat const kSGMinXScale = 0.85;
     _pageControl.numberOfPages = count;
     _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * count, 1);
     [self _layoutPages];
-    
+    if (_exposeMode) {
+        [self _disableInteractions];
+    } else {
+        [self _enableInteractions];
+    }
     [childController didMoveToParentViewController:self];
 }
 
@@ -273,12 +276,10 @@ CGFloat const kSGMinXScale = 0.85;
         _animatedScrolling = YES;
         [_scrollView setContentOffset:off animated:YES];
         
-        if (!_exposeMode) {
-            [self _enableInteractions];
+        if (_exposeMode) {
+            [self _disableInteractions];
         } else {
-            // Disable interaction with the current controller
-            UIView *container = _containerViews[index];
-            container.userInteractionEnabled = NO;
+            [self _enableInteractions];
         }
     }
 }
@@ -446,7 +447,7 @@ CGFloat const kSGMinXScale = 0.85;
             
             CGFloat y = 0;//_toolbar.frame.size.height;
             
-            // Just in case rest the transform
+            // Just in case reset the transform
             container.transform = CGAffineTransformIdentity;
             container.frame = CGRectMake(_scrollView.frame.size.width * i,
                                          y,
@@ -599,7 +600,10 @@ CGFloat const kSGMinXScale = 0.85;
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
         }
-        
+        UITapGestureRecognizer *rec = [self.view.gestureRecognizers lastObject];
+        if (rec != nil) {
+            [self.view removeGestureRecognizer:rec];
+        }
         _animating = YES;
         [UIView animateWithDuration:duration
                          animations:^{
@@ -706,34 +710,40 @@ CGFloat const kSGMinXScale = 0.85;
 #pragma mark UIScrollViewDelegate
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    if (scrollView != _scrollView) return;
-    if (!_exposeMode) {
+    if (scrollView == _scrollView) {
         [self _disableInteractions];
+        [self _setCloseButtonHidden:YES];
     }
-    [self _setCloseButtonHidden:YES];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (scrollView != _scrollView) {
+        // In this case it's the content webview
         if (scrollView.contentOffset.y < 0 && _toolbar.frame.origin.y < 0) {
             [self _setToolbarHidden:NO];
         }
-        return;
-    }
-    
-    CGFloat offset = scrollView.contentOffset.x;
-    CGFloat width = scrollView.frame.size.width;
-    
-    // Don't do anything state changing when animating,
-    NSInteger nextPage = (NSInteger)fabs((offset+(width/2))/width);
-    if (nextPage != _pageControl.currentPage) {
-        _pageControl.currentPage = nextPage;
-        [self _layoutPages];
-        [self updateInterface];
-    }
-    [self _scalePages];
-    if (_toolbar.frame.origin.y != 0) {
-        [self _setToolbarHidden:NO];
+    } else {
+        // In this case it's the horizontal scrollview
+        CGFloat offset = scrollView.contentOffset.x;
+        CGFloat width = scrollView.frame.size.width;
+        
+        // Don't do anything state changing when animating,
+        NSInteger nextPage = (NSInteger)fabs((offset+(width/2))/width);
+        if (nextPage != _pageControl.currentPage) {
+            _pageControl.currentPage = nextPage;
+            // Make the next page appear
+            [self _layoutPages];
+            [self updateInterface];
+        }
+        [self _scalePages];
+        // Workaround in case scrollViewWillBeginDragging is not called
+        UIView *container = _containerViews[_pageControl.currentPage];
+        if (container.clipsToBounds == NO) {
+            [self _disableInteractions];
+        }
+        if (_toolbar.frame.origin.y != 0) {
+            [self _setToolbarHidden:NO];
+        }
     }
 }
 
