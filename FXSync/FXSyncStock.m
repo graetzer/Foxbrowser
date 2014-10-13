@@ -56,9 +56,11 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                                 _clientTabs = [arr filteredArrayUsingPredicate:pred];
                                             }
                                             
-                                            [[NSNotificationCenter defaultCenter]
-                                             postNotificationName:kFXDataChangedNotification
-                                             object:self];
+                                            dispatch_async(dispatch_get_main_queue(), ^{
+                                                [[NSNotificationCenter defaultCenter]
+                                                 postNotificationName:kFXDataChangedNotification
+                                                 object:self];
+                                            });
                                         }];
 }
 

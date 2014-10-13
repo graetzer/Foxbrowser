@@ -152,7 +152,12 @@
                                                                                   target:url.absoluteString] build]];
             }
         };
-        [_browser presentViewController:activityVC animated:YES completion:NULL];
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+            <#statements#>
+        } else {
+            [_browser presentViewController:activityVC animated:YES completion:NULL];
+        }
+        
     }
 }
 

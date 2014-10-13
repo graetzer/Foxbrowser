@@ -136,9 +136,7 @@
 }
 
 - (void)refresh {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.previewPanel refresh];
-    });
+    [self.previewPanel refresh];
 }
 
 #pragma mark - SGPreviewPanelDelegate

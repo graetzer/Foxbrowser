@@ -9,5 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface FXSettingsViewController : UIViewController
+@property (weak, nonatomic) IBOutlet UIButton *syncButton;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+- (IBAction)startSync:(id)sender;
 
 @end

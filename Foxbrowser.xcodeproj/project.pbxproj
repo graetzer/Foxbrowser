@@ -1073,6 +1073,7 @@
 					"$(SRCROOT)/External/GoogleAnalytics",
 					"$(SDKROOT)/usr/lib/system",
 				);
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1097,6 +1098,7 @@
 					"$(SRCROOT)/External/GoogleAnalytics",
 					"$(SDKROOT)/usr/lib/system",
 				);
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
