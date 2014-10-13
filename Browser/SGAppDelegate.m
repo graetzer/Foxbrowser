@@ -43,18 +43,18 @@ NSString *const kSGSearchEngineURLKey = @"org.graetzer.search";
 NSString *const kSGEnableHTTPStackKey = @"org.graetzer.httpauth";
 NSString *const kSGEnableAnalyticsKey = @"org.graetzer.analytics";
 
+// Only used in the appdelegate
 NSString *const kSGBackgroundedAtTimeKey = @"kSGBackgroundedAtTimeKey";
-
-
+NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
 
 @implementation SGAppDelegate {
     Reachability *_reachability;
 }
 
-
 - (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     appDelegate = self;
     _reachability = [Reachability reachabilityForInternetConnection];
+    [self evaluateDefaultSettings];
     
     __strong SGBrowserViewController *browser;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
@@ -68,38 +68,66 @@ NSString *const kSGBackgroundedAtTimeKey = @"kSGBackgroundedAtTimeKey";
     _window.restorationIdentifier = NSStringFromClass([UIWindow class]);
     self.window.rootViewController = browser;
     
-    [self evaluateDefaultSettings];
-    
     return YES;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
     [self.window makeKeyAndVisible];
-    
     // 0.5 delay as a workaround so that modal views work
     [self performSelector:@selector(setupSync) withObject:nil afterDelay:0.5];
-    
     //-------------- Marketing stuff -------------------------
-    //
-    //    [GAI sharedInstance].trackUncaughtExceptions = YES;
-    //    [GAI sharedInstance].dispatchInterval = 60*5;
-    //    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
-    //    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
-    ////#ifdef DEBUG
-    ////    [GAI sharedInstance].debug =  YES;
-    ////#endif
-    //
-    //    [Appirater setAppId:@"550365886"];
-    //    [Appirater setDelegate:self];
-    //    [Appirater setDaysUntilPrompt:1];
-    //    [Appirater setUsesUntilPrompt:3];
-    //    [Appirater setTimeBeforeReminding:2];
-    //
-    //    [Appirater appLaunched:YES];
-    //
+
+    [GAI sharedInstance].trackUncaughtExceptions = YES;
+    [GAI sharedInstance].dispatchInterval = 60*5;
+    self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
+//#ifdef DEBUG
+//    [GAI sharedInstance].debug =  YES;
+//#endif
+
+    [Appirater setAppId:@"550365886"];
+    [Appirater setDelegate:self];
+    [Appirater setDaysUntilPrompt:1];
+    [Appirater setUsesUntilPrompt:3];
+    [Appirater setTimeBeforeReminding:2];
+    [Appirater appLaunched:YES];
     
     return YES;
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    [Appirater appEnteredForeground:YES];
+    // 0.5 delay as a workaround so that modal views work
+    [self performSelector:@selector(setupSync) withObject:nil afterDelay:0.5];
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    // Analytics Opt out
+    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    //stop timers, threads, spinner animations, etc.
+    // note the time we were suspended, so we can decide whether to do a refresh when we are resumed
+    [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970]
+                                              forKey:kSGBackgroundedAtTimeKey];
+    [self.browserViewController saveCurrentTabs];
+    [[GAI sharedInstance] dispatch];
+    
+    __block UIBackgroundTaskIdentifier identifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+        [[UIApplication sharedApplication] endBackgroundTask:identifier];
+        identifier = UIBackgroundTaskInvalid;
+    }];
+    
+    //    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+    //        if (identifier != UIBackgroundTaskInvalid) {
+    ////            [[Store getStore] saveChanges];
+    //            [[UIApplication sharedApplication] endBackgroundTask:identifier];
+    //        }
+    //    });
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+    [self.browserViewController saveCurrentTabs];
 }
 
 - (UIViewController *)application:(UIApplication *)application
@@ -122,38 +150,6 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
     NSString* version = [[NSBundle mainBundle].infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString* storedVersion = [coder decodeObjectForKey: UIApplicationStateRestorationBundleVersionKey];
     return [version isEqualToString:storedVersion];
-}
-
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    // Analytics Opt out
-    [GAI sharedInstance].optOut = [[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableAnalyticsKey];
-    [Appirater appEnteredForeground:YES];
-}
-
-
-- (void)applicationWillTerminate:(UIApplication *)application {
-    [self.browserViewController saveCurrentTabs];
-}
-
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    //stop timers, threads, spinner animations, etc.
-    // note the time we were suspended, so we can decide whether to do a refresh when we are resumed
-    [[NSUserDefaults standardUserDefaults] setDouble:[[NSDate date] timeIntervalSince1970]
-                                              forKey:kSGBackgroundedAtTimeKey];
-    [self.browserViewController saveCurrentTabs];
-    [[GAI sharedInstance] dispatch];
-    
-    __block UIBackgroundTaskIdentifier identifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
-        [[UIApplication sharedApplication] endBackgroundTask:identifier];
-        identifier = UIBackgroundTaskInvalid;
-    }];
-    
-//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-//        if (identifier != UIBackgroundTaskInvalid) {
-////            [[Store getStore] saveChanges];
-//            [[UIApplication sharedApplication] endBackgroundTask:identifier];
-//        }
-//    });
 }
 
 - (BOOL)application:(UIApplication *)application
@@ -193,11 +189,18 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
         }
     } else {
         
-        FXLoginViewController* login = [FXLoginViewController new];
-        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:login];
-        navController.modalPresentationStyle = UIModalPresentationFormSheet;
-        navController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-        [self.browserViewController presentViewController:navController animated:YES completion:NULL];
+        // Only show this at start once
+        BOOL didRunBefore = [defaults boolForKey:kSGDidRunBeforeKey];
+        if (!didRunBefore) {
+            [defaults setBool:YES forKey:kSGDidRunBeforeKey];
+            [defaults synchronize];
+            
+            FXLoginViewController* login = [FXLoginViewController new];
+            UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:login];
+            navController.modalPresentationStyle = UIModalPresentationFormSheet;
+            navController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+            [self.browserViewController presentViewController:navController animated:YES completion:NULL];
+        }
     }
 }
 

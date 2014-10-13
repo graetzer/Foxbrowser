@@ -18,6 +18,7 @@
 
 // Interval in seconds
 @property (nonatomic, assign) NSTimeInterval localTimeOffsetSec;
+@property (nonatomic, strong, readonly) NSOperationQueue *queue;
 
 /**
  * @method signIn

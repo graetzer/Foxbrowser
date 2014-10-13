@@ -102,6 +102,10 @@
 - (void)decodeRestorableStateWithCoder:(NSCoder *)coder {
     [super decodeRestorableStateWithCoder:coder];
     _request = [coder decodeObjectForKey:@"request"];
+    if (self.title == nil && _request != nil) {
+        self.title = _request.URL.host;
+    }
+    
     // Workaround because after state restoration we need to reload,
     // Otherwise you get a blank page
     _restoring = YES;

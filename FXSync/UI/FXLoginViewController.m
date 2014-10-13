@@ -66,6 +66,7 @@
     if (textField == _emailField) {
         [_passwordField becomeFirstResponder];
     } else if (textField == _passwordField) {
+        [textField resignFirstResponder];
         [self _tryLogin];
     }
     return YES;

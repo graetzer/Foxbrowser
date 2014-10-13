@@ -42,7 +42,6 @@
 @implementation SGTabsViewController {
     __weak UIView *_headerView;
     __weak SGTabsView *_tabsView;
-    __weak SGAddButton *_addButton;
     __weak SGTabsToolbar *_toolbar;
 }
 
@@ -87,32 +86,25 @@
 
 - (void)loadView {
     [super loadView];
-    
+        
     CGRect bounds = self.view.bounds;
     CGRect head = CGRectMake(0, 0, bounds.size.width, kSGToolbarHeight + kTabsHeigth);
     __strong UIView *header = [[UIView alloc] initWithFrame:head];
     header.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     header.backgroundColor = [UIColor blackColor];
-    [self.view addSubview:_headerView];
+    [self.view addSubview:header];
     _headerView = header;
     
-    CGRect frame = CGRectMake(0, kTabsHeigth, head.size.width, kSGToolbarHeight);
-    __strong SGTabsToolbar *toolbar = [[SGTabsToolbar alloc] initWithFrame:frame browserDelegate:self];
-    [_headerView addSubview:toolbar];
-    _toolbar = toolbar;
-    
-    frame = CGRectMake(0, 0, head.size.width - kAddButtonWidth, kTabsHeigth);
+    CGRect frame = CGRectMake(0, 0, head.size.width, kTabsHeigth);
     __strong SGTabsView *tabs = [[SGTabsView alloc] initWithFrame:frame];
     tabs.tabsController = self;
     [_headerView addSubview:tabs];
     _tabsView = tabs;
     
-    frame = CGRectMake(head.size.width - kAddButtonWidth, 0, kAddButtonWidth, kTabsHeigth);
-    SGAddButton *add = [[SGAddButton alloc] initWithFrame:frame];
-    add.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-    [add.button addTarget:self action:@selector(addTab) forControlEvents:UIControlEventTouchUpInside];
-    [_headerView addSubview:add];
-    _addButton = add;
+    frame = CGRectMake(0, kTabsHeigth, head.size.width, kSGToolbarHeight);
+    __strong SGTabsToolbar *toolbar = [[SGTabsToolbar alloc] initWithFrame:frame browserDelegate:self];
+    [_headerView addSubview:toolbar];
+    _toolbar = toolbar;
 }
 
 - (void)viewDidLoad {
@@ -139,8 +131,8 @@
     }
 }
 
-- (void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
     
     CGFloat topOffset = 0;
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
@@ -148,8 +140,7 @@
     }
     CGRect b = self.view.bounds;
     _headerView.frame = CGRectMake(0, 0, b.size.width, kSGToolbarHeight + kTabsHeigth + topOffset);
-    _tabsView.frame = CGRectMake(0, topOffset, b.size.width - kAddButtonWidth, kTabsHeigth);
-    _addButton.frame = CGRectMake(b.size.width - kAddButtonWidth, topOffset, kAddButtonWidth, kTabsHeigth);
+    _tabsView.frame = CGRectMake(0, topOffset, b.size.width, kTabsHeigth);
     _toolbar.frame = CGRectMake(0, kTabsHeigth + topOffset, b.size.width, kSGToolbarHeight);
     self.selectedViewController.view.frame = [self _contentFrame];
 }

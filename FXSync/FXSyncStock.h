@@ -18,9 +18,8 @@
 
 @property (readonly, strong, nonatomic) FXSyncEngine *syncEngine;
 
-
-@property (readonly, strong, nonatomic) NSArray *history;
 @property (readonly, strong, nonatomic) NSArray *clientTabs;
+- (NSArray *)history;
 - (NSArray *)bookmarks;
 
 + (instancetype)sharedInstance;
@@ -32,6 +31,9 @@
         completion:(void(^)(BOOL))block;
 - (void)logout;
 
+// ======= Helper methods to work with history ======
+
+- (void)deleteHistoryItem:(FXSyncItem *)item;
 
 // ======= Helper methods to work the tabs for the current device ======
 

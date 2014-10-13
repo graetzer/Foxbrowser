@@ -178,11 +178,16 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
         && _parentFolder != nil) {
         
         FXSyncItem *item = _bookmarks[indexPath.row];
-        [[FXSyncStock sharedInstance] deleteBookmark:item];
-        
-        NSMutableArray *arr = [_bookmarks mutableCopy];
-        [arr removeObjectAtIndex:indexPath.row];
-        _bookmarks = arr;
+        if ([_parentFolder.syncId isEqualToString:@"history"]) {
+            [[FXSyncStock sharedInstance] deleteHistoryItem:item];
+            _bookmarks = [FXSyncStock sharedInstance].history;
+        } else {
+            
+            [[FXSyncStock sharedInstance] deleteBookmark:item];
+            NSMutableArray *arr = [_bookmarks mutableCopy];
+            [arr removeObjectAtIndex:indexPath.row];
+            _bookmarks = arr;
+        }
         
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
     }

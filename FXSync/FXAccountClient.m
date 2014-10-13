@@ -24,9 +24,7 @@ NSString *const kFXNamespace = @"identity.mozilla.com/picl/v1/";
 uint const PBKDF2_ROUNDS = 1000;
 uint const STRETCHED_PASS_LENGTH_BYTES = 32;
 
-@implementation FXAccountClient {
-    NSOperationQueue *_queue;
-}
+@implementation FXAccountClient
 
 - (instancetype)init {
     if (self = [super init]) {

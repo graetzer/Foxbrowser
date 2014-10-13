@@ -74,47 +74,44 @@
 
 @end
 
-@interface SGPreviewPanel ()
-@property (weak, nonatomic) SGPreviewTile *selected;
-@property (strong, nonatomic) NSMutableArray *tiles;
-@end
 
-@implementation SGPreviewPanel
+@implementation SGPreviewPanel {
+    __weak SGPreviewTile *_selected;
+    NSMutableArray *_tiles;
+}
 
 - (id)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self refresh];
-        [self layout];
     }
     return self;
 }
 
 - (void)layout {
-    if (self.tiles.count == 0) return;
+    if (_tiles.count == 0) return;
     
-    SGPreviewTile *tile = self.tiles[0];
+    SGPreviewTile *tile = _tiles[0];
     CGRect b = self.bounds;
     CGSize tileSize = tile.frame.size;
     
     NSUInteger columns, lines;
     if (b.size.width > b.size.height) {
         columns = b.size.width/tileSize.width;
-        lines = MAX((self.tiles.count + (columns-1)) / columns, 1);
+        lines = MAX((_tiles.count + (columns-1)) / columns, 1);
     } else {
         lines = b.size.height/tileSize.height;
-        columns = MAX((self.tiles.count + (lines-1)) / lines, 1);
+        columns = MAX((_tiles.count + (lines-1)) / lines, 1);
     }
     
     CGFloat paddingX = (b.size.width - columns*tileSize.width)/(columns + 1);
     CGFloat paddingY = (b.size.height - lines*tileSize.height)/(lines + 1);
     
-    for (NSUInteger i = 0; i < self.tiles.count; i++) {
+    for (NSUInteger i = 0; i < _tiles.count; i++) {
         NSUInteger line = i / columns;
         NSUInteger column = i % columns;
         
-        SGPreviewTile *tile = self.tiles[i];
+        SGPreviewTile *tile = _tiles[i];
         CGRect frame = tile.frame;
         frame.origin.x = column*(tileSize.width + paddingX) + paddingX;
         frame.origin.y = line*(tileSize.height + paddingY) + paddingY;
@@ -130,20 +127,20 @@
 - (void)willMoveToWindow:(UIWindow *)newWindow {
     [super willMoveToWindow:newWindow];
     if (newWindow) {
-        if (self.tiles.count < [SGFavouritesManager sharedManager].maxFavs) {
+        if (_tiles.count < [SGFavouritesManager sharedManager].maxFavs) {
             [self refresh];
         }
     }
 }
 
 - (void)refresh {
-    for (SGPreviewTile *tile in self.tiles) {
+    for (SGPreviewTile *tile in _tiles) {
         [tile removeFromSuperview];
     }
-    [self.tiles removeAllObjects];
+    [_tiles removeAllObjects];
     
     SGFavouritesManager *favsMngr = [SGFavouritesManager sharedManager];
-    self.tiles = [NSMutableArray arrayWithCapacity:favsMngr.maxFavs];
+    _tiles = [NSMutableArray arrayWithCapacity:favsMngr.maxFavs];
     
     NSArray *favs = [favsMngr favourites];
     for (FXSyncItem *item in favs) {
@@ -152,22 +149,23 @@
 }
 
 - (void)addTileWithItem:(FXSyncItem *)item {
-    if (item == nil) return;
-    
-    SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item];
-    if (tile == nil) return;
-    tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
-    
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-    tap.delegate  = self;
-    [tile addGestureRecognizer:tap];
-    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                                                            action:@selector(handleLongPress:)];
-    longPress.delegate = self;
-    [tile addGestureRecognizer:longPress];
-    
-    [self addSubview:tile];
-    [self.tiles addObject:tile];
+    if (item != nil) {
+        SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item];
+        if (tile != nil) {
+            tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
+            
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+            tap.delegate  = self;
+            [tile addGestureRecognizer:tap];
+            UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
+                                                                                                    action:@selector(handleLongPress:)];
+            longPress.delegate = self;
+            [tile addGestureRecognizer:longPress];
+            
+            [self addSubview:tile];
+            [_tiles addObject:tile];
+        }
+    }
 }
 
 #pragma mark - Tap Handling, context menu
@@ -183,10 +181,11 @@
 - (IBAction)handleLongPress:(UILongPressGestureRecognizer *)recognizer {
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
-            self.selected = (SGPreviewTile*)recognizer.view;
-            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:self.selected.url.absoluteString
+            _selected = (SGPreviewTile*)recognizer.view;
+            NSString *cancel = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? NSLocalizedString(@"Cancel", @"cancel") : nil;
+            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:_selected.url.absoluteString
                                                                delegate:self
-                                                      cancelButtonTitle:UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? NSLocalizedString(@"Cancel", @"cancel") : nil
+                                                      cancelButtonTitle:cancel
                                                  destructiveButtonTitle:NSLocalizedString(@"Remove", @"Remove from page")
                                                       otherButtonTitles:
                                     NSLocalizedString(@"Open", @"Open a link"),
@@ -204,22 +203,22 @@
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     switch (buttonIndex) {
         case 1:
-            [self.delegate open:self.selected];
+            [self.delegate open:_selected];
             break;
             
         case 2:
-            [self.delegate openNewTab:self.selected];
+            [self.delegate openNewTab:_selected];
             break;
             
         case 0: {
-            FXSyncItem *next = [[SGFavouritesManager sharedManager] blockItem:self.selected.item];
-            [self.tiles removeObject:self.selected];
+            FXSyncItem *next = [[SGFavouritesManager sharedManager] blockItem:_selected.item];
+            [_tiles removeObject:_selected];
             
            [UIView transitionWithView:self
                              duration:0.3
                               options:UIViewAnimationOptionAllowAnimatedContent
                            animations:^{
-                               [self.selected removeFromSuperview];
+                               [_selected removeFromSuperview];
                                [self addTileWithItem:next];
                                [self layout];
                            }

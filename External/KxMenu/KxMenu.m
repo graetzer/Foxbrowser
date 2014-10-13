@@ -503,7 +503,7 @@ typedef enum {
             titleLabel.text = menuItem.title;
             titleLabel.font = titleFont;
             titleLabel.textAlignment = menuItem.alignment;
-            titleLabel.textColor = menuItem.foreColor ? menuItem.foreColor : [UIColor darkTextColor];
+            titleLabel.textColor = menuItem.foreColor ? menuItem.foreColor : [UIColor darkGrayColor];
             titleLabel.backgroundColor = [UIColor clearColor];
             titleLabel.autoresizingMask = UIViewAutoresizingNone;
             //titleLabel.backgroundColor = [UIColor greenColor];
@@ -633,9 +633,9 @@ typedef enum {
         CGFloat a;
         [tintColor getRed:&R0 green:&G0 blue:&B0 alpha:&a];
         [tintColor getRed:&R1 green:&G1 blue:&B1 alpha:&a];
-        R1 -= 0.075;
-        G1 -= 0.075;
-        B1 -= 0.075;
+        R1 -= 0.05;
+        G1 -= 0.05;
+        B1 -= 0.05;
     }
     
     CGFloat X0 = frame.origin.x;

@@ -57,7 +57,7 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    _saveTimer = [NSTimer scheduledTimerWithTimeInterval:10
+    _saveTimer = [NSTimer scheduledTimerWithTimeInterval:30
                                                   target:self
                                                 selector:@selector(saveCurrentTabs)
                                                 userInfo:nil repeats:YES];

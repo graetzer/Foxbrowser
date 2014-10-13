@@ -18,13 +18,13 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        _tabColor = kSGBrowserBarColor;
+        _tabColor = UIColorFromHEX(0xC0C0C0);
         self.backgroundColor = [UIColor clearColor];
         
         self.button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [self.button setImage:[UIImage imageNamed:@"plus-gray"] forState:UIControlStateNormal];
+        //[self.button setImage:[UIImage imageNamed:@"plus-gray"] forState:UIControlStateNormal];
         self.button.showsTouchWhenHighlighted = YES;
-        self.button.frame = CGRectMake(kCornerRadius, 0, self.bounds.size.width - kCornerRadius, self.bounds.size.height);
+        self.button.frame = self.bounds;//CGRectMake(kCornerRadius, 0, self.bounds.size.width - kCornerRadius*2, self.bounds.size.height);
         [self addSubview:self.button];
     }
     return self;
@@ -34,20 +34,25 @@
     CGRect  tabRect   = self.bounds;
     CGFloat tabLeft   = tabRect.origin.x;
     CGFloat tabRight  = tabRect.origin.x + tabRect.size.width;
-    CGFloat tabTop    = tabRect.origin.y;
-    CGFloat tabBottom = tabRect.origin.y + tabRect.size.height;
+    CGFloat tabTop    = tabRect.origin.y + kCornerRadius;
+    CGFloat tabBottom = tabRect.origin.y + tabRect.size.height - kCornerRadius;
     
     CGMutablePathRef path = CGPathCreateMutable();
     
-    CGPathMoveToPoint(path, NULL, tabLeft, tabBottom);
+    CGPathMoveToPoint(path, NULL, tabLeft+kCornerRadius, tabBottom);
     // Bottom left
-    CGPathAddArc(path, NULL, tabLeft, tabBottom - kCornerRadius, kCornerRadius, M_PI_2, 0, YES);
-    CGPathAddLineToPoint(path, NULL, tabLeft + kCornerRadius, tabTop + kCornerRadius);
+    CGPathAddArc(path, NULL, tabLeft+kCornerRadius, tabBottom - kCornerRadius, kCornerRadius, M_PI_2, -M_PI, NO);
+    CGPathAddLineToPoint(path, NULL, tabLeft, tabTop + kCornerRadius);
     
     // Top left
-    CGPathAddArc(path, NULL, tabLeft + 2*kCornerRadius, tabTop + kCornerRadius, kCornerRadius, M_PI, -M_PI_2, NO);
-    CGPathAddLineToPoint(path, NULL, tabRight, tabTop);
-    CGPathAddLineToPoint(path, NULL, tabRight, tabBottom);
+    CGPathAddArc(path, NULL, tabLeft + kCornerRadius, tabTop + kCornerRadius, kCornerRadius, M_PI, -M_PI_2, NO);
+    CGPathAddLineToPoint(path, NULL, tabRight - kCornerRadius, tabTop);
+    
+    // Top rigth
+    CGPathAddArc(path, NULL, tabRight - kCornerRadius, tabTop + kCornerRadius, kCornerRadius, M_PI_2, 0, NO);
+    
+    // Bottom rigth
+    CGPathAddArc(path, NULL, tabRight - kCornerRadius, tabBottom - kCornerRadius, kCornerRadius, 0, M_PI_2, NO);
     CGPathCloseSubpath(path);
     
     CGContextRef ctx = UIGraphicsGetCurrentContext();
@@ -61,7 +66,6 @@
     CGContextFillPath(ctx);
     
     CGPathRelease(path);
-    
 }
 
 @end

@@ -57,25 +57,11 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
 }
 
 - (void)startSync {
-    if (![self isSyncRunning]
-        && _userAuth != nil
+    if (![self isSyncRunning]// Do not run twice
+        && _userAuth != nil//Auth must be there
         && [_reachability isReachable]) {
-        
-        // Any of these methods will ideally call the next one
-        if (_userAuth.syncInfo == nil) {
-            [self _requestSyncInfo];
-        } else if (_keyBundle == nil || _collectionKeys == nil) {
-            [self _prepareKeys];
-        } else if (!_foundClientRecord) {
-            [self _loadMetarecord];
-        } else if (_storageVersion == 5) {
-            [self _performSync];
-        } else {
-            NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
-                                               code:kFXSyncEngineErrorUnsupportedStorageVersion
-                                           userInfo:nil];
-            [_delegate syncEngine:self didFailWithError:err];
-        }
+        // Request this everytime, only valid for 1 hour
+        [self _requestSyncInfo];
     }
 }
 
@@ -90,7 +76,20 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                                                            withKey:[key dataUsingEncoding:NSUTF8StringEncoding]
                                                      withAlgorithm:CryptoAlgorithmSHA256];
             
-            [self _prepareKeys];
+            
+            // Any of these methods will ideally call the next one
+            if (_keyBundle == nil || _collectionKeys == nil) {
+                [self _prepareKeys];
+            } else if (!_foundClientRecord) {
+                [self _loadMetarecord];
+            } else if (_storageVersion == 5) {
+                [self _performSync];
+            } else {
+                NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                                   code:kFXSyncEngineErrorUnsupportedStorageVersion
+                                               userInfo:nil];
+                [_delegate syncEngine:self didFailWithError:err];
+            }
         }
         OSAtomicDecrement32(&_networkOpsCount);
     }];
@@ -101,7 +100,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
         OSAtomicIncrement32(&_networkOpsCount);
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [self _downloadChanges];
-            [self _uploadChanges];
+            //[self _uploadChanges];
             OSAtomicDecrement32(&_networkOpsCount);
         });
     }
@@ -170,6 +169,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                             [[FXSyncStore sharedInstance] setSyncTime:nextMod forCollection:cName];
                         }
                         
+                        [self _uploadChangesFrom:cName];
                         if (_delegate != nil) {
                             [_delegate syncEngine:self didLoadCollection:cName];
                         }
@@ -185,29 +185,35 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
             }];
 }
 
-- (void)_uploadChanges {
-    FXSyncStore *store = [FXSyncStore sharedInstance];
-    NSArray *cols = [FXSyncEngine collectionNames];
+//- (void)_uploadChanges {
+//    FXSyncStore *store = [FXSyncStore sharedInstance];
+//    NSArray *cols = [FXSyncEngine collectionNames];
+//    
+//    for (NSString *cName in cols) {
+//        
+//    }
+//}
+
+- (void)_uploadChangesFrom:(NSString *)cName {
     
-    for (NSString *cName in cols) {
-        NSTimeInterval newer = [store syncTimeForCollection:cName];
-        NSArray *uploads = [store changedItemsForCollection:cName];
-        
-        // Not all data is forever relevant
-        // If the user deletes the app, data should disappear
-        NSInteger ttl = 0;
-        if ([cName isEqualToString:kFXHistoryCollectionKey]
-            || [cName isEqualToString:kFXTabsCollectionKey]) {
-            ttl = SEVEN_DAYS*3;
-        }
-        
-        for (FXSyncItem *item in uploads) {
-            // We use the upload time for the entire collection,
-            // rather than item.modified
-            [self _uploadItem:item
-                   timeToLive:ttl
-              unmodifiedSince:newer];
-        }
+    FXSyncStore *store = [FXSyncStore sharedInstance];
+    NSTimeInterval newer = [store syncTimeForCollection:cName];
+    NSArray *uploads = [store changedItemsForCollection:cName];
+    
+    // Not all data is forever relevant
+    // If the user deletes the app, data should disappear
+    NSInteger ttl = 0;
+    if ([cName isEqualToString:kFXHistoryCollectionKey]
+        || [cName isEqualToString:kFXTabsCollectionKey]) {
+        ttl = SEVEN_DAYS*3;
+    }
+    
+    for (FXSyncItem *item in uploads) {
+        // We use the upload time for the entire collection,
+        // rather than item.modified
+        [self _uploadItem:item
+               timeToLive:ttl
+          unmodifiedSince:newer];
     }
 }
 
@@ -232,8 +238,14 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                     NSTimeInterval modified = [resp.allHeaderFields[kFXHeaderLastModified] doubleValue];
                     if (modified > unmodified) {
                         DLog(@"Successfully pushed: %@/%@", item.collection, item.syncId);
-                        item.modified = modified;
-                        [[FXSyncStore sharedInstance] saveItem:item];
+                        
+                        if ([item deleted]) {
+                            [[FXSyncStore sharedInstance] deleteItem:item];
+                            DLog(@"Deleting item: %@", payload);
+                        } else {
+                            item.modified = modified;
+                            [[FXSyncStore sharedInstance] saveItem:item];
+                        }
                         [[FXSyncStore sharedInstance] setSyncTime:modified forCollection:item.collection];
                     }
                 } else if (resp.statusCode == 412) {

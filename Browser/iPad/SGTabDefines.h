@@ -28,7 +28,7 @@
 
 #define kTabsHeigth  35.0
 
-#define kAddButtonWidth 40.
+#define kAddButtonWidth 30.
 
 #define kCornerRadius 5
 #define kShadowRadius 5.0

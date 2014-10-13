@@ -27,7 +27,6 @@
 #import "FXSyncStock.h"
 
 @implementation SGFavouritesManager {
-    NSMutableArray *_userFavourites;
     NSMutableArray *_favourites;
     
     NSCache *_imageCache;
@@ -60,8 +59,10 @@
 
 #pragma mark Favourites stuff
 - (NSArray *)favourites {
-    if (_favourites.count < [self maxFavs]) [self _fillFavourites];
-    return _favourites;
+    if (_favourites.count < [self maxFavs]) {
+        [self _fillFavourites];
+    }
+    return [_favourites copy];
 }
 
 - (void)refresh {
@@ -175,7 +176,7 @@
 
 - (FXSyncItem *)_fillFavourites {
     NSArray *history = [[FXSyncStock sharedInstance] history];
-    NSArray *bookmarks = [[FXSyncStock sharedInstance] bookmarks];
+    NSArray *bookmarks = [[FXSyncStock sharedInstance] bookmarksWithParent:@"toolbar"];
     
     FXSyncItem *item;
     NSUInteger i = _favourites.count;
@@ -250,11 +251,6 @@
 - (NSString *)_blacklistFilePath {
     NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
     return [path stringByAppendingPathComponent:@"blacklist.plist"];
-}
-
-- (NSString *)_userFavouritesPath {
-    NSString* path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) lastObject];
-    return [path stringByAppendingPathComponent:@"userfavourites.plist"];
 }
 
 @end

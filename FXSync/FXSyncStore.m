@@ -75,7 +75,7 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     
     dispatch_async(_queue, ^{
         // TODO allow a flexible limit
-        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ ORDER BY sortindex DESC LIMIT 2000", cName];
+        NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ ORDER BY sortindex DESC LIMIT 1000", cName];
         
         sqlite3_stmt *stmnt = nil;
         if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {

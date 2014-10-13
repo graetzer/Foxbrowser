@@ -92,6 +92,8 @@
         if (field == nil) {
             CGRect frame = CGRectInset(cell.contentView.bounds, 20, 0);
             field = [[UITextField alloc] initWithFrame:frame];
+            field.returnKeyType = UIReturnKeyDone;
+            field.delegate = self;
             field.tag = indexPath.row + TAG_OFFSET;
             field.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
             [cell.contentView addSubview:field];
@@ -101,7 +103,7 @@
         if (indexPath.row == 0) {
             field.placeholder = NSLocalizedString(@"Name", @"Name of the Bookmark");
             field.text = [_bookmark title];
-            field.returnKeyType = UIReturnKeyDone;
+            
         } else {
             if ([[_bookmark type] isEqualToString:@"bookmark"] && indexPath.row == 1) {
                 field.placeholder = NSLocalizedString(@"Website URL", @"URL of Bookmark");

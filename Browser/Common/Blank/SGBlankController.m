@@ -62,7 +62,7 @@
     self.restorationIdentifier = NSStringFromClass([self class]);
     self.restorationClass = [self class];
     
-    self.title = NSLocalizedString(@"Untitled", @"Untitled tab");
+    self.title = NSLocalizedString(@"New Tab", @"New Tab page");//NSLocalizedString(@"Untitled", @"Untitled tab");
     self.view.backgroundColor = [UIColor whiteColor];
     
     NSArray *titles = @[NSLocalizedString(@"Most popular", @"Most popular websites"),
@@ -136,7 +136,9 @@
 }
 
 - (void)refresh {
-    [self.previewPanel refresh];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.previewPanel refresh];
+    });
 }
 
 #pragma mark - SGPreviewPanelDelegate

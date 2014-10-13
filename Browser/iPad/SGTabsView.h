@@ -22,9 +22,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class SGTabsViewController;
+@class SGTabsViewController, SGAddButton;
 
 @interface SGTabsView : UIView <UIGestureRecognizerDelegate>
+@property (weak, nonatomic) SGAddButton *addButton;
 @property (weak, nonatomic) SGTabsViewController *tabsController;
 @property (strong, nonatomic, readonly) NSMutableArray *tabs;
 @property (assign, nonatomic) NSUInteger selected;
@@ -34,7 +35,4 @@
 
 - (NSUInteger)indexOfViewController:(UIViewController *)controller;
 - (UIViewController *)viewControllerAtIndex:(NSUInteger)index;
-
-/// Calculates the width each tabs needs and resizes the view
-- (void)resizeTabs;
 @end

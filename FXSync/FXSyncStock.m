@@ -17,8 +17,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 @implementation FXSyncStock {
     NSMutableArray *_bookmarks;
+    NSMutableArray *_history;
 }
-@synthesize history = _history, clientTabs = _clientTabs;
 
 + (instancetype)sharedInstance {
     static FXSyncStock *instance;
@@ -35,6 +35,10 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
         _syncEngine.delegate = self;
         _syncEngine.userAuth = [FXUserAuth new];
         [self _unarchiveKeys];
+        
+        [self _prefetchCollection:kFXBookmarksCollectionKey];
+        [self _prefetchCollection:kFXHistoryCollectionKey]; 
+        [self _prefetchCollection:kFXTabsCollectionKey];
     }
     return self;
 }
@@ -86,25 +90,12 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 #pragma mark - Properties;
 
-- (NSArray *)bookmarks {
-    if (_bookmarks == nil) {
-        [self _prefetchCollection:kFXBookmarksCollectionKey];
-    }
-    return _bookmarks;
-}
-
 - (NSArray *)history {
-    if (_history == nil) {
-        [self _prefetchCollection:kFXHistoryCollectionKey];
-    }
     return _history;
 }
 
-- (NSArray *)clientTabs {
-    if (_clientTabs == nil) {
-        [self _prefetchCollection:kFXTabsCollectionKey];
-    }
-    return _clientTabs;
+- (NSArray *)bookmarks {
+    return _bookmarks;
 }
 
 #pragma mark - FXSyncEngineDelegate
@@ -158,6 +149,13 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 - (void)logout {
     
+}
+
+#pragma mark - History
+
+- (void)deleteHistoryItem:(FXSyncItem *)item; {
+    [item deleteItem];
+    [_history removeObject:item];
 }
 
 #pragma mark - Tabs
