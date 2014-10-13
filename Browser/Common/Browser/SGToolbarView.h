@@ -30,11 +30,11 @@
 - (instancetype)initWithFrame:(CGRect)frame browserDelegate:(SGBrowserViewController *)browser;
 
 - (IBAction)showBrowserMenu:(id)sender;
-/*! Update the searchfield and the  */
+/*! Update the searchfield and the progress */
 - (void)updateInterface;
 
 - (void)presentSearchController;
-- (void)presentBookmarksCompletion:(void(^)(void))completion;
+- (void)presentMenuController:(UIViewController *)vc completion:(void(^)(void))completion;
 - (void)dismissPresented;
 
 @end

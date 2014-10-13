@@ -119,7 +119,7 @@
 }
 
 - (void)_showBookmarks {
-    [self presentBookmarksCompletion:NULL];
+    [self presentMenuController:_bookmarks completion:NULL];
 }
 
 - (void)_addBookmark {
@@ -130,7 +130,8 @@
             title = NSLocalizedString(@"Untitled", @"Untitled bookmark");
         }
         
-        [self presentBookmarksCompletion:^{
+        
+        [self presentMenuController:_bookmarks completion:^{
             FXBookmarkEditController *edit = [FXBookmarkEditController new];
             edit.bookmark = [[FXSyncStock sharedInstance] bookmarkWithTitle:title url:url];
             [_bookmarks pushViewController:edit animated:YES];
@@ -152,11 +153,7 @@
                                                                                   target:url.absoluteString] build]];
             }
         };
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-            <#statements#>
-        } else {
-            [_browser presentViewController:activityVC animated:YES completion:NULL];
-        }
+        [self presentMenuController:activityVC completion:NULL];
         
     }
 }
@@ -225,7 +222,7 @@
 }
 
 - (void)presentSearchController; {}
-- (void)presentBookmarksCompletion:(void(^)(void))completion; {}
+- (void)presentMenuController:(UIViewController *)vc completion:(void(^)(void))completion;{}
 - (void)dismissPresented; {
     [KxMenu dismissMenu];
 }

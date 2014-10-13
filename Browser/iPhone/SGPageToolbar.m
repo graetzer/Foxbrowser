@@ -206,8 +206,8 @@
     }
 }
 
-- (void)presentBookmarksCompletion:(void(^)(void))completion; {
-    [self.browser presentViewController:self.bookmarks animated:YES completion:completion];
+- (void)presentMenuController:(UIViewController *)vc completion:(void(^)(void))completion; {
+    [self.browser presentViewController:vc animated:YES completion:completion];
 }
 
 - (void)dismissPresented; {

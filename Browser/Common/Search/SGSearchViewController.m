@@ -34,8 +34,10 @@ static NSArray* gFreshSearchHits = nil;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-	
     self.contentSizeForViewInPopover = CGSizeMake(500., 280.);
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        self.preferredContentSize = CGSizeMake(500., 280.);
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

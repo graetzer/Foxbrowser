@@ -185,8 +185,8 @@
     }
 }
 
-- (void)presentBookmarksCompletion:(void(^)(void))completion; {
-    _popoverController = [[UIPopoverController alloc] initWithContentViewController:self.bookmarks];
+- (void)presentMenuController:(UIViewController *)vc completion:(void(^)(void))completion; {
+    _popoverController = [[UIPopoverController alloc] initWithContentViewController:vc];
     _popoverController.delegate = self;
     [_popoverController presentPopoverFromRect:self.menuButton.frame
                                         inView:self

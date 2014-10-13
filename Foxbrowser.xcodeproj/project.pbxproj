@@ -62,11 +62,6 @@
 		F4BB5B1116C32C8300275E31 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BB5B0F16C32C8300275E31 /* Appirater.m */; };
 		F4BBDC9D19E427290078D4AA /* SGToolbarView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BBDC9C19E427290078D4AA /* SGToolbarView.m */; };
 		F4BBDCA119E435640078D4AA /* KxMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BBDCA019E435640078D4AA /* KxMenu.m */; };
-		F4BBDCAC19E4523E0078D4AA /* AboutScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDCA219E4523E0078D4AA /* AboutScreen.xib */; };
-		F4BBDCAD19E4523E0078D4AA /* EasySetupViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDCA419E4523E0078D4AA /* EasySetupViewController.xib */; };
-		F4BBDCAE19E4523E0078D4AA /* LogoutController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDCA619E4523E0078D4AA /* LogoutController.xib */; };
-		F4BBDCAF19E4523E0078D4AA /* SettingsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDCA819E4523E0078D4AA /* SettingsController.xib */; };
-		F4BBDCB019E4523E0078D4AA /* WelcomePage.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDCAA19E4523E0078D4AA /* WelcomePage.xib */; };
 		F4BBDD3519E453450078D4AA /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDD3319E453450078D4AA /* AppiraterLocalizable.strings */; };
 		F4BBDD5719E5D5C00078D4AA /* FXLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDD5619E5D5C00078D4AA /* FXLoginViewController.xib */; };
 		F4BBDD5A19E617390078D4AA /* FXHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BBDD5919E617390078D4AA /* FXHelpViewController.m */; };
@@ -199,11 +194,6 @@
 		F4BBDC9C19E427290078D4AA /* SGToolbarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGToolbarView.m; sourceTree = "<group>"; };
 		F4BBDC9F19E435640078D4AA /* KxMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KxMenu.h; sourceTree = "<group>"; };
 		F4BBDCA019E435640078D4AA /* KxMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KxMenu.m; sourceTree = "<group>"; };
-		F4BBDCA319E4523E0078D4AA /* de */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = de; path = Browser/de.lproj/AboutScreen.xib; sourceTree = SOURCE_ROOT; };
-		F4BBDCA519E4523E0078D4AA /* de */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = de; path = Browser/de.lproj/EasySetupViewController.xib; sourceTree = SOURCE_ROOT; };
-		F4BBDCA719E4523E0078D4AA /* de */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = de; path = Browser/de.lproj/LogoutController.xib; sourceTree = SOURCE_ROOT; };
-		F4BBDCA919E4523E0078D4AA /* de */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = de; path = Browser/de.lproj/SettingsController.xib; sourceTree = SOURCE_ROOT; };
-		F4BBDCAB19E4523E0078D4AA /* de */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = de; path = Browser/de.lproj/WelcomePage.xib; sourceTree = SOURCE_ROOT; };
 		F4BBDD3419E453450078D4AA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
 		F4BBDD3619E4534E0078D4AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
 		F4BBDD3719E453510078D4AA /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
@@ -492,14 +482,6 @@
 			name = TabsBar;
 			sourceTree = "<group>";
 		};
-		F467FFCE15A6446B00EACFBD /* Weave */ = {
-			isa = PBXGroup;
-			children = (
-				F4FD2B7115AE0D01005DBAB4 /* Xib */,
-			);
-			path = Weave;
-			sourceTree = "<group>";
-		};
 		F46A63AB167CCC1E0004BE43 /* Search */ = {
 			isa = PBXGroup;
 			children = (
@@ -653,23 +635,10 @@
 			path = Favourites;
 			sourceTree = "<group>";
 		};
-		F4FD2B7115AE0D01005DBAB4 /* Xib */ = {
-			isa = PBXGroup;
-			children = (
-				F4BBDCA219E4523E0078D4AA /* AboutScreen.xib */,
-				F4BBDCA419E4523E0078D4AA /* EasySetupViewController.xib */,
-				F4BBDCA619E4523E0078D4AA /* LogoutController.xib */,
-				F4BBDCA819E4523E0078D4AA /* SettingsController.xib */,
-				F4BBDCAA19E4523E0078D4AA /* WelcomePage.xib */,
-			);
-			name = Xib;
-			sourceTree = "<group>";
-		};
 		F4FE2C3A159B6C58001B04D7 = {
 			isa = PBXGroup;
 			children = (
 				F406C000195F25A300A84C76 /* FXSync */,
-				F467FFCE15A6446B00EACFBD /* Weave */,
 				F45516E315A47B8A00E0B54E /* External */,
 				F4FE2C4F159B6C58001B04D7 /* Browser */,
 				F4FE2C48159B6C58001B04D7 /* Frameworks */,
@@ -833,15 +802,10 @@
 				F40AF1E516D2C9AB00EDFD02 /* JSSearchTools.js in Resources */,
 				F44870BC1687E0E700769EA4 /* JSTools.js in Resources */,
 				F4047E4E19E827E900D27001 /* FXSettingsViewController.xib in Resources */,
-				F4BBDCAF19E4523E0078D4AA /* SettingsController.xib in Resources */,
 				F407FAB617E622D6008179F4 /* Images.xcassets in Resources */,
-				F4BBDCAE19E4523E0078D4AA /* LogoutController.xib in Resources */,
 				F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */,
 				F4C3906C161093D500349AA4 /* Settings.bundle in Resources */,
-				F4BBDCAD19E4523E0078D4AA /* EasySetupViewController.xib in Resources */,
-				F4BBDCB019E4523E0078D4AA /* WelcomePage.xib in Resources */,
 				F4BBDD5719E5D5C00078D4AA /* FXLoginViewController.xib in Resources */,
-				F4BBDCAC19E4523E0078D4AA /* AboutScreen.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -911,46 +875,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		F4BBDCA219E4523E0078D4AA /* AboutScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4BBDCA319E4523E0078D4AA /* de */,
-			);
-			name = AboutScreen.xib;
-			sourceTree = "<group>";
-		};
-		F4BBDCA419E4523E0078D4AA /* EasySetupViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4BBDCA519E4523E0078D4AA /* de */,
-			);
-			name = EasySetupViewController.xib;
-			sourceTree = "<group>";
-		};
-		F4BBDCA619E4523E0078D4AA /* LogoutController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4BBDCA719E4523E0078D4AA /* de */,
-			);
-			name = LogoutController.xib;
-			sourceTree = "<group>";
-		};
-		F4BBDCA819E4523E0078D4AA /* SettingsController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4BBDCA919E4523E0078D4AA /* de */,
-			);
-			name = SettingsController.xib;
-			sourceTree = "<group>";
-		};
-		F4BBDCAA19E4523E0078D4AA /* WelcomePage.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4BBDCAB19E4523E0078D4AA /* de */,
-			);
-			name = WelcomePage.xib;
-			sourceTree = "<group>";
-		};
 		F4BBDD3319E453450078D4AA /* AppiraterLocalizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
