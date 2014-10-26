@@ -95,7 +95,7 @@
     }
 
     [DejalBezelActivityView activityViewForView:self.view
-                                      withLabel:NSLocalizedString(@"loading...", "loading...")];
+                                      withLabel:NSLocalizedString(@"Authorizing", "Authorizing")];
     self.navigationItem.leftBarButtonItem.enabled = NO;
     self.navigationItem.rightBarButtonItem.enabled = NO;
     

@@ -12,8 +12,9 @@
 
 FOUNDATION_EXPORT NSString *const kFXSyncEngineErrorDomain;
 typedef NS_ENUM(NSUInteger, kFXSyncEngineError) {
-    kFXSyncEngineErrorUnsupportedStorageVersion,
+    kFXSyncEngineErrorStorageVersionMismatch,
     kFXSyncEngineErrorEncryption,
+    kFXSyncEngineErrorAuthentication,// 404 response
     kFXSyncEngineErrorEndOfLife,
     kFXSyncEngineErrorMaintenance
 };
@@ -36,8 +37,10 @@ typedef NS_ENUM(NSUInteger, kFXSyncEngineError) {
 + (NSArray *)collectionNames;
 
 @property (strong, nonatomic) FXUserAuth *userAuth;
-@property (strong, nonatomic, readonly) Reachability *reachability;
+/*! Global record containing info about the stored data */
+@property (strong, nonatomic) NSDictionary *metaglobal;
 
+@property (strong, nonatomic, readonly) Reachability *reachability;
 @property (weak, nonatomic) id<FXSyncEngineDelegate> delegate;
 
 @property (readonly, getter=isSyncRunning) BOOL syncRunning;
@@ -46,6 +49,7 @@ typedef NS_ENUM(NSUInteger, kFXSyncEngineError) {
 @property (nonatomic, readonly) NSString *clientName;
 
 - (void)startSync;
+- (void)reset;
 
 @end
 

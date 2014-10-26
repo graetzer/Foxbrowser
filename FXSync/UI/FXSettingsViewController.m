@@ -10,26 +10,30 @@
 #import "FXSyncStock.h"
 #import "FXSyncEngine.h"
 
-@implementation FXSettingsViewController
+@implementation FXSettingsViewController {
+    NSTimer *_timer;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = NSLocalizedString(@"Settings", @"Settings");
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                           target:self
                                                                                           action:@selector(_cancel)];
+    [self _refresh];
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(_refresh)
-                                                 name:kFXDataChangedNotification
-                                               object:nil];
+    _timer = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                              target:self
+                                            selector:@selector(_refresh)
+                                            userInfo:nil repeats:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_timer invalidate];
+    _timer = nil;
 }
 
 - (void)_refresh {

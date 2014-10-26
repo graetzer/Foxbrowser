@@ -103,7 +103,7 @@
 - (IBAction)_addFolder:(id)sender {
     if (_parentFolder != nil) {
         FXBookmarkEditController *edit = [FXBookmarkEditController new];
-        edit.bookmark = [[FXSyncStock sharedInstance] folderWithParent:_parentFolder];
+        edit.bookmark = [[FXSyncStock sharedInstance] newFolderWithParent:_parentFolder];
         [self.navigationController pushViewController:edit animated:YES];
     }
 }

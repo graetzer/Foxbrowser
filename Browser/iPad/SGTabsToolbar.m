@@ -15,6 +15,7 @@
 #import "SGTabsViewController.h"
 #import "SGSearchField.h"
 
+#import "NJKWebViewProgressView.h"
 #import "GAI.h"
 
 @implementation SGTabsToolbar

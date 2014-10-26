@@ -397,7 +397,13 @@ typedef enum {
     const CGFloat kMarginY = 5.f;
     
     UIFont *titleFont = [KxMenu titleFont];
-    if (!titleFont) titleFont = [UIFont boldSystemFontOfSize:16];
+    if (!titleFont) {
+        if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_7_0) {
+            titleFont = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
+        } else {
+            titleFont = [UIFont boldSystemFontOfSize:[UIFont buttonFontSize]];
+        }
+    }
     
     CGFloat maxImageWidth = 0;    
     CGFloat maxItemHeight = 0;

@@ -33,6 +33,7 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
  * Serializes the dictionary and saves it into payload
  */
 - (void)save;
+/*! Mark item as deleted, you should probably not call this method directly  */
 - (void)deleteItem;
 
 @end
@@ -97,4 +98,7 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 // ====== History ====
 /*! string: uri of the page */
 - (NSString *)histUri;
+/*! time should be given in seconds. It seems that storageformat 5 stores datetimes in nanoseconds
+ * This method will take care of that*/
+- (void)addVisit:(NSTimeInterval)time type:(NSInteger)code;
 @end

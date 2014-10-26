@@ -18,6 +18,8 @@
 - (void)saveItem:(FXSyncItem *)item;
 - (void)deleteItem:(FXSyncItem *)item;
 
+- (void)clearAll;
+- (void)clearCollection:(NSString *)cName older:(NSTimeInterval)cutoff;
 //- (void)deletCollection:(NSString *)collection;
 
 /*! Sorted by sortindex, pass something negative into limit for unlimited */

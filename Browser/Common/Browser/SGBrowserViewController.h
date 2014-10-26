@@ -66,6 +66,7 @@
 - (void)stop;
 
 - (BOOL)isLoading;
+- (float)progress;
 
 - (void)goBack;
 - (void)goForward;

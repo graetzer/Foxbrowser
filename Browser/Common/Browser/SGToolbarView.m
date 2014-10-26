@@ -12,13 +12,14 @@
 #import "FXLoginViewController.h"
 #import "FXSettingsViewController.h"
 #import "FXBookmarkTableController.h"
-
 #import "FXBookmarkEditController.h"
+
 #import "SGBrowserViewController.h"
 #import "SGSearchViewController.h"
 #import "SGSearchField.h"
 
 #import "KxMenu.h"
+#import "NJKWebViewProgressView.h"
 
 @implementation SGToolbarView
 
@@ -71,10 +72,10 @@
         searchC.delegate = self;
         _searchController = searchC;
         
-        __strong UIProgressView *progressV = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 0, 100, 3)];
-        progressV.progressViewStyle = UIProgressViewStyleBar;
-        [self addSubview:progressV];
-        _progressView = progressV;
+        __strong NJKWebViewProgressView *pV = [[NJKWebViewProgressView alloc] initWithFrame:CGRectMake(0, 0, 100, 3)];
+        pV.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+        [self addSubview:pV];
+        _progressView = pV;
         
         _bookmarks = [[UINavigationController alloc] initWithRootViewController:[FXBookmarkTableController new]];
     }
@@ -98,17 +99,25 @@
                                            target:self
                                            action:@selector(_showSharingUI)]];
         
-        [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Bookmark Page",
-                                                                    @"add a new bookmark")
-                                            image:[UIImage imageNamed:@"favourite"]
-                                           target:self
-                                           action:@selector(_addBookmark)]];
-        
+        FXSyncItem *item = [[FXSyncStock sharedInstance] bookmarkForUrl:url];
+        if (item == nil) {
+            [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Bookmark This Page",
+                                                                        @"add a new bookmark")
+                                                image:[UIImage imageNamed:@"favourite"]
+                                               target:self
+                                               action:@selector(_addRemoveBookmark)]];
+        } else {
+            [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Remove This Bookmark",
+                                                                        @"remove a bookmarked page")
+                                                image:[UIImage imageNamed:@"un_favourite"]
+                                               target:self
+                                               action:@selector(_addRemoveBookmark)]];
+        }
     }
     [menuItems addObject:[KxMenuItem menuItem:NSLocalizedString(@"Settings", @"Settings")
-                                        image:[UIImage imageNamed:@"settings"]
+                                        image:[UIImage imageNamed:@"sync"]
                                        target:self
-                                       action:@selector(_showSettings)]];
+                                       action:@selector(_showSyncSettings)]];
 
     
     CGRect rect = [_browser.view convertRect:sv.bounds fromView:sv];
@@ -122,22 +131,23 @@
     [self presentMenuController:_bookmarks completion:NULL];
 }
 
-- (void)_addBookmark {
+- (void)_addRemoveBookmark {
     NSURL *url = [_browser URL];
-    NSString *title = [[_browser selectedViewController] title];
-    if (url) {
+    FXSyncItem *item = [[FXSyncStock sharedInstance] bookmarkForUrl:url];
+    if (item == nil && url != nil) {
+        NSString *title = [[_browser selectedViewController] title];
         if (!title) {
             title = NSLocalizedString(@"Untitled", @"Untitled bookmark");
         }
-        
-        
         [self presentMenuController:_bookmarks completion:^{
             FXBookmarkEditController *edit = [FXBookmarkEditController new];
-            edit.bookmark = [[FXSyncStock sharedInstance] bookmarkWithTitle:title url:url];
+            edit.bookmark = [[FXSyncStock sharedInstance] newBookmarkWithTitle:title url:url];
             [_bookmarks pushViewController:edit animated:YES];
         }];
+        
+    } else if (item != nil) {
+        [[FXSyncStock sharedInstance] deleteBookmark:item];
     }
-    
 }
 
 - (void)_showSharingUI {
@@ -158,7 +168,7 @@
     }
 }
 
-- (void)_showSettings {
+- (void)_showSyncSettings {
     BOOL syncReady = [[FXSyncStock sharedInstance] hasUserCredentials];
     if (!syncReady) {
         FXLoginViewController* login = [FXLoginViewController new];
@@ -173,13 +183,6 @@
         [_browser presentViewController:nav animated:YES completion:NULL];
     }
 }
-//
-//- (void)_openExternal {
-//    NSURL *url = [self.browser URL];
-//    if (url) {
-//        [[UIApplication sharedApplication] openURL:url];
-//    }
-//}
 
 - (void)updateInterface {
     if ([_browser canStopOrReload]) {
@@ -190,31 +193,7 @@
             _searchField.state = SGSearchFieldStateReload;
         }
         
-        static BOOL loadingOld;
-        float p = _progressView.progress;
-        NSInteger tag = (NSInteger)[_browser request];
-        if (loading && loadingOld) {
-            
-            // Make sure we haven't changed the website while we are loading
-            if (_progressView.tag != tag) {
-                _progressView.tag = tag;
-                _progressView.progress = 0;
-                _progressView.hidden = YES;
-            } else if (p < 0.8f) {
-                _progressView.hidden = NO;
-                [_progressView setProgress:p + 0.2f animated:YES];
-            }
-            
-        } else if (!loading && !loadingOld) {
-            if (0.f < p && p < 1.f) {
-                _progressView.hidden = NO;
-                [_progressView setProgress:1.f animated:YES];
-            } else if (p != 0.f) {
-                _progressView.hidden = YES;
-                _progressView.progress = 0.f;
-            }
-        }        loadingOld = loading;
-        
+        [_progressView setProgress:[_browser progress] animated:YES];
     } else {
         _searchField.state = SGSearchFieldStateDisabled;
         _progressView.hidden = YES;

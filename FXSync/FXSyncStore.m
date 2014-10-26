@@ -166,23 +166,24 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     });
 }
 
-// TODO add where modified
-//- (void)deletCollection:(NSString *)cName {
-//    dispatch_async(_queue, ^{
-//        NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@", cName];
-//
-//        sqlite3_stmt *stmnt = nil;
-//        if (sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmnt, NULL) == SQLITE_OK) {
-//            
-//            sqlite3_bind_text(stmnt, 1, [collection UTF8String],
-//                              (int)[collection length], SQLITE_TRANSIENT);
-//            sqlite3_step(stmnt);
-//        }
-//        if (sqlite3_finalize(stmnt) != SQLITE_OK) {
-//            [self _throwDBError];
-//        }
-//    });
-//}
+- (void)clearAll; {
+    dispatch_async(_queue, ^{
+        NSArray *all = [FXSyncEngine collectionNames];
+        for (NSString *cName in all) {
+            NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@", cName];
+            sqlite3_exec(_db, sql.UTF8String, NULL, NULL, NULL);
+        }
+        sqlite3_exec(_db, "DELETE FROM syncinfo", NULL, NULL, NULL);
+    });
+}
+
+- (void)clearCollection:(NSString *)cName older:(NSTimeInterval)cutoff; {
+    dispatch_async(_queue, ^{
+        // We use -1 to mark edited stuff
+        NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@ WHERE modified BETWEEN 0 AND %.2f", cName, cutoff];
+        sqlite3_exec(_db, sql.UTF8String, NULL, NULL, NULL);
+    });
+}
 
 - (NSArray *)changedItemsForCollection:(NSString *)cName {
     __block NSArray *result;

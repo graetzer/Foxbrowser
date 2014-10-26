@@ -24,6 +24,7 @@
 #import "SGWebViewController.h"
 #import "UIViewController+SGBrowserViewController.h"
 #import "UIWebView+WebViewAdditions.h"
+
 #import "SGTabsViewController.h"
 #import "SGAppDelegate.h"
 #import "NSStringPunycodeAdditions.h"
@@ -33,6 +34,7 @@
 
 @implementation SGWebViewController {
     NSDictionary *_selected;
+    NJKWebViewProgress *_progressProxy;
     BOOL _restoring;
 }
 
@@ -138,8 +140,12 @@
                                         initWithTarget:self action:@selector(_handleLongPressGesture:)];
     gr.delegate = self;
     [self.webView addGestureRecognizer:gr];
-    self.webView.delegate = self;
     self.webView.scalesPageToFit = YES;
+    
+    _progressProxy = [[NJKWebViewProgress alloc] init];
+    _progressProxy.webViewProxyDelegate = self;
+    _progressProxy.progressDelegate = self;
+    self.webView.delegate = _progressProxy;
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
@@ -163,6 +169,7 @@
     // We can't just load the request, this would add to the history
     if (_restoring) {
         [_webView reload];
+        _restoring = NO;
     } else {
         // self.title == nil is a workaround, to get the uiwebview to load the page
         if (_webView.request == nil || self.title == nil) {
@@ -396,6 +403,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     
     NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
     [self.webView showPlaceholder:error.localizedDescription title:title];
+}
+
+- (void)webViewProgress:(NJKWebViewProgress *)webViewProgress updateProgress:(float)progress; {
+    _progress = progress;
 }
 
 #pragma mark - Networking

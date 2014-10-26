@@ -55,6 +55,14 @@
     }
 }
 
+//- (NSString *)description {
+//    if (_jsonPayload != nil) {
+//        return [_jsonPayload description];
+//    } else {
+//        return [super description];
+//    }
+//}
+
 @end
 
 @implementation FXSyncItem (CommonFormat)
@@ -188,6 +196,15 @@
 - (NSString *)histUri; {
     id val = self.jsonPayload[@"histUri"];
     return val == [NSNull null] ? nil : val;
+}
+
+- (void)addVisit:(NSTimeInterval)time type:(NSInteger)code {
+    if (self.jsonPayload[@"visits"]
+        && self.jsonPayload[@"visits"] != [NSNull null]) {
+        [self.jsonPayload[@"visits"] addObject:@[@(time), @(code)]];
+    } else {
+        self.jsonPayload[@"visits"] = @[@[@(time), @(code)]];
+    }
 }
 
 @end

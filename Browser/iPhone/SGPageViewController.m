@@ -35,7 +35,6 @@ CGFloat const kSGMinXScale = 0.85;
 
 @implementation SGPageViewController {
     BOOL _animating;
-    BOOL _animatedScrolling;
     
     NSMutableArray *_containerViews;
     NSMutableArray *_viewControllers;
@@ -69,7 +68,6 @@ CGFloat const kSGMinXScale = 0.85;
     
     _pageControl.numberOfPages = _viewControllers.count;
     _pageControl.currentPage = i;
-    [self _layout];
 }
 
 #pragma mark - View initialization
@@ -187,6 +185,10 @@ CGFloat const kSGMinXScale = 0.85;
         _viewControllers = [NSMutableArray arrayWithCapacity:10];
         [self loadSavedTabs];
     }
+    
+    [self _layout];
+    [self _positionScrollview];
+    [self _layoutPages];
 }
 
 /*! Set the delegate to nil because the scrollview delegate gets weird scroll values */
@@ -196,9 +198,15 @@ CGFloat const kSGMinXScale = 0.85;
     _scrollView.delegate = nil;
 }
 
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    [self _layout];
+    [self _positionScrollview];
+    [self _layoutPages];
+}
+
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
     [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-    [self _layout];
     _scrollView.delegate = self;
 }
 
@@ -208,8 +216,11 @@ CGFloat const kSGMinXScale = 0.85;
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     _scrollView.delegate = nil;
     //_animatedScrolling = YES;
-    [coordinator animateAlongsideTransition:NULL completion:^(id<UIViewControllerTransitionCoordinator> handler) {
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinator> handler) {
         [self _layout];
+        [self _positionScrollview];
+        [self _layoutPages];
+    } completion:^(id<UIViewControllerTransitionCoordinator> handler) {
         _scrollView.delegate = self;
     }];
 }
@@ -244,8 +255,6 @@ CGFloat const kSGMinXScale = 0.85;
     if (_viewControllers.count == 0) {
         [_containerViews addObject:container];
         [_viewControllers addObject:childController];
-        // If there are no pages we need to redisplay the button
-        _closeButton.hidden = !_exposeMode;
     } else {
         NSInteger index = _pageControl.currentPage+1;
         [_containerViews insertObject:container atIndex:index];
@@ -253,11 +262,12 @@ CGFloat const kSGMinXScale = 0.85;
     }
     
     [self addChildViewController:childController];
-    NSUInteger count = _viewControllers.count;
-    _pageControl.numberOfPages = count;
-    _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * count, 1);
+
+    _pageControl.numberOfPages = _viewControllers.count;
     [self _layoutPages];
+    [self _positionScrollview];
     if (_exposeMode) {
+        [self _setCloseButtonHidden:YES];
         [self _disableInteractions];
     } else {
         [self _enableInteractions];
@@ -273,7 +283,6 @@ CGFloat const kSGMinXScale = 0.85;
         // self.count != 1 as a workaround when there is just 1 view and no scrolling animation
         [self _setCloseButtonHidden:self.count != 1];
         CGPoint off = CGPointMake(_scrollView.frame.size.width * index, 0);
-        _animatedScrolling = YES;
         [_scrollView setContentOffset:off animated:YES];
         
         if (_exposeMode) {
@@ -308,6 +317,7 @@ CGFloat const kSGMinXScale = 0.85;
                      completion:^(BOOL done){
                          _animating = NO;
                          [childController removeFromParentViewController];
+                         [self _positionScrollview];
                          [self _layoutPages];
                          [self updateInterface];
                          
@@ -328,8 +338,9 @@ CGFloat const kSGMinXScale = 0.85;
 - (void)swapCurrentViewControllerWith:(UIViewController *)viewController {
     UIViewController *old = [self selectedViewController];
     
-    if (!old) [self addViewController:viewController];
-    else if (![_viewControllers containsObject:viewController]) {
+    if (!old) {
+        [self addViewController:viewController];
+    } else if (![_viewControllers containsObject:viewController]) {
         [self addChildViewController:viewController];
         
         NSUInteger index = [self selectedIndex];
@@ -420,21 +431,22 @@ CGFloat const kSGMinXScale = 0.85;
     _tabsButton.frame = CGRectMake(b.size.width - 40, _topOffset + 4, 36, 36);
     _titleLabel.frame = CGRectMake(5, kSGToolbarHeight + _topOffset + 1, b.size.width - 5, _titleLabel.font.lineHeight);
     
-    [self _layoutPages];
+//    [self _layoutPages];
+//    NSUInteger current = _pageControl.currentPage;
+//    // Workaround for iOS 8
+//    if (!_animatedScrolling) {
+//        _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * _viewControllers.count, 1);
+//        CGPoint off = CGPointMake(_scrollView.frame.size.width * current, 0);
+//        _scrollView.contentOffset = off;
+//    }
+//    _animatedScrolling = NO;
+}
+
+- (void)_positionScrollview {
     NSUInteger current = _pageControl.currentPage;
-    // Workaround for iOS 8
-    if (!_animatedScrolling) {
-        _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * _viewControllers.count, 1);
-        CGPoint off = CGPointMake(_scrollView.frame.size.width * current, 0);
-        _scrollView.contentOffset = off;
-    }
-    _animatedScrolling = NO;
-    
-    if ([_containerViews count] > 0) {
-        UIView *container = _containerViews[current];
-        CGPoint point = container.frame.origin;
-        _closeButton.center = [self.view convertPoint:point fromView:_scrollView];
-    }
+    _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * _viewControllers.count, 1);
+    CGPoint off = CGPointMake(_scrollView.frame.size.width * current, 0);
+    _scrollView.contentOffset = off;
 }
 
 /*! Managing the visible viewcontrollers, only 3 are added to the scrollview at a time */
@@ -472,6 +484,11 @@ CGFloat const kSGMinXScale = 0.85;
         } else if (container.superview) {
             [container removeFromSuperview];
         }
+    }
+    if ([_containerViews count] > 0) {
+        UIView *container = _containerViews[current];
+        CGPoint point = container.frame.origin;
+        _closeButton.center = [self.view convertPoint:point fromView:_scrollView];
     }
 }
 
@@ -571,56 +588,52 @@ CGFloat const kSGMinXScale = 0.85;
 
 - (void)setExposeMode:(BOOL)exposeMode animated:(BOOL)animated {
     _exposeMode = exposeMode;
-    CGFloat duration = animated ? SG_DURATION : 0;
     if (exposeMode) {
-        [_toolbar.searchField resignFirstResponder];
-        [self _disableInteractions];
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
             [self setNeedsStatusBarAppearanceUpdate];
         }
+        [_toolbar.searchField resignFirstResponder];
+        [self _disableInteractions];
+        [self _setCloseButtonHidden:NO];
         
-        _animating = YES;
-        [UIView animateWithDuration:duration
-                         animations:^{
-                             [self _layout];
-                         }
-                         completion:^(BOOL finished) {
-                             _animating = NO;
-                             UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                                   action:@selector(_tappedViewController:)];
-                             rec.cancelsTouchesInView = NO;
-                             [self.view addGestureRecognizer:rec];
-                             [self _setCloseButtonHidden:NO];
-                         }];
-        
+        UITapGestureRecognizer *rec = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                              action:@selector(_tappedViewController:)];
+        rec.cancelsTouchesInView = NO;
+        [self.view addGestureRecognizer:rec];
     } else {
         
-        [self _setCloseButtonHidden:YES];
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+            [self setNeedsStatusBarAppearanceUpdate];
         }
+        [self _enableInteractions];
+        [self _setCloseButtonHidden:YES];
+        
         UITapGestureRecognizer *rec = [self.view.gestureRecognizers lastObject];
         if (rec != nil) {
             [self.view removeGestureRecognizer:rec];
         }
-        _animating = YES;
-        [UIView animateWithDuration:duration
-                         animations:^{
+    }
+    
+    _animating = YES;
+    [UIView animateWithDuration:animated ? SG_DURATION : 0
+                     animations:^{
+                         if (!_exposeMode) {
                              CGRect frame = _toolbar.frame;
                              frame.origin.y = 0;
                              _toolbar.frame = frame;
-                             [self _layout];
                          }
-                         completion:^(BOOL finished){
-                             _animating = NO;
-                             [self _enableInteractions];
-                         }
-         ];
-    }
-    _addTabButton.enabled = exposeMode;
-    _menuButton.enabled = exposeMode;
-    _tabsButton.enabled = exposeMode;
+                         [self _layout];
+                         [self _positionScrollview];
+                         [self _layoutPages];
+                     }
+                     completion:^(BOOL finished) {
+                         _animating = NO;
+                         _addTabButton.enabled = exposeMode;
+                         _menuButton.enabled = exposeMode;
+                         _tabsButton.enabled = exposeMode;
+                     }];
 }
 
 - (void)setExposeMode:(BOOL)exposeMode {
@@ -751,7 +764,8 @@ CGFloat const kSGMinXScale = 0.85;
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
     [self _setCloseButtonHidden:NO];
     [self _layout];
-    _animatedScrolling = NO;
+    [self _positionScrollview];
+    [self _layoutPages];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {

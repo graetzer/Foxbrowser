@@ -36,7 +36,6 @@
 @interface SGSearchViewController : UITableViewController 
 
 @property (nonatomic, weak) id<SGSearchDelegate> delegate;
-@property (nonatomic, retain) NSArray *searchHits;
 
 - (void)filterResultsUsingString:(NSString *)filterString;
 @end

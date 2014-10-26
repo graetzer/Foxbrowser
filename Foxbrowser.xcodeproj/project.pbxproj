@@ -46,6 +46,8 @@
 		F467007D15A64CE000EACFBD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F467007C15A64CE000EACFBD /* Security.framework */; };
 		F467007F15A64CF200EACFBD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F467007E15A64CF200EACFBD /* QuartzCore.framework */; };
 		F46700FE15A651FA00EACFBD /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F46700FD15A651FA00EACFBD /* libicucore.dylib */; };
+		F46991E119FDB0D0005FC698 /* NJKWebViewProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = F46991DE19FDB0D0005FC698 /* NJKWebViewProgress.m */; };
+		F46991E219FDB0D0005FC698 /* NJKWebViewProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = F46991E019FDB0D0005FC698 /* NJKWebViewProgressView.m */; };
 		F46A63B0167CCC1E0004BE43 /* SGSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63AD167CCC1E0004BE43 /* SGSearchField.m */; };
 		F46A63B1167CCC1E0004BE43 /* SGSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63AF167CCC1E0004BE43 /* SGSearchViewController.m */; };
 		F46A63B5167CE08F0004BE43 /* SGPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F46A63B4167CE08F0004BE43 /* SGPageViewController.m */; };
@@ -160,6 +162,10 @@
 		F467007C15A64CE000EACFBD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		F467007E15A64CF200EACFBD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		F46700FD15A651FA00EACFBD /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
+		F46991DD19FDB0D0005FC698 /* NJKWebViewProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NJKWebViewProgress.h; sourceTree = "<group>"; };
+		F46991DE19FDB0D0005FC698 /* NJKWebViewProgress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NJKWebViewProgress.m; sourceTree = "<group>"; };
+		F46991DF19FDB0D0005FC698 /* NJKWebViewProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NJKWebViewProgressView.h; sourceTree = "<group>"; };
+		F46991E019FDB0D0005FC698 /* NJKWebViewProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NJKWebViewProgressView.m; sourceTree = "<group>"; };
 		F46A6371167C300E0004BE43 /* JSTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = JSTools.js; sourceTree = "<group>"; };
 		F46A63AC167CCC1E0004BE43 /* SGSearchField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGSearchField.h; sourceTree = "<group>"; };
 		F46A63AD167CCC1E0004BE43 /* SGSearchField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGSearchField.m; sourceTree = "<group>"; };
@@ -445,6 +451,7 @@
 		F45516E315A47B8A00E0B54E /* External */ = {
 			isa = PBXGroup;
 			children = (
+				F46991DC19FDB0D0005FC698 /* NJKWebViewProgress */,
 				F4BBDC9E19E435640078D4AA /* KxMenu */,
 				F42CC1261956626A005411EA /* IDN */,
 				F4BB5B0D16C32C8300275E31 /* Appirater */,
@@ -480,6 +487,17 @@
 				F49EE8A615A24426001B4D5F /* SGTabView.m */,
 			);
 			name = TabsBar;
+			sourceTree = "<group>";
+		};
+		F46991DC19FDB0D0005FC698 /* NJKWebViewProgress */ = {
+			isa = PBXGroup;
+			children = (
+				F46991DD19FDB0D0005FC698 /* NJKWebViewProgress.h */,
+				F46991DE19FDB0D0005FC698 /* NJKWebViewProgress.m */,
+				F46991DF19FDB0D0005FC698 /* NJKWebViewProgressView.h */,
+				F46991E019FDB0D0005FC698 /* NJKWebViewProgressView.m */,
+			);
+			path = NJKWebViewProgress;
 			sourceTree = "<group>";
 		};
 		F46A63AB167CCC1E0004BE43 /* Search */ = {
@@ -832,6 +850,7 @@
 				F4C0C0C719DDADA300EF8722 /* FXLoginViewController.m in Sources */,
 				F406C028195F25A300A84C76 /* NSData+Base64.m in Sources */,
 				F41084D719CB46FD0064A9B3 /* Reachability.m in Sources */,
+				F46991E119FDB0D0005FC698 /* NJKWebViewProgress.m in Sources */,
 				F406C030195F25A300A84C76 /* NSString+Parser.m in Sources */,
 				F406C02A195F25A300A84C76 /* CryptoProxy.m in Sources */,
 				F4C0C0CD19DDB00400EF8722 /* FXSettingsViewController.m in Sources */,
@@ -851,6 +870,7 @@
 				F410E96519E19FEC001F0112 /* FXFolderSelectorController.m in Sources */,
 				F406C031195F25A300A84C76 /* NSString+Trim.m in Sources */,
 				F46A63B0167CCC1E0004BE43 /* SGSearchField.m in Sources */,
+				F46991E219FDB0D0005FC698 /* NJKWebViewProgressView.m in Sources */,
 				F4047E4319E6E6B700D27001 /* DejalActivityView.m in Sources */,
 				F46A63B1167CCC1E0004BE43 /* SGSearchViewController.m in Sources */,
 				F46A63B5167CE08F0004BE43 /* SGPageViewController.m in Sources */,

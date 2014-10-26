@@ -170,6 +170,11 @@
     return NO;
 }
 
+- (float)progress {
+    SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
+    return webC.progress;
+}
+
 - (void)goBack; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];

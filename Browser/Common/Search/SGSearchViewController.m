@@ -25,18 +25,20 @@
 
 
 @implementation SGSearchViewController {
-    NSString* gLastSearchString;
+    NSString *_lastQery;
+    NSArray *_localResults;
+    NSArray *_remoteResults;
 }
-@synthesize searchHits;
 
 static NSThread* gRefreshThread = nil;
 static NSArray* gFreshSearchHits = nil;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.contentSizeForViewInPopover = CGSizeMake(500., 280.);
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
         self.preferredContentSize = CGSizeMake(500., 280.);
+    } else {
+        self.contentSizeForViewInPopover = CGSizeMake(500., 280.);
     }
 }
 
@@ -52,23 +54,33 @@ static NSArray* gFreshSearchHits = nil;
 #pragma mark Table view methods
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    searchHits = gFreshSearchHits;
-    return 2;
+    _localResults = gFreshSearchHits;
+    return 3;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (section == 0) {
-        if (_delegate.text.length != 0) {
-            return [searchHits count];
+    if (_delegate.text.length != 0) {
+        if (section == 0) {
+            return [_localResults count];
+        } else {
+            return [_remoteResults count];
         }
-        return 0;
     }
-    else return 1;
+    return 1;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    if (section == 0 && [_localResults count] > 0) {
+        return @"Search Suggestions";
+    } else if (section == 1 && [_remoteResults count] > 0) {
+        return @"Local Results";
+    }
+    return nil;
 }
 
 // Display the strings in displayedRecentSearches.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 1 && gLastSearchString != nil) {
+    if (indexPath.section == 3 && _lastQery != nil) {
         static NSString *CellIdentifier = @"PAGE_SEARCH_CELL";
         
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -80,67 +92,57 @@ static NSArray* gFreshSearchHits = nil;
             cell.imageView.image = [UIImage imageNamed:@"goto"];
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
-        cell.textLabel.text = [NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Find in Page", @"Search something in the webpage"), gLastSearchString];
+        cell.textLabel.text = [NSString stringWithFormat:@"%@: %@",
+                               NSLocalizedString(@"Find in Page", @"Search something in the webpage"),
+                               _lastQery];
         return cell;
-    } else { //regular title/url cell
-        //NOTE: I'm now sharing the table cell cache between all my tables to save memory
+    } else {
         static NSString *CellIdentifier = @"URL_CELL";
-        
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (!cell) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
         
-        @try {
-            if (searchHits) {
-                if ([searchHits count]) {
-                    cell.textLabel.textColor = [UIColor blackColor];
-                    cell.textLabel.textAlignment = NSTextAlignmentLeft;
-                    
-                    FXSyncItem* matchItem = searchHits[[indexPath row]];
-                    NSString *uri = [matchItem urlString];
-                    
-                    // Set up the cell...
-                    if ([[matchItem title] length]) {
-                        cell.textLabel.text = [matchItem title];
-                        cell.detailTextLabel.text = uri;
-                    } else {
-                        cell.textLabel.text = uri;
-                        cell.detailTextLabel.text = nil;
-                    }
-                    //the item tells us which icon to use
-                    if ([matchItem.collection isEqualToString:kFXHistoryCollectionKey]) {
-                        cell.imageView.image = [UIImage imageNamed:@"history"];
-                    } else {
-                        // In any other case the bookmark has a type field
-                        // We should have a corresponding image for that
-                        cell.imageView.image = [UIImage imageNamed:[matchItem type]];
-                    }
-                } else {//empty list, means no matches
-                    cell.textLabel.textColor = [UIColor grayColor];
-                    cell.textLabel.text = NSLocalizedString(@"No Matches", @"no matching items found");
-                    cell.detailTextLabel.text = nil;
-                    cell.imageView.image = nil;
-                }
+        if (_localResults) {
+            if ([_localResults count]) {
+                cell.textLabel.textColor = [UIColor blackColor];
+                cell.textLabel.textAlignment = NSTextAlignmentLeft;
                 
-            } else { //no list at all, means searching
+                FXSyncItem* matchItem = _localResults[indexPath.row];
+                NSString *uri = [matchItem urlString];
+                
+                // Set up the cell...
+                if ([[matchItem title] length]) {
+                    cell.textLabel.text = [matchItem title];
+                    cell.detailTextLabel.text = uri;
+                } else {
+                    cell.textLabel.text = uri;
+                    cell.detailTextLabel.text = nil;
+                }
+                //the item tells us which icon to use
+                if ([matchItem.collection isEqualToString:kFXHistoryCollectionKey]) {
+                    cell.imageView.image = [UIImage imageNamed:@"history"];
+                } else {
+                    // In any other case the bookmark has a type field
+                    // We should have a corresponding image for that
+                    cell.imageView.image = [UIImage imageNamed:[matchItem type]];
+                }
+            } else {//empty list, means no matches
                 cell.textLabel.textColor = [UIColor grayColor];
-                cell.textLabel.text = NSLocalizedString(@"Searching...", @"searching for matching items");
+                cell.textLabel.text = NSLocalizedString(@"No Matches", @"no matching items found");
                 cell.detailTextLabel.text = nil;
                 cell.imageView.image = nil;
             }
-        } @catch (NSException * e) {
-            DLog(@"item to display missing from searchhits");
-            cell.textLabel.textColor = [UIColor blackColor];
-            cell.textLabel.text = nil;
+            
+        } else { //no list at all, means searching
+            cell.textLabel.textColor = [UIColor grayColor];
+            cell.textLabel.text = NSLocalizedString(@"Searching...", @"searching for matching items");
             cell.detailTextLabel.text = nil;
             cell.imageView.image = nil;
         }
-        
         return cell;
     }
-
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -148,14 +150,15 @@ static NSArray* gFreshSearchHits = nil;
 		[gRefreshThread cancel];
 		gRefreshThread = nil;
 	}
-    
-	UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-    
-	if (!([searchHits count] == 0 && gLastSearchString.length == 0)) {
+        
+	if (!([_localResults count] == 0 && _lastQery.length == 0)) {
 		if (indexPath.section == 1)
-            [self.delegate finishPageSearch:gLastSearchString];
-		else
-			[self.delegate finishSearch:cell.detailTextLabel.text title:cell.textLabel.text];
+            [self.delegate finishPageSearch:_lastQery];
+        else {
+            FXSyncItem* matchItem = _localResults[[indexPath row]];
+            NSString *uri = [matchItem urlString];
+			[self.delegate finishSearch:uri title:[matchItem title]];
+        }
 	}
     
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -176,7 +179,7 @@ static NSArray* gFreshSearchHits = nil;
     
     if (!query || query.length == 0) {
         gFreshSearchHits = nil;
-        gLastSearchString = nil;
+        _lastQery = nil;
         [self.tableView reloadData];
     } else {
         //now fire up a new search thread
@@ -233,9 +236,9 @@ static NSArray* gFreshSearchHits = nil;
         BOOL skip = NO;
         
         NSString *title = [item title];
-        NSString *uri = [item bmkUri];// bookmark
-        if (!uri) uri = [item siteUri];// livemark
-        if (!uri) uri = [item histUri];// history entry
+        NSString *uri = [item urlString];
+        NSString *description = [item description];
+        
         // Workaround to avoid folders and other unexpected stuff
         if (![uri length]) continue;
         
@@ -261,7 +264,9 @@ static NSArray* gFreshSearchHits = nil;
         
         for (NSPredicate* pred in predicateList) {
             @try  {
-                isSuperDeluxeSparkleHit = isSuperDeluxeSparkleHit && ([pred evaluateWithObject:title] || [pred evaluateWithObject:uri]);
+                isSuperDeluxeSparkleHit = isSuperDeluxeSparkleHit && ([pred evaluateWithObject:title]
+                                                                      || [pred evaluateWithObject:uri]
+                                                                      || [pred evaluateWithObject:description]);
             } @catch (NSException * e)  {
                 isSuperDeluxeSparkleHit = NO;
                 break; //just get out
@@ -286,19 +291,18 @@ static NSArray* gFreshSearchHits = nil;
 
 
 //OK, this has gotten a lot easier.  the lists of tabs, bookmarks, and history are already sorted by frecency,
-// so I can start at the beginning and stop when I get MAXPERLIST hits from each 
-
+// so I can start at the beginning and stop when I get MAXPERLIST hits from each
 - (void)refreshHits:(NSString*)searchString
 {
     //empty string means no hits
     if (searchString == nil || [searchString length] == 0)
     {
         gFreshSearchHits = nil;
-        gLastSearchString = nil;
+        _lastQery = nil;
         return;
     }
     
-    gLastSearchString = searchString;
+    _lastQery = searchString;
     
     //make the list of strict predicates to match.  usually only 1, but if the user separates strings with spaces, we must match them all,
     // on different word boundaries, to be a hit
@@ -372,8 +376,7 @@ static NSArray* gFreshSearchHits = nil;
     
     //OK!!  Now we have at least 0 and at most N * MAXPERLIST, sorted by frecency
     //but wait, if we don't have at least MAXPERLIST, then let's try doing a plain old substring match
-    if ([WORD_matches count] < MAXPERLIST)
-    {
+    if ([WORD_matches count] < MAXPERLIST) {
         //we will tack the substring matches, themselves sorted, onto the end of the list, to make MAXPERLIST
         NSMutableArray* SUBSTRING_matches = [NSMutableArray arrayWithArray:[newSubstringHits allValues]];
         [SUBSTRING_matches sortUsingComparator:cmp];

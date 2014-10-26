@@ -34,6 +34,7 @@
 // ======= Helper methods to work with history ======
 
 - (void)deleteHistoryItem:(FXSyncItem *)item;
+- (void)addHistoryURL:(NSURL *)url;
 
 // ======= Helper methods to work the tabs for the current device ======
 
@@ -52,13 +53,15 @@
  * storageversion 5 the bookmark order is determinded by the childrens array in the parent folder
  */
 - (NSArray *)bookmarksWithParentFolder:(FXSyncItem *)folder;
-/*! Recursively delete bookmarks, resets the prefetched stuff */
+/*! Recursively delete bookmarks */
 - (void)deleteBookmark:(FXSyncItem *)bookmark;
 
 /*! Create a new bookmark, located in unfiled */
-- (FXSyncItem *)bookmarkWithTitle:(NSString *)title url:(NSURL *)url;
-- (FXSyncItem *)folderWithParent:(FXSyncItem *)folder;
+- (FXSyncItem *)newBookmarkWithTitle:(NSString *)title url:(NSURL *)url;
+- (FXSyncItem *)newFolderWithParent:(FXSyncItem *)folder;
 
+/*! Can be used to determine if an url should be bookmarked  */
+- (FXSyncItem *)bookmarkForUrl:(NSURL *)url;
 
 @end
 

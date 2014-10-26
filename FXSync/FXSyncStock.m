@@ -79,15 +79,15 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 - (void)_archiveKeys {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:
                     _syncEngine.userAuth.accountCreds];
-    if (data != nil) {
-        [UICKeyChainStore setData:data forKey:@"accountCreds"];
-        
-        data = [NSKeyedArchiver archivedDataWithRootObject:
-                _syncEngine.userAuth.accountKeys];
-        if (data != nil) {
-            [UICKeyChainStore setData:data forKey:@"accountKeys"];
-        }
-    }
+    [UICKeyChainStore setData:data forKey:@"accountCreds"];
+    
+    data = [NSKeyedArchiver archivedDataWithRootObject:
+            _syncEngine.userAuth.accountKeys];
+        [UICKeyChainStore setData:data forKey:@"accountKeys"];
+
+    data = [NSKeyedArchiver archivedDataWithRootObject:
+            _syncEngine.metaglobal];
+    [UICKeyChainStore setData:data forKey:@"metaglobal"];
 }
 
 #pragma mark - Properties;
@@ -104,11 +104,18 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 - (void)syncEngine:(FXSyncEngine *)engine didLoadCollection:(NSString *)cName {
     [self _prefetchCollection:cName];
-    
 }
 
 - (void)syncEngine:(FXSyncEngine *)engine didFailWithError:(NSError *)error {
     
+    NSString *alert = [error localizedDescription];
+    NSString *reason = [error localizedFailureReason];
+    if ([reason length] > 0) {
+        alert = [alert stringByAppendingFormat:@"\n%@", reason];
+    }
+    if ([alert length] > 0) {
+        [self syncEngine:engine alertWithString:alert];
+    }
 }
 
 - (void)syncEngine:(FXSyncEngine *)engine alertWithString:(NSString *)alert {
@@ -150,7 +157,10 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 }
 
 - (void)logout {
-    
+    [_syncEngine reset];
+    [UICKeyChainStore removeAllItems];
+    _syncEngine.userAuth.accountCreds = nil;
+    _syncEngine.userAuth.accountKeys = nil;
 }
 
 #pragma mark - History
@@ -158,6 +168,33 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 - (void)deleteHistoryItem:(FXSyncItem *)item; {
     [item deleteItem];
     [_history removeObject:item];
+}
+
+- (void)addHistoryURL:(NSURL *)url {
+    NSParameterAssert(url);
+    
+    FXSyncItem *hist;
+    NSString *urlS = url.absoluteString;
+    for (FXSyncItem *item in _history) {
+        if ([[item histUri] isEqualToString:urlS]) {
+            hist = item;
+            break;
+            
+        }
+    }
+    if (hist == nil) {
+        hist = [FXSyncItem new];
+        hist.syncId = RandomString(12);
+        hist.collection = kFXHistoryCollectionKey;
+        hist.sortindex = 100;
+        hist.jsonPayload = [@{@"id":hist.syncId,
+                              @"title":url.host,
+                              @"histUri":[NSString stringWithFormat:@"%@", url]} mutableCopy];
+        
+    }
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    [hist addVisit:now type:2];
+    [hist save];
 }
 
 #pragma mark - Tabs
@@ -196,9 +233,10 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 #pragma mark - Bookmarks
 
 - (NSArray *)topBookmarkFolders {
-    if ([_bookmarks count] > 0) {
+    NSArray *result = [self bookmarksWithParent:@"places"];
+    if ([result count] > 0) {
         // parentid of menu, mobile and toolbar is 'places'
-        return [self bookmarksWithParent:@"places"];
+        return result;
     } else {
         // Workaround for 
         FXSyncItem *toolbar = [FXSyncItem new];
@@ -252,11 +290,12 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                             }];
         }
     }
+    // Mark as deleted
     [bookmark deleteItem];
     [_bookmarks removeObject:bookmark];
 }
 
-- (FXSyncItem *)bookmarkWithTitle:(NSString *)title url:(NSURL *)url; {
+- (FXSyncItem *)newBookmarkWithTitle:(NSString *)title url:(NSURL *)url; {
     NSParameterAssert(title && url);
     
     FXSyncItem *item = [FXSyncItem new];
@@ -284,14 +323,25 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     return item;
 }
 
-- (FXSyncItem *)folderWithParent:(FXSyncItem *)folder; {
-    FXSyncItem *item = [self bookmarkWithTitle:NSLocalizedString(@"New Folder",
+- (FXSyncItem *)newFolderWithParent:(FXSyncItem *)folder; {
+    FXSyncItem *item = [self newBookmarkWithTitle:NSLocalizedString(@"New Folder",
                                                                  @"Create a new folder")
                                            url:[NSURL URLWithString:@"about:blank"]];
     [item setType:@"folder"];
     [item.jsonPayload removeObjectForKey:@"bmkUri"];
     [item save];
     return item;
+}
+
+/*! Can be used to determine if an url should be bookmarked  */
+- (FXSyncItem *)bookmarkForUrl:(NSURL *)url; {
+    NSString *urlS = [NSString stringWithFormat:@"%@", url];
+    for (FXSyncItem *item in _bookmarks) {
+        if ([[item bmkUri] isEqualToString:urlS]) {
+            return item;
+        }
+    }
+    return nil;
 }
 
 @end

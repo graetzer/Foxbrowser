@@ -24,6 +24,7 @@
 #import "SGPageViewController.h"
 #import "SGSearchField.h"
 
+#import "NJKWebViewProgressView.h"
 #import "GAI.h"
 
 @implementation SGPageToolbar {

@@ -43,7 +43,6 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
     NSDictionary *_collectionKeys;
     
     BOOL _foundClientRecord;
-    NSInteger _storageVersion;
     
     int32_t _networkOpsCount;
 }
@@ -65,6 +64,13 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
     }
 }
 
+- (void)reset {
+    _credentials = nil;
+    _keyBundle = nil;
+    _collectionKeys = nil;
+    _foundClientRecord = NO;
+}
+
 /*! Get the reuired authorization credentials and the sync key */
 - (void)_requestSyncInfo {
     OSAtomicIncrement32(&_networkOpsCount);
@@ -80,13 +86,13 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
             // Any of these methods will ideally call the next one
             if (_keyBundle == nil || _collectionKeys == nil) {
                 [self _prepareKeys];
-            } else if (!_foundClientRecord) {
+            } else if (!_foundClientRecord || _metaglobal == nil) {
                 [self _loadMetarecord];
-            } else if (_storageVersion == 5) {
+            } else if ([_metaglobal[@"storageVersion"] isEqual:@5]) {
                 [self _performSync];
             } else {
                 NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
-                                                   code:kFXSyncEngineErrorUnsupportedStorageVersion
+                                                   code:kFXSyncEngineErrorStorageVersionMismatch
                                                userInfo:nil];
                 [_delegate syncEngine:self didFailWithError:err];
             }
@@ -182,6 +188,8 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                            unmodifiedSince:0
                                     offset:nil maximum:limit+500];
                 }
+                // In any other case we just don't handle the error,
+                // if it's an internet connection error we can retry later
             }];
 }
 
@@ -269,6 +277,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
  * Load the global meta record which
  * contains information about the global storage version (it should be 5)
  * This should be queried to detect breaking updates
+ * https://docs.services.mozilla.com/sync/storageformat5.html#metaglobal-record
  */
 - (void)_loadMetarecord {
     
@@ -280,17 +289,31 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                 if (json != nil && resp.statusCode == 200) {
                     // This data should not be encrypted
                     NSData *src = [json[@"payload"] dataUsingEncoding:NSUTF8StringEncoding];
-                    NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:src
-                                                                            options:0
-                                                                              error:NULL];
-                    _storageVersion = [payload[@"storageVersion"] integerValue];
+                    NSDictionary *meta = [NSJSONSerialization JSONObjectWithData:src
+                                                                         options:0
+                                                                           error:NULL];
                     
-                    if (_storageVersion == 5) {
+                    if ([meta[@"storageVersion"] isEqual:@5]) {
+                        // Do a full sync if the syncID changes
+                        if (_metaglobal != nil
+                            && [meta[@"syncID"] isEqualToString:_metaglobal[@"syncID"]]) {
+                            DLog(@"Sync ID changed, deleting local data");
+                            [[FXSyncStore sharedInstance] clearAll];
+                        }
+                        _metaglobal = meta;
                         [self _updateClientRecord];
                     } else {
+                        NSString *msg;
+                        if ([_metaglobal[@"storageVersion"] integerValue] > 5) {
+                            msg = NSLocalizedString(@"Data on the server is in a new and unrecognized format. Please update Firefox Home.",
+                                                    @"update Firefox Home");
+                        } else {
+                            msg = NSLocalizedString(@"Data on the server is in an old and unsupported format. Please update Firefox Sync on your computer.",
+                                                    @"update Firefox Sync");
+                        }
                         NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
-                                                           code:kFXSyncEngineErrorUnsupportedStorageVersion
-                                                       userInfo:nil];
+                                                           code:kFXSyncEngineErrorStorageVersionMismatch
+                                                       userInfo:@{NSLocalizedDescriptionKey:msg}];
                         [_delegate syncEngine:self didFailWithError:err];
                     }
                 }
@@ -421,6 +444,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                     NSString *rawPayload;
                     if (err != nil) {
                         [_delegate syncEngine:self didFailWithError:err];
+                        
                     } else if([bso isKindOfClass:[NSDictionary class]]
                               && (rawPayload = bso[@"payload"]) != nil) {
                         
@@ -486,6 +510,8 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
     
     NSString *computedHMAC = [[NSData dataWithBytes:hmac length:CC_SHA256_DIGEST_LENGTH] hexadecimalString];
     if (![computedHMAC isEqualToString:payload[@"hmac"]]) {
+        
+        
         NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
                                            code:kFXSyncEngineErrorEncryption
                                        userInfo:nil];
@@ -614,7 +640,42 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
 }
 
 /*! Handle Alerts, Backoff, timestamp + offset calculations */
-- (BOOL)_handleSpecialResponses:(NSHTTPURLResponse *)headers {
+- (BOOL)_handleSpecialResponses:(NSHTTPURLResponse *)resp {
+    
+    // Unauthorized
+    if (resp.statusCode == 401) {
+        // Technically the code doesn't have to indicate that
+        NSString *msg = NSLocalizedString(@"Due to a recent update, you need to log in to Firefox Home again.",
+                                          @"Message that we show in a dialog when you need to sign in again after upgrading");
+        NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                             code:kFXSyncEngineErrorAuthentication
+                                         userInfo:@{NSLocalizedDescriptionKey:msg}];
+        [self.delegate syncEngine:self
+                 didFailWithError:error];
+        return NO;
+    } else if (resp.statusCode == 503) {
+        // Service Unavailable
+        // TODO handle the retry after header
+        return NO;
+    } else if (resp.statusCode == 513) {
+        NSString *t = resp.allHeaderFields[kFXHeaderAlert];
+        NSDictionary *alert = [NSJSONSerialization JSONObjectWithData:[t dataUsingEncoding:NSUTF8StringEncoding]
+                                                              options:0 error:NULL];
+        
+        if (alert[@"message"]) {
+            NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                                 code:kFXSyncEngineErrorEndOfLife
+                                             userInfo:@{NSLocalizedDescriptionKey:alert[@"message"],
+                                                        NSLocalizedFailureReasonErrorKey:alert[@"url"]}];
+            [self.delegate syncEngine:self
+                     didFailWithError:error];
+            return NO;
+        }
+    } else if ([resp.allHeaderFields[kFXHeaderAlert] length] > 0) {
+        // Show error
+        [self.delegate syncEngine:self
+                  alertWithString:resp.allHeaderFields[kFXHeaderAlert]];
+    }
     return YES;
 }
 

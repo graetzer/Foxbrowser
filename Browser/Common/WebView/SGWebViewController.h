@@ -25,16 +25,17 @@
 #import <Security/Security.h>
 #import <AVFoundation/AVFoundation.h>
 
-@class SGTabsViewController;
+#import "NJKWebViewProgress.h"
 
 @interface SGWebViewController : UIViewController <UIWebViewDelegate, UIGestureRecognizerDelegate,
-UIActionSheetDelegate, UIViewControllerRestoration>
+UIActionSheetDelegate, UIViewControllerRestoration, NJKWebViewProgressDelegate>
 
 @property (weak, nonatomic) UIWebView *webView;
 @property (weak, nonatomic) UIToolbar *searchToolbar;
 
 @property (strong, nonatomic) NSURLRequest *request;
 @property (assign, nonatomic, readonly, getter = isLoading) BOOL loading;
+@property (assign, nonatomic, readonly) float progress;
 
 /// Loads a request
 /// If parameter request is nil, the last loaded request will be reloaded

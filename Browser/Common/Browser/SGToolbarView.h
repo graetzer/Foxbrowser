@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-#include "SGSearchViewController.h"
-@class SGBrowserViewController, SGSearchField;
+#import "SGSearchViewController.h"
+@class SGBrowserViewController, SGSearchField, NJKWebViewProgressView;
 
 /*! Common superclass for the device specific toolbars */
 @interface SGToolbarView : UIView <UITextFieldDelegate, SGSearchDelegate>
@@ -20,7 +20,7 @@
 @property (weak, readonly, nonatomic) UIButton *forwardButton;
 @property (weak, readonly, nonatomic) UIButton *menuButton;
 
-@property (weak, nonatomic) UIProgressView *progressView;
+@property (weak, nonatomic) NJKWebViewProgressView *progressView;
 
 @property (strong, nonatomic, readonly) UINavigationController *bookmarks;
 
