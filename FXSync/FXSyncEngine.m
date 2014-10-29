@@ -296,17 +296,18 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                     if ([meta[@"storageVersion"] isEqual:@5]) {
                         // Do a full sync if the syncID changes
                         if (_metaglobal != nil
-                            && [meta[@"syncID"] isEqualToString:_metaglobal[@"syncID"]]) {
+                            && ![meta isEqual:_metaglobal]) {
+                            //[meta[@"syncID"] isEqualToString:_metaglobal[@"syncID"]]
                             DLog(@"Sync ID changed, deleting local data");
-                            [[FXSyncStore sharedInstance] clearAll];
+                            [[FXSyncStore sharedInstance] clearMetadata];
                         }
                         _metaglobal = meta;
                         [self _updateClientRecord];
                     } else {
                         NSString *msg;
                         if ([_metaglobal[@"storageVersion"] integerValue] > 5) {
-                            msg = NSLocalizedString(@"Data on the server is in a new and unrecognized format. Please update Firefox Home.",
-                                                    @"update Firefox Home");
+                            msg = NSLocalizedString(@"Data on the server is in a new and unrecognized format. Please update Foxbrowser.",
+                                                    @"update Foxbrowser");
                         } else {
                             msg = NSLocalizedString(@"Data on the server is in an old and unsupported format. Please update Firefox Sync on your computer.",
                                                     @"update Firefox Sync");
@@ -334,7 +335,6 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                payload:nil
             completion:^(NSHTTPURLResponse *resp, id bso, NSError *err) {
                 _foundClientRecord = NO;
-                
                 NSString *rawPayload;
                 if (resp.statusCode == 200
                     && [bso isKindOfClass:[NSDictionary class]]
@@ -345,22 +345,27 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                                                                   options:0
                                                                     error:NULL];
                     
-                    // Update the client record every 7 days
-                    NSTimeInterval modified = [bso[@"modified"] doubleValue];
-                    if ([payload[@"id"] isEqualToString:myID]
-                        && modified > [[NSDate date] timeIntervalSince1970] - SEVEN_DAYS) {
-                        
+                    if ([payload[@"id"] isEqualToString:myID]) {
                         DLog(@"Found matching mobile client record");
-                        _foundClientRecord = YES;
-                        [self _performSync];
+                        
+                        NSTimeInterval modified = [bso[@"modified"] doubleValue];
+                        NSArray *commands = payload[@"commands"];
+                        if ([commands count] > 0) {
+                            [_delegate syncEngine:self didReceiveCommands:commands];
+                        } // Update the client record every 7 days
+                        else if (modified < [[NSDate date] timeIntervalSince1970] - SEVEN_DAYS) {
+                            _foundClientRecord = YES;
+                            [self _performSync];
+                        }
                     }
                 }
                 
                 if (!_foundClientRecord) {
-                    DLog(@"Did not find matching client record");
+                    DLog(@"Updating client record");
                     NSDictionary *client = @{@"id" : myID,
                                              @"name":[self clientName],
                                              @"type" : @"mobile",
+                                             @"commands":@[],
                                              @"version" : @"3.0",
                                              @"protocols": @[@"1.5"]};
                     
@@ -465,7 +470,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                             }
                         }
                         _collectionKeys = keys;
-                        [self _performSync];
+                        [self _loadMetarecord];
                     }
                 }];
     } else {
@@ -645,7 +650,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
     // Unauthorized
     if (resp.statusCode == 401) {
         // Technically the code doesn't have to indicate that
-        NSString *msg = NSLocalizedString(@"Due to a recent update, you need to log in to Firefox Home again.",
+        NSString *msg = NSLocalizedString(@"Due to a recent update, you need to log in to Foxbrowser again.",
                                           @"Message that we show in a dialog when you need to sign in again after upgrading");
         NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
                                              code:kFXSyncEngineErrorAuthentication

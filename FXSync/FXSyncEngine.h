@@ -23,6 +23,7 @@ typedef NS_ENUM(NSUInteger, kFXSyncEngineError) {
 @required
 - (void)syncEngine:(FXSyncEngine *)engine didLoadCollection:(NSString *)cName;
 - (void)syncEngine:(FXSyncEngine *)engine didFailWithError:(NSError *)error;
+- (void)syncEngine:(FXSyncEngine *)engine didReceiveCommands:(NSArray *)commands;
 - (void)syncEngine:(FXSyncEngine *)engine alertWithString:(NSString *)alert;
 @end
 

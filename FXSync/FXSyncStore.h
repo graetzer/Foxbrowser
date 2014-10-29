@@ -18,7 +18,7 @@
 - (void)saveItem:(FXSyncItem *)item;
 - (void)deleteItem:(FXSyncItem *)item;
 
-- (void)clearAll;
+- (void)clearMetadata;
 - (void)clearCollection:(NSString *)cName older:(NSTimeInterval)cutoff;
 //- (void)deletCollection:(NSString *)collection;
 

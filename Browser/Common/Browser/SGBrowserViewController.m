@@ -36,22 +36,15 @@
     NSMutableArray *_httpsHosts;
 }
 
-- (void)_willEnterForeground {
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableHTTPStackKey]) {
-        [CustomHTTPProtocol setDelegate:self];
-        [CustomHTTPProtocol start];
-    } else {
-        [CustomHTTPProtocol setDelegate:nil];
-        [CustomHTTPProtocol stop];
-    }
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self _willEnterForeground];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(_willEnterForeground)
                                                  name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_openURLWithArgs:)
+                                                 name:kFXOpenURLNotification object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -77,10 +70,28 @@
     _saveTimer = nil;
     [_interfaceTimer invalidate];
     _interfaceTimer = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (BOOL)shouldAutorotate {
     return self.presentedViewController ? [self.presentedViewController shouldAutorotate] : YES;
+}
+
+#pragma mark - Notification Listener
+
+- (void)_willEnterForeground {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableHTTPStackKey]) {
+        [CustomHTTPProtocol setDelegate:self];
+        [CustomHTTPProtocol start];
+    } else {
+        [CustomHTTPProtocol setDelegate:nil];
+        [CustomHTTPProtocol stop];
+    }
+}
+
+- (void)_openURLWithArgs:(NSNotification *)n {
+    NSDictionary *args = n.userInfo;
+    [self handleURLString:args[@"uri"] title:args[@"title"]];
 }
 
 #pragma mark - Abstract methods

@@ -166,13 +166,8 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     });
 }
 
-- (void)clearAll; {
+- (void)clearMetadata; {
     dispatch_async(_queue, ^{
-        NSArray *all = [FXSyncEngine collectionNames];
-        for (NSString *cName in all) {
-            NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@", cName];
-            sqlite3_exec(_db, sql.UTF8String, NULL, NULL, NULL);
-        }
         sqlite3_exec(_db, "DELETE FROM syncinfo", NULL, NULL, NULL);
     });
 }

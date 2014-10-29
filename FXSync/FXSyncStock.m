@@ -13,6 +13,7 @@
 #include "UICKeyChainStore.h"
 
 NSString *const kFXDataChangedNotification = @"kFXDataChangedNotification";
+NSString *const kFXOpenURLNotification = @"kFXOpenURLNotification";
 NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 @implementation FXSyncStock {
@@ -115,6 +116,19 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     }
     if ([alert length] > 0) {
         [self syncEngine:engine alertWithString:alert];
+    }
+}
+
+- (void)syncEngine:(FXSyncEngine *)engine didReceiveCommands:(NSArray *)commands {
+    DLog(@"Received commands %@", commands);
+    for (NSDictionary *cmd in commands) {
+        if ([cmd[@"command"] isEqualToString:@"displayURI"]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kFXOpenURLNotification
+                                                                    object:self
+                                                                  userInfo:cmd[@"args"]];
+            });
+        }
     }
 }
 

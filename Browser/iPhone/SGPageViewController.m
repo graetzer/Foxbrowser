@@ -29,7 +29,6 @@
 CGFloat const kSGMinYScale = 0.85;
 CGFloat const kSGMinXScale = 0.85;
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(0.7, 0.7))
-
 #define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
 #define SG_DURATION 0.25
 
@@ -228,7 +227,6 @@ CGFloat const kSGMinXScale = 0.85;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    
     if (!_animating) [self _layout];
 }
 
@@ -252,7 +250,7 @@ CGFloat const kSGMinXScale = 0.85;
     container.clipsToBounds = _exposeMode;
     [container addSubview:childController.view];
     
-    if (_viewControllers.count == 0) {
+    if (SG_CONTAINER_EMPTY) {
         [_containerViews addObject:container];
         [_viewControllers addObject:childController];
     } else {

@@ -9,7 +9,6 @@
 #import "FXBookmarkTableController.h"
 #import "FXSyncStock.h"
 #import "FXBookmarkEditController.h"
-#import "SGBrowserViewController.h"
 
 @implementation FXBookmarkTableController
 
@@ -228,8 +227,12 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 //        }
         else {
             NSString *uri = [item urlString];
-            if ([uri length]) {
-                [appDelegate.browserViewController handleURLString:uri title:[item title]];
+            if ([uri length] > 0) {
+                NSString *title = [item title] ? [item title] : @"";
+                [[NSNotificationCenter defaultCenter] postNotificationName:kFXOpenURLNotification
+                                                                    object:self
+                                                                  userInfo:@{@"title":title, @"uri":uri}];
+                
                 if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
                     [self.parentViewController dismissViewControllerAnimated:YES completion:NULL];
                 }

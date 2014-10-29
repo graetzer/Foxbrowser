@@ -66,6 +66,8 @@
 @end
 
 FOUNDATION_EXPORT NSString *const kFXDataChangedNotification;
+/*! Should open a url, gets a dictionary with the keys title and uri */
+FOUNDATION_EXPORT NSString *const kFXOpenURLNotification;
 FOUNDATION_EXPORT NSString *const kFXErrorNotification;
 
 
