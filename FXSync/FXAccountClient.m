@@ -326,14 +326,19 @@ uint const STRETCHED_PASS_LENGTH_BYTES = 32;
                                }
                                
                                if (error != nil) {
-                                   ELog(error);
-                                   if (json != nil && json[@"errno"]){
-                                       ELog(json);
-                                       NSInteger code = [json[@"errno"] integerValue];
-                                       error = [NSError errorWithDomain:@"com.mozilla.identity" code:code userInfo:json];
+                                   ELog(json);
+                                   if (json != nil && json[@"code"]) {
+                                       NSInteger code = [json[@"code"] integerValue];
+                                       NSDictionary *info;
+                                       if (json[@"message"]) {
+                                           info = @{NSLocalizedDescriptionKey:json[@"message"]};
+                                       }
+                                       error = [NSError errorWithDomain:@"com.mozilla.identity"
+                                                                   code:code
+                                                               userInfo:info];
                                        
                                        // Let's try this
-                                       if (code == INVALID_TIMESTAMP) {
+                                       if ([json[@"errno"] integerValue] == INVALID_TIMESTAMP) {
                                            NSTimeInterval serverTime = [json[@"serverTime"] doubleValue];
                                            NSTimeInterval offset = serverTime - [[NSDate date] timeIntervalSince1970];
                                            _localTimeOffsetSec = offset;

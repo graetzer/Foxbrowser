@@ -184,6 +184,7 @@
                     }
                     completion:^(BOOL finished){
                         [childController didMoveToParentViewController:self];
+                        [self updateInterface];
                     }];
 }
 

@@ -18,6 +18,7 @@
 
 @property (readonly, strong, nonatomic) FXSyncEngine *syncEngine;
 
+@property (readonly, strong, nonatomic) NSString *user;
 @property (readonly, strong, nonatomic) NSArray *clientTabs;
 - (NSArray *)history;
 - (NSArray *)bookmarks;
@@ -32,7 +33,7 @@
 - (void)logout;
 
 // ======= Helper methods to work with history ======
-
+- (void)clearHistory;
 - (void)deleteHistoryItem:(FXSyncItem *)item;
 - (void)addHistoryURL:(NSURL *)url;
 

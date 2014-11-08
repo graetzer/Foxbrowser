@@ -34,6 +34,7 @@ NSString *const kFXHistoryCollectionKey = @"history";
 NSString *const kFXPasswordsCollectionKey = @"passwords";
 NSString *const kFXPrefsCollectionKey = @"prefs";
 NSString *const kFXFormsCollectionKey = @"forms";
+NSString *const kFXClientsCollectionKey = @"clients";
 
 NSInteger const SEVEN_DAYS = 7*24*60*60;
 
@@ -74,9 +75,10 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
 /*! Get the reuired authorization credentials and the sync key */
 - (void)_requestSyncInfo {
     OSAtomicIncrement32(&_networkOpsCount);
-    [_userAuth requestSyncInfo:^(NSDictionary *syncInfo) {
-        DLog(@"Sync Token %@", syncInfo);
-        if (syncInfo[@"token"] != nil) {
+    [_userAuth requestSyncInfo:^(NSDictionary *syncInfo, NSError *err) {
+        
+        if (syncInfo[@"token"] != nil && err == nil) {
+            DLog(@"Sync Token %@", syncInfo);
             NSString *key = syncInfo[@"token"][@"key"];
             _credentials = [[HawkCredentials alloc] initWithHawkId:syncInfo[@"token"][@"id"]
                                                            withKey:[key dataUsingEncoding:NSUTF8StringEncoding]
@@ -96,6 +98,17 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                                                userInfo:nil];
                 [_delegate syncEngine:self didFailWithError:err];
             }
+        } else {
+            
+            if ([err code] == 401) {
+                NSString *msg = NSLocalizedString(@"Failed to authenticate",
+                                                  @"Failed to authenticate");
+                NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                                     code:kFXSyncEngineErrorAuthentication
+                                                 userInfo:@{NSLocalizedDescriptionKey:msg}];
+                [self.delegate syncEngine:self didFailWithError:error];
+            }
+            
         }
         OSAtomicDecrement32(&_networkOpsCount);
     }];
@@ -193,28 +206,14 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
             }];
 }
 
-//- (void)_uploadChanges {
-//    FXSyncStore *store = [FXSyncStore sharedInstance];
-//    NSArray *cols = [FXSyncEngine collectionNames];
-//    
-//    for (NSString *cName in cols) {
-//        
-//    }
-//}
-
 - (void)_uploadChangesFrom:(NSString *)cName {
     
     FXSyncStore *store = [FXSyncStore sharedInstance];
     NSTimeInterval newer = [store syncTimeForCollection:cName];
     NSArray *uploads = [store changedItemsForCollection:cName];
-    
     // Not all data is forever relevant
     // If the user deletes the app, data should disappear
-    NSInteger ttl = 0;
-    if ([cName isEqualToString:kFXHistoryCollectionKey]
-        || [cName isEqualToString:kFXTabsCollectionKey]) {
-        ttl = SEVEN_DAYS*3;
-    }
+    NSInteger ttl = [self _timeToLiveForCollection:cName];
     
     for (FXSyncItem *item in uploads) {
         // We use the upload time for the entire collection,
@@ -655,8 +654,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
         NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
                                              code:kFXSyncEngineErrorAuthentication
                                          userInfo:@{NSLocalizedDescriptionKey:msg}];
-        [self.delegate syncEngine:self
-                 didFailWithError:error];
+        [self.delegate syncEngine:self didFailWithError:error];
         return NO;
     } else if (resp.statusCode == 503) {
         // Service Unavailable
@@ -688,6 +686,26 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
     return @[kFXTabsCollectionKey, kFXBookmarksCollectionKey,
              kFXHistoryCollectionKey];
     // , kFXPasswordsCollectionKey, kFXFormsCollectionKey
+}
+
+/*!
+ * Forms = 60 days, clients = 21 days (refreshed weekly), history = 60 days, tabs = 7
+ * From source http://mxr.mozilla.org/mozilla-central/search?string=_TTL&case=1&find=services%2Fsync%2Fmodules%2Fengines%2F&findi=&filter=^%5B^\0%5D*%24&hitlimit=&tree=mozilla-central
+ */
+- (NSInteger)_timeToLiveForCollection:(NSString *)cName {
+    if ([cName isEqualToString:kFXTabsCollectionKey]) {
+        return 7 * 24 * 60 * 60;
+    } else if ([cName isEqualToString:kFXHistoryCollectionKey]) {
+        return 60 * 24 * 60 * 60;
+    } else if ([cName isEqualToString:kFXClientsCollectionKey]) {
+        // 21 days in seconds
+        return 21 * 24 * 60 * 60;
+    } else if ([cName isEqualToString:kFXFormsCollectionKey]) {
+        // 60 days in seconds
+        return 60 * 24 * 60 * 60;
+    } else {
+        return 0;
+    }
 }
 
 - (BOOL)isSyncRunning {

@@ -8,9 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FXSettingsViewController : UIViewController
+@interface FXSettingsViewController : UIViewController <UIAlertViewDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *syncButton;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (weak, nonatomic) IBOutlet UILabel *bookmarksLabel;
+@property (weak, nonatomic) IBOutlet UILabel *historyLabel;
+@property (weak, nonatomic) IBOutlet UILabel *userLabel;
 - (IBAction)startSync:(id)sender;
+- (IBAction)clearHistory:(id)sender;
 
 @end

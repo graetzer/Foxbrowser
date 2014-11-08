@@ -28,7 +28,6 @@
 
 @property (readonly, nonatomic) UIImageView *imageView;
 @property (readonly, nonatomic) UILabel *label;
-@property (readonly, nonatomic) NSURL *url;
 @property (readonly, nonatomic) FXSyncItem *item;
 
 - (id)initWithItem:(FXSyncItem *)item;
@@ -37,8 +36,8 @@
 
 @protocol SGPanelDelegate <NSObject>
 
-- (void)openNewTab:(SGPreviewTile *)tile;
-- (void)open:(SGPreviewTile *)tile;
+- (void)openNewTab:(FXSyncItem *)item;
+- (void)open:(FXSyncItem *)item;
 
 @end
 

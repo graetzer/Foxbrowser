@@ -21,10 +21,12 @@
 //
 
 #import "SGBlankController.h"
-#import "UIViewController+SGBrowserViewController.h"
-#import "FXTabsViewController.h"
+
+#import "NSStringPunycodeAdditions.h"
 #import "SGBottomView.h"
 #import "SGBrowserViewController.h"
+
+#import "FXTabsViewController.h"
 #import "FXSyncStock.h"
 
 @implementation SGBlankController
@@ -125,7 +127,6 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
-    [self.browserViewController updateInterface];
 }
 
 - (void)viewWillLayoutSubviews {
@@ -140,16 +141,24 @@
 }
 
 #pragma mark - SGPreviewPanelDelegate
-- (void)openNewTab:(SGPreviewTile *)tile {
-    if (tile.url)
-        [self.browserViewController addTabWithURLRequest:[NSMutableURLRequest requestWithURL:tile.url]
-                                                   title:tile.label.text];
+- (void)openNewTab:(FXSyncItem *)item {
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    NSString *urlS = [item urlString];
+    NSURL *url;
+    if ([urlS length] && (url = [NSURL URLWithUnicodeString:urlS])) {
+        [browser addTabWithURLRequest:[NSMutableURLRequest requestWithURL:url]
+                                title:[item title]];
+    }
 }
 
-- (void)open:(SGPreviewTile *)tile {
-    if (tile.url)
-        [self.browserViewController openURLRequest:[NSMutableURLRequest requestWithURL:tile.url]
-                                             title:tile.label.text];
+- (void)open:(FXSyncItem *)item {
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    NSString *urlS = [item urlString];
+    NSURL *url;
+    if ([urlS length] && (url = [NSURL URLWithUnicodeString:urlS])) {
+        [browser openURLRequest:[NSMutableURLRequest requestWithURL:url]
+                                title:[item title]];
+    }
 }
 
 #pragma mark - UIScrollViewDelegate

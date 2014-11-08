@@ -19,11 +19,13 @@
 - (void)deleteItem:(FXSyncItem *)item;
 
 - (void)clearMetadata;
+- (void)clearData;
 - (void)clearCollection:(NSString *)cName older:(NSTimeInterval)cutoff;
 //- (void)deletCollection:(NSString *)collection;
 
 /*! Sorted by sortindex, pass something negative into limit for unlimited */
 - (void)loadCollection:(NSString *)cName
+                 limit:(NSUInteger)limit
               callback:(void(^)(NSMutableArray *))callback;
 - (void)loadSyncId:(NSString *)syncId
   fromCollection:(NSString *)cName

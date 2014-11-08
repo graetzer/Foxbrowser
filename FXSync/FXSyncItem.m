@@ -9,6 +9,9 @@
 #import "FXSyncItem.h"
 #import "FXSyncStore.h"
 
+NSInteger kFXSyncItemModified = -1;
+NSInteger kFXSyncItemDeleted = -2;
+
 @implementation FXSyncItem
 @synthesize jsonPayload = _jsonPayload;
 
@@ -31,8 +34,13 @@
 }
 
 - (void)save {
-    _modified = -1;//[[NSDate date] timeIntervalSince1970];
+    _modified = kFXSyncItemModified;
     if (_jsonPayload != nil) {
+        // Dirty workaround
+        if ([_jsonPayload[@"deleted"] boolValue]) {
+            _modified = kFXSyncItemDeleted;
+        }
+        
         NSError *error = nil;
         NSData *data = [NSJSONSerialization dataWithJSONObject:_jsonPayload
                                                        options:0
@@ -54,14 +62,6 @@
         [self save];
     }
 }
-
-//- (NSString *)description {
-//    if (_jsonPayload != nil) {
-//        return [_jsonPayload description];
-//    } else {
-//        return [super description];
-//    }
-//}
 
 @end
 
@@ -198,12 +198,17 @@
     return val == [NSNull null] ? nil : val;
 }
 
+- (NSArray *)visits; {
+    return self.jsonPayload[@"visits"];
+}
+
 - (void)addVisit:(NSTimeInterval)time type:(NSInteger)code {
+    NSDictionary *visit = @{@"date":@((long)time * 1.0e6), @"type":@(code)};
     if (self.jsonPayload[@"visits"]
         && self.jsonPayload[@"visits"] != [NSNull null]) {
-        [self.jsonPayload[@"visits"] addObject:@[@(time), @(code)]];
+        [self.jsonPayload[@"visits"] addObject:visit];
     } else {
-        self.jsonPayload[@"visits"] = @[@[@(time), @(code)]];
+        self.jsonPayload[@"visits"] = [NSMutableArray arrayWithObject:visit];
     }
 }
 

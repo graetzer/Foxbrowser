@@ -28,6 +28,6 @@
 - (void)signInFetchKeysEmail:(NSString *)email
                     password:(NSString *)pass
                   completion:(void(^)(BOOL))completion;
-- (void)requestSyncInfo:(void(^)(NSDictionary *))callback;
+- (void)requestSyncInfo:(void(^)(NSDictionary *, NSError *))callback;
 
 @end

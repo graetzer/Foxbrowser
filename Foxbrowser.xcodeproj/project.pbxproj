@@ -39,6 +39,8 @@
 		F455171815A47D9E00E0B54E /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F455171715A47D9E00E0B54E /* libz.dylib */; };
 		F455171A15A47DA400E0B54E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F455171915A47DA400E0B54E /* SystemConfiguration.framework */; };
 		F455171C15A47DB100E0B54E /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F455171B15A47DB100E0B54E /* MobileCoreServices.framework */; };
+		F455C5F51A02E74500F49C07 /* Icons.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F455C5F41A02E74400F49C07 /* Icons.xcassets */; };
+		F455C5F81A08702500F49C07 /* NSString+Levenshtein.m in Sources */ = {isa = PBXBuildFile; fileRef = F455C5F71A08702500F49C07 /* NSString+Levenshtein.m */; };
 		F459C15F15C6AF3200740236 /* SGBottomView.m in Sources */ = {isa = PBXBuildFile; fileRef = F459C15E15C6AF3200740236 /* SGBottomView.m */; };
 		F45E1ED01819923000786048 /* CacheStoragePolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E1ECB1819923000786048 /* CacheStoragePolicy.m */; };
 		F45E1ED11819923000786048 /* CanonicalRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = F45E1ECD1819923000786048 /* CanonicalRequest.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -76,7 +78,6 @@
 		F4C1EE2515B07FCB00FB2B97 /* SGPreviewPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */; };
 		F4C3906C161093D500349AA4 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F4C3906B161093D500349AA4 /* Settings.bundle */; };
 		F4D03D5316C6A9BA00A67B9F /* SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */; };
-		F4D03D5616C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */; };
 		F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */; };
 		F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5216C6A9BA00A67B9F /* UIImage+Scaling.m */; };
 		F4D410E319D2641200E22491 /* FXSyncStock.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D410E219D2641200E22491 /* FXSyncStock.m */; };
@@ -149,6 +150,9 @@
 		F455171715A47D9E00E0B54E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		F455171915A47DA400E0B54E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		F455171B15A47DB100E0B54E /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		F455C5F41A02E74400F49C07 /* Icons.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Icons.xcassets; path = UI/Icons.xcassets; sourceTree = "<group>"; };
+		F455C5F61A08702500F49C07 /* NSString+Levenshtein.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Levenshtein.h"; sourceTree = "<group>"; };
+		F455C5F71A08702500F49C07 /* NSString+Levenshtein.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Levenshtein.m"; sourceTree = "<group>"; };
 		F459C15D15C6AF3200740236 /* SGBottomView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGBottomView.h; sourceTree = "<group>"; };
 		F459C15E15C6AF3200740236 /* SGBottomView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBottomView.m; sourceTree = "<group>"; };
 		F45E1ECA1819923000786048 /* CacheStoragePolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CacheStoragePolicy.h; sourceTree = "<group>"; };
@@ -252,8 +256,6 @@
 		F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPreviewPanel.m; sourceTree = "<group>"; };
 		F4C3906B161093D500349AA4 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
-		F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SGBrowserViewController.h"; sourceTree = "<group>"; };
-		F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SGBrowserViewController.m"; sourceTree = "<group>"; };
 		F4D03D4F16C6A9BA00A67B9F /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
 		F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
 		F4D03D5116C6A9BA00A67B9F /* UIImage+Scaling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Scaling.h"; sourceTree = "<group>"; };
@@ -262,7 +264,6 @@
 		F4D410E219D2641200E22491 /* FXSyncStock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXSyncStock.m; sourceTree = "<group>"; };
 		F4D6B067167FBEAF00BF8D4A /* SGPageToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageToolbar.h; sourceTree = "<group>"; };
 		F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageToolbar.m; sourceTree = "<group>"; };
-		F4F8F74D1659A46700F8CEF9 /* NSObject+Subscripts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Subscripts.h"; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FD2B6715ADDB9D005DBAB4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -612,6 +613,7 @@
 				F4C0C0CB19DDB00400EF8722 /* FXSettingsViewController.h */,
 				F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */,
 				F4047E4D19E827E900D27001 /* FXSettingsViewController.xib */,
+				F455C5F41A02E74400F49C07 /* Icons.xcassets */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -636,8 +638,6 @@
 				F4BBDC9C19E427290078D4AA /* SGToolbarView.m */,
 				F442FD1E19D88B7E00298182 /* SGBrowserViewController.h */,
 				F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */,
-				F4D03D4C16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.h */,
-				F4D03D4D16C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -645,6 +645,8 @@
 		F4D03D4E16C6A9BA00A67B9F /* Favourites */ = {
 			isa = PBXGroup;
 			children = (
+				F455C5F61A08702500F49C07 /* NSString+Levenshtein.h */,
+				F455C5F71A08702500F49C07 /* NSString+Levenshtein.m */,
 				F4D03D4F16C6A9BA00A67B9F /* SGFavouritesManager.h */,
 				F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */,
 				F4D03D5116C6A9BA00A67B9F /* UIImage+Scaling.h */,
@@ -708,7 +710,6 @@
 				F49EE8A315A24426001B4D5F /* iPad */,
 				F4FE2C58159B6C58001B04D7 /* SGAppDelegate.h */,
 				F4FE2C59159B6C58001B04D7 /* SGAppDelegate.m */,
-				F4F8F74D1659A46700F8CEF9 /* NSObject+Subscripts.h */,
 				F407FAB517E622D6008179F4 /* Images.xcassets */,
 				F4FE2C50159B6C58001B04D7 /* Supporting Files */,
 			);
@@ -817,6 +818,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4BBDD3519E453450078D4AA /* AppiraterLocalizable.strings in Resources */,
+				F455C5F51A02E74500F49C07 /* Icons.xcassets in Resources */,
 				F40AF1E516D2C9AB00EDFD02 /* JSSearchTools.js in Resources */,
 				F44870BC1687E0E700769EA4 /* JSTools.js in Resources */,
 				F4047E4E19E827E900D27001 /* FXSettingsViewController.xib in Resources */,
@@ -851,6 +853,7 @@
 				F406C028195F25A300A84C76 /* NSData+Base64.m in Sources */,
 				F41084D719CB46FD0064A9B3 /* Reachability.m in Sources */,
 				F46991E119FDB0D0005FC698 /* NJKWebViewProgress.m in Sources */,
+				F455C5F81A08702500F49C07 /* NSString+Levenshtein.m in Sources */,
 				F406C030195F25A300A84C76 /* NSString+Parser.m in Sources */,
 				F406C02A195F25A300A84C76 /* CryptoProxy.m in Sources */,
 				F4C0C0CD19DDB00400EF8722 /* FXSettingsViewController.m in Sources */,
@@ -879,7 +882,6 @@
 				F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */,
 				F4BB5B1116C32C8300275E31 /* Appirater.m in Sources */,
 				F4D03D5316C6A9BA00A67B9F /* SGBrowserViewController.m in Sources */,
-				F4D03D5616C6A9BA00A67B9F /* UIViewController+SGBrowserViewController.m in Sources */,
 				F406C035195F25A300A84C76 /* FXUserAuth.m in Sources */,
 				F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */,
 				F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */,

@@ -43,7 +43,6 @@
     CGSize size = [fm imageSize];
     if (self = [super initWithFrame:CGRectMake(0, 0, size.width, size.height + 5 + font.lineHeight)]) {
         _item = item;
-        _url = url;
         
         _label = [[UILabel alloc] initWithFrame:CGRectMake(0, size.height + 5, size.width, font.lineHeight)];
         _label.backgroundColor = [UIColor clearColor];
@@ -173,7 +172,7 @@
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             SGPreviewTile *panel = (SGPreviewTile*)recognizer.view;
-            [self.delegate open:panel];
+            [self.delegate open:panel.item];
         }
     }
 }
@@ -183,7 +182,13 @@
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             _selected = (SGPreviewTile*)recognizer.view;
             NSString *cancel = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? NSLocalizedString(@"Cancel", @"cancel") : nil;
-            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:_selected.url.absoluteString
+            
+            NSString *title = [_selected.item title];
+            if ([title length] == 0) {
+                title = [_selected.item urlString];
+            }
+            
+            UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:title
                                                                delegate:self
                                                       cancelButtonTitle:cancel
                                                  destructiveButtonTitle:NSLocalizedString(@"Remove", @"Remove from page")
@@ -203,11 +208,11 @@
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     switch (buttonIndex) {
         case 1:
-            [self.delegate open:_selected];
+            [self.delegate open:_selected.item];
             break;
             
         case 2:
-            [self.delegate openNewTab:_selected];
+            [self.delegate openNewTab:_selected.item];
             break;
             
         case 0: {

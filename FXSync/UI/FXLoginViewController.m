@@ -103,6 +103,8 @@
      loginEmail:email
      password:pass
      completion:^(BOOL success) {
+         [DejalBezelActivityView removeViewAnimated:YES];
+         
          if (success) {
              [[FXSyncStock sharedInstance] restock];
              [self _cancel:self];

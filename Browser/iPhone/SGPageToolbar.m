@@ -108,8 +108,9 @@
     CGFloat searchWidth = width - posX - self.tabsButton.frame.size.width;
     searchWidth -= self.menuButton.frame.size.width + 3*margin;
     
-    self.searchField.frame = CGRectMake(posX, (height - self.searchField.frame.size.height + topOffset)/2,
-                                    searchWidth, self.searchField.frame.size.height);
+    CGSize size = self.searchField.frame.size;
+    self.searchField.frame = CGRectMake(posX, (height - size.height + topOffset)/2,
+                                    searchWidth, size.height);
     self.progressView.frame = CGRectMake(0, height-3, width, 3);
 }
 

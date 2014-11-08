@@ -24,6 +24,7 @@
 #import "UIImage+Scaling.h"
 #import "SGWebViewController.h"
 #import "NSStringPunycodeAdditions.h"
+#import "NSString+Levenshtein.h"
 #import "FXSyncStock.h"
 
 @implementation SGFavouritesManager {
@@ -233,17 +234,26 @@
 
 - (NSString *)_searchImagePathForURL:(NSURL *)url {
     NSString* path = [self _screenshotPath];
-    NSString *name = url.host;
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:NULL];
-    NSString *longest;
+    NSString *host = url.host;
+    
+    NSString *best = nil;
+    float bestDistance = 1000000;
+    
+    // Find the smallest Levenshtein distance
     for (NSString *file in files) {
-        NSString *main = [file stringByDeletingPathExtension];
-        if ([main hasSuffix:name] && longest.length < name.length) {
-            longest = main;
+        NSString *current = [file stringByDeletingPathExtension];
+        
+        float dist =  [host levenshteinDistance:current];
+        if (dist < bestDistance) {
+            best = current;
+            bestDistance = dist;
         }
     }
-    if (longest != nil) {
-        return [[path stringByAppendingPathComponent:longest] stringByAppendingPathExtension:@"png"];
+    
+    // No more than 20% difference
+    if (best != nil && bestDistance < host.length/5) {
+        return [[path stringByAppendingPathComponent:best] stringByAppendingPathExtension:@"jpg"];
     }
     return nil;
 }

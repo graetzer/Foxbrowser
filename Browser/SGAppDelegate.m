@@ -23,6 +23,7 @@
 
 #import "SGAppDelegate.h"
 
+#import "NSStringPunycodeAdditions.h"
 #import "SGTabsViewController.h"
 #import "SGPageViewController.h"
 #import "SGFavouritesManager.h"
@@ -160,11 +161,11 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
     NSString *urlS = url.resourceSpecifier;
     if ([url.scheme isEqualToString:@"foxbrowser"]) {
         urlS = [NSString stringWithFormat:@"http:%@", urlS];
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlS]];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithUnicodeString:urlS]];
         [self.browserViewController addTabWithURLRequest:request title:sourceApplication];
         return YES;
     } else if ([url.scheme isEqualToString:@"foxbrowsers"]) {
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlS]];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithUnicodeString:urlS]];
         [self.browserViewController addTabWithURLRequest:request title:sourceApplication];
         return YES;
     } else if ([url.scheme hasPrefix:@"http"] || [url.scheme hasPrefix:@"https"]) {

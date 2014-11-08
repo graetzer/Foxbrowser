@@ -46,6 +46,7 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 - (void)_prefetchCollection:(NSString *)cName {
     [[FXSyncStore sharedInstance] loadCollection:cName
+                                           limit:0
                                         callback:^(NSMutableArray *arr) {
                                             if ([kFXBookmarksCollectionKey isEqualToString:cName]) {
                                                 _bookmarks = arr;
@@ -69,12 +70,16 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     NSData *data = [UICKeyChainStore dataForKey:@"accountCreds"];
     if (data != nil) {
         _syncEngine.userAuth.accountCreds = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        
-        data = [UICKeyChainStore dataForKey:@"accountKeys"];
-        if (data != nil) {
-            _syncEngine.userAuth.accountKeys = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-        }
     }
+    data = [UICKeyChainStore dataForKey:@"accountKeys"];
+    if (data != nil) {
+        _syncEngine.userAuth.accountKeys = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    }
+    data = [UICKeyChainStore dataForKey:@"metaglobal"];
+    if (data != nil) {
+        _syncEngine.metaglobal = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    }
+    _user = [UICKeyChainStore stringForKey:@"user"];
 }
 
 - (void)_archiveKeys {
@@ -89,6 +94,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     data = [NSKeyedArchiver archivedDataWithRootObject:
             _syncEngine.metaglobal];
     [UICKeyChainStore setData:data forKey:@"metaglobal"];
+    
+    [UICKeyChainStore setString:_user forKey:@"user"];
 }
 
 #pragma mark - Properties;
@@ -133,12 +140,14 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 }
 
 - (void)syncEngine:(FXSyncEngine *)engine alertWithString:(NSString *)alert {
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Warning", nil)
-                                                        message:alert
-                                                       delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
-                                              otherButtonTitles:nil];
-    [alertView show];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Warning", nil)
+                                                            message:alert
+                                                           delegate:nil
+                                                  cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
+                                                  otherButtonTitles:nil];
+        [alertView show];
+    });
 }
 
 #pragma mark - Methods
@@ -164,6 +173,7 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                       password:pass
                            completion:^(BOOL success) {
                                if (success) {
+                                   _user = email;
                                    [self _archiveKeys];
                                }
                                block(success);
@@ -175,9 +185,18 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     [UICKeyChainStore removeAllItems];
     _syncEngine.userAuth.accountCreds = nil;
     _syncEngine.userAuth.accountKeys = nil;
+    _syncEngine.metaglobal = nil;
+    [[FXSyncStore sharedInstance] clearData];
 }
 
 #pragma mark - History
+
+- (void)clearHistory {
+    for (FXSyncItem *item in _history) {
+        [item deleteItem];
+    }
+    [_history removeAllObjects];
+}
 
 - (void)deleteHistoryItem:(FXSyncItem *)item; {
     [item deleteItem];
@@ -196,6 +215,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
             
         }
     }
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    // Create a new element if it is not there yet
     if (hist == nil) {
         hist = [FXSyncItem new];
         hist.syncId = RandomString(12);
@@ -204,11 +225,23 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
         hist.jsonPayload = [@{@"id":hist.syncId,
                               @"title":url.host,
                               @"histUri":[NSString stringWithFormat:@"%@", url]} mutableCopy];
+        [_history addObject:hist];
         
+    } else {
+        // This method is called way too often
+        // Lets use a threshold of every 5 minutes
+        // where we allow a visit
+        NSDictionary *last = [[hist visits] lastObject];
+        NSNumber *date = last[@"date"];
+        NSTimeInterval d = 1.0e6;
+        if (last != nil && fabs(now - [date integerValue]/d) < 5 * 60) {
+            return;
+        }
     }
-    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    
     [hist addVisit:now type:2];
     [hist save];
+    DLog(@"Added history %@", urlS);
 }
 
 #pragma mark - Tabs
@@ -228,6 +261,7 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     __block NSArray *clients;
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
     [[FXSyncStore sharedInstance] loadCollection:kFXTabsCollectionKey
+                                           limit:0
                                         callback:^(NSArray *arr) {
                                             clients = arr;
                                             dispatch_semaphore_signal(sem);

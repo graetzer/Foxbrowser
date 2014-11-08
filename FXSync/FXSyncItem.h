@@ -38,6 +38,8 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 
 @end
 
+FOUNDATION_EXPORT NSInteger kFXSyncItemModified;
+FOUNDATION_EXPORT NSInteger kFXSyncItemDeleted;
 
 @interface FXSyncItem (CommonFormat)
 
@@ -98,7 +100,6 @@ typedef NS_ENUM(NSInteger, FFSyncItemType) {
 // ====== History ====
 /*! string: uri of the page */
 - (NSString *)histUri;
-/*! time should be given in seconds. It seems that storageformat 5 stores datetimes in nanoseconds
- * This method will take care of that*/
+- (NSArray *)visits;
 - (void)addVisit:(NSTimeInterval)time type:(NSInteger)code;
 @end

@@ -22,14 +22,15 @@
 
 
 #import "SGWebViewController.h"
-#import "UIViewController+SGBrowserViewController.h"
+
 #import "UIWebView+WebViewAdditions.h"
 
 #import "SGTabsViewController.h"
 #import "SGAppDelegate.h"
-#import "NSStringPunycodeAdditions.h"
 #import "SGFavouritesManager.h"
 
+#import "FXSyncStock.h"
+#import "NSStringPunycodeAdditions.h"
 #import "GAI.h"
 
 @implementation SGWebViewController {
@@ -183,7 +184,7 @@
 - (IBAction)_handleLongPressGesture:(UILongPressGestureRecognizer *)sender {
     if (sender.state == UIGestureRecognizerStateBegan) {
         CGPoint at = [sender locationInView:self.webView];
-        //CGPoint pt = at;
+        at.y -= self.webView.scrollView.contentInset.top;
         
         // convert point from view to HTML coordinate system
         //CGPoint offset  = [self.webView scrollOffset];
@@ -268,17 +269,19 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     NSString *prefix = @"javascript:";
     if ([link hasPrefix:prefix]) return;
     
-    NSURLRequest *nextRequest = [self _nextRequestForURL:[NSURL URLWithString:link]];
+    NSURLRequest *nextRequest = [self _nextRequestForURL:[NSURL URLWithUnicodeString:link]];
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
     
     if (link && imageSrc) {
         if (buttonIndex == 0) {
             [self openRequest:nextRequest];
         }
         else if (buttonIndex == 1) {
-            [self.browserViewController addTabWithURLRequest:nextRequest title:nil];
+            [browser addTabWithURLRequest:nextRequest title:nil];
         }
         else if (buttonIndex == 2) {
-            [self performSelectorInBackground:@selector(saveImageURL:) withObject:[NSURL URLWithString:imageSrc]];
+            [self performSelectorInBackground:@selector(saveImageURL:)
+                                   withObject:[NSURL URLWithUnicodeString:imageSrc]];
         } else if (buttonIndex == 3) {
             [UIPasteboard generalPasteboard].string = link;
         }
@@ -287,14 +290,15 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
             [self openRequest:nextRequest];
         }
         else if (buttonIndex == 1) {
-            [self.browserViewController addTabWithURLRequest:nextRequest title:nil];
+            [browser addTabWithURLRequest:nextRequest title:nil];
         }
         else if (buttonIndex == 2) {
             [UIPasteboard generalPasteboard].string = link;
         }
     } else if (imageSrc) {
         if (buttonIndex == 0) {
-            [self performSelectorInBackground:@selector(saveImageURL:) withObject:[NSURL URLWithString:imageSrc]];
+            [self performSelectorInBackground:@selector(saveImageURL:)
+                                   withObject:[NSURL URLWithUnicodeString:imageSrc]];
         } else if (buttonIndex == 1) {
             [UIPasteboard generalPasteboard].string = imageSrc;
         }
@@ -330,15 +334,16 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
   navigationType:(UIWebViewNavigationType)navigationType {
     
     NSString *scheme = request.URL.scheme;
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
     if ([scheme isEqualToString:@"newtab"]) {
         NSString *urlString = [request.URL.resourceSpecifier stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
         NSMutableURLRequest *mutableReq = [request mutableCopy];
-        mutableReq.URL = [NSURL URLWithString:urlString relativeToURL:self.request.URL];
-        [self.browserViewController addTabWithURLRequest:mutableReq title:nil];
+        mutableReq.URL = [NSURL URLWithString:[urlString encodedURLString] relativeToURL:self.request.URL];
+        [browser addTabWithURLRequest:mutableReq title:nil];
         return NO;
     } else if ([scheme isEqualToString:@"closetab"]) {
-        [self.browserViewController removeViewController:self];
+        [browser removeViewController:self];
         return NO;
     }
     
@@ -357,26 +362,34 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     _loading = YES;
     [self _dismissSearchToolbar];
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     _loading = NO;
     
-    [self.webView loadJSTools];
-    [self.webView disableTouchCallout];
+    [webView loadJSTools];
+    [webView disableTouchCallout];
     self.title = [webView title];
     
     if (![self.webView.request.URL.scheme isEqualToString:@"file"]) {
-        self.request = self.webView.request;
+        // Just in case the main url changes, add an history entry
+        if (![_request.mainDocumentURL isEqual:webView.request.mainDocumentURL] ) {
+            [[FXSyncStock sharedInstance] addHistoryURL:_request.URL];
+        }
+        _request = webView.request;
     }
-    
-    //[[WeaveOperations sharedOperations] addHistoryURL:self.request.URL title:self.title];
     [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     // If an error oocured, disable the loading stuff
     _loading = NO;
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
     
     DLog(@"WebView error code: %ld", (long)error.code);
     //ignore these
@@ -407,6 +420,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 
 - (void)webViewProgress:(NJKWebViewProgress *)webViewProgress updateProgress:(float)progress; {
     _progress = progress;
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
 }
 
 #pragma mark - Networking
@@ -439,6 +454,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
             [self.webView loadRequest:self.request];
         }
     }
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
 }
 
 - (void)reload {

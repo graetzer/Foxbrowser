@@ -21,16 +21,18 @@
 //
 
 #import "SGBrowserViewController.h"
-#import "SGBlankController.h"
+
 #import "SGWebViewController.h"
+#import "SGBlankController.h"
 #import "SGAppDelegate.h"
-#import "FXSyncStock.h"
-#import "NSStringPunycodeAdditions.h"
+
 #import "GAI.h"
+#import "NSStringPunycodeAdditions.h"
+
+#import "FXSyncStock.h"
 
 @implementation SGBrowserViewController {
     NSTimer *_saveTimer;
-    NSTimer *_interfaceTimer;
     
     NSInteger _dialogResult;
     NSMutableArray *_httpsHosts;
@@ -39,12 +41,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self _willEnterForeground];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(_willEnterForeground)
-                                                 name:UIApplicationWillEnterForegroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(_openURLWithArgs:)
-                                                 name:kFXOpenURLNotification object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -54,22 +50,26 @@
                                                   target:self
                                                 selector:@selector(saveCurrentTabs)
                                                 userInfo:nil repeats:YES];
-    _interfaceTimer = [NSTimer scheduledTimerWithTimeInterval:1
-                                                       target:self
-                                                     selector:@selector(updateInterface)
-                                                     userInfo:nil
-                                                      repeats:YES];
     
     [appDelegate.tracker set:kGAIScreenName value:@"SGBrowserViewController"];
     [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_willEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_openURLWithArgs:)
+                                                 name:kFXOpenURLNotification object:nil];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self updateInterface];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     [_saveTimer invalidate];
     _saveTimer = nil;
-    [_interfaceTimer invalidate];
-    _interfaceTimer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -278,7 +278,7 @@
             }
             
             NSDictionary *tab = latest[x];
-            NSURL *url = [NSURL URLWithString:tab[@"urlHistory"][0]];
+            NSURL *url = [NSURL URLWithUnicodeString:tab[@"urlHistory"][0]];
             
             if ([url.scheme hasPrefix:@"http"]) {
                 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -323,20 +323,24 @@
 
 - (UIViewController *)createNewTabViewController {
     NSString *startpage = [[NSUserDefaults standardUserDefaults] stringForKey:kSGStartpageURLKey];
-    NSURL *url = [NSURL URLWithString:startpage];
+    NSURL *url = [NSURL URLWithUnicodeString:startpage];
     if ([[NSUserDefaults standardUserDefaults] boolForKey:kSGEnableStartpageKey] && url) {
+        
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
         SGWebViewController *webC = [SGWebViewController new];
         webC.title = request.URL.absoluteString;
         [webC openRequest:request];
         return webC;
+        
     } else {
         return [SGBlankController new];
     }
 }
 
 - (NSURL *)_parseURLString:(NSString *)input {
-    if ([input isEqualToString:@"about:config"]) return [NSURL URLWithString:input];
+    if ([input isEqualToString:@"about:config"]) {
+        return [NSURL URLWithUnicodeString:input];
+    }
     
     BOOL hasSpace = ([input rangeOfString:@" "].location != NSNotFound);
     BOOL hasDot = ([input rangeOfString:@"."].location != NSNotFound);

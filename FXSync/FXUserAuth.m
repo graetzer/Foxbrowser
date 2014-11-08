@@ -78,10 +78,8 @@ static NSData* getPublicKeyMod(NSData *pk);
     }];
 }
 
-- (void)requestSyncInfo:(void(^)(NSDictionary *))callback {
+- (void)requestSyncInfo:(void(^)(NSDictionary *, NSError *))callback {
     NSParameterAssert(callback);
-    
-    
     
     NSString *sessionToken = _accountCreds[@"sessionToken"];
     //[self recoveryEmailStatusWithToken:sessionToken callback:^(NSDictionary *status)
@@ -121,15 +119,20 @@ static NSData* getPublicKeyMod(NSData *pk);
 }
 
 - (void)_requestTokenWithKey:(NSDictionary *)publicKey
-                    callback:(void(^)(NSDictionary *))callback {
+                    callback:(void(^)(NSDictionary *, NSError *))callback {
     
     NSString *sessionToken = _accountCreds[@"sessionToken"];
     [self certificateSignWithToken:sessionToken
                          publicKey:publicKey
                           duration:kFXCertDurationSeconds
                           callback:^(NSDictionary *json, NSError *error) {
-                              _cert = json[@"cert"];
+                              // In this case the json probably just contains the error
+                              if (error != nil) {
+                                  callback(json, error);
+                                  return ;
+                              }
                               
+                              _cert = json[@"cert"];
                               NSString *assert = [self _assertionWithAudience:kFXSyncAuthUrl
                                                                      duration:kFXCertDurationSeconds];
                               NSString *clientState = [self _computeClientState];
@@ -137,15 +140,14 @@ static NSData* getPublicKeyMod(NSData *pk);
                               [self _authTokenWithBrowserIDAssert:assert
                                                       clientState:clientState
                                                        completion:^(NSDictionary *token, NSError *error) {
-                                                           if (error == nil) {
+                                                           if (error == nil && token != nil) {
                                                                _syncInfo  = @{@"token":token,
                                                                               @"syncKey":_accountKeys[@"kB"],
                                                                               @"sessionToken":sessionToken};
-                                                               callback(_syncInfo);
-                                                           } else {
-                                                               ELog(error);
-                                                               callback(nil);
+                                                               
                                                            }
+                                                           ELog(error);
+                                                           callback(_syncInfo, error);
                                                        }];
                           }];
 }
@@ -179,7 +181,7 @@ static NSData* getPublicKeyMod(NSData *pk);
     [self sendHawkRequest:req
               credentials:nil
                completion:^(NSHTTPURLResponse *resp, id json, NSError *error) {
-                   if (error != nil && json != nil) {
+                   if (error != nil && json != nil && resp != nil) {
                        error = [NSError errorWithDomain:@"com.mozilla.token"
                                                    code:resp.statusCode
                                                userInfo:json];

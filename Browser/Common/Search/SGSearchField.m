@@ -72,6 +72,7 @@
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
             
 //            rect.origin.y = [self editingRectForBounds:self.bounds].origin.y;
+            rect.origin.y = (self.bounds.size.height - rect.size.height)/2;
             NSMutableParagraphStyle *para = [[NSMutableParagraphStyle alloc] init];
             para.alignment = self.textAlignment;
             [text drawInRect:rect withAttributes:@{NSFontAttributeName:self.font,
