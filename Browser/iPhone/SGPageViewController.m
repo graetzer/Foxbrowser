@@ -191,6 +191,7 @@ CGFloat const kSGMinXScale = 0.84;
     [super viewDidAppear:animated];
     // Take care of the top offset
     [self _layoutScrollviews];
+    [self _layoutPages];
     if (!_exposeMode) {
         [self _enableInteractions];
     }
@@ -444,7 +445,6 @@ CGFloat const kSGMinXScale = 0.84;
     if ([vc isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *web = (SGWebViewController *)vc;
         web.webView.scrollView.contentInset = ins;
-        web.webView.scrollView.scrollIndicatorInsets = ins;
     }
 }
 
@@ -595,7 +595,6 @@ CGFloat const kSGMinXScale = 0.84;
         rec.cancelsTouchesInView = NO;
         [self.view addGestureRecognizer:rec];
     } else {
-        
         if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
             [self setNeedsStatusBarAppearanceUpdate];

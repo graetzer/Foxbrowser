@@ -180,7 +180,9 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                    _user = email;
                                    [self _archiveKeys];
                                }
-                               block(success);
+                               dispatch_async(dispatch_get_main_queue(), ^{
+                                   block(success);
+                               });
                            }];
 }
 
