@@ -91,7 +91,10 @@
 
 - (void)_openURLWithArgs:(NSNotification *)n {
     NSDictionary *args = n.userInfo;
-    [self handleURLString:args[@"uri"] title:args[@"title"]];
+    NSURL *url = [NSURL URLWithUnicodeString:args[@"uri"]];
+    if (url) {
+        [self addTabWithURLRequest:[NSURLRequest requestWithURL:url] title:args[@"title"]];
+    }
 }
 
 #pragma mark - Abstract methods

@@ -131,9 +131,13 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
     for (NSDictionary *cmd in commands) {
         if ([cmd[@"command"] isEqualToString:@"displayURI"]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[NSNotificationCenter defaultCenter] postNotificationName:kFXOpenURLNotification
-                                                                    object:self
-                                                                  userInfo:cmd[@"args"]];
+                NSArray *args = cmd[@"args"];
+                if ([args count] >= 3) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kFXOpenURLNotification
+                                                                        object:self
+                                                                      userInfo:@{@"uri":args[0],
+                                                                                 @"title":args[2]}];
+                }
             });
         }
     }
@@ -232,9 +236,12 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
         // Lets use a threshold of every 5 minutes
         // where we allow a visit
         NSDictionary *last = [[hist visits] lastObject];
-        NSNumber *date = last[@"date"];
-        NSTimeInterval d = 1.0e6;
-        if (last != nil && fabs(now - [date integerValue]/d) < 5 * 60) {
+        if (![last isKindOfClass:[NSDictionary class]]) {
+            [hist deleteItem];
+            return;
+        }
+        if (last != nil
+            && fabs(now - [last[@"date"] integerValue]/1.0e6) < 5 * 60) {
             return;
         }
     }

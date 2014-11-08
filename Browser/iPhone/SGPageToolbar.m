@@ -87,15 +87,22 @@
         topOffset = [self.browser.topLayoutGuide length];
     }
     
-    if (!_searchMaskVisible) {
-        CGFloat buttonSize = 30;
-        self.backButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2,
-                                           buttonSize, buttonSize);
-        
-        posX += buttonSize + margin;
-        self.forwardButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2,
-                                          buttonSize, buttonSize);
-        
+    
+    CGFloat buttonSize = 30;
+    self.backButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2,
+                                       buttonSize, buttonSize);
+    
+    posX += buttonSize + margin;
+    self.forwardButton.frame = CGRectMake(posX, (height - buttonSize + topOffset)/2,
+                                      buttonSize, buttonSize);
+    if (_searchMaskVisible) {
+        // Hides the buttons under the search field
+        // but still layout them
+        posX -= buttonSize + margin;
+        self.searchController.view.frame = CGRectMake(0, self.frame.size.height,
+                                                      self.frame.size.width,
+                                                      self.superview.bounds.size.height - self.frame.size.height);
+    } else {
         if (self.forwardButton.enabled) {
             posX += buttonSize + margin;
         }

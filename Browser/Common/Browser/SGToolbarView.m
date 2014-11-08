@@ -186,17 +186,18 @@
 
 - (void)updateInterface {
     if ([_browser canStopOrReload]) {
+         _progressView.hidden = NO;
+        [_progressView setProgress:[_browser progress] animated:YES];
         BOOL loading = [_browser isLoading];
         if (loading) {
             _searchField.state = SGSearchFieldStateStop;
         } else {
             _searchField.state = SGSearchFieldStateReload;
         }
-        
-        [_progressView setProgress:[_browser progress] animated:YES];
     } else {
-        _searchField.state = SGSearchFieldStateDisabled;
         _progressView.hidden = YES;
+        _searchField.state = SGSearchFieldStateDisabled;
+        
     }
 }
 
