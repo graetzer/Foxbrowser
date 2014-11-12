@@ -283,12 +283,7 @@ CGFloat const kSGMinXScale = 0.84;
         [self _setCloseButtonHidden:self.count != 1];
         CGPoint off = CGPointMake(_scrollView.frame.size.width * index, 0);
         [_scrollView setContentOffset:off animated:YES];
-        
-        if (_exposeMode) {
-            [self _disableInteractions];
-        } else {
-            [self _enableInteractions];
-        }
+        [self _disableInteractions];
     }
 }
 
@@ -725,7 +720,7 @@ CGFloat const kSGMinXScale = 0.84;
         [self _setCloseButtonHidden:YES];
         [UIView animateWithDuration:0.3
                          animations:^{
-                         [self _layoutPages];
+                             [self _layoutPages];
                          }];
         
     }
@@ -763,6 +758,12 @@ CGFloat const kSGMinXScale = 0.84;
 // Always called when animating
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
     if (scrollView == _scrollView) {
+        if (_exposeMode) {
+            [self _disableInteractions];
+        } else {
+            [self _enableInteractions];
+        }
+        
         [self _setCloseButtonHidden:NO];
         [self _layout];
         [self _layoutScrollviews];
@@ -780,14 +781,16 @@ CGFloat const kSGMinXScale = 0.84;
 // Only called when the user does it
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     if (scrollView == _scrollView) {
-        _animating = NO;
-        if (!_exposeMode) {
+        if (_exposeMode) {
+            [self _disableInteractions];
+        } else {
             [self _enableInteractions];
         }
+        
         [self _setCloseButtonHidden:NO];
         [self _layoutPages];
-    } else {// We got a webView scrolling
         
+    } else {// We got a webView scrolling
         CGFloat y = _toolbar.frame.origin.y;
         if (y != -kSGToolbarHeight
             && y < -kSGToolbarHeight/2) {
