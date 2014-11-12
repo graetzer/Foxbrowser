@@ -608,11 +608,9 @@
 				F4047E3E19E6E6B700D27001 /* ext */,
 				F4BBDD5B19E617410078D4AA /* Login */,
 				F410E96619E1AC82001F0112 /* Bookmarks */,
+				F4FD90F61A131D72005BF13F /* Settings */,
 				F4C0C0C119DDAD7D00EF8722 /* FXTabsViewController.h */,
 				F4C0C0C219DDAD7D00EF8722 /* FXTabsViewController.m */,
-				F4C0C0CB19DDB00400EF8722 /* FXSettingsViewController.h */,
-				F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */,
-				F4047E4D19E827E900D27001 /* FXSettingsViewController.xib */,
 				F455C5F41A02E74400F49C07 /* Icons.xcassets */,
 			);
 			name = UI;
@@ -653,6 +651,16 @@
 				F4D03D5216C6A9BA00A67B9F /* UIImage+Scaling.m */,
 			);
 			path = Favourites;
+			sourceTree = "<group>";
+		};
+		F4FD90F61A131D72005BF13F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F4C0C0CB19DDB00400EF8722 /* FXSettingsViewController.h */,
+				F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */,
+				F4047E4D19E827E900D27001 /* FXSettingsViewController.xib */,
+			);
+			name = Settings;
 			sourceTree = "<group>";
 		};
 		F4FE2C3A159B6C58001B04D7 = {

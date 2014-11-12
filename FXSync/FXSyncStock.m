@@ -189,10 +189,15 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 - (void)logout {
     [_syncEngine reset];
     [UICKeyChainStore removeAllItems];
+    _user = nil;
     _syncEngine.userAuth.accountCreds = nil;
     _syncEngine.userAuth.accountKeys = nil;
     _syncEngine.metaglobal = nil;
+    
     [[FXSyncStore sharedInstance] clearData];
+    _history = nil;
+    _bookmarks = nil;
+    _clientTabs = nil;
 }
 
 #pragma mark - History
