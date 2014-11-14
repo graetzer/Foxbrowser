@@ -83,7 +83,6 @@
     }
 }
 
-
 - (void)dealloc {
     self.webView.delegate = nil;
 }
@@ -151,16 +150,10 @@
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
     [super willMoveToParentViewController:parent];
-    if (!parent) {// View is removed
-        for (UIGestureRecognizer *rec in self.webView.gestureRecognizers) {
-            [rec removeTarget:self action:nil];
-        }
-        
+    if (parent == nil) {// View is removed
         self.webView.delegate = nil;
         [self.webView stopLoading];
         [self.webView clearContent];
-        
-        _loading = NO;
     }
 }
 
@@ -168,7 +161,7 @@
     [super viewDidAppear:animated];
     
     // We can't just load the request, this would add to the history
-    if (_restoring) {
+    if (_restoring) {// We have to reload, this is a bug wth apple
         [_webView reload];
         _restoring = NO;
     } else {
@@ -176,6 +169,15 @@
         if (_webView.request == nil || self.title == nil) {
             [self openRequest:nil];
         }
+    }
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    if (_searchToolbar) {
+        CGFloat y = self.view.frame.origin.y;
+        _searchToolbar.frame = CGRectMake(0, self.view.bounds.size.height - 44 - y,
+                                          self.view.bounds.size.width, 44);
     }
 }
 
@@ -414,6 +416,17 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
         }
     }
     
+    if ([error.domain isEqual:@"WebKitErrorDomain"]) {
+        // Ignore "Fame Load Interrupted" errors. Seen after app store links.
+        if (error.code == 102) return;
+        
+        NSURL *url = [NSURL URLWithString:error.userInfo[@"NSErrorFailingURLStringKey"]];
+        if (error.code == 101 && [[UIApplication sharedApplication]canOpenURL:url]) {
+            [[UIApplication sharedApplication]openURL:url];
+            return;
+        }
+    }
+    
     NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
     [self.webView showPlaceholder:error.localizedDescription title:title];
 }
@@ -465,7 +478,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 #pragma mark - Search on page
 
 - (NSInteger)search:(NSString *)searchString {
-    if (self.searchToolbar) [self.searchToolbar removeFromSuperview];
+    if (_searchToolbar) [_searchToolbar removeFromSuperview];
     
     NSInteger count = [self.webView highlightOccurencesOfString:searchString];
     DLog(@"Found the string %@ %ld times", searchString, (long)count);
@@ -511,14 +524,15 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     label.text = [NSString stringWithFormat:@"Found: %li", (long)count];
     UIBarButtonItem *textItem = [[UIBarButtonItem alloc] initWithCustomView:label];
     
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone
+        && NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_7_1) {
         searchToolbar.tintColor = kSGBrowserBarColor;
         done.tintColor = [UIColor lightGrayColor];
     }
     
     searchToolbar.items = @[last, next, space, textItem, space, done];
     [self.view addSubview:searchToolbar];
-    self.searchToolbar = searchToolbar;
+    _searchToolbar = searchToolbar;
     
     return count;
 }
@@ -532,15 +546,15 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 - (IBAction)_dismissSearchToolbar {
-    if (self.searchToolbar) {
+    if (_searchToolbar) {
         [self.webView removeHighlights];
         [UIView animateWithDuration:0.3
                          animations:^{
-                             self.searchToolbar.alpha = 0;
+                             _searchToolbar.alpha = 0;
                          }
                          completion:^(BOOL finished){
-                             [self.searchToolbar removeFromSuperview];
-                             self.searchToolbar = nil;
+                             [_searchToolbar removeFromSuperview];
+                             _searchToolbar = nil;
                          }];
     }
 }

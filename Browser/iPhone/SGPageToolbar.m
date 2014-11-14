@@ -173,7 +173,7 @@
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     [self presentSearchController];
-    [textField selectAll:self];
+    //[textField selectAll:self];
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {

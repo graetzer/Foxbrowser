@@ -682,14 +682,13 @@ CGFloat const kSGMinXScale = 0.84;
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     if (gestureRecognizer == _panGesture) {
-        UIViewController *vc = self.selectedViewController;
-        SGWebViewController *webC = (SGWebViewController *)vc;
-        if (webC.webView.scrollView.contentSize.height < _scrollView.bounds.size.height) {
+        UIWebView *webC = (UIWebView *)_panGesture.view;
+        if (CGRectGetMaxY(_toolbar.frame) == 0
+            && webC.scrollView.contentSize.height < _scrollView.bounds.size.height) {
             return NO;
         }
-        
-        
-        CGPoint trans = [_panGesture translationInView:vc.view];
+    
+        CGPoint trans = [_panGesture translationInView:webC];
         CGFloat offset = trans.y - _panTranslation;
         CGRect next = CGRectOffset(_toolbar.frame, 0, offset);
         

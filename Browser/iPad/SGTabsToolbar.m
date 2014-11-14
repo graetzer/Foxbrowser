@@ -130,7 +130,7 @@
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     [self presentSearchController];
-    [textField selectAll:self];
+    //[textField selectAll:self];
 }
 
 - (BOOL)textFieldShouldClear:(UITextField *)textField {

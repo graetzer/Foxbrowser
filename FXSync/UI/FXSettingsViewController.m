@@ -25,6 +25,14 @@
                                                                             target:self
                                                                             action:@selector(_logout)];
     [self _refresh];
+    
+    _syncButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    _syncButton.layer.borderWidth = 1.0;
+    _syncButton.layer.cornerRadius = 10;
+    
+    _clearButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    _clearButton.layer.borderWidth = 1.0;
+    _clearButton.layer.cornerRadius = 10;
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];

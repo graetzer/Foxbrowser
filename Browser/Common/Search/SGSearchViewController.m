@@ -25,7 +25,7 @@
 
 
 @implementation SGSearchViewController {
-    NSString *_lastQery;
+    NSString *_lastQuery;
     NSArray *_localResults;
     NSArray *_remoteResults;
 }
@@ -59,28 +59,32 @@ static NSArray* gFreshSearchHits = nil;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (_delegate.text.length != 0) {
+    if ([_lastQuery length]) {
         if (section == 0) {
-            return [_localResults count];
-        } else {
-            return [_remoteResults count];
+            if (!_localResults && !_remoteResults) {
+                return 1;
+            } else {
+                return [_localResults count];
+            }
+        } else if (section == 1) {
+            return MIN([_remoteResults count], 5);
+        } else if (section == 2) {
+            return 1;//Search on page
         }
     }
-    return 1;
+    return 0;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (section == 0 && [_localResults count] > 0) {
-        return @"Search Suggestions";
-    } else if (section == 1 && [_remoteResults count] > 0) {
-        return @"Local Results";
+    if (section == 1 && [_remoteResults count] > 0) {
+        return NSLocalizedString(@"Search Suggestions", @"Remote search suggestions");
     }
     return nil;
 }
 
 // Display the strings in displayedRecentSearches.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 3 && _lastQery != nil) {
+    if (indexPath.section == 2 && _lastQuery != nil) {
         static NSString *CellIdentifier = @"PAGE_SEARCH_CELL";
         
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -94,7 +98,7 @@ static NSArray* gFreshSearchHits = nil;
         }
         cell.textLabel.text = [NSString stringWithFormat:@"%@: %@",
                                NSLocalizedString(@"Find in Page", @"Search something in the webpage"),
-                               _lastQery];
+                               _lastQuery];
         return cell;
     } else {
         static NSString *CellIdentifier = @"URL_CELL";
@@ -102,16 +106,21 @@ static NSArray* gFreshSearchHits = nil;
         if (!cell) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
             cell.accessoryType = UITableViewCellAccessoryNone;
+            cell.textLabel.textAlignment = NSTextAlignmentLeft;
         }
         
-        if (_localResults) {
-            if ([_localResults count]) {
-                cell.textLabel.textColor = [UIColor blackColor];
-                cell.textLabel.textAlignment = NSTextAlignmentLeft;
+        if (indexPath.section == 0) {
+            if (!_localResults && !_remoteResults) {//no lists at all, means searching
+                cell.textLabel.textColor = [UIColor grayColor];
+                cell.textLabel.text = NSLocalizedString(@"Searching...", @"searching for matching items");
+                cell.detailTextLabel.text = nil;
+                cell.imageView.image = nil;
+            } else {
                 
                 FXSyncItem* matchItem = _localResults[indexPath.row];
                 NSString *uri = [matchItem urlString];
                 
+                cell.textLabel.textColor = [UIColor blackColor];
                 // Set up the cell...
                 if ([[matchItem title] length]) {
                     cell.textLabel.text = [matchItem title];
@@ -128,19 +137,14 @@ static NSArray* gFreshSearchHits = nil;
                     // We should have a corresponding image for that
                     cell.imageView.image = [UIImage imageNamed:[matchItem type]];
                 }
-            } else {//empty list, means no matches
-                cell.textLabel.textColor = [UIColor grayColor];
-                cell.textLabel.text = NSLocalizedString(@"No Matches", @"no matching items found");
-                cell.detailTextLabel.text = nil;
-                cell.imageView.image = nil;
             }
-            
-        } else { //no list at all, means searching
-            cell.textLabel.textColor = [UIColor grayColor];
-            cell.textLabel.text = NSLocalizedString(@"Searching...", @"searching for matching items");
+        } else {//section == 1
+            NSString* matchItem = _remoteResults[indexPath.row];
+            cell.textLabel.text = matchItem;
             cell.detailTextLabel.text = nil;
             cell.imageView.image = nil;
         }
+        
         return cell;
     }
 }
@@ -151,15 +155,20 @@ static NSArray* gFreshSearchHits = nil;
 		gRefreshThread = nil;
 	}
         
-	if (!([_localResults count] == 0 && _lastQery.length == 0)) {
-		if (indexPath.section == 1)
-            [self.delegate finishPageSearch:_lastQery];
-        else {
+    if (indexPath.section == 0) {
+        if ([_localResults count] > 0 && _lastQuery.length != 0) {
             FXSyncItem* matchItem = _localResults[[indexPath row]];
             NSString *uri = [matchItem urlString];
-			[self.delegate finishSearch:uri title:[matchItem title]];
+            [self.delegate finishSearch:uri title:[matchItem title]];
         }
-	}
+    } else if (indexPath.section == 1) {
+        if (!([_remoteResults count] == 0 && _lastQuery.length == 0)) {
+            NSString* matchItem = _remoteResults[indexPath.row];
+            [self.delegate finishSearch:matchItem title:matchItem];
+        }
+    } else if (indexPath.section == 2) {
+        [self.delegate finishPageSearch:_lastQuery];
+    }
     
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -178,14 +187,42 @@ static NSArray* gFreshSearchHits = nil;
     }
     
     if (!query || query.length == 0) {
-        gFreshSearchHits = nil;
-        _lastQery = nil;
+        _lastQuery = nil;
+        _localResults = nil;
+        _remoteResults = nil;
         [self.tableView reloadData];
     } else {
+        _lastQuery = query;
         //now fire up a new search thread
         gRefreshThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadRefreshHits:) object:query];
         [gRefreshThread start];
+        [self _loadRemoteResults:query];
     }
+}
+
+- (void)_loadRemoteResults:(NSString *)query {
+    if ([appDelegate canConnectToInternet]) {
+        NSString *urlS = [NSString stringWithFormat:@"http://api.bing.com/osjson.aspx?query=%@",
+                          [query stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        
+        NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:urlS]];
+        [NSURLConnection sendAsynchronousRequest:req
+                                           queue:[NSOperationQueue mainQueue]
+                               completionHandler:^(NSURLResponse *resp, NSData *data, NSError *error){
+                                   if (error == nil) {
+                                       id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+                                       if ([json isKindOfClass:[NSArray class]] && [json count] > 1) {
+                                           _remoteResults = json[1];
+                                       } else {
+                                           _remoteResults = nil;
+                                       }
+                                       
+                                       [self.tableView reloadData];
+                                   }
+                                   ELog(error);
+                               }];
+    }
+    
 }
 
 - (void) threadRefreshHits:(NSString*)searchText {
@@ -206,7 +243,7 @@ static NSArray* gFreshSearchHits = nil;
     }
 }
 
-#define MAXPERLIST 15
+#define MAXPERLIST 4
 
 //This method works by side-effect.  It's complicated and rather ugly, but it was important not to have to
 // duplicate it for each of the three lists
@@ -231,8 +268,6 @@ static NSArray* gFreshSearchHits = nil;
     
     for (FXSyncItem* item in items)
     {
-        NSRange titleRange;
-        NSRange urlRange;
         BOOL skip = NO;
         
         NSString *title = [item title];
@@ -246,9 +281,12 @@ static NSArray* gFreshSearchHits = nil;
         // it obviously can't have them as the start of words
         for (NSString* term in terms) {
             
-            titleRange = [title rangeOfString:term options:NSCaseInsensitiveSearch];
-            urlRange = [uri rangeOfString:term options:NSCaseInsensitiveSearch];
-            if (titleRange.location == NSNotFound && urlRange.location == NSNotFound)
+            NSRange titleRange = [title rangeOfString:term options:NSCaseInsensitiveSearch];
+            NSRange urlRange = [uri rangeOfString:term options:NSCaseInsensitiveSearch];
+            NSRange descRange = [description rangeOfString:term options:NSCaseInsensitiveSearch];
+            if ((!title || titleRange.location == NSNotFound)
+                && (!uri || urlRange.location == NSNotFound)
+                && (!description || descRange.location == NSNotFound))
             {
                 skip = YES;
                 break;
@@ -281,7 +319,6 @@ static NSArray* gFreshSearchHits = nil;
         } else if (substrHitCount < maxHits) {
             substrHitCount++;
             substrHits[uri] = item;
-            //[substrHits setObject:item forKey:[item objectForKey:@"url"]];
         }
         
         //now bail if we already have enough word hits.  if we have a fulllist of word hits, we don't care how many substr hits we have
@@ -292,17 +329,7 @@ static NSArray* gFreshSearchHits = nil;
 
 //OK, this has gotten a lot easier.  the lists of tabs, bookmarks, and history are already sorted by frecency,
 // so I can start at the beginning and stop when I get MAXPERLIST hits from each
-- (void)refreshHits:(NSString*)searchString
-{
-    //empty string means no hits
-    if (searchString == nil || [searchString length] == 0)
-    {
-        gFreshSearchHits = nil;
-        _lastQery = nil;
-        return;
-    }
-    
-    _lastQery = searchString;
+- (void)refreshHits:(NSString*)searchString {
     
     //make the list of strict predicates to match.  usually only 1, but if the user separates strings with spaces, we must match them all,
     // on different word boundaries, to be a hit
@@ -410,8 +437,6 @@ static NSArray* gFreshSearchHits = nil;
     {
         gFreshSearchHits = WORD_matches; 
     }
-    
-    
 }
 
 

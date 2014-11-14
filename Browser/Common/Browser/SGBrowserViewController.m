@@ -38,9 +38,20 @@
     NSMutableArray *_httpsHosts;
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self _willEnterForeground];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_willEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_openURLWithArgs:)
+                                                 name:kFXOpenURLNotification object:nil];
+
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -53,12 +64,6 @@
     
     [appDelegate.tracker set:kGAIScreenName value:@"SGBrowserViewController"];
     [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(_willEnterForeground)
-                                                 name:UIApplicationWillEnterForegroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(_openURLWithArgs:)
-                                                 name:kFXOpenURLNotification object:nil];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -70,7 +75,6 @@
     [super viewWillDisappear:animated];
     [_saveTimer invalidate];
     _saveTimer = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (BOOL)shouldAutorotate {

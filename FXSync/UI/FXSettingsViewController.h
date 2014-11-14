@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 @interface FXSettingsViewController : UIViewController <UIAlertViewDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *syncButton;
+@property (weak, nonatomic) IBOutlet UIButton *clearButton;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 @property (weak, nonatomic) IBOutlet UILabel *bookmarksLabel;
 @property (weak, nonatomic) IBOutlet UILabel *historyLabel;
