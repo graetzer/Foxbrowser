@@ -45,11 +45,12 @@
             NSString* path = [self _screenshotPath];
             NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:NULL];
             for (NSString *file in files) {
-                NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:file error:NULL];
+                NSString *f = [path stringByAppendingPathComponent:file];
+                NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:f error:NULL];
                 NSDate *modDate = attr[NSFileModificationDate];
                 NSDate *cutoff = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*21];
-                if ([modDate compare:cutoff] == NSOrderedDescending) {
-                    [[NSFileManager defaultManager] removeItemAtPath:file error:NULL];
+                if ([modDate compare:cutoff] == NSOrderedAscending) {
+                    [[NSFileManager defaultManager] removeItemAtPath:f error:NULL];
                 }
             }
         });

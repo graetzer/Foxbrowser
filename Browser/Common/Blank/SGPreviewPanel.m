@@ -76,7 +76,18 @@
     
     CGRect b = self.bounds;
     CGSize tileSize = [self _tileSize];
-    
+    NSInteger columns = b.size.width / tileSize.width;
+    for (NSUInteger i = 0; i < _tiles.count; i++) {
+        NSUInteger line = i / columns;
+        NSUInteger column = i % columns;
+        
+        SGPreviewTile *tile = _tiles[i];
+        CGRect frame = tile.frame;
+        frame.origin.x = column*(tileSize.width + 5) + 5;
+        frame.origin.y = line*(tileSize.height + 5) + 5;
+        tile.frame = frame;
+    }
+    /*
     NSUInteger columns, lines;
     if (b.size.width > b.size.height) {
         columns = b.size.width/tileSize.width;
@@ -98,7 +109,7 @@
         frame.origin.x = column*(tileSize.width + paddingX) + paddingX;
         frame.origin.y = line*(tileSize.height + paddingY) + paddingY;
         tile.frame = frame;
-    }
+    }*/
 }
 
 - (void)layoutSubviews {
