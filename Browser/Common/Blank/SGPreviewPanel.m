@@ -3,21 +3,7 @@
 //  Foxbrowser
 //
 //  Created by simon on 13.07.12.
-//
-//
-//  Copyright (c) 2012 Simon Peter Grätzer
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+//  Copyright (c) 2012-2014 Simon Peter Grätzer. All rights reserved.
 //
 
 #import "SGPreviewPanel.h"
@@ -27,7 +13,7 @@
 
 @implementation SGPreviewTile
 
-- (id)initWithItem:(FXSyncItem *)item {
+- (id)initWithItem:(FXSyncItem *)item frame:(CGRect)frame {
     NSString *urlS = [item urlString];
     NSURL *url = [NSURL URLWithUnicodeString:urlS];
     if (url == nil) return nil;
@@ -40,11 +26,11 @@
     }
     
     SGFavouritesManager *fm = [SGFavouritesManager sharedManager];
-    CGSize size = [fm imageSize];
-    if (self = [super initWithFrame:CGRectMake(0, 0, size.width, size.height + 5 + font.lineHeight)]) {
+    if (self = [super initWithFrame:frame]) {
         _item = item;
         
-        _label = [[UILabel alloc] initWithFrame:CGRectMake(0, size.height + 5, size.width, font.lineHeight)];
+        _label = [[UILabel alloc] initWithFrame:CGRectMake(0, frame.size.height - font.lineHeight,
+                                                           frame.size.width, font.lineHeight)];
         _label.backgroundColor = [UIColor clearColor];
         _label.font = font;
         _label.textColor = [UIColor darkTextColor];
@@ -52,9 +38,10 @@
         [self addSubview:_label];
         
         UIImage *image = [fm imageWithURL:url];
-
-        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-        
+        frame.size.height -= _label.frame.size.height + 5;
+        _imageView = [[UIImageView alloc] initWithFrame:frame];
+        _imageView.layer.borderColor = [UIColor grayColor].CGColor;
+        _imageView.layer.borderWidth = 1.f;
         _imageView.backgroundColor = [UIColor clearColor];
         if (image == nil) {
             _imageView.image = [UIImage imageNamed:@"default_thumbnail"];
@@ -63,9 +50,6 @@
             _imageView.image = image;
             _imageView.contentMode = UIViewContentModeScaleAspectFit;
         }
-        
-        _imageView.layer.borderColor = [UIColor grayColor].CGColor;
-        _imageView.layer.borderWidth = 1.f;
         [self addSubview:_imageView];
     }
     return self;
@@ -87,12 +71,11 @@
     return self;
 }
 
-- (void)layout {
+- (void)_layout {
     if (_tiles.count == 0) return;
     
-    SGPreviewTile *tile = _tiles[0];
     CGRect b = self.bounds;
-    CGSize tileSize = tile.frame.size;
+    CGSize tileSize = [self _tileSize];
     
     NSUInteger columns, lines;
     if (b.size.width > b.size.height) {
@@ -120,7 +103,7 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    [self layout];
+    [self _layout];
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
@@ -149,15 +132,17 @@
 
 - (void)addTileWithItem:(FXSyncItem *)item {
     if (item != nil) {
-        SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item];
+        CGRect frame = CGRectZero;
+        frame.size = [self _tileSize];
+        SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item frame:frame];
         if (tile != nil) {
             tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
             
-            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleTap:)];
             tap.delegate  = self;
             [tile addGestureRecognizer:tap];
             UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                                                                    action:@selector(handleLongPress:)];
+                                                                                                    action:@selector(_handleLongPress:)];
             longPress.delegate = self;
             [tile addGestureRecognizer:longPress];
             
@@ -167,8 +152,20 @@
     }
 }
 
+- (CGSize)_tileSize {
+    CGSize s = self.bounds.size;
+    s.width -= 5;
+    s.height -= 5;
+    NSUInteger m = [[SGFavouritesManager sharedManager] maxFavs];
+    if (s.width > s.height) {
+        return CGSizeMake(2*s.width/m - 5, s.height/2 - 5);
+    } else {
+        return CGSizeMake(s.width/2 - 5, 2*s.height/m - 5);
+    }
+}
+
 #pragma mark - Tap Handling, context menu
-- (IBAction)handleTap:(UITapGestureRecognizer *)recognizer {
+- (IBAction)_handleTap:(UITapGestureRecognizer *)recognizer {
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             SGPreviewTile *panel = (SGPreviewTile*)recognizer.view;
@@ -177,7 +174,7 @@
     }
 }
 
-- (IBAction)handleLongPress:(UILongPressGestureRecognizer *)recognizer {
+- (IBAction)_handleLongPress:(UILongPressGestureRecognizer *)recognizer {
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             _selected = (SGPreviewTile*)recognizer.view;
@@ -225,10 +222,9 @@
                            animations:^{
                                [_selected removeFromSuperview];
                                [self addTileWithItem:next];
-                               [self layout];
+                               [self _layout];
                            }
                            completion:^(BOOL finished) {
-                               //[self.blacklist writeToFile:[SGPreviewPanel blacklistFilePath] atomically:NO];
                            }];
         }
         default:
@@ -236,11 +232,13 @@
     }
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return NO;
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+       shouldReceiveTouch:(UITouch *)touch {
     return YES;
 }
 

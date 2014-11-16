@@ -5,19 +5,7 @@
 //  Created by Simon Grätzer on 27.12.12.
 //
 //
-//  Copyright (c) 2012 Simon Peter Grätzer
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+//  Copyright (c) 2012-2014 Simon Peter Grätzer
 //
 
 #import "SGFavouritesManager.h"
@@ -48,7 +36,23 @@
         _favourites = [NSMutableArray arrayWithCapacity:[self maxFavs]];
         _imageCache = [NSCache new];
         _blocked = [NSMutableArray arrayWithContentsOfFile:[self _blacklistFilePath]];
-        if (!_blocked) _blocked = [NSMutableArray arrayWithCapacity:10];
+        if (!_blocked) {
+            _blocked = [NSMutableArray arrayWithCapacity:10];
+        }
+        
+        // Delete old files after 3 weeks
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            NSString* path = [self _screenshotPath];
+            NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:NULL];
+            for (NSString *file in files) {
+                NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:file error:NULL];
+                NSDate *modDate = attr[NSFileModificationDate];
+                NSDate *cutoff = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*21];
+                if ([modDate compare:cutoff] == NSOrderedDescending) {
+                    [[NSFileManager defaultManager] removeItemAtPath:file error:NULL];
+                }
+            }
+        });
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(refresh)
@@ -98,7 +102,7 @@
 
 - (CGSize)imageSize {
     CGSize size = [UIScreen mainScreen].bounds.size;
-    CGFloat scale = 0.23;
+    CGFloat scale = 0.2 * [UIScreen mainScreen].scale;
     return size.height > size.width ? CGSizeMake(size.height*scale, size.width*scale) :
     CGSizeMake(size.width*scale, size.height*scale);
 }
@@ -109,41 +113,32 @@
     return 8;//on the iPad always 8
 }
 
-//- (void)setFavouriteWithURL:(NSURL *)url title:(NSString *)title atIndex:(NSUInteger)index {
-//    NSDictionary *item = @{@"url":url.absoluteString, @"title":title, @"index":@(index)};
-//    [_userFavourites addObject:item];//wrong
-//    
-//    // TODO check if index is already occupied
-//    [self refresh];
-//}
-
 #pragma mark Screenshot stuff
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController; {
     NSURL *url = webController.request.URL;
     if (![self _containsHost:url.host]) return;
     
     NSString *path = [self _imagePathForURL:url];
-    
     NSFileManager *fm = [NSFileManager defaultManager];
     if ([fm fileExistsAtPath:path]) {
         NSDictionary *attr = [fm attributesOfItemAtPath:path error:NULL];
         NSDate *modDate = attr[NSFileModificationDate];
-        if ([modDate compare:[NSDate dateWithTimeIntervalSinceNow:-60*60*24*3]] == NSOrderedDescending)
+        if ([modDate compare:[NSDate dateWithTimeIntervalSinceNow:-60*60*24*3]] == NSOrderedDescending) {
             return;
+        }
     }
     
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         
         UIImage *screen = [self _imageWithView:webController.webView];
-        if (screen.size.height > screen.size.width)
+        if (screen.size.height > screen.size.width) {
             screen = [screen cutImageToSize:CGSizeMake(screen.size.width, screen.size.height)];
+        }
         
-        //CGFloat scale = [UIScreen mainScreen].scale;
-        //CGSize size = CGSizeApplyAffineTransform(self.imageSize, CGAffineTransformMakeScale(scale, scale));
-        screen = [screen scaleProportionalToSize:self.imageSize];
+        screen = [screen scaleProportionalToSize:[self imageSize]];
         if (screen) {
-            NSData *data = UIImagePNGRepresentation(screen);
+            NSData *data = UIImageJPEGRepresentation(screen, 0.7);
             [data writeToFile:path atomically:NO];
         }
         
@@ -193,9 +188,11 @@
         if ([urlS length] == 0) urlS = [item siteUri];
         
         NSURL *url = [NSURL URLWithUnicodeString:urlS];
-        if (!url || [self _containsHost:url.host] || [_blocked containsObject:url.absoluteString]) {
+        if (!url
+            || [self _containsHost:url.host]
+            || [_blocked containsObject:url.absoluteString]) {
             item = nil;
-            continue;
+            continue;//skip
         }
         
         if ([urlS length]) {
@@ -229,9 +226,10 @@
     if (![fm fileExistsAtPath:path])
         [fm createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:NULL];
     
-    return [[path stringByAppendingPathComponent:url.host] stringByAppendingPathExtension:@"png"];
+    return [[path stringByAppendingPathComponent:url.host] stringByAppendingPathExtension:@"jpg"];
 }
 
+/*! Search for the image file with the longest matching host suffix */
 - (NSString *)_searchImagePathForURL:(NSURL *)url {
     NSString* path = [self _screenshotPath];
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:NULL];
@@ -239,11 +237,10 @@
     
     NSString *best = nil;
     float bestDistance = 1000000;
-    
     // Find the smallest Levenshtein distance
     for (NSString *file in files) {
-        NSString *current = [file stringByDeletingPathExtension];
         
+        NSString *current = [file stringByDeletingPathExtension];
         float dist =  [host levenshteinDistance:current];
         if (dist < bestDistance) {
             best = current;

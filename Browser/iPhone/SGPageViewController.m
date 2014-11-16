@@ -3,21 +3,7 @@
 //  SGPageController
 //
 //  Created by Simon Grätzer on 13.12.12.
-//
-//
-//  Copyright (c) 2012 Simon Grätzer
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+//  Copyright (c) 2012-2014 Simon Peter Grätzer. All rights reserved.
 //
 
 
@@ -32,10 +18,9 @@ CGFloat const kSGMinYScale = 0.84;
 CGFloat const kSGMinXScale = 0.84;
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(0.75, 0.8))
 #define SG_CONTAINER_EMPTY (_viewControllers.count == 0)
-#define SG_DURATION 0.25
+#define SG_DURATION 0.2
 
 @implementation SGPageViewController {
-    BOOL _animating;
     NSMutableArray *_viewControllers;
     CGFloat _topOffset;
     
@@ -57,10 +42,7 @@ CGFloat const kSGMinXScale = 0.84;
     NSInteger i = [coder decodeIntegerForKey:@"currentPage"];
     
     for (UIViewController *vc in _viewControllers) {
-//        UIView *container = [[UIView alloc] initWithFrame:_scrollView.bounds];
-//        [_containerViews addObject:container];
         [self addChildViewController:vc];
-//        [container addSubview:vc.view];
         [vc didMoveToParentViewController:self];
     }
     
@@ -142,7 +124,7 @@ CGFloat const kSGMinXScale = 0.84;
     
     __strong UIScrollView *scroller = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scroller.autoresizingMask = (UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight);
-    scroller.clipsToBounds = NO;
+    scroller.autoresizesSubviews = NO;
     scroller.backgroundColor = [UIColor clearColor];
     scroller.pagingEnabled = YES;
     scroller.showsHorizontalScrollIndicator = NO;
@@ -234,7 +216,7 @@ CGFloat const kSGMinXScale = 0.84;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    if (!_animating) [self _layout];
+    [self _layout];
 }
 
 - (UIView *)rotatingHeaderView {
@@ -265,25 +247,24 @@ CGFloat const kSGMinXScale = 0.84;
     
     [self _layoutScrollviews];
     [self _layoutPages];
-    if (_exposeMode) {
-        [self _setCloseButtonHidden:YES];
-        [self _disableInteractions];
-    } else {
-        [self _enableInteractions];
-    }
     [childController didMoveToParentViewController:self];
 }
 
 - (void)showViewController:(UIViewController *)viewController{
     NSUInteger index = [_viewControllers indexOfObject:viewController];
-    if (index != NSNotFound && _pageControl.currentPage != index) {
+    if (index != NSNotFound) {
         _pageControl.currentPage = index;
-        
-        // self.count != 1 as a workaround when there is just 1 view and no scrolling animation
-        [self _setCloseButtonHidden:self.count != 1];
         CGPoint off = CGPointMake(_scrollView.frame.size.width * index, 0);
-        [_scrollView setContentOffset:off animated:YES];
+
         [self _disableInteractions];
+        [self _setCloseButtonHidden:self.count != 1];
+        [UIView animateWithDuration:SG_DURATION/2
+                         animations:^{
+                             [self _layoutPages];
+                             [self _setToolbarHidden:NO animated:NO];
+                         } completion:^(BOOL animated) {
+                             [_scrollView setContentOffset:off animated:YES];
+                         }];
     }
 }
 
@@ -292,11 +273,9 @@ CGFloat const kSGMinXScale = 0.84;
     
     [self _setCloseButtonHidden:YES];
     [childController willMoveToParentViewController:nil];
-//    [_containerViews removeObjectAtIndex:index];
     [_viewControllers removeObjectAtIndex:index];
     NSUInteger count = _viewControllers.count;
     
-    _animating = YES;
     [UIView animateWithDuration:SG_DURATION
                      animations:^{
                          [childController.view removeFromSuperview];
@@ -309,7 +288,6 @@ CGFloat const kSGMinXScale = 0.84;
                          }
                      }
                      completion:^(BOOL done){
-                         _animating = NO;
                          [childController removeFromParentViewController];
                          [self _layoutScrollviews];
                          [self _layoutPages];
@@ -550,11 +528,10 @@ CGFloat const kSGMinXScale = 0.84;
     }
 }
 
-- (void)_setToolbarHidden:(BOOL)hidden {
-    if (!_exposeMode && !_animating) {
-        _animating = YES;
+- (void)_setToolbarHidden:(BOOL)hidden animated:(BOOL)animated {
+    if (!_exposeMode) {
         
-        [UIView animateWithDuration:SG_DURATION
+        [UIView animateWithDuration:animated ? SG_DURATION : 0
                          animations:^{
                              CGRect b = self.view.bounds;
                              CGFloat h = _toolbar.frame.size.height;
@@ -568,7 +545,6 @@ CGFloat const kSGMinXScale = 0.84;
                              [self _layoutPages];
 
                          } completion:^(BOOL finished){
-                             _animating = NO;
                              [self updateInterface];
                          }];
     }
@@ -603,7 +579,6 @@ CGFloat const kSGMinXScale = 0.84;
         }
     }
     
-    _animating = YES;
     [UIView animateWithDuration:animated ? SG_DURATION : 0
                      animations:^{
                          if (!_exposeMode) {
@@ -616,7 +591,6 @@ CGFloat const kSGMinXScale = 0.84;
                          [self _layoutPages];
                      }
                      completion:^(BOOL finished) {
-                         _animating = NO;
                          _addTabButton.enabled = exposeMode;
                          _menuButton.enabled = exposeMode;
                          _tabsButton.enabled = exposeMode;
@@ -638,7 +612,6 @@ CGFloat const kSGMinXScale = 0.84;
     switch (recognizer.state) {
         case UIGestureRecognizerStateBegan:{
             _panTranslation = [recognizer translationInView:webC.view].y;
-            _animating = YES;
         }
             break;
             
@@ -663,14 +636,14 @@ CGFloat const kSGMinXScale = 0.84;
         }
             break;
             
-            
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateEnded:{
-            _animating = NO;
-            if (_toolbar.frame.origin.y < -kSGToolbarHeight/2) {
-                [self _setToolbarHidden:YES];
-            } else {
-                [self _setToolbarHidden:NO];
+            CGFloat y = _toolbar.frame.origin.y;
+            if (y != -kSGToolbarHeight
+                && y < -kSGToolbarHeight/2) {
+                [self _setToolbarHidden:YES animated:YES];
+            } else if (y != 0 && y > -kSGToolbarHeight/2) {
+                [self _setToolbarHidden:NO animated:YES];
             }
             _panTranslation = 0;
         }
@@ -715,13 +688,10 @@ CGFloat const kSGMinXScale = 0.84;
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     if (scrollView == _scrollView) {
-        [self _disableInteractions];
         [self _setCloseButtonHidden:YES];
-        [UIView animateWithDuration:0.3
-                         animations:^{
-                             [self _layoutPages];
-                         }];
-        
+        [self _disableInteractions];
+        [self _layoutPages];
+        [self _setToolbarHidden:NO animated:NO];
     }
 }
 
@@ -749,7 +719,7 @@ CGFloat const kSGMinXScale = 0.84;
         }
         // We need to unhide it if we scroll sideways
         if (_toolbar.frame.origin.y != 0) {
-            [self _setToolbarHidden:NO];
+            [self _setToolbarHidden:NO animated:YES];
         }
     }
 }
@@ -793,16 +763,17 @@ CGFloat const kSGMinXScale = 0.84;
         CGFloat y = _toolbar.frame.origin.y;
         if (y != -kSGToolbarHeight
             && y < -kSGToolbarHeight/2) {
-            [self _setToolbarHidden:YES];
+            [self _setToolbarHidden:YES animated:YES];
         } else if (y != 0 && y > -kSGToolbarHeight/2) {
-            [self _setToolbarHidden:NO];
+            [self _setToolbarHidden:NO animated:YES];
         }
     }
 }
 
 - (void)scrollViewDidScrollToTop:(UIScrollView *)scrollView {
-    if (scrollView == _scrollView) return;
-    [self _setToolbarHidden:NO];
+    if (scrollView != _scrollView) {// Only for a webview
+        [self _setToolbarHidden:NO animated:YES];
+    }
 }
 
 #pragma mark - IBAction

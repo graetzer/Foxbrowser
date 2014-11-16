@@ -3,9 +3,7 @@
 //  SGTabs
 //
 //  Created by simon on 07.06.12.
-//
-//
-//  Copyright (c) 2012-2013 Simon Peter Grätzer
+//  Copyright (c) 2012-2014 Simon Peter Grätzer. All rights reserved.
 //
 
 
@@ -60,60 +58,6 @@
     self.progressView.frame = CGRectMake(0, b.size.height-3, b.size.width, 3);
 }
 
-//#pragma mark - Libary
-
-//- (IBAction)showOptions:(UIButton *)sender {
-//    [self _destroyOverlays];
-//    
-//    _actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-//                                               delegate:self
-//                                      cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-//                                 destructiveButtonTitle:nil
-//                                      otherButtonTitles:
-//                    NSLocalizedString(@"Notifications", @"Notifications"),
-//                    NSLocalizedString(@"Share Page", @"Share url of page"),
-//                    NSLocalizedString(@"View in Safari", @"launch safari to display the url"),
-//                    // NSLocalizedString(@"Settings", nil),
-//                    nil];
-//    [self.actionSheet showFromRect:sender.frame inView:self animated:YES];
-//}
-//
-//- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-//    NSURL *url = [self.browser URL];
-//    
-//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//        if (buttonIndex == 0) {
-//            if (!_bookmarks) {
-//                _bookmarks = [[UINavigationController alloc] initWithRootViewController:[BookmarkPage new]];
-//            }
-//            _popoverController = [[UIPopoverController alloc] initWithContentViewController:_bookmarks];
-//            _popoverController.delegate = self;
-//            [_popoverController presentPopoverFromRect:_systemItem.frame
-//                                                inView:self
-//                              permittedArrowDirections:UIPopoverArrowDirectionAny
-//                                              animated:YES];
-//        } else if (buttonIndex == 1 && url != nil) {
-//            UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:@[url]
-//                                                                                     applicationActivities:nil];
-//            activityVC.completionHandler = ^(NSString *activityType, BOOL completed) {
-//                if (completed) {
-//                    [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activityType
-//                                                                                      action:@"Share URL"
-//                                                                                      target:url.absoluteString] build]];
-//                }
-//            };
-//            
-//            _popoverController = [[UIPopoverController alloc] initWithContentViewController:activityVC];
-//            _popoverController.delegate = self;
-//            [_popoverController presentPopoverFromRect:_systemItem.frame
-//                                                inView:self
-//                              permittedArrowDirections:UIPopoverArrowDirectionAny
-//                                              animated:YES];
-//        } else if (buttonIndex == 2) {// Open in mobile safari
-//            [[UIApplication sharedApplication] openURL:url];
-//        }
-//    });
-//}
 
 - (void)updateInterface {
     [super updateInterface];
