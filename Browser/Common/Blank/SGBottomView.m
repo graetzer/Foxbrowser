@@ -35,7 +35,12 @@
         
         NSString *text = @"Foxbrowser";
         UIFont *font = [UIFont fontWithName:fontName size:fontSize+3];
-        CGSize size = [text sizeWithFont:font];
+        CGSize size;
+        if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_7_0) {
+            size = [text sizeWithAttributes:@{NSFontAttributeName:font}];
+        } else {
+            size = [text sizeWithFont:font];
+        }
         UILabel *label = [[UILabel alloc] initWithFrame:
                           CGRectMake(CGRectGetMaxX(logoView.frame) + margin, (frame.size.height - size.height)/2,
                                      size.width, size.height)];

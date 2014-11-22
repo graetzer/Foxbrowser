@@ -84,13 +84,12 @@
     
     SGPreviewPanel *previewPanel = [[SGPreviewPanel alloc] initWithFrame:scrollFrame];
     previewPanel.delegate = self;
-    
     [scrollView addSubview:previewPanel];
     _previewPanel = previewPanel;
     
     FXTabsViewController *tabBrowser = [[FXTabsViewController alloc] initWithStyle:UITableViewStylePlain];
     [self addChildViewController:tabBrowser];
-    tabBrowser.view.frame = CGRectMake(self.view.bounds.size.width, 0, SG_TAB_WIDTH, _scrollView.bounds.size.height);
+    tabBrowser.view.frame = CGRectMake(_scrollView.bounds.size.width, 0, SG_TAB_WIDTH, _scrollView.bounds.size.height);
     tabBrowser.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
     [self.scrollView addSubview:tabBrowser.view];
     [tabBrowser didMoveToParentViewController:self];
@@ -110,16 +109,15 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width + SG_TAB_WIDTH, self.scrollView.bounds.size.height);
-}
-
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
     
-    _scrollView.frame = CGRectMake(0, 0, self.view.bounds.size.width,
-                                   self.view.bounds.size.height - _bottomView.frame.size.height);
+    CGRect scrollFrame = CGRectMake(0, 0, self.view.bounds.size.width,
+                                    self.view.bounds.size.height - _bottomView.frame.size.height);
+    _scrollView.frame = scrollFrame;
+    scrollFrame.size.width += SG_TAB_WIDTH;
+    _scrollView.contentSize = scrollFrame.size;
+    _previewPanel.frame = _scrollView.bounds;
 }
 
 - (void)refresh {

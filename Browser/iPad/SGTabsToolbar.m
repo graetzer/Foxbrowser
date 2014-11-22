@@ -55,7 +55,7 @@
     self.menuButton.frame = btnR;
     
     CGRect b = self.bounds;
-    self.progressView.frame = CGRectMake(0, b.size.height-3, b.size.width, 3);
+    self.progressView.frame = CGRectMake(0, b.size.height-2, b.size.width, 2);
 }
 
 

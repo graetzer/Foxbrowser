@@ -361,12 +361,21 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                 
                 if (!_foundClientRecord) {
                     DLog(@"Updating client record");
+                    NSString *formfactor = @"phone";
+                    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+                        formfactor = @"largetablet";
+                    }
                     NSDictionary *client = @{@"id" : myID,
                                              @"name":[self clientName],
                                              @"type" : @"mobile",
                                              @"commands":@[],
                                              @"version" : @"3.0",
-                                             @"protocols": @[@"1.5"]};
+                                             @"protocols": @[@"1.5"],
+                                             // Recently added
+                                             @"os" : @"iOS",
+                                             @"appPackage" : @"org.graetzer.fxsync",
+                                             @"application" : @"Foxbrowser",
+                                             @"formfactor" : formfactor};
                     
                     NSData *plaintext = [NSJSONSerialization dataWithJSONObject:client options:0 error:NULL];
                     NSString *payload = [self _encryptPayload:plaintext keyBundle:[self _keysForCollection:@"clients"]];

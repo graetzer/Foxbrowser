@@ -118,28 +118,28 @@
     self.restorationClass = [self class];
     self.view.restorationIdentifier = @"webView";
     
-    self.webView.frame = self.view.bounds;
-    self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.webView.backgroundColor = [UIColor whiteColor];
+    _webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _webView.backgroundColor = [UIColor whiteColor];
     //UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? [UIColor colorWithWhite:1 alpha:0.2] : [UIColor clearColor];
     UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc]
                                         initWithTarget:self action:@selector(_handleLongPressGesture:)];
     gr.delegate = self;
-    [self.webView addGestureRecognizer:gr];
-    self.webView.scalesPageToFit = YES;
+    [_webView addGestureRecognizer:gr];
+    _webView.scalesPageToFit = YES;
     
     _progressProxy = [[NJKWebViewProgress alloc] init];
     _progressProxy.webViewProxyDelegate = self;
     _progressProxy.progressDelegate = self;
-    self.webView.delegate = _progressProxy;
+    _webView.delegate = _progressProxy;
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
     [super willMoveToParentViewController:parent];
     if (parent == nil) {// View is removed
-        self.webView.delegate = nil;
-        [self.webView stopLoading];
-        [self.webView clearContent];
+        _webView.delegate = nil;
+        [_webView stopLoading];
+        [_webView clearContent];
+        _loading = NO;
     }
 }
 
@@ -173,7 +173,6 @@
     if (sender.state == UIGestureRecognizerStateBegan) {
         CGPoint at = [sender locationInView:self.webView];
         at.y -= self.webView.scrollView.contentInset.top;
-        
         // convert point from view to HTML coordinate system
         //CGPoint offset  = [self.webView scrollOffset];
         CGSize viewSize = [self.webView frame].size;
@@ -181,9 +180,6 @@
         
         CGFloat f = windowSize.width / viewSize.width;
         CGPoint pt = CGPointMake(at.x*f, at.y*f);
-//        pt.x = pt.x * f ;//+ offset.x;
-//        pt.y = pt.y * f ;//+ offset.y;
-        
         [self _showContextMenuFor:pt atPoint:at];
     }
 }
@@ -191,6 +187,150 @@
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES;
+}
+
+#pragma mark - UIWebViewDelegate
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request
+  navigationType:(UIWebViewNavigationType)navigationType {
+    
+    NSString *scheme = request.URL.scheme;
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    if ([scheme isEqualToString:@"newtab"]) {
+        NSString *urlString = [request.URL.resourceSpecifier stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+        NSMutableURLRequest *mutableReq = [request mutableCopy];
+        mutableReq.URL = [NSURL URLWithString:[urlString encodedURLString] relativeToURL:self.request.URL];
+        [browser addTabWithURLRequest:mutableReq title:nil];
+        return NO;
+    } else if ([scheme isEqualToString:@"closetab"]) {
+        [browser removeViewController:self];
+        return NO;
+    }
+    
+    if (navigationType != UIWebViewNavigationTypeOther) {
+        if (IsNativeAppURLWithoutChoice(request.URL)) {
+            [[UIApplication sharedApplication] openURL:request.URL];
+            return NO;
+        } else if (![request.mainDocumentURL isEqual:_request.mainDocumentURL]) {
+            // Change of webpage
+            _request = request;
+        }
+    }
+    return YES;
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    _loading = YES;
+    [self _dismissSearchToolbar];
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    _loading = NO;
+    
+    [webView loadJSTools];
+    [webView disableTouchCallout];
+    self.title = [webView title];
+    
+    if (![self.webView.request.URL.scheme isEqualToString:@"file"]) {
+        // Just in case the main url changes, add an history entry
+        if (![_request.mainDocumentURL isEqual:webView.request.mainDocumentURL] ) {
+            [[FXSyncStock sharedInstance] addHistoryURL:_request.URL];
+        }
+        _request = webView.request;
+    }
+    [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    // If an error oocured, disable the loading stuff
+    _loading = NO;
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
+    
+    DLog(@"WebView error code: %ld", (long)error.code);
+    //ignore these
+    if ([error.domain isEqual:NSURLErrorDomain]
+        && error.code == NSURLErrorCancelled) return;
+    
+    if (error.code == NSURLErrorCannotFindHost
+        || error.code == NSURLErrorDNSLookupFailed
+        || ([(id)kCFErrorDomainCFNetwork isEqualToString:error.domain] && error.code == 2)) {
+        
+        // Host not found, try adding www. in front?
+        if ([self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
+            NSMutableString *urlS = [self.request.URL.absoluteString mutableCopy];
+            NSRange range = [urlS rangeOfString:@"://"];
+            if (range.location != NSNotFound) {
+                [urlS insertString:@"www." atIndex:range.location+range.length];
+                NSMutableURLRequest *next = [self.request mutableCopy];
+                next.URL = [NSURL URLWithString:urlS];
+                [self openRequest:next];
+                return;
+            }
+        }
+    }
+    
+    // Ignore "Fame Load Interrupted" errors. Seen after app store links.
+    if ([error.domain isEqual:@"WebKitErrorDomain"]) {
+        // if (error.code == 102) return;
+        NSURL *url = [NSURL URLWithString:error.userInfo[@"NSErrorFailingURLStringKey"]];
+        if (error.code == 101 && [[UIApplication sharedApplication]canOpenURL:url]) {
+            [[UIApplication sharedApplication]openURL:url];
+        }
+        return;
+    }
+    
+    NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
+    [self.webView showPlaceholder:error.localizedDescription title:title];
+}
+
+- (void)webViewProgress:(NJKWebViewProgress *)webViewProgress updateProgress:(float)progress; {
+    _progress = progress;
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
+}
+
+#pragma mark - Networking
+
+/*! Build a request that contains the referrer etc */
+- (NSURLRequest *)_nextRequestForURL:(NSURL *)url {
+    if (url == nil) return nil;
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
+    return request;
+}
+
+- (void)openRequest:(NSURLRequest *)request {
+    if (request != nil) _request = request;
+    if (![self isViewLoaded] || _request == nil) return;
+    
+    // In case the webView is not empty, show the error on the site
+    if (![appDelegate canConnectToInternet]) {
+        [_webView showPlaceholder:NSLocalizedString(@"No internet connection available", nil)
+                                title:NSLocalizedString(@"Cannot Load Page", @"unable to load page")];
+    } else {
+        // Show some info if asked for it
+        if ([self.request.URL.absoluteString isEqualToString:@"about:config"]) {
+            NSString *version = [NSBundle mainBundle].infoDictionary[(NSString*)kCFBundleVersionKey];
+            NSString *text = [NSString stringWithFormat:@"Version %@<br/>Developer simon@graetzer.org<br/>Thanks for using Foxbrowser!", version];
+            [_webView showPlaceholder:text title:@"Foxbrowser Configuration"];
+        } else {
+            _loading = YES;
+            [_webView loadRequest:self.request];
+        }
+    }
+    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
+    [browser updateInterface];
+}
+
+- (void)reload {
+    [self openRequest:nil];
 }
 
 #pragma mark - Contextual menu
@@ -314,151 +454,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                           cancelButtonTitle:NSLocalizedString(@"OK", nil)
                           otherButtonTitles:nil] show];
     }
-}
-
-#pragma mark - UIWebViewDelegate
-
--  (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request
-  navigationType:(UIWebViewNavigationType)navigationType {
-    
-    NSString *scheme = request.URL.scheme;
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    if ([scheme isEqualToString:@"newtab"]) {
-        NSString *urlString = [request.URL.resourceSpecifier stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        
-        NSMutableURLRequest *mutableReq = [request mutableCopy];
-        mutableReq.URL = [NSURL URLWithString:[urlString encodedURLString] relativeToURL:self.request.URL];
-        [browser addTabWithURLRequest:mutableReq title:nil];
-        return NO;
-    } else if ([scheme isEqualToString:@"closetab"]) {
-        [browser removeViewController:self];
-        return NO;
-    }
-    
-    if (navigationType != UIWebViewNavigationTypeOther) {
-        if (IsNativeAppURLWithoutChoice(request.URL)) {
-            [[UIApplication sharedApplication] openURL:request.URL];
-            return NO;
-        } else if (![request.mainDocumentURL isEqual:_request.mainDocumentURL]) {
-            // Change of webpage
-            self.request = request;
-        }
-    }
-    return YES;
-}
-
-- (void)webViewDidStartLoad:(UIWebView *)webView {
-    _loading = YES;
-    [self _dismissSearchToolbar];
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
-}
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
-    _loading = NO;
-    
-    [webView loadJSTools];
-    [webView disableTouchCallout];
-    self.title = [webView title];
-    
-    if (![self.webView.request.URL.scheme isEqualToString:@"file"]) {
-        // Just in case the main url changes, add an history entry
-        if (![_request.mainDocumentURL isEqual:webView.request.mainDocumentURL] ) {
-            [[FXSyncStock sharedInstance] addHistoryURL:_request.URL];
-        }
-        _request = webView.request;
-    }
-    [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
-}
-
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    // If an error oocured, disable the loading stuff
-    _loading = NO;
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
-    
-    DLog(@"WebView error code: %ld", (long)error.code);
-    //ignore these
-    if ([error.domain isEqual:NSURLErrorDomain]
-        && error.code == NSURLErrorCancelled) return;
-    
-    if (error.code == NSURLErrorCannotFindHost
-        || error.code == NSURLErrorDNSLookupFailed
-        || ([(id)kCFErrorDomainCFNetwork isEqualToString:error.domain] && error.code == 2)) {
-        
-        // Host not found, try adding www. in front?
-        if ([self.request.URL.host rangeOfString:@"www"].location == NSNotFound) {
-            NSMutableString *urlS = [self.request.URL.absoluteString mutableCopy];
-            NSRange range = [urlS rangeOfString:@"://"];
-            if (range.location != NSNotFound) {
-                [urlS insertString:@"www." atIndex:range.location+range.length];
-                NSMutableURLRequest *next = [self.request mutableCopy];
-                next.URL = [NSURL URLWithString:urlS];
-                [self openRequest:next];
-                return;
-            }
-        }
-    }
-    
-    if ([error.domain isEqual:@"WebKitErrorDomain"]) {
-        // Ignore "Fame Load Interrupted" errors. Seen after app store links.
-        if (error.code == 102) return;
-        
-        NSURL *url = [NSURL URLWithString:error.userInfo[@"NSErrorFailingURLStringKey"]];
-        if (error.code == 101 && [[UIApplication sharedApplication]canOpenURL:url]) {
-            [[UIApplication sharedApplication]openURL:url];
-            return;
-        }
-    }
-    
-    NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
-    [self.webView showPlaceholder:error.localizedDescription title:title];
-}
-
-- (void)webViewProgress:(NJKWebViewProgress *)webViewProgress updateProgress:(float)progress; {
-    _progress = progress;
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
-}
-
-#pragma mark - Networking
-
-/*! Build a request that contains the referrer etc */
-- (NSURLRequest *)_nextRequestForURL:(NSURL *)url {
-    if (url == nil) return nil;
-    
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setValue:self.request.URL.absoluteString forHTTPHeaderField:@"Referer"];
-    return request;
-}
-
-- (void)openRequest:(NSURLRequest *)request {
-    if (request != nil) self.request = request;
-    if (![self isViewLoaded]) return;
-    
-    // In case the webView is not empty, show the error on the site
-    if (![appDelegate canConnectToInternet]) {
-        [self.webView showPlaceholder:NSLocalizedString(@"No internet connection available", nil)
-                                title:NSLocalizedString(@"Cannot Load Page", @"unable to load page")];
-    } else {
-        // Show some info if asked for it
-        if ([self.request.URL.absoluteString isEqualToString:@"about:config"]) {
-            NSString *version = [NSBundle mainBundle].infoDictionary[(NSString*)kCFBundleVersionKey];
-            NSString *text = [NSString stringWithFormat:@"Version %@<br/>Developer simon@graetzer.org<br/>Thanks for using Foxbrowser!", version];
-            [self.webView showPlaceholder:text title:@"Foxbrowser Configuration"];
-        } else {
-            _loading = YES;
-            [self.webView loadRequest:self.request];
-        }
-    }
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
-}
-
-- (void)reload {
-    [self openRequest:nil];
 }
 
 #pragma mark - Search on page

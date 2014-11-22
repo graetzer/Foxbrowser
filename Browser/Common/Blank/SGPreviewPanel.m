@@ -31,6 +31,7 @@
         
         _label = [[UILabel alloc] initWithFrame:CGRectMake(0, frame.size.height - font.lineHeight,
                                                            frame.size.width, font.lineHeight)];
+        _label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
         _label.backgroundColor = [UIColor clearColor];
         _label.font = font;
         _label.textColor = [UIColor darkTextColor];
@@ -40,6 +41,7 @@
         UIImage *image = [fm imageWithURL:url];
         frame.size.height -= _label.frame.size.height + 5;
         _imageView = [[UIImageView alloc] initWithFrame:frame];
+        _imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _imageView.layer.borderColor = [UIColor grayColor].CGColor;
         _imageView.layer.borderWidth = 1.f;
         _imageView.backgroundColor = [UIColor clearColor];
@@ -74,42 +76,35 @@
 - (void)_layout {
     if (_tiles.count == 0) return;
     
-    CGRect b = self.bounds;
-    CGSize tileSize = [self _tileSize];
-    NSInteger columns = b.size.width / tileSize.width;
-    for (NSUInteger i = 0; i < _tiles.count; i++) {
-        NSUInteger line = i / columns;
-        NSUInteger column = i % columns;
-        
-        SGPreviewTile *tile = _tiles[i];
-        CGRect frame = tile.frame;
-        frame.origin.x = column*(tileSize.width + 5) + 5;
-        frame.origin.y = line*(tileSize.height + 5) + 5;
-        tile.frame = frame;
+    CGSize s = self.bounds.size;
+    CGSize tileSize = CGSizeMake(120, 80);
+    CGFloat marginX = 10, marginY = 10;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        tileSize = CGSizeMake(270, 180);
+        marginX = 20;
+        marginY = 20;
     }
-    /*
-    NSUInteger columns, lines;
-    if (b.size.width > b.size.height) {
-        columns = b.size.width/tileSize.width;
-        lines = MAX((_tiles.count + (columns-1)) / columns, 1);
-    } else {
-        lines = b.size.height/tileSize.height;
-        columns = MAX((_tiles.count + (lines-1)) / lines, 1);
-    }
-    
-    CGFloat paddingX = (b.size.width - columns*tileSize.width)/(columns + 1);
-    CGFloat paddingY = (b.size.height - lines*tileSize.height)/(lines + 1);
+    NSInteger columns = s.width / (tileSize.width+marginX);
+    NSInteger lines = s.height / (tileSize.height+marginY);
+    CGFloat paddingX = (s.width - columns * (tileSize.width+marginX))/2;
+    CGFloat paddingY = (s.height - lines * (tileSize.height+marginY))/2;
     
     for (NSUInteger i = 0; i < _tiles.count; i++) {
         NSUInteger line = i / columns;
         NSUInteger column = i % columns;
         
+        if (line == lines-1 && column == 0) {
+            NSInteger leftOver = [_tiles count] - i;
+            paddingX = (s.width - leftOver * (tileSize.width+marginX))/2;
+        }
+        
         SGPreviewTile *tile = _tiles[i];
-        CGRect frame = tile.frame;
-        frame.origin.x = column*(tileSize.width + paddingX) + paddingX;
-        frame.origin.y = line*(tileSize.height + paddingY) + paddingY;
+        CGRect frame;
+        frame.origin.x = column*(tileSize.width + marginX) + paddingX;
+        frame.origin.y = line*(tileSize.height + marginY) + paddingY;
+        frame.size = tileSize;
         tile.frame = frame;
-    }*/
+    }
 }
 
 - (void)layoutSubviews {
@@ -144,7 +139,7 @@
 - (void)addTileWithItem:(FXSyncItem *)item {
     if (item != nil) {
         CGRect frame = CGRectZero;
-        frame.size = [self _tileSize];
+        frame.size = CGSizeMake(100, 75);//[self _tileSize];
         SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item frame:frame];
         if (tile != nil) {
             tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);
@@ -160,18 +155,6 @@
             [self addSubview:tile];
             [_tiles addObject:tile];
         }
-    }
-}
-
-- (CGSize)_tileSize {
-    CGSize s = self.bounds.size;
-    s.width -= 5;
-    s.height -= 5;
-    NSUInteger m = [[SGFavouritesManager sharedManager] maxFavs];
-    if (s.width > s.height) {
-        return CGSizeMake(2*s.width/m - 5, s.height/2 - 5);
-    } else {
-        return CGSizeMake(s.width/2 - 5, 2*s.height/m - 5);
     }
 }
 

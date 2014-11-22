@@ -258,13 +258,17 @@ CGFloat const kSGMinXScale = 0.84;
 
         [self _disableInteractions];
         [self _setCloseButtonHidden:self.count != 1];
-        [UIView animateWithDuration:SG_DURATION/2
-                         animations:^{
-                             [self _layoutPages];
-                             [self _setToolbarHidden:NO animated:NO];
-                         } completion:^(BOOL animated) {
-                             [_scrollView setContentOffset:off animated:YES];
-                         }];
+        if (CGRectGetMinY(_toolbar.frame) < 0) {
+            [UIView animateWithDuration:SG_DURATION/2
+                             animations:^{
+                                 [self _layoutPages];
+                                 [self _setToolbarHidden:NO animated:NO];
+                             } completion:^(BOOL animated) {
+                                 [_scrollView setContentOffset:off animated:YES];
+                             }];
+        } else {
+            [_scrollView setContentOffset:off animated:YES];
+        }
     }
 }
 
@@ -690,8 +694,10 @@ CGFloat const kSGMinXScale = 0.84;
     if (scrollView == _scrollView) {
         [self _setCloseButtonHidden:YES];
         [self _disableInteractions];
+        if (CGRectGetMinY(_toolbar.frame) < 0) {
+            [self _setToolbarHidden:NO animated:NO];
+        }
         [self _layoutPages];
-        [self _setToolbarHidden:NO animated:NO];
     }
 }
 
