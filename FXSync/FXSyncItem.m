@@ -58,7 +58,7 @@ NSInteger kFXSyncItemDeleted = -2;
 
 - (void)deleteItem {
     if (_jsonPayload) {
-        _jsonPayload[@"deleted"] = @YES;
+        _jsonPayload = [@{@"id":_syncId, @"deleted":@YES} mutableCopy];
         [self save];
     }
 }

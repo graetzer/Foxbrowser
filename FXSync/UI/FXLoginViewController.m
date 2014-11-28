@@ -15,8 +15,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = NSLocalizedString(@"Sync Login", @"Firefox sync login title");
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Help", nil)
+    self.title = NSLocalizedStringFromTable(@"Sync Login", @"FXSync", @"Firefox sync login title");
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"Help", @"FXSync", )
                                                                               style:UIBarButtonItemStylePlain
                                                                              target:self
                                                                              action:@selector(_showHelp)];
@@ -78,24 +78,25 @@
                                   regularExpressionWithPattern:@"\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,6}"
                                   options:NSRegularExpressionCaseInsensitive
                                   error:NULL];
-    NSUInteger matches  = [regex numberOfMatchesInString:email
+    // Crashes if email is nil
+    NSUInteger matches = [regex numberOfMatchesInString:email ? email : @""
                                                  options:0
                                                    range:NSMakeRange(0, [email length])];
     if (matches != 1) {
-        [self _showWarning:NSLocalizedString(@"Please enter the email address for your account",
-                                             @"Invalid email warning")];
+        [self _showWarning:NSLocalizedStringFromTable(@"Please enter the email address for your account",
+                                                      @"FXSync", @"Invalid email warning")];
         return;
     }
     
     NSString *pass = _passwordField.text;
     if ([pass length] == 0) {
-        [self _showWarning:NSLocalizedString(@"Please enter a password",
-                                             @"User did not enter password warning")];
+        [self _showWarning:NSLocalizedStringFromTable(@"Please enter a password",
+                                                      @"FXSync", @"User did not enter password warning")];
         return;
     }
 
     [DejalBezelActivityView activityViewForView:self.view
-                                      withLabel:NSLocalizedString(@"Authorizing", "Authorizing")];
+                                      withLabel:NSLocalizedStringFromTable(@"Authorizing", @"FXSync", "Authorizing")];
     self.navigationItem.leftBarButtonItem.enabled = NO;
     self.navigationItem.rightBarButtonItem.enabled = NO;
     
@@ -111,17 +112,17 @@
          } else {
              self.navigationItem.leftBarButtonItem.enabled = YES;
              self.navigationItem.rightBarButtonItem.enabled = YES;
-             [self _showWarning:NSLocalizedString(@"Login Failure",
-                                                  @"unable to login")];
+             [self _showWarning:NSLocalizedStringFromTable(@"Login Failure",
+                                                           @"FXSync", @"unable to login")];
          }
      }];
 }
 
 - (void)_showWarning:(NSString *)warn {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Warning", )
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Warning", @"FXSync", )
                                                     message:warn
                                                    delegate:nil
-                                          cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
+                                          cancelButtonTitle:NSLocalizedStringFromTable(@"OK", @"FXSync", @"ok")
                                           otherButtonTitles:nil];
     [alert show];
 }

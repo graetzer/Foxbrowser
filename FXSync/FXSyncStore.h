@@ -37,3 +37,13 @@
 - (NSTimeInterval)syncTimeForCollection:(NSString *)collection;
 - (void)setSyncTime:(NSTimeInterval)modified forCollection:(NSString *)collection;
 @end
+
+FOUNDATION_EXPORT NSString *const kFXTabsCollectionKey;
+FOUNDATION_EXPORT NSString *const kFXBookmarksCollectionKey;
+FOUNDATION_EXPORT NSString *const kFXHistoryCollectionKey;
+FOUNDATION_EXPORT NSString *const kFXPasswordsCollectionKey;
+FOUNDATION_EXPORT NSString *const kFXPrefsCollectionKey;
+FOUNDATION_EXPORT NSString *const kFXFormsCollectionKey;
+FOUNDATION_EXPORT NSString *const kFXClientsCollectionKey;
+
+FOUNDATION_EXPORT NSString *const kFXSyncStoreException;

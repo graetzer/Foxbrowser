@@ -67,8 +67,8 @@ CGFloat const kSGMinXScale = 0.84;
                                                           action:@selector(_moveWebView:)];
     _panGesture.delegate = self;
     
-    CGRect b = self.view.bounds;
-    __strong SGPageToolbar *toolbar = [[SGPageToolbar alloc] initWithFrame:CGRectMake(0, 0, b.size.width, kSGToolbarHeight)
+    CGSize s = self.view.bounds.size;
+    __strong SGPageToolbar *toolbar = [[SGPageToolbar alloc] initWithFrame:CGRectMake(0, 0, s.width, kSGToolbarHeight)
                                                                    browserDelegate:self];
     toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     _toolbar = toolbar;
@@ -79,7 +79,7 @@ CGFloat const kSGMinXScale = 0.84;
     button.enabled = NO;
     button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:20];
     button.showsTouchWhenHighlighted = YES;
-    [button setTitle:NSLocalizedString(@"New Tab", @"New Tab") forState:UIControlStateNormal];
+    [button setTitle:NSLocalizedString(@"New Tab", @"Open new tab page") forState:UIControlStateNormal];
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [button setImage:[UIImage imageNamed:@"plus-white"] forState:UIControlStateNormal];
     button.titleEdgeInsets = UIEdgeInsetsMake(0, 10, 0, 0);
@@ -145,8 +145,8 @@ CGFloat const kSGMinXScale = 0.84;
     [self.view addSubview:button];
     _closeButton = button;
     
-    __strong UIPageControl *pageCtrl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, b.size.height - 25.,
-                                                                                       b.size.width, 25.)];
+    __strong UIPageControl *pageCtrl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, s.height - 25.,
+                                                                                       s.width, 25.)];
     [self.view insertSubview:pageCtrl belowSubview:_scrollView];
     _pageControl = pageCtrl;
     _pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
@@ -386,28 +386,34 @@ CGFloat const kSGMinXScale = 0.84;
 
 /*! Internal layout function */
 - (void)_layout {
-    CGRect b = self.view.bounds;
-    _pageControl.frame = CGRectMake(0, b.size.height - 25., b.size.width, 25.);
+    CGSize s = self.view.bounds.size;
+    _pageControl.frame = CGRectMake(0, s.height - 25., s.width, 25.);
     
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
         _topOffset = [self.topLayoutGuide length];
     }
     CGFloat toolbarH = kSGToolbarHeight+_topOffset;
     if (_exposeMode) {
-        _toolbar.frame = CGRectMake(0, -toolbarH, b.size.width, toolbarH);
-        _scrollView.frame = CGRectMake(0, toolbarH, b.size.width, b.size.height - (toolbarH));
+        _toolbar.frame = CGRectMake(0, -toolbarH, s.width, toolbarH);
+        _scrollView.frame = CGRectMake(0, toolbarH, s.width, s.height - (toolbarH));
     } else {
-        _toolbar.frame = CGRectMake(0, _toolbar.frame.origin.y, b.size.width, toolbarH);
-        _scrollView.frame = b;
+        _toolbar.frame = CGRectMake(0, _toolbar.frame.origin.y, s.width, toolbarH);
+        _scrollView.frame = self.view.bounds;
+    }
+    CGSize size;
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        size = [[_addTabButton titleForState:UIControlStateNormal]
+                sizeWithAttributes:@{NSFontAttributeName:_addTabButton.titleLabel.font}];
+    } else {
+        size = [[_addTabButton titleForState:UIControlStateNormal]
+                sizeWithFont:_addTabButton.titleLabel.font];
     }
     
-    CGSize size = [[_addTabButton titleForState:UIControlStateNormal]
-                   sizeWithAttributes:@{NSFontAttributeName:_addTabButton.titleLabel.font}];
     _addTabButton.frame = CGRectMake(5, _topOffset + 10, 40 + size.width, size.height);
-    _menuButton.frame = CGRectMake(b.size.width - 80, _topOffset + 4, 36, 36);
-    _tabsButton.frame = CGRectMake(b.size.width - 40, _topOffset + 4, 36, 36);
+    _menuButton.frame = CGRectMake(s.width - 80, _topOffset + 4, 36, 36);
+    _tabsButton.frame = CGRectMake(s.width - 40, _topOffset + 4, 36, 36);
     _titleLabel.frame = CGRectMake(5, kSGToolbarHeight + _topOffset + 1,
-                                   b.size.width - 5, _titleLabel.font.lineHeight);
+                                   s.width - 5, _titleLabel.font.lineHeight);
 }
 
 - (void)_layoutScrollviews {
@@ -537,13 +543,13 @@ CGFloat const kSGMinXScale = 0.84;
         
         [UIView animateWithDuration:animated ? SG_DURATION : 0
                          animations:^{
-                             CGRect b = self.view.bounds;
+                             CGSize s = self.view.bounds.size;
                              CGFloat h = _toolbar.frame.size.height;
                              if (hidden) {
-                                 _toolbar.frame = CGRectMake(0, -kSGToolbarHeight, b.size.width, h);
+                                 _toolbar.frame = CGRectMake(0, -kSGToolbarHeight, s.width, h);
                                  [_toolbar setSubviewsAlpha:0];
                              } else {
-                                 _toolbar.frame = CGRectMake(0, 0, b.size.width, h);
+                                 _toolbar.frame = CGRectMake(0, 0, s.width, h);
                                  [_toolbar setSubviewsAlpha:1];
                              }
                              [self _layoutPages];
@@ -633,7 +639,8 @@ CGFloat const kSGMinXScale = 0.84;
             } else {
                 CGPoint curr = webC.webView.scrollView.contentOffset;
                 curr.y -= offset;
-                if ( curr.y > 0 && curr.y <= webC.webView.scrollView.contentSize.height) {
+                CGFloat h = webC.webView.scrollView.contentSize.height - webC.webView.frame.size.height;
+                if ( curr.y > 0 && curr.y <= h) {
                     webC.webView.scrollView.contentOffset = curr;
                 }
             }
@@ -697,7 +704,6 @@ CGFloat const kSGMinXScale = 0.84;
         if (CGRectGetMinY(_toolbar.frame) < 0) {
             [self _setToolbarHidden:NO animated:NO];
         }
-        [self _layoutPages];
     }
 }
 

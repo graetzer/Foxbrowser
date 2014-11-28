@@ -12,6 +12,14 @@
 #import "FXSyncEngine.h"
 #import "FXSyncItem.h"
 
+NSString *const kFXTabsCollectionKey = @"tabs";
+NSString *const kFXBookmarksCollectionKey = @"bookmarks";
+NSString *const kFXHistoryCollectionKey = @"history";
+NSString *const kFXPasswordsCollectionKey = @"passwords";
+NSString *const kFXPrefsCollectionKey = @"prefs";
+NSString *const kFXFormsCollectionKey = @"forms";
+NSString *const kFXClientsCollectionKey = @"clients";
+
 NSString *const kFXSyncStoreFile = @"fxstore.db";
 NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
 

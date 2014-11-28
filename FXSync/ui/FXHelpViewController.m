@@ -22,7 +22,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = NSLocalizedString(@"Instructions", @"Instructions title");
+    self.title = NSLocalizedStringFromTable(@"Instructions", @"FXSync", @"Instructions title");
     
     __strong UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc]
                                                    initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
@@ -72,14 +72,14 @@
     if (error.code == NSURLErrorCancelled || [error.domain isEqualToString:@"WebKitErrorDomain"])
         return;
     
-    NSString *title = NSLocalizedString(@"Error Loading Page", @"error loading page");
+    NSString *title = NSLocalizedStringFromTable(@"Error Loading Page", @"FXSync", @"error loading page");
     if ([self.webView isEmpty]) {
         [self.webView showPlaceholder:error.localizedDescription title:title];
     } else {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
                                                         message:error.localizedDescription
                                                        delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
+                                              cancelButtonTitle:NSLocalizedStringFromTable(@"OK", @"FXSync", @"ok")
                                               otherButtonTitles: nil];
         [alert show];
     }

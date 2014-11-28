@@ -145,10 +145,10 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 
 - (void)syncEngine:(FXSyncEngine *)engine alertWithString:(NSString *)alert {
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Warning", nil)
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Warning", @"FXSync", )
                                                             message:alert
                                                            delegate:nil
-                                                  cancelButtonTitle:NSLocalizedString(@"OK", @"ok")
+                                                  cancelButtonTitle:NSLocalizedStringFromTable(@"OK", @"FXSync", @"ok")
                                                   otherButtonTitles:nil];
         [alertView show];
     });
@@ -305,13 +305,14 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
         toolbar.syncId = @"toolbar";
         toolbar.jsonPayload = [NSMutableDictionary new];
         [toolbar setType:@"folder"];
-        [toolbar setTitle:NSLocalizedString(@"Bookmarks Toolbar", @"bookmarks toolbar")];
-        
+        [toolbar setTitle:NSLocalizedStringFromTable(@"Bookmarks Toolbar",
+                                                     @"FXSync", @"bookmarks toolbar")];
         FXSyncItem *unfiled = [FXSyncItem new];
         unfiled.syncId = @"unfiled";
         unfiled.jsonPayload = [NSMutableDictionary new];
         [unfiled setType:@"folder"];
-        [unfiled setTitle:NSLocalizedString(@"Unsorted Bookmarks", @"unsorted bookmarks")];
+        [unfiled setTitle:NSLocalizedStringFromTable(@"Unsorted Bookmarks",
+                                                     @"FXSync", @"unsorted bookmarks")];
         
         return @[toolbar, unfiled];
     }
@@ -369,8 +370,13 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                           @"bmkUri":[NSString stringWithFormat:@"%@", url],
                           @"type":@"bookmark",
                           @"parentid":@"unfiled",
-                          @"parentName":NSLocalizedString(@"Unsorted Bookmarks",
-                                                          @"unsorted bookmarks")
+                          @"parentName":NSLocalizedStringFromTable(@"Unsorted Bookmarks",
+                                                                   @"FXSync",
+                                                                   @"unsorted bookmarks"),
+                          @"description":[NSNull null],//Apparently Firefox like's it's empty
+                          @"keyword":[NSNull null],// attributes, or it will recreate the object
+                          @"loadInSidebar":@0,// with a different id (which is bad)
+                          @"tags":@[]
                           } mutableCopy];
     [item save];
     [_bookmarks addObject:item];
@@ -386,8 +392,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
 }
 
 - (FXSyncItem *)newFolderWithParent:(FXSyncItem *)folder; {
-    FXSyncItem *item = [self newBookmarkWithTitle:NSLocalizedString(@"New Folder",
-                                                                 @"Create a new folder")
+    FXSyncItem *item = [self newBookmarkWithTitle:NSLocalizedStringFromTable(@"New Folder",
+                                                                             @"FXSync", @"Create a new folder")
                                            url:[NSURL URLWithString:@"about:blank"]];
     [item setType:@"folder"];
     [item.jsonPayload removeObjectForKey:@"bmkUri"];

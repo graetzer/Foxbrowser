@@ -82,6 +82,7 @@
 		F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5216C6A9BA00A67B9F /* UIImage+Scaling.m */; };
 		F4D410E319D2641200E22491 /* FXSyncStock.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D410E219D2641200E22491 /* FXSyncStock.m */; };
 		F4D6B069167FBEAF00BF8D4A /* SGPageToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */; };
+		F4D9F83C1A27BBD2003E1D0C /* FXSync.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4D9F83A1A27BBD2003E1D0C /* FXSync.strings */; };
 		F4FCC8F915B77D4800207BEA /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FCC8F815B77D4800207BEA /* Twitter.framework */; };
 		F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */; };
 		F4FE2C4A159B6C58001B04D7 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4FE2C49159B6C58001B04D7 /* UIKit.framework */; };
@@ -139,6 +140,7 @@
 		F41084D619CB46FD0064A9B3 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		F410E96319E19FEB001F0112 /* FXFolderSelectorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXFolderSelectorController.h; path = ui/FXFolderSelectorController.h; sourceTree = "<group>"; };
 		F410E96419E19FEC001F0112 /* FXFolderSelectorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXFolderSelectorController.m; path = ui/FXFolderSelectorController.m; sourceTree = "<group>"; };
+		F41893521A27C6DA00FE91DF /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/FXSync.strings; sourceTree = "<group>"; };
 		F419E75718423E75007EE996 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		F42CC124195652E3005411EA /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F42CC1271956626A005411EA /* NSStringPunycodeAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringPunycodeAdditions.h; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 		F45E1ECD1819923000786048 /* CanonicalRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CanonicalRequest.m; sourceTree = "<group>"; };
 		F45E1ECE1819923000786048 /* CustomHTTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomHTTPProtocol.h; sourceTree = "<group>"; };
 		F45E1ECF1819923000786048 /* CustomHTTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomHTTPProtocol.m; sourceTree = "<group>"; };
+		F46004CA1A27BDD3004548B7 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/FXSync.strings; sourceTree = "<group>"; };
 		F4665956194CA6890028DD40 /* libcommonCrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcommonCrypto.dylib; path = usr/lib/system/libcommonCrypto.dylib; sourceTree = SDKROOT; };
 		F467007A15A64CD500EACFBD /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		F467007C15A64CE000EACFBD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -255,6 +258,7 @@
 		F4C1EE2315B07FCB00FB2B97 /* SGPreviewPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPreviewPanel.h; sourceTree = "<group>"; };
 		F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPreviewPanel.m; sourceTree = "<group>"; };
 		F4C3906B161093D500349AA4 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		F4C6F7CA1A27EE9E00266392 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/FXSync.strings; sourceTree = "<group>"; };
 		F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
 		F4D03D4F16C6A9BA00A67B9F /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
 		F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
@@ -264,6 +268,7 @@
 		F4D410E219D2641200E22491 /* FXSyncStock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXSyncStock.m; sourceTree = "<group>"; };
 		F4D6B067167FBEAF00BF8D4A /* SGPageToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageToolbar.h; sourceTree = "<group>"; };
 		F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageToolbar.m; sourceTree = "<group>"; };
+		F4D9F83B1A27BBD2003E1D0C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/FXSync.strings; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FD2B6715ADDB9D005DBAB4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -342,6 +347,7 @@
 		F406C000195F25A300A84C76 /* FXSync */ = {
 			isa = PBXGroup;
 			children = (
+				F4D9F83A1A27BBD2003E1D0C /* FXSync.strings */,
 				F406C001195F25A300A84C76 /* ext */,
 				F406C026195F25A300A84C76 /* NSData+Ext.h */,
 				F406C027195F25A300A84C76 /* NSData+Ext.m */,
@@ -830,6 +836,7 @@
 				F40AF1E516D2C9AB00EDFD02 /* JSSearchTools.js in Resources */,
 				F44870BC1687E0E700769EA4 /* JSTools.js in Resources */,
 				F4047E4E19E827E900D27001 /* FXSettingsViewController.xib in Resources */,
+				F4D9F83C1A27BBD2003E1D0C /* FXSync.strings in Resources */,
 				F407FAB617E622D6008179F4 /* Images.xcassets in Resources */,
 				F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */,
 				F4C3906C161093D500349AA4 /* Settings.bundle in Resources */,
@@ -943,6 +950,17 @@
 				F4BBDD5519E453E00078D4AA /* ja */,
 			);
 			name = AppiraterLocalizable.strings;
+			sourceTree = "<group>";
+		};
+		F4D9F83A1A27BBD2003E1D0C /* FXSync.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F4D9F83B1A27BBD2003E1D0C /* en */,
+				F46004CA1A27BDD3004548B7 /* de */,
+				F41893521A27C6DA00FE91DF /* fr */,
+				F4C6F7CA1A27EE9E00266392 /* es */,
+			);
+			name = FXSync.strings;
 			sourceTree = "<group>";
 		};
 		F4FD2B6415ADDB7B005DBAB4 /* Localizable.strings */ = {

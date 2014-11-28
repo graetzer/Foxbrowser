@@ -7,6 +7,7 @@
 //
 
 #import "SGSearchViewController.h"
+#import "FXSyncStore.h"
 #import "FXSyncStock.h"
 
 

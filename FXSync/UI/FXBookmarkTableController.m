@@ -7,8 +7,10 @@
 //
 
 #import "FXBookmarkTableController.h"
-#import "FXSyncStock.h"
 #import "FXBookmarkEditController.h"
+
+#import "FXSyncStore.h"
+#import "FXSyncStock.h"
 
 @implementation FXBookmarkTableController
 
@@ -18,7 +20,7 @@
         if (_parentFolder != nil) {
             self.title = [_parentFolder title];
         } else {
-            self.title = NSLocalizedString(@"Bookmarks", @"Bookmarks");
+            self.title = NSLocalizedStringFromTable(@"Bookmarks", @"FXSync", @"Bookmarks");
         }
     }
     
@@ -80,8 +82,8 @@
     if (_parentFolder != nil) {
         UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                                target:nil action:nil];
-        UIBarButtonItem *folder = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"New Folder",
-                                                                                           @"Create a new bookmark folder")
+        UIBarButtonItem *folder = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"New Folder",
+                                                                                                    @"FXSync", @"Create a new folder")
                                                                    style:UIBarButtonItemStylePlain
                                                                   target:self
                                                                   action:@selector(_addFolder:)];
@@ -132,8 +134,7 @@
     
     // Let's see if we display the top most folders, and need to show the history
     if (_parentFolder == nil && indexPath.section == 0) {
-        NSString *title = [NSLocalizedString(@"history", @"history")
-                           capitalizedStringWithLocale:[NSLocale currentLocale]];
+        NSString *title = NSLocalizedStringFromTable(@"History", @"FXSync", @"History");
         cell.textLabel.text = title;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.imageView.image = [UIImage imageNamed:@"history"];
@@ -197,8 +198,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (_parentFolder == nil && indexPath.section == 0) {
         FXBookmarkTableController *table = [FXBookmarkTableController new];
-        table.title = [NSLocalizedString(@"history", @"history")
-                       capitalizedStringWithLocale:[NSLocale currentLocale]];
+        table.title = NSLocalizedStringFromTable(@"History", @"FXSync", @"History Label");
         // Workaround, so that this is treated as subfolder
         table.parentFolder = [FXSyncItem new];
         table.parentFolder.collection = kFXHistoryCollectionKey;

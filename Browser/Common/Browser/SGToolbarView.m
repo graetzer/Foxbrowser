@@ -137,7 +137,7 @@
     if (item == nil && url != nil) {
         NSString *title = [[_browser selectedViewController] title];
         if (!title) {
-            title = NSLocalizedString(@"Untitled", @"Untitled bookmark");
+            title = NSLocalizedString(@"Untitled", @"Title string");
         }
         [self presentMenuController:_bookmarks completion:^{
             FXBookmarkEditController *edit = [FXBookmarkEditController new];

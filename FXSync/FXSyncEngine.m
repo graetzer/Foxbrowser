@@ -28,14 +28,6 @@ NSString *const kFXHeaderAlert = @"X-Weave-Alert";
 NSString *const kFXHeaderIfModifiedSince = @"X-If-Modified-Since";
 NSString *const kFXHeaderIfUnmodifiedSince = @"X-If-Unmodified-Since";
 
-NSString *const kFXTabsCollectionKey = @"tabs";
-NSString *const kFXBookmarksCollectionKey = @"bookmarks";
-NSString *const kFXHistoryCollectionKey = @"history";
-NSString *const kFXPasswordsCollectionKey = @"passwords";
-NSString *const kFXPrefsCollectionKey = @"prefs";
-NSString *const kFXFormsCollectionKey = @"forms";
-NSString *const kFXClientsCollectionKey = @"clients";
-
 NSInteger const SEVEN_DAYS = 7*24*60*60;
 
 @implementation FXSyncEngine  {
@@ -101,8 +93,8 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
         } else {
             
             if ([err code] == 401) {
-                NSString *msg = NSLocalizedString(@"Failed to authenticate",
-                                                  @"Failed to authenticate");
+                NSString *msg = NSLocalizedStringFromTable(@"Failed to authenticate",
+                                                           @"FXSync", @"Failed to authenticate");
                 NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
                                                      code:kFXSyncEngineErrorAuthentication
                                                  userInfo:@{NSLocalizedDescriptionKey:msg}];
@@ -248,7 +240,7 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                         
                         if ([item deleted]) {
                             [[FXSyncStore sharedInstance] deleteItem:item];
-                            DLog(@"Deleting item: %@", payload);
+                            DLog(@"Deleting item: %@", item.syncId);
                         } else {
                             item.modified = modified;
                             [[FXSyncStore sharedInstance] saveItem:item];
@@ -305,11 +297,11 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                     } else {
                         NSString *msg;
                         if ([_metaglobal[@"storageVersion"] integerValue] > 5) {
-                            msg = NSLocalizedString(@"Data on the server is in a new and unrecognized format. Please update Foxbrowser.",
-                                                    @"update Foxbrowser");
+                            msg = NSLocalizedStringFromTable(@"Data on the server is in a new and unrecognized format. Please update Foxbrowser.",
+                                                             @"FXSync", @"update Foxbrowser");
                         } else {
-                            msg = NSLocalizedString(@"Data on the server is in an old and unsupported format. Please update Firefox Sync on your computer.",
-                                                    @"update Firefox Sync");
+                            msg = NSLocalizedStringFromTable(@"Data on the server is in an old and unsupported format. Please update Firefox Sync on your computer.",
+                                                             @"FXSync", @"update Firefox Sync");
                         }
                         NSError *err = [NSError errorWithDomain:kFXSyncEngineErrorDomain
                                                            code:kFXSyncEngineErrorStorageVersionMismatch
@@ -415,12 +407,13 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
             return;
         }
         
+        // Always overwrite local results
         FXSyncItem *item = [[FXSyncItem alloc] init];
         item.collection = cName;
         item.syncId = bso[@"id"];
         if ([payload[@"deleted"] boolValue]) {
             [[FXSyncStore sharedInstance] deleteItem:item];
-            DLog(@"Deleting item: %@", payload);
+            DLog(@"Deleting item: %@ %@", item.syncId, payload);
         } else {
             item.modified = [bso[@"modified"] doubleValue];
             item.sortindex = [bso[@"sortindex"] integerValue];
@@ -658,8 +651,8 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
     // Unauthorized
     if (resp.statusCode == 401) {
         // Technically the code doesn't have to indicate that
-        NSString *msg = NSLocalizedString(@"Due to a recent update, you need to log in to Foxbrowser again.",
-                                          @"Message that we show in a dialog when you need to sign in again after upgrading");
+        NSString *msg = NSLocalizedStringFromTable(@"Due to a recent update, you need to log in to Foxbrowser again.",
+                                                   @"FXSync", @"Message that we show in a dialog when you need to sign in again after upgrading");
         NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
                                              code:kFXSyncEngineErrorAuthentication
                                          userInfo:@{NSLocalizedDescriptionKey:msg}];

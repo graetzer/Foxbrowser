@@ -416,7 +416,7 @@
         self.credentialsPrompt = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Authorizing", @"Authorizing")
                                                             message:NSLocalizedString(@"Please enter your credentials", @"HTTP Basic auth")
                                                            delegate:self
-                                                  cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
+                                                  cancelButtonTitle:NSLocalizedString(@"Cancel", @"Cancel")
                                                   otherButtonTitles:NSLocalizedString(@"OK", @"ok"), nil];
         self.credentialsPrompt.alertViewStyle = UIAlertViewStyleLoginAndPasswordInput;
         if (challenge.proposedCredential != nil) {
@@ -468,7 +468,7 @@
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Verify Server Identity", @"Untrusted certificate")
                                                         message:message
                                                        delegate:self
-                                              cancelButtonTitle:NSLocalizedString(@"Cancel", @"cancel")
+                                              cancelButtonTitle:NSLocalizedString(@"Cancel", @"Cancel")
                                               otherButtonTitles:NSLocalizedString(@"Continue", nil), nil];
         [alert show];
     });

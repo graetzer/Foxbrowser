@@ -50,7 +50,7 @@
     self.restorationIdentifier = NSStringFromClass([self class]);
     self.restorationClass = [self class];
     
-    self.title = NSLocalizedString(@"New Tab", @"New Tab page");//NSLocalizedString(@"Untitled", @"Untitled tab");
+    self.title = NSLocalizedString(@"New Tab", @"Open new tab page");
     self.view.backgroundColor = [UIColor whiteColor];
     
     NSArray *titles = @[NSLocalizedString(@"Most popular", @"Most popular websites"),

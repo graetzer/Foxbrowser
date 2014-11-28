@@ -15,12 +15,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = NSLocalizedString(@"Settings", @"Settings");
+    self.title = NSLocalizedStringFromTable(@"Settings", @"FXSync", @"Settings");
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                           target:self
                                                                                           action:@selector(_cancel)];
     
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Sign Out", @"perform sign out")
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"Sign Out", @"FXSync", @"perform sign out")
                                                                              style:UIBarButtonItemStyleBordered
                                                                             target:self
                                                                             action:@selector(_logout)];
@@ -58,11 +58,12 @@
         _syncButton.enabled = YES;
     }
     
-    NSString *m = NSLocalizedString(@"Logged in as", );
+    
+    NSString *m = NSLocalizedStringFromTable(@"Logged in as", @"FXSync", @"Start of sentence");
     _userLabel.text = [m stringByAppendingFormat:@": %@", st.user];
-    m = NSLocalizedString(@"Bookmarks", @"number of bookmarks label");
+    m = NSLocalizedStringFromTable(@"Bookmarks", @"FXSync", @"Bookmarks");
     _bookmarksLabel.text = [m stringByAppendingFormat:@": %ld", (unsigned long)[st.bookmarks count]];
-    m = NSLocalizedString(@"History", @"number of history items label");
+    m = NSLocalizedStringFromTable(@"History", @"FXSync", @"History Label");
     _historyLabel.text = [m stringByAppendingFormat:@": %ld", (unsigned long)[st.history count]];
 }
 
@@ -71,12 +72,13 @@
 }
 
 - (void)_logout {
-    NSString *msg = NSLocalizedString(@"Signing out will erase your Firefox Sync information from this device, but will require signing in and a full refresh next time. ", "Signout");
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Warning", @"")
+    NSString *msg = NSLocalizedStringFromTable(@"Signing out will erase your Firefox Sync information from this device, but will require signing in and a full refresh next time.",
+                                               @"FXSync", "Signout");
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Warning", @"FXSync", )
                                                     message:msg
                                                    delegate:self
-                                          cancelButtonTitle:NSLocalizedString(@"Cancel", nil)
-                                          otherButtonTitles:NSLocalizedString(@"OK", @"ok"), nil];
+                                          cancelButtonTitle:NSLocalizedStringFromTable(@"Cancel", @"FXSync", )
+                                          otherButtonTitles:NSLocalizedStringFromTable(@"OK", @"FXSync", @"ok"), nil];
     [alert show];
 }
 

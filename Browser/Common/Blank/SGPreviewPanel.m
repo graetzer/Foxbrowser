@@ -172,7 +172,7 @@
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         if ([recognizer.view isKindOfClass:[SGPreviewTile class]]) {
             _selected = (SGPreviewTile*)recognizer.view;
-            NSString *cancel = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? NSLocalizedString(@"Cancel", @"cancel") : nil;
+            NSString *cancel = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? NSLocalizedString(@"Cancel", @"Cancel") : nil;
             
             NSString *title = [_selected.item title];
             if ([title length] == 0) {

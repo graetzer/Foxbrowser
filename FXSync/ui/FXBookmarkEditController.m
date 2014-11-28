@@ -22,13 +22,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self.tableView registerClass:[UITableViewHeaderFooterView class] forHeaderFooterViewReuseIdentifier:@"HeaderIdentifier"];
-//    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
-//                                                                                           target:self
-//                                                                                           action:@selector(_saveData)];
     if ([[_bookmark type] isEqualToString:@"folder"]) {
-        self.title = NSLocalizedString(@"Edit Folder", @"Edit Bookmark Folder");
+        self.title = NSLocalizedStringFromTable(@"Edit Folder", @"FXSync", @"Edit Bookmark Folder");
     } else {
-        self.title = NSLocalizedString(@"Edit", @"Edit something");
+        self.title = NSLocalizedStringFromTable(@"Edit", @"FXSync", @"Edit something");
     }
 }
 
@@ -69,11 +66,11 @@
     UITableViewHeaderFooterView *header = [tableView dequeueReusableHeaderFooterViewWithIdentifier:headerReuseIdentifier];
     
     if (section == 0) {
-        header.textLabel.text = NSLocalizedString(@"Information",
-                                                  @"Information");
+        header.textLabel.text = NSLocalizedStringFromTable(@"Information",
+                                                           @"FXSync", @"Information");
     } else if (section == 1) {
-        header.textLabel.text = NSLocalizedString(@"Containing Folder",
-                                                  @"Location of Bookmark");
+        header.textLabel.text = NSLocalizedStringFromTable(@"Containing Folder",
+                                                           @"FXSync", @"Location of Bookmark");
     }
     
     return header;
@@ -101,22 +98,22 @@
         
         cell.accessoryType = UITableViewCellAccessoryNone;
         if (indexPath.row == 0) {
-            field.placeholder = NSLocalizedString(@"Name", @"Name of the Bookmark");
+            field.placeholder = NSLocalizedStringFromTable(@"Title", @"FXSync", @"Title of the Bookmark");
             field.text = [_bookmark title];
             
         } else {
             if ([[_bookmark type] isEqualToString:@"bookmark"] && indexPath.row == 1) {
-                field.placeholder = NSLocalizedString(@"Website URL", @"URL of Bookmark");
+                field.placeholder = NSLocalizedStringFromTable(@"Website URL", @"FXSync", @"URL of Bookmark");
                 field.text = [_bookmark bmkUri];
             } else if ([[_bookmark type] isEqualToString:@"livemark"]) {
                 if (indexPath.row == 1) {// Feed-Url
-                    field.placeholder = NSLocalizedString(@"Feed-URL", @"URL of RSS Feed");
+                    field.placeholder = NSLocalizedStringFromTable(@"Feed-URL", @"FXSync", @"URL of RSS Feed");
                     field.text = [_bookmark feedUri];
                 } else if (indexPath.row == 2) {//Website-URL
                     field.autocorrectionType = UITextAutocorrectionTypeNo;
                     field.spellCheckingType = UITextSpellCheckingTypeNo;
                     field.autocapitalizationType = UITextAutocapitalizationTypeNone;
-                    field.placeholder = NSLocalizedString(@"Website URL", @"URL of Bookmark");
+                    field.placeholder = NSLocalizedStringFromTable(@"Website URL", @"FXSync", @"URL of Bookmark");
                     field.text = [_bookmark siteUri];
                 }
             }
