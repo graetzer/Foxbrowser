@@ -211,30 +211,9 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
     [def synchronize];
 }
 
-
 - (BOOL) canConnectToInternet; {
     return [_reachability isReachable];
 }
-
-//- (void) eraseAllUserData {
-//    NSHTTPCookieStorage* storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-//	NSHTTPCookie *cookie;
-//	for (cookie in [storage cookies])  {
-//		[storage deleteCookie: cookie];
-//	}
-//    [[NSURLCache sharedURLCache] removeAllCachedResponses];
-//    
-//    [[SGFavouritesManager sharedManager] resetFavourites];
-//    
-//	// Workaround for #602419 - If the wifi is turned off, it acts as if a blank account is signed in
-//	// See a more detailed description in LogoutController
-////	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveShowedFirstRunPage];
-////	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"needsFullReset"];
-////	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveBackgroundedAtTime];
-////	[[NSUserDefaults standardUserDefaults] removeObjectForKey: @"useSafari"];
-////	[[NSUserDefaults standardUserDefaults] removeObjectForKey: kWeaveUseNativeApps];
-////	[[NSUserDefaults standardUserDefaults] synchronize];
-//}
 
 #pragma mark - AppiraterDelegate
 - (void)appiraterDidDeclineToRate:(Appirater *)appirater {

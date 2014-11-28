@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		F4047E4319E6E6B700D27001 /* DejalActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4047E4119E6E6B700D27001 /* DejalActivityView.m */; };
 		F4047E4C19E766D500D27001 /* UICKeyChainStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F4047E4B19E766D500D27001 /* UICKeyChainStore.m */; };
-		F4047E4E19E827E900D27001 /* FXSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4047E4D19E827E900D27001 /* FXSettingsViewController.xib */; };
 		F406C028195F25A300A84C76 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = F406C005195F25A300A84C76 /* NSData+Base64.m */; };
 		F406C029195F25A300A84C76 /* NSString+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = F406C007195F25A300A84C76 /* NSString+Base64.m */; };
 		F406C02A195F25A300A84C76 /* CryptoProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = F406C009195F25A300A84C76 /* CryptoProxy.m */; };
@@ -67,7 +66,6 @@
 		F4BBDC9D19E427290078D4AA /* SGToolbarView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BBDC9C19E427290078D4AA /* SGToolbarView.m */; };
 		F4BBDCA119E435640078D4AA /* KxMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BBDCA019E435640078D4AA /* KxMenu.m */; };
 		F4BBDD3519E453450078D4AA /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDD3319E453450078D4AA /* AppiraterLocalizable.strings */; };
-		F4BBDD5719E5D5C00078D4AA /* FXLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4BBDD5619E5D5C00078D4AA /* FXLoginViewController.xib */; };
 		F4BBDD5A19E617390078D4AA /* FXHelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4BBDD5919E617390078D4AA /* FXHelpViewController.m */; };
 		F4C0C0C319DDAD7D00EF8722 /* FXTabsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0C219DDAD7D00EF8722 /* FXTabsViewController.m */; };
 		F4C0C0C719DDADA300EF8722 /* FXLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C0C0C619DDADA300EF8722 /* FXLoginViewController.m */; };
@@ -77,6 +75,8 @@
 		F4C1EE2215B07F9F00FB2B97 /* SGBlankController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C1EE2115B07F9F00FB2B97 /* SGBlankController.m */; };
 		F4C1EE2515B07FCB00FB2B97 /* SGPreviewPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */; };
 		F4C3906C161093D500349AA4 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F4C3906B161093D500349AA4 /* Settings.bundle */; };
+		F4C6F7CB1A282EE500266392 /* FXSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4C6F7CD1A282EE500266392 /* FXSettingsViewController.xib */; };
+		F4C6F7CE1A282EF500266392 /* FXLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4C6F7D01A282EF500266392 /* FXLoginViewController.xib */; };
 		F4D03D5316C6A9BA00A67B9F /* SGBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */; };
 		F4D03D5716C6A9BA00A67B9F /* SGFavouritesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */; };
 		F4D03D5816C6A9BA00A67B9F /* UIImage+Scaling.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D03D5216C6A9BA00A67B9F /* UIImage+Scaling.m */; };
@@ -98,7 +98,6 @@
 		F4047E4119E6E6B700D27001 /* DejalActivityView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DejalActivityView.m; sourceTree = "<group>"; };
 		F4047E4A19E766D500D27001 /* UICKeyChainStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICKeyChainStore.h; sourceTree = "<group>"; };
 		F4047E4B19E766D500D27001 /* UICKeyChainStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICKeyChainStore.m; sourceTree = "<group>"; };
-		F4047E4D19E827E900D27001 /* FXSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = FXSettingsViewController.xib; path = UI/FXSettingsViewController.xib; sourceTree = "<group>"; };
 		F406C004195F25A300A84C76 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
 		F406C005195F25A300A84C76 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
 		F406C006195F25A300A84C76 /* NSString+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Base64.h"; sourceTree = "<group>"; };
@@ -240,7 +239,6 @@
 		F4BBDD5319E453DC0078D4AA /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
 		F4BBDD5419E453DE0078D4AA /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
 		F4BBDD5519E453E00078D4AA /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/AppiraterLocalizable.strings; sourceTree = "<group>"; };
-		F4BBDD5619E5D5C00078D4AA /* FXLoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = FXLoginViewController.xib; path = UI/FXLoginViewController.xib; sourceTree = "<group>"; };
 		F4BBDD5819E617390078D4AA /* FXHelpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXHelpViewController.h; path = UI/FXHelpViewController.h; sourceTree = "<group>"; };
 		F4BBDD5919E617390078D4AA /* FXHelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FXHelpViewController.m; path = UI/FXHelpViewController.m; sourceTree = "<group>"; };
 		F4C0C0C119DDAD7D00EF8722 /* FXTabsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FXTabsViewController.h; path = UI/FXTabsViewController.h; sourceTree = "<group>"; };
@@ -259,6 +257,13 @@
 		F4C1EE2415B07FCB00FB2B97 /* SGPreviewPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPreviewPanel.m; sourceTree = "<group>"; };
 		F4C3906B161093D500349AA4 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		F4C6F7CA1A27EE9E00266392 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/FXSync.strings; sourceTree = "<group>"; };
+		F4C6F7D11A282F2C00266392 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FXLoginViewController.xib; sourceTree = "<group>"; };
+		F4C6F7D21A282F2C00266392 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/FXSettingsViewController.xib; sourceTree = "<group>"; };
+		F4C6F7D31A282F4200266392 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/FXSync.strings; sourceTree = "<group>"; };
+		F4C6F7D51A282F9E00266392 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/FXSettingsViewController.strings; sourceTree = "<group>"; };
+		F4C6F7D71A28301F00266392 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/FXLoginViewController.strings; sourceTree = "<group>"; };
+		F4C6F7D91A28C6E400266392 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/FXLoginViewController.strings; sourceTree = "<group>"; };
+		F4C6F7DB1A28C97C00266392 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/FXSettingsViewController.strings; sourceTree = "<group>"; };
 		F4D03D4716C6A9BA00A67B9F /* SGBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGBrowserViewController.m; sourceTree = "<group>"; };
 		F4D03D4F16C6A9BA00A67B9F /* SGFavouritesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGFavouritesManager.h; sourceTree = "<group>"; };
 		F4D03D5016C6A9BA00A67B9F /* SGFavouritesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGFavouritesManager.m; sourceTree = "<group>"; };
@@ -268,7 +273,6 @@
 		F4D410E219D2641200E22491 /* FXSyncStock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXSyncStock.m; sourceTree = "<group>"; };
 		F4D6B067167FBEAF00BF8D4A /* SGPageToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGPageToolbar.h; sourceTree = "<group>"; };
 		F4D6B068167FBEAF00BF8D4A /* SGPageToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGPageToolbar.m; sourceTree = "<group>"; };
-		F4D9F83B1A27BBD2003E1D0C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/FXSync.strings; sourceTree = "<group>"; };
 		F4FCC8F815B77D4800207BEA /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		F4FD2B6515ADDB7B005DBAB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4FD2B6715ADDB9D005DBAB4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -588,7 +592,7 @@
 			children = (
 				F4C0C0C519DDADA300EF8722 /* FXLoginViewController.h */,
 				F4C0C0C619DDADA300EF8722 /* FXLoginViewController.m */,
-				F4BBDD5619E5D5C00078D4AA /* FXLoginViewController.xib */,
+				F4C6F7D01A282EF500266392 /* FXLoginViewController.xib */,
 				F4BBDD5819E617390078D4AA /* FXHelpViewController.h */,
 				F4BBDD5919E617390078D4AA /* FXHelpViewController.m */,
 			);
@@ -664,7 +668,7 @@
 			children = (
 				F4C0C0CB19DDB00400EF8722 /* FXSettingsViewController.h */,
 				F4C0C0CC19DDB00400EF8722 /* FXSettingsViewController.m */,
-				F4047E4D19E827E900D27001 /* FXSettingsViewController.xib */,
+				F4C6F7CD1A282EE500266392 /* FXSettingsViewController.xib */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -815,6 +819,7 @@
 				tr,
 				uk,
 				vi,
+				Base,
 			);
 			mainGroup = F4FE2C3A159B6C58001B04D7;
 			productRefGroup = F4FE2C46159B6C58001B04D7 /* Products */;
@@ -835,12 +840,12 @@
 				F455C5F51A02E74500F49C07 /* Icons.xcassets in Resources */,
 				F40AF1E516D2C9AB00EDFD02 /* JSSearchTools.js in Resources */,
 				F44870BC1687E0E700769EA4 /* JSTools.js in Resources */,
-				F4047E4E19E827E900D27001 /* FXSettingsViewController.xib in Resources */,
+				F4C6F7CB1A282EE500266392 /* FXSettingsViewController.xib in Resources */,
 				F4D9F83C1A27BBD2003E1D0C /* FXSync.strings in Resources */,
 				F407FAB617E622D6008179F4 /* Images.xcassets in Resources */,
 				F4FD2B6615ADDB7B005DBAB4 /* Localizable.strings in Resources */,
 				F4C3906C161093D500349AA4 /* Settings.bundle in Resources */,
-				F4BBDD5719E5D5C00078D4AA /* FXLoginViewController.xib in Resources */,
+				F4C6F7CE1A282EF500266392 /* FXLoginViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -952,13 +957,35 @@
 			name = AppiraterLocalizable.strings;
 			sourceTree = "<group>";
 		};
+		F4C6F7CD1A282EE500266392 /* FXSettingsViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F4C6F7D21A282F2C00266392 /* Base */,
+				F4C6F7D51A282F9E00266392 /* de */,
+				F4C6F7DB1A28C97C00266392 /* fr */,
+			);
+			name = FXSettingsViewController.xib;
+			path = UI;
+			sourceTree = "<group>";
+		};
+		F4C6F7D01A282EF500266392 /* FXLoginViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F4C6F7D11A282F2C00266392 /* Base */,
+				F4C6F7D71A28301F00266392 /* de */,
+				F4C6F7D91A28C6E400266392 /* fr */,
+			);
+			name = FXLoginViewController.xib;
+			path = UI;
+			sourceTree = "<group>";
+		};
 		F4D9F83A1A27BBD2003E1D0C /* FXSync.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				F4D9F83B1A27BBD2003E1D0C /* en */,
 				F46004CA1A27BDD3004548B7 /* de */,
 				F41893521A27C6DA00FE91DF /* fr */,
 				F4C6F7CA1A27EE9E00266392 /* es */,
+				F4C6F7D31A282F4200266392 /* Base */,
 			);
 			name = FXSync.strings;
 			sourceTree = "<group>";

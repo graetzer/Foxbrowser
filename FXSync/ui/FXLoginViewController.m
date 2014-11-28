@@ -11,6 +11,9 @@
 #import "FXHelpViewController.h"
 #import "DejalActivityView.h"
 
+#import "SGAppDelegate.h"
+#import "GAI.h"
+
 @implementation FXLoginViewController
 
 - (void)viewDidLoad {
@@ -24,7 +27,9 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                                                           target:self
                                                                                           action:@selector(_cancel:)];
-
+    
+    [appDelegate.tracker set:kGAIScreenName value:@"LoginView"];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -55,6 +60,12 @@
 
 - (IBAction)_cancel:(id)sender {
     [self dismissViewControllerAnimated:YES completion:NULL];
+    if (sender != self) {
+        [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
+                                                                          action:@"Cancel"
+                                                                           label:@"Cancel"
+                                                                           value:nil] build]];
+    }
 }
 
 - (IBAction)_showHelp {
@@ -109,11 +120,21 @@
          if (success) {
              [[FXSyncStock sharedInstance] restock];
              [self _cancel:self];
+             
+             [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
+                                                                               action:@"Login"
+                                                                                label:@"Success"
+                                                                                value:nil] build]];
          } else {
              self.navigationItem.leftBarButtonItem.enabled = YES;
              self.navigationItem.rightBarButtonItem.enabled = YES;
              [self _showWarning:NSLocalizedStringFromTable(@"Login Failure",
                                                            @"FXSync", @"unable to login")];
+             
+             [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
+                                                                               action:@"Login"
+                                                                                label:@"Failure"
+                                                                                value:nil] build]];
          }
      }];
 }

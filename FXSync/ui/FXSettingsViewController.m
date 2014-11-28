@@ -9,6 +9,9 @@
 #import "FXSettingsViewController.h"
 #import "FXSyncStock.h"
 
+#import "SGAppDelegate.h"
+#import "GAI.h"
+
 @implementation FXSettingsViewController {
     NSTimer *_timer;
 }
@@ -33,6 +36,9 @@
     _clearButton.layer.borderColor = [UIColor whiteColor].CGColor;
     _clearButton.layer.borderWidth = 1.0;
     _clearButton.layer.cornerRadius = 10;
+    
+    [appDelegate.tracker set:kGAIScreenName value:@"SettingsView"];
+    [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -89,14 +95,17 @@
 
 - (IBAction)clearHistory:(id)sender {
     [[FXSyncStock sharedInstance] clearHistory];
-    
-    
 }
 
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
     if (buttonIndex > 0) {
         [[FXSyncStock sharedInstance] logout];
         [self dismissViewControllerAnimated:YES completion:NULL];
+        
+        [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Settings"
+                                                                          action:@"Logout"
+                                                                           label:nil
+                                                                           value:nil] build]];
     }
 }
 @end
