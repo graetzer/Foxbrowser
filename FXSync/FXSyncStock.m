@@ -396,6 +396,8 @@ NSString *const kFXErrorNotification = @"kFXErrorNotification";
                                                                              @"FXSync", @"Create a new folder")
                                            url:[NSURL URLWithString:@"about:blank"]];
     [item setType:@"folder"];
+    [item setParentid:folder.syncId];
+    [item setParentName:[folder title]];
     [item.jsonPayload removeObjectForKey:@"bmkUri"];
     [item save];
     return item;
