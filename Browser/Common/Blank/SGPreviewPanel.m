@@ -35,7 +35,16 @@
         _label.backgroundColor = [UIColor clearColor];
         _label.font = font;
         _label.textColor = [UIColor darkTextColor];
-        _label.text = [_item title];
+        if ([[_item title] length] > 0) {
+            _label.text = [_item title];
+        } else {
+            NSString *url = [item urlString];
+            NSRange r = [url rangeOfString:@"//"];
+            if (url && r.location != NSNotFound) {
+                url = [url substringFromIndex:r.location + r.length];
+            }
+            _label.text = url;
+        }
         [self addSubview:_label];
         
         UIImage *image = [fm imageWithURL:url];
@@ -85,15 +94,15 @@
         marginY = 20;
     }
     NSInteger columns = s.width / (tileSize.width+marginX);
-    NSInteger lines = s.height / (tileSize.height+marginY);
+    NSInteger rows = s.height / (tileSize.height+marginY);
     CGFloat paddingX = (s.width - columns * (tileSize.width+marginX))/2;
-    CGFloat paddingY = (s.height - lines * (tileSize.height+marginY))/2;
+    CGFloat paddingY = (s.height - rows * (tileSize.height+marginY))/2;
     
     for (NSUInteger i = 0; i < _tiles.count; i++) {
-        NSUInteger line = i / columns;
+        NSUInteger row = i / columns;
         NSUInteger column = i % columns;
         
-        if (line == lines-1 && column == 0) {
+        if (row == rows-1 && column == 0) {
             NSInteger leftOver = [_tiles count] - i;
             paddingX = (s.width - leftOver * (tileSize.width+marginX))/2;
         }
@@ -101,7 +110,7 @@
         SGPreviewTile *tile = _tiles[i];
         CGRect frame;
         frame.origin.x = column*(tileSize.width + marginX) + paddingX;
-        frame.origin.y = line*(tileSize.height + marginY) + paddingY;
+        frame.origin.y = row*(tileSize.height + marginY) + paddingY;
         frame.size = tileSize;
         tile.frame = frame;
     }
@@ -139,7 +148,7 @@
 - (void)addTileWithItem:(FXSyncItem *)item {
     if (item != nil) {
         CGRect frame = CGRectZero;
-        frame.size = CGSizeMake(100, 75);//[self _tileSize];
+        frame.size = CGSizeMake(120, 80);//[self _tileSize];
         SGPreviewTile *tile = [[SGPreviewTile alloc] initWithItem:item frame:frame];
         if (tile != nil) {
             tile.center = CGPointMake(self.bounds.size.width + tile.bounds.size.width, self.bounds.size.height/2);

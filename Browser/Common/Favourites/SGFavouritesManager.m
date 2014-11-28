@@ -109,15 +109,20 @@
 }
 
 - (NSUInteger)maxFavs {
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
-        return [UIScreen mainScreen].bounds.size.height >= 568 ? 8 : 6;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        if ([UIScreen mainScreen].scale == 3.0) {
+            return 12;// Show 12 on the iPhone 6 plus
+        } else {
+            return [UIScreen mainScreen].bounds.size.height >= 568 ? 8 : 6;
+        }
+    }
     return 8;//on the iPad always 8
 }
 
 #pragma mark Screenshot stuff
 - (void)webViewDidFinishLoad:(SGWebViewController *)webController; {
     NSURL *url = webController.request.URL;
-    if (![self _containsHost:url.host]) return;
+    if (![self _mightNeedScreenshot:url.host]) return;
     
     NSString *path = [self _imagePathForURL:url];
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -160,6 +165,21 @@
 }
 
 #pragma mark  - Utility
+
+- (BOOL)_mightNeedScreenshot:(NSString *)host {
+    float bestDistance = MAXFLOAT;
+    for (FXSyncItem *item in _favourites) {
+        NSString *urlS = [item urlString];
+        if ([urlS length] > 0) {
+            NSURL *url = [NSURL URLWithString:urlS];
+            float dist =  [host levenshteinDistance:url.host];
+            if (dist < bestDistance) {
+                bestDistance = dist;
+            }
+        }
+    }
+    return bestDistance < 10;
+}
 
 - (BOOL)_containsHost:(NSString *)host {
     for (FXSyncItem *item in _favourites) {

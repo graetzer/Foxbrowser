@@ -235,13 +235,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     self.title = [webView title];
     
     if (![self.webView.request.URL.scheme isEqualToString:@"file"]) {
-        // Just in case the main url changes, add an history entry
-        if (![_request.mainDocumentURL isEqual:webView.request.mainDocumentURL] ) {
-            [[FXSyncStock sharedInstance] addHistoryURL:_request.URL];
-        }
         _request = webView.request;
     }
-    [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
     SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
     [browser updateInterface];
 }
@@ -293,6 +288,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     _progress = progress;
     SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
     [browser updateInterface];
+    
+    if (progress >= 1 && ![self.webView.request.URL.scheme isEqualToString:@"file"]) {
+        [[FXSyncStock sharedInstance] addHistoryURL:_request.URL];
+        [[SGFavouritesManager sharedManager] webViewDidFinishLoad:self];
+    }
 }
 
 #pragma mark - Networking
