@@ -153,7 +153,7 @@
 - (void)reload; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        [webC reload];
+        [webC openRequest:nil];
         [self updateInterface];
     }
 }
@@ -198,7 +198,7 @@
 - (BOOL)canGoBack; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        return [webC.webView canGoBack];
+        return [webC canGoBack];
     }
     return NO;
 }
@@ -206,7 +206,7 @@
 - (BOOL)canGoForward; {
     if ([[self selectedViewController] isKindOfClass:[SGWebViewController class]]) {
         SGWebViewController *webC = (SGWebViewController *)[self selectedViewController];
-        return [webC.webView canGoForward];
+        return [webC canGoForward];
     }
     return NO;
 }

@@ -20,6 +20,8 @@ UIActionSheetDelegate, UIViewControllerRestoration, NJKWebViewProgressDelegate>
 @property (weak, nonatomic) UIToolbar *searchToolbar;
 
 @property (strong, nonatomic) NSURLRequest *request;
+@property (nonatomic, readonly, assign) BOOL canGoBack;
+@property (nonatomic, readonly, assign) BOOL canGoForward;
 @property (assign, nonatomic, readonly, getter = isLoading) BOOL loading;
 @property (assign, nonatomic, readonly) float progress;
 
@@ -27,6 +29,5 @@ UIActionSheetDelegate, UIViewControllerRestoration, NJKWebViewProgressDelegate>
 /// If parameter request is nil, the last loaded request will be reloaded
 - (void)openRequest:(NSURLRequest *)request;
 - (NSInteger)search:(NSString *)searchString;
-- (void)reload;
 
 @end

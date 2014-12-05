@@ -1,26 +1,23 @@
 # Foxbrowser
 
-The purpose of the project is to provide a full Firefox Sync powered replacement for Mobile Safari on iOs devices. 
-The backend code is forked from Firefox Home for iOS, on top of that I created an entirely new UI.
+The purpose of the project is to provide a full Firefox Sync powered replacement for Mobile Safari on iOS devices.
+Two way sync is supported, what is still lacking is support for stored passwords and form autocompletion.
 
-- Safari style UI (Might change in future releases)
-- Support for Firefox Sync as in Firefox Home (Open tabs, Bookmarks & History)
+- Full Firefox Sync (Open tabs, Bookmarks & History)
 - Secure end to end encrypted transport of your Sync data
-- Up to 8 Tab's
-- Start screen with the most frequent visited History entry's
+- Supports Do Not Track
+- Start screen with the most frequent visited history entry's
 - See open tabs from your other Firefox Sync enabled devices
 - Real-time search in your browsing history, bookmarks and tabs
-- Send Tweet's and mail's directly from the App
-- Best of all: It's free
+- Search engine integration in the Address bar
+- Share URL's via Facebook, Twitter, Mail, Google+
+- Search in the website
 
 [More info](http://git.graetzer.org/Foxbrowser/)
 
-### Limitations
-The Firefox Home codebase doesn't allow changes to the sync data yet, currently the browser works read-only.
-If you visit a site that's not already in the history, it's added locally.
 
 #### Licence
-   Copyright 2012-2013 Simon Peter Grätzer
+   Copyright 2012-2014 Simon Peter Grätzer
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

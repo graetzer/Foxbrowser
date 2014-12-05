@@ -107,13 +107,13 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
         [[UIApplication sharedApplication] endBackgroundTask:identifier];
         identifier = UIBackgroundTaskInvalid;
     }];
-    
-    //    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-    //        if (identifier != UIBackgroundTaskInvalid) {
-    ////            [[Store getStore] saveChanges];
-    //            [[UIApplication sharedApplication] endBackgroundTask:identifier];
-    //        }
-    //    });
+    // Just wait 10 seconds to finish uploads
+    dispatch_queue_t q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), q, ^{
+        if (identifier != UIBackgroundTaskInvalid) {
+            [[UIApplication sharedApplication] endBackgroundTask:identifier];
+        }
+    });
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {

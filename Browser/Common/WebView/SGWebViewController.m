@@ -223,8 +223,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     _loading = YES;
     [self _dismissSearchToolbar];
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -237,15 +235,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     if (![self.webView.request.URL.scheme isEqualToString:@"file"]) {
         _request = webView.request;
     }
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     // If an error oocured, disable the loading stuff
     _loading = NO;
-    SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
-    [browser updateInterface];
     
     DLog(@"WebView error code: %ld", (long)error.code);
     //ignore these
@@ -284,8 +278,12 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     [self.webView showPlaceholder:error.localizedDescription title:title];
 }
 
+/* This should be called everytime, so we do not need to call updateInterface in the other methods */
 - (void)webViewProgress:(NJKWebViewProgress *)webViewProgress updateProgress:(float)progress; {
     _progress = progress;
+    _canGoBack = [_webView canGoBack];
+    _canGoForward = [_webView canGoForward];
+    
     SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
     [browser updateInterface];
     
@@ -327,10 +325,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     }
     SGBrowserViewController *browser = (SGBrowserViewController *)self.parentViewController;
     [browser updateInterface];
-}
-
-- (void)reload {
-    [self openRequest:nil];
 }
 
 #pragma mark - Contextual menu
