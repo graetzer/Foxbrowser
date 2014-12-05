@@ -13,8 +13,13 @@ Two way sync is supported, what is still lacking is support for stored passwords
 - Share URL's via Facebook, Twitter, Mail, Google+
 - Search in the website
 
-[More info](http://git.graetzer.org/Foxbrowser/)
+[AppStore](https://itunes.apple.com/app/foxbrowser/id550365886?mt=8)
 
+### Screenshots
+
+![Screenshot Login](https://github.com/graetzer/Foxbrowser/raw/master/Artwork/login.png)
+![Screenshot Home](https://github.com/graetzer/Foxbrowser/raw/master/Artwork/home.jpeg)
+![Screenshot Site](https://github.com/graetzer/Foxbrowser/raw/master/Artwork/site.png)
 
 #### Licence
    Copyright 2012-2014 Simon Peter Grätzer
@@ -31,9 +36,3 @@ Two way sync is supported, what is still lacking is support for stored passwords
    See the License for the specific language governing permissions and
    limitations under the License.
 
-### Screenshots
-
-![Screenshot 1](http://graetzer.org/wp-content/uploads/2012/08/foxbrowser_screen1.png)
-![Screenshot 1](http://graetzer.org/wp-content/uploads/2012/08/foxbrowser_screen2.png)
-
-![Logo](https://raw.github.com/graetzer/Foxbrowser/master/Weave/Images/logo@2x.png)
