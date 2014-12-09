@@ -67,7 +67,7 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [self performSelector:@selector(setupSync) withObject:nil afterDelay:0.5];
     //-------------- Marketing stuff -------------------------
 
-    [GAI sharedInstance].trackUncaughtExceptions = YES;
+    [[GAI sharedInstance] setTrackUncaughtExceptions:YES];
     [GAI sharedInstance].dispatchInterval = 60*5;
     self.tracker = [[GAI sharedInstance] trackerWithTrackingId:@"UA-38223136-1"];
 //#ifdef DEBUG

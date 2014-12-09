@@ -10,6 +10,9 @@
 #import "FXSyncStore.h"
 #import "FXSyncStock.h"
 
+#import "GAI.h"
+#import "SGAppDelegate.h"
+
 
 @implementation SGSearchViewController {
     NSString *_lastQuery;
@@ -226,6 +229,11 @@ static NSArray* gFreshSearchHits = nil;
         }
         @catch (NSException *e) {
             DLog(@"Failed to update search results: %@", e);
+            NSString * desc = [NSString stringWithFormat:@"%@/%@", [e description], [e callStackSymbols]];
+            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+            [tracker send:[[GAIDictionaryBuilder
+                            createExceptionWithDescription:desc
+                            withFatal:@NO] build]];
         }
     }
 }

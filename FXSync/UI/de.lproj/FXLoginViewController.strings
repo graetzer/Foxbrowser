@@ -12,7 +12,7 @@
 "EFw-Qp-WxV.text" = "Passwort:";
 
 /* Class = "IBUILabel"; text = "  Although this app was tested carefully, the developer is not responssible for possible datalosses "; ObjectID = "Ecu-bx-lTc"; */
-"Ecu-bx-lTc.text" = "Diese App wurde sorgfältig getestet, der Entwickler übernimmt keine Verantwortung für mögliche Datenverluste. ";
+"Ecu-bx-lTc.text" = "Obwohl diese App sorgfältig getestet wurde, kann der Entwickler keine Verantwortung für mögliche Datenverluste übernehmen.";
 
 /* Class = "IBUITextField"; placeholder = "name@example.com"; ObjectID = "EiD-si-ZkX"; */
 "EiD-si-ZkX.placeholder" = "name@example.com";

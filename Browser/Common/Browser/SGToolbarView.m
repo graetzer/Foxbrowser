@@ -19,6 +19,7 @@
 #import "SGSearchField.h"
 
 #import "KxMenu.h"
+#import "TUSafariActivity.h"
 #import "NJKWebViewProgressView.h"
 
 @implementation SGToolbarView
@@ -153,9 +154,10 @@
 - (void)_showSharingUI {
     NSURL *url = [self.browser URL];
     
-    if (url) {
+    if (url != nil) {
+        TUSafariActivity *safari = [[TUSafariActivity alloc] init];
         UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:@[url]
-                                                                                 applicationActivities:nil];
+                                                                                 applicationActivities:@[safari]];
         activityVC.completionHandler = ^(NSString *activityType, BOOL completed) {
             if (completed) {
                 [appDelegate.tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:activityType

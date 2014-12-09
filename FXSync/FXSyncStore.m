@@ -106,7 +106,6 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
     NSParameterAssert(syncId && cName && block);
     
     dispatch_async(_queue, ^{
-        // TODO allow a flexible limit
         NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE syncId = ?", cName];
         
         sqlite3_stmt *stmnt = nil;
@@ -119,7 +118,6 @@ NSString *const kFXSyncStoreException = @"org.graetzer.fxsync.db";
             [self _throwDBError];
         }
     });
-
 }
 
 - (void)saveItem:(FXSyncItem *)item {

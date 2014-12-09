@@ -11,7 +11,6 @@
 #import "FXHelpViewController.h"
 #import "DejalActivityView.h"
 
-#import "SGAppDelegate.h"
 #import "GAI.h"
 
 @implementation FXLoginViewController
@@ -55,16 +54,19 @@
 #pragma mark - Other
 
 - (IBAction)startLogin:(id)sender {
+    [_emailField resignFirstResponder];
+    [_passwordField resignFirstResponder];
     [self _tryLogin];
 }
 
 - (IBAction)_cancel:(id)sender {
     [self dismissViewControllerAnimated:YES completion:NULL];
     if (sender != self) {
-        [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
-                                                                          action:@"Cancel"
-                                                                           label:@"Cancel"
-                                                                           value:nil] build]];
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
+                                                              action:@"Cancel"
+                                                               label:@"Cancel"
+                                                               value:nil] build]];
     }
 }
 
@@ -85,15 +87,7 @@
 
 - (void)_tryLogin {
     NSString *email = _emailField.text;
-    NSRegularExpression *regex = [NSRegularExpression
-                                  regularExpressionWithPattern:@"\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,6}"
-                                  options:NSRegularExpressionCaseInsensitive
-                                  error:NULL];
-    // Crashes if email is nil
-    NSUInteger matches = [regex numberOfMatchesInString:email ? email : @""
-                                                 options:0
-                                                   range:NSMakeRange(0, [email length])];
-    if (matches != 1) {
+    if ([email length] == 0) {
         [self _showWarning:NSLocalizedStringFromTable(@"Please enter the email address for your account",
                                                       @"FXSync", @"Invalid email warning")];
         return;
@@ -111,10 +105,7 @@
     self.navigationItem.leftBarButtonItem.enabled = NO;
     self.navigationItem.rightBarButtonItem.enabled = NO;
     
-    [[FXSyncStock sharedInstance]
-     loginEmail:email
-     password:pass
-     completion:^(BOOL success) {
+    [[FXSyncStock sharedInstance] loginEmail:email password:pass completion:^(BOOL success) {
          [DejalBezelActivityView removeViewAnimated:YES];
          
          if (success) {
@@ -128,13 +119,20 @@
          } else {
              self.navigationItem.leftBarButtonItem.enabled = YES;
              self.navigationItem.rightBarButtonItem.enabled = YES;
-             [self _showWarning:NSLocalizedStringFromTable(@"Login Failure",
-                                                           @"FXSync", @"unable to login")];
              
-             [appDelegate.tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
-                                                                               action:@"Login"
-                                                                                label:@"Failure"
-                                                                                value:nil] build]];
+             NSMutableString *warn = [NSLocalizedStringFromTable(@"Login Failure", @"FXSync", @"unable to login") mutableCopy];
+             if (![self _validateEmail:email]) {
+                 [warn appendString:@"\n"];
+                 [warn appendString:NSLocalizedStringFromTable(@"Please enter the email address for your account",
+                                                              @"FXSync", @"Invalid email warning")];
+             }
+             [self _showWarning:warn];
+             
+             id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+             [tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"Sync"
+                                                                   action:@"Login"
+                                                                    label:@"Failure"
+                                                                    value:nil] build]];
          }
      }];
 }
@@ -146,6 +144,19 @@
                                           cancelButtonTitle:NSLocalizedStringFromTable(@"OK", @"FXSync", @"ok")
                                           otherButtonTitles:nil];
     [alert show];
+}
+
+- (BOOL)_validateEmail:(NSString *)email {
+    if (!email || [email length] < 2) return NO;
+    NSRegularExpression *regex = [NSRegularExpression
+                                  regularExpressionWithPattern:@"[A-Z0-9a-z\\._%+-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}"
+                                  options:NSRegularExpressionCaseInsensitive
+                                  error:NULL];
+    // Crashes if email is nil
+    NSUInteger matches = [regex numberOfMatchesInString:email
+                                                options:0
+                                                  range:NSMakeRange(0, [email length])];
+    return matches > 0;
 }
 
 @end

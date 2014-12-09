@@ -9,7 +9,6 @@
 #import "FXSettingsViewController.h"
 #import "FXSyncStock.h"
 
-#import "SGAppDelegate.h"
 #import "GAI.h"
 
 @implementation FXSettingsViewController {
@@ -37,7 +36,8 @@
     _clearButton.layer.borderWidth = 1.0;
     _clearButton.layer.cornerRadius = 10;
     
-    [appDelegate.tracker set:kGAIScreenName value:@"SettingsView"];
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName value:@"SettingsView"];
     [appDelegate.tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 - (void)viewWillAppear:(BOOL)animated {

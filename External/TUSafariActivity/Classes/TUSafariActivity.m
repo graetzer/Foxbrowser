@@ -42,16 +42,13 @@
 
 - (NSString *)activityTitle
 {
-    NSURL *resourcesURL = [[NSBundle mainBundle] URLForResource:@"TUSafariActivity" withExtension:@"bundle"];
-    NSBundle *bundle = [NSBundle bundleWithURL:resourcesURL];
-    NSString *defaultString = [bundle localizedStringForKey:@"Open in Safari" value:@"Open in Safari" table:@"TUSafariActivity"];
-    
+    NSString *defaultString = NSLocalizedStringFromTable(@"Open in Safari", @"TUSafariActivity", );
     return [[NSBundle mainBundle] localizedStringForKey:@"Open in Safari" value:defaultString table:nil];
 }
 
 - (UIImage *)activityImage
 {
-	return [UIImage imageNamed:@"TUSafariActivity.bundle/safari"];
+	return [UIImage imageNamed:@"safari"];
 }
 
 - (BOOL)canPerformWithActivityItems:(NSArray *)activityItems

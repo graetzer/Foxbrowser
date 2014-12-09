@@ -458,20 +458,22 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                         NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:decrypted
                                                                                 options:NSJSONReadingMutableContainers
                                                                                   error:NULL];
-                        // Let's put the default keybundle in there, so it is processed by the loop
-                        NSMutableDictionary *cols = payload[@"collections"];
-                        cols[@"default"] = payload[@"default"];
-                        
-                        NSMutableDictionary *keys = [NSMutableDictionary dictionaryWithCapacity:[cols count]];
-                        for (NSString *key in cols) {
-                            NSArray *arr = cols[key];
-                            if ([arr count] == 2) {
-                                keys[key] =  @{@"encKey" : [arr[0] base64DecodedData],
-                                               @"hmacKey": [arr[1] base64DecodedData]};
+                        if (payload != nil) {
+                            // Let's put the default keybundle in there, so it is processed by the loop
+                            NSMutableDictionary *cols = payload[@"collections"];
+                            cols[@"default"] = payload[@"default"];
+                            
+                            NSMutableDictionary *keys = [NSMutableDictionary dictionaryWithCapacity:[cols count]];
+                            for (NSString *key in cols) {
+                                NSArray *arr = cols[key];
+                                if ([arr count] == 2) {
+                                    keys[key] =  @{@"encKey" : [arr[0] base64DecodedData],
+                                                   @"hmacKey": [arr[1] base64DecodedData]};
+                                }
                             }
+                            _collectionKeys = keys;
+                            [self _loadMetarecord];
                         }
-                        _collectionKeys = keys;
-                        [self _loadMetarecord];
                     }
                 }];
     } else {
