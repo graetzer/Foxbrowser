@@ -1,0 +1,18 @@
+
+/* Class = "IBUIButton"; normalTitle = "Synchronize Now"; ObjectID = "0z8-nc-GiE"; */
+"0z8-nc-GiE.normalTitle" = "Jetzt Synchronisieren";
+
+/* Class = "IBUILabel"; text = "Logged in as: simon@graetzer.org "; ObjectID = "LFk-PY-AXb"; */
+"LFk-PY-AXb.text" = "Eingeloggt als: simon@example.org";
+
+/* Class = "IBUILabel"; text = "Bookmarks:"; ObjectID = "Mkk-ko-jjR"; */
+"Mkk-ko-jjR.text" = "Bookmarks:";
+
+/* Class = "IBUILabel"; text = "History:"; ObjectID = "PfY-Jt-6lx"; */
+"PfY-Jt-6lx.text" = "Chronik:";
+
+/* Class = "IBUIButton"; normalTitle = "Clear History"; ObjectID = "TTb-FG-zXp"; */
+"TTb-FG-zXp.normalTitle" = "Lösche Chronik";
+
+/* Class = "IBUILabel"; text = "Sync-Client developed by graetzer.org"; ObjectID = "zgC-tH-r53"; */
+"zgC-tH-r53.text" = "Entwickelt von graetzer.org";

@@ -79,15 +79,18 @@ static NSData* getPublicKeyMod(NSData *pk);
 }
 
 - (void)requestSyncInfo:(void(^)(NSDictionary *, NSError *))callback {
-    NSParameterAssert(callback);
+    NSParameterAssert(callback && _accountCreds);
     
     NSString *sessionToken = _accountCreds[@"sessionToken"];
     //[self recoveryEmailStatusWithToken:sessionToken callback:^(NSDictionary *status)
     NSNumber *verified = _accountCreds[@"verified"];
     if ([sessionToken length] && [verified boolValue]) {
         
-        [self _generateKeyPair];
         NSData* keyData = [self _getPublicKeyBits];
+        if (keyData == nil || [keyData length] == 0) {
+            [self _generateKeyPair];
+            keyData = [self _getPublicKeyBits];
+        }
         
         // http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One#Example_encoded_in_DER
         const char *buffer = keyData.bytes;

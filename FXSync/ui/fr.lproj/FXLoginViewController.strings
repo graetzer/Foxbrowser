@@ -1,0 +1,30 @@
+
+/* Class = "IBUILabel"; text = "Press 'Help' for instructions"; ObjectID = "5lA-A4-EB9"; */
+"5lA-A4-EB9.text" = "Appuyez sur «Aide» pour obtenir des instructions";
+
+/* Class = "IBUILabel"; text = "Login with your Firefox Account"; ObjectID = "9bO-AI-kRP"; */
+"9bO-AI-kRP.text" = "Connectez-vous avec votre compte Firefox";
+
+/* Class = "IBUIButton"; normalTitle = "Login"; ObjectID = "BXh-Jq-GkZ"; */
+"BXh-Jq-GkZ.normalTitle" = "Connecter";
+
+/* Class = "IBUILabel"; text = "Password:"; ObjectID = "EFw-Qp-WxV"; */
+"EFw-Qp-WxV.text" = "Mot de passe:";
+
+/* Class = "IBUILabel"; text = " Although this app was tested carefully, the developer is not responssible for possible datalosses"; ObjectID = "Ecu-bx-lTc"; */
+"Ecu-bx-lTc.text" = " Although this app was tested carefully, the developer is not responssible for possible datalosses";
+
+/* Class = "IBUITextField"; placeholder = "name@example.com"; ObjectID = "EiD-si-ZkX"; */
+"EiD-si-ZkX.placeholder" = "nom@exemple.com";
+
+/* Class = "IBUILabel"; text = "Foxbrowser requires a Firefox Account. Use Firefox on your computer to create an account."; ObjectID = "PO5-lD-Sfe"; */
+"PO5-lD-Sfe.text" = "Foxbrowser nécessite un compte Firefox. Utilisez Firefox sur votre ordinateur pour créer un compte.";
+
+/* Class = "IBUILabel"; text = "This is not a product of the Mozilla corporation"; ObjectID = "bAF-8A-Eaa"; */
+"bAF-8A-Eaa.text" = "Ce ne est pas un produit de la société Mozilla";
+
+/* Class = "IBUITextField"; placeholder = "Your Password"; ObjectID = "lNb-sH-TaX"; */
+"lNb-sH-TaX.placeholder" = "Votre mot de passe";
+
+/* Class = "IBUILabel"; text = "Email:"; ObjectID = "taH-3i-pg5"; */
+"taH-3i-pg5.text" = "Email:";
