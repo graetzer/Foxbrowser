@@ -67,9 +67,9 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
 /*! Get the reuired authorization credentials and the sync key */
 - (void)_requestSyncInfo {
     OSAtomicIncrement32(&_networkOpsCount);
-    [_userAuth requestSyncInfo:^(NSDictionary *syncInfo, NSError *err) {
+    [_userAuth requestSyncInfo:^(NSDictionary *syncInfo, NSError *error) {
         
-        if (syncInfo[@"token"] != nil && err == nil) {
+        if (syncInfo[@"token"] != nil && error == nil) {
             DLog(@"Sync Token %@", syncInfo);
             NSString *key = syncInfo[@"token"][@"key"];
             _credentials = [[HawkCredentials alloc] initWithHawkId:syncInfo[@"token"][@"id"]
@@ -91,16 +91,14 @@ NSInteger const SEVEN_DAYS = 7*24*60*60;
                 [_delegate syncEngine:self didFailWithError:err];
             }
         } else {
-            
-            if ([err code] == 401) {
+            if ([error code] == 401) {// Make this one readable
                 NSString *msg = NSLocalizedStringFromTable(@"Failed to authenticate",
                                                            @"FXSync", @"Failed to authenticate");
-                NSError *error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
-                                                     code:kFXSyncEngineErrorAuthentication
-                                                 userInfo:@{NSLocalizedDescriptionKey:msg}];
-                [self.delegate syncEngine:self didFailWithError:error];
+                error = [NSError errorWithDomain:kFXSyncEngineErrorDomain
+                                            code:kFXSyncEngineErrorAuthentication
+                                        userInfo:@{NSLocalizedDescriptionKey:msg}];
             }
-            
+            [self.delegate syncEngine:self didFailWithError:error];
         }
         OSAtomicDecrement32(&_networkOpsCount);
     }];

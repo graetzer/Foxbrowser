@@ -182,11 +182,13 @@
 }
 
 - (BOOL)_containsHost:(NSString *)host {
-    for (FXSyncItem *item in _favourites) {
-        NSString *urlS = [item urlString];
-        if ([urlS rangeOfString:host].location != NSNotFound// avoid costly conversion
-            && [[NSURL URLWithUnicodeString:urlS].host isEqualToString:host])
-            return YES;
+    if (host != nil || [host length] > 0) {
+        for (FXSyncItem *item in _favourites) {
+            NSString *urlS = [item urlString];
+            if ([urlS rangeOfString:host].location != NSNotFound// avoid costly conversion
+                && [[NSURL URLWithUnicodeString:urlS].host isEqualToString:host])
+                return YES;
+        }
     }
     return NO;
 }
@@ -209,8 +211,8 @@
         if ([urlS length] == 0) urlS = [item siteUri];
         
         NSURL *url = [NSURL URLWithUnicodeString:urlS];
-        if (!url
-            || [self _containsHost:url.host]
+        if (![url host]
+            || [self _containsHost:[url host]]
             || [_blocked containsObject:url.absoluteString]) {
             item = nil;
             continue;//skip

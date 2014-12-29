@@ -26,15 +26,11 @@ static NSData* getPublicKeyMod(NSData *pk);
 
 @implementation FXUserAuth {
     // My keys
-    SecKeyRef publicKeyRef;
     SecKeyRef privateKeyRef;
     NSString *_cert;// BrowserID cert
 }
 
 - (void)dealloc {
-    if (publicKeyRef != NULL) {
-        CFRelease(publicKeyRef);
-    }
     if (privateKeyRef != NULL) {
         CFRelease(privateKeyRef);
     }
@@ -86,10 +82,21 @@ static NSData* getPublicKeyMod(NSData *pk);
     NSNumber *verified = _accountCreds[@"verified"];
     if ([sessionToken length] && [verified boolValue]) {
         
+        // Query the public and private key, create if necessary
         NSData* keyData = [self _getPublicKeyBits];
         if (keyData == nil || [keyData length] == 0) {
             [self _generateKeyPair];
             keyData = [self _getPublicKeyBits];
+        } else {// We will need the private key later on
+            [self _queryPrivateKeyRef];
+        }
+        if (keyData == nil || privateKeyRef == NULL) {
+            NSString *msg = NSLocalizedStringFromTable(@"Cannot Load Private Key From Keychain",
+                                                       @"FXSync", @"cannot load private key from keychain");
+            callback(nil, [NSError errorWithDomain:@"org.graetzer.auth"
+                                              code:-151
+                                          userInfo:@{NSLocalizedDescriptionKey:msg}]);
+            return;
         }
         
         // http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One#Example_encoded_in_DER
@@ -252,59 +259,67 @@ static NSData* getPublicKeyMod(NSData *pk);
     if (!(keySize == 512 || keySize == 1024 || keySize == 2048)) {
         DLog(@"%lu is an invalid and unsupported key size.", (unsigned long)keySize);
     }
-    
     // First delete current keys.
     [self _deleteKeys];
     
-    // Container dictionaries.
-    NSMutableDictionary * privateKeyAttr = [NSMutableDictionary dictionaryWithCapacity:5];
-    NSMutableDictionary * publicKeyAttr = [NSMutableDictionary dictionaryWithCapacity:8];
-    NSMutableDictionary * keyPairAttr = [NSMutableDictionary dictionaryWithCapacity:5];
-    
-    NSData *privateTag = [kFXPrivateKeyTag dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *publicTag = [kFXPublicKeyTag dataUsingEncoding:NSUTF8StringEncoding];
-    
-    keyPairAttr[(__bridge id)kSecAttrKeyType] = (__bridge id)kSecAttrKeyTypeRSA;
-    keyPairAttr[(__bridge id)kSecAttrKeySizeInBits] = @(keySize);
-    
     // Set the private key dictionary.
+     NSMutableDictionary * privateKeyAttr = [NSMutableDictionary dictionaryWithCapacity:5];
     privateKeyAttr[(__bridge id)kSecAttrIsPermanent] = @YES;
-    privateKeyAttr[(__bridge id)kSecAttrApplicationTag] = privateTag;
+    privateKeyAttr[(__bridge id)kSecAttrApplicationTag] = [kFXPrivateKeyTag
+                                                           dataUsingEncoding:NSUTF8StringEncoding];
     
     // Set the public key dictionary.
+    NSMutableDictionary * publicKeyAttr = [NSMutableDictionary dictionaryWithCapacity:8];
     publicKeyAttr[(__bridge id)kSecAttrIsPermanent] = @YES;
-    publicKeyAttr[(__bridge id)kSecAttrApplicationTag] = publicTag;
+    publicKeyAttr[(__bridge id)kSecAttrApplicationTag] = [kFXPublicKeyTag
+                                                          dataUsingEncoding:NSUTF8StringEncoding];
     
     // Set attributes to top level dictionary.
+    NSMutableDictionary * keyPairAttr = [NSMutableDictionary dictionaryWithCapacity:5];
+    keyPairAttr[(__bridge id)kSecAttrKeyType] = (__bridge id)kSecAttrKeyTypeRSA;
+    keyPairAttr[(__bridge id)kSecAttrKeySizeInBits] = @(keySize);
     keyPairAttr[(__bridge id)kSecPrivateKeyAttrs] = privateKeyAttr;
     keyPairAttr[(__bridge id)kSecPublicKeyAttrs] = publicKeyAttr;
     
     // SecKeyGeneratePair returns the SecKeyRefs just for educational purposes.
+    SecKeyRef publicKeyRef;
     sanityCheck = SecKeyGeneratePair((__bridge CFDictionaryRef)keyPairAttr, &publicKeyRef, &privateKeyRef);
     
     if (!(sanityCheck == noErr && publicKeyRef != NULL && privateKeyRef != NULL)) {
         ELog(@"Something really bad went wrong with generating the key pair.")
     }
+    CFRelease(publicKeyRef);
 }
 
 - (NSMutableDictionary *)_keyQuery {
-    NSMutableDictionary * queryPublicKey = [[NSMutableDictionary alloc] init];
-    queryPublicKey[(__bridge id)kSecClass] = (__bridge id)(kSecClassKey);
-    queryPublicKey[(__bridge id)kSecAttrKeyType] = (__bridge id)(kSecAttrKeyTypeRSA);
-    queryPublicKey[(__bridge id)kSecReturnData] = @YES;
-    queryPublicKey[(__bridge id)kSecAttrApplicationTag] = kFXPublicKeyTag;
-    return queryPublicKey;
+    NSMutableDictionary * query = [[NSMutableDictionary alloc] init];
+    query[(__bridge id)kSecClass] = (__bridge id)(kSecClassKey);
+    query[(__bridge id)kSecAttrKeyType] = (__bridge id)(kSecAttrKeyTypeRSA);
+    query[(__bridge id)kSecAttrApplicationTag] = kFXPublicKeyTag;
+    return query;
 }
 
 - (NSData *)_getPublicKeyBits {
-    NSMutableDictionary * queryPublicKey = [self _keyQuery];
+    NSMutableDictionary * query = [self _keyQuery];
+    query[(__bridge id)kSecReturnData] = @YES;
     
     CFTypeRef result;// Get the key bits.
-    if (SecItemCopyMatching((__bridge CFDictionaryRef)queryPublicKey,
+    if (SecItemCopyMatching((__bridge CFDictionaryRef)query,
                             &result) == errSecSuccess) {
         return CFBridgingRelease(result);
     }
     return nil;
+}
+
+- (void)_queryPrivateKeyRef {
+    NSMutableDictionary *query = [self _keyQuery];
+    query[(__bridge id)kSecReturnRef] = @YES;
+    query[(__bridge id)kSecAttrApplicationTag] = kFXPrivateKeyTag;
+    
+    CFTypeRef result;// Get the key bits.
+    if (SecItemCopyMatching((__bridge CFDictionaryRef)query, &result) == errSecSuccess) {
+        privateKeyRef = (SecKeyRef)result;
+    }
 }
 
 - (void)_deleteKeys {

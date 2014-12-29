@@ -73,7 +73,7 @@
         searchC.delegate = self;
         _searchController = searchC;
         
-        __strong NJKWebViewProgressView *pV = [[NJKWebViewProgressView alloc] initWithFrame:CGRectMake(0, 0, 100, 3)];
+        __strong NJKWebViewProgressView *pV = [[NJKWebViewProgressView alloc] initWithFrame:CGRectMake(0, 0, 100, 2)];
         pV.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         [self addSubview:pV];
         _progressView = pV;
