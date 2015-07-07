@@ -23,7 +23,7 @@
 #import "Reachability.h"
 #import "Appirater.h"
 
-
+#import "FillrSDK/Fillr.h"
 
 SGAppDelegate *appDelegate;
 NSString *const kSGEnableStartpageKey = @"org.graetzer.enableStartpage";
@@ -80,6 +80,8 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [Appirater setUsesUntilPrompt:3];
     [Appirater setTimeBeforeReminding:2];
     [Appirater appLaunched:YES];
+    
+    [[Fillr sharedInstance] initialiseWithDevKey:@"Hehe" andUrlSchema:@"org.graetzer.foxbrowser"];
     
     return YES;
 }
@@ -159,6 +161,10 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
         return YES;
     } else if ([url.scheme hasPrefix:@"http"] || [url.scheme hasPrefix:@"https"]) {
         [self.browserViewController addTabWithURLRequest:[NSMutableURLRequest requestWithURL:url] title:sourceApplication];
+        return YES;
+    } if ([[Fillr sharedInstance] canHandleOpenURL:url]) {
+        [[Fillr sharedInstance] handleOpenURL:url];
+        
         return YES;
     }
     return NO;
