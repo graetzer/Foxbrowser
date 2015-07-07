@@ -81,7 +81,7 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [Appirater setTimeBeforeReminding:2];
     [Appirater appLaunched:YES];
     
-    [[Fillr sharedInstance] initialiseWithDevKey:@"Hehe" andUrlSchema:@"org.graetzer.foxbrowser"];
+    [[Fillr sharedInstance] initialiseWithDevKey:@"Hehe" andUrlSchema:@"com.fillr.foxbrowser"];
     
     return YES;
 }
@@ -162,7 +162,7 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
     } else if ([url.scheme hasPrefix:@"http"] || [url.scheme hasPrefix:@"https"]) {
         [self.browserViewController addTabWithURLRequest:[NSMutableURLRequest requestWithURL:url] title:sourceApplication];
         return YES;
-    } if ([[Fillr sharedInstance] canHandleOpenURL:url]) {
+    } else if ([[Fillr sharedInstance] canHandleOpenURL:url]) {
         [[Fillr sharedInstance] handleOpenURL:url];
         
         return YES;
