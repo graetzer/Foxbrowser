@@ -14,6 +14,8 @@
 #import "SGWebViewController.h"
 #import "SGBlankController.h"
 
+#import "FillrSDK/Fillr.h"
+
 CGFloat const kSGMinYScale = 0.84;
 CGFloat const kSGMinXScale = 0.84;
 #define SG_EXPOSED_TRANSFORM (CGAffineTransformMakeScale(0.75, 0.8))
@@ -516,6 +518,10 @@ CGFloat const kSGMinXScale = 0.84;
             
             if (enable && webC.view != _panGesture.view) {
                 [webC.view addGestureRecognizer:_panGesture];
+            }
+            
+            if (enable) {
+                [[Fillr sharedInstance] trackWebview:webC.webView];
             }
         }
         vc.view.clipsToBounds = !enable;

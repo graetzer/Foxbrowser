@@ -159,7 +159,7 @@
         }
     }
     
-    [[Fillr sharedInstance] trackWebview:_webView];
+    //[[Fillr sharedInstance] trackWebview:_webView];
 }
 
 - (void)viewDidLayoutSubviews {
