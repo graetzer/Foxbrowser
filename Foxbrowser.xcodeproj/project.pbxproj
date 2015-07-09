@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		21AFFEC91B4B922800D2EB84 /* libFillrSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21AFFEBC1B4B902700D2EB84 /* libFillrSDK.a */; };
-		21AFFECB1B4B927100D2EB84 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21AFFECA1B4B927100D2EB84 /* WebKit.framework */; };
+		21AFFECB1B4B927100D2EB84 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21AFFECA1B4B927100D2EB84 /* WebKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		21AFFEE01B4BB7A000D2EB84 /* FillrSDKBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 21AFFEDF1B4BB7A000D2EB84 /* FillrSDKBundle.bundle */; };
 		F4047E4319E6E6B700D27001 /* DejalActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = F4047E4119E6E6B700D27001 /* DejalActivityView.m */; };
 		F4047E4C19E766D500D27001 /* UICKeyChainStore.m in Sources */ = {isa = PBXBuildFile; fileRef = F4047E4B19E766D500D27001 /* UICKeyChainStore.m */; };

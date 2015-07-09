@@ -82,6 +82,7 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [Appirater appLaunched:YES];
     
     [[Fillr sharedInstance] initialiseWithDevKey:@"Hehe" andUrlSchema:@"com.fillr.foxbrowser"];
+    [Fillr sharedInstance].overlayInputAccessoryView = YES;
     
     return YES;
 }
