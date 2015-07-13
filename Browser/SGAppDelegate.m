@@ -81,8 +81,9 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [Appirater setTimeBeforeReminding:2];
     [Appirater appLaunched:YES];
     
-    [[Fillr sharedInstance] initialiseWithDevKey:@"Hehe" andUrlSchema:@"com.fillr.foxbrowser"];
-    [Fillr sharedInstance].overlayInputAccessoryView = YES;
+    [[Fillr sharedInstance] initialiseWithDevKey:@"wahahaha" andUrlSchema:@"com.fillr.foxbrowser"];
+    //[Fillr sharedInstance].overlayInputAccessoryView = YES;
+    [[Fillr sharedInstance] setEnabled:YES];
     
     return YES;
 }
