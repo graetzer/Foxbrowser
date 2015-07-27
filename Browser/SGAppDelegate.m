@@ -25,6 +25,9 @@
 
 #import "FillrSDK/Fillr.h"
 
+@interface SGAppDelegate()<FillrDelegate>
+@end
+
 SGAppDelegate *appDelegate;
 NSString *const kSGEnableStartpageKey = @"org.graetzer.enableStartpage";
 NSString *const kSGStartpageURLKey = @"org.graetzer.startpageurl";
@@ -81,9 +84,10 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [Appirater setTimeBeforeReminding:2];
     [Appirater appLaunched:YES];
     
-    [[Fillr sharedInstance] initialiseWithDevKey:@"wahahaha" andUrlSchema:@"com.fillr.foxbrowser"];
-    //[Fillr sharedInstance].overlayInputAccessoryView = YES;
+    [[Fillr sharedInstance] initialiseWithDevKey:@"c4a8852ce67427a97330388659e0f2b5" andUrlSchema:@"com.fillr.foxbrowser"];
+    [Fillr sharedInstance].overlayInputAccessoryView = YES;
     [[Fillr sharedInstance] setEnabled:YES];
+    [Fillr sharedInstance].delegate = self;
     
     return YES;
 }
@@ -243,6 +247,12 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
                                                                action:@"Remind Later"
                                                                 label:nil
                                                                 value:nil] build]];
+}
+
+- (void)fillrStateChanged:(FillrSessionState)state currentWebView:(UIView *)currentWebView {
+    if (state == FillrStateDownloadingApp || state == FillrStateOpenApp) {
+        NSLog(@"Fillr App Called");
+    }
 }
 
 @end
