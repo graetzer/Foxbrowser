@@ -16,7 +16,7 @@
 #import "UIWebView+WebViewAdditions.h"
 #import "SGBlankController.h"
 
-
+#import "FillrSDK/Fillr.h"
 
 @interface SGTabsViewController ()
 
@@ -178,6 +178,11 @@
     UIViewController *current = [self selectedViewController];
     if (viewController == current || [_tabsView indexOfViewController:viewController] == NSNotFound)
         return;
+    
+    if ([viewController isKindOfClass:[SGWebViewController class]]) {
+        SGWebViewController *webC = (SGWebViewController *)viewController;
+        [[Fillr sharedInstance] trackWebview:webC.webView];
+    }
     
     viewController.view.frame = [self _contentFrame];
     [viewController.view setNeedsLayout];

@@ -1,0 +1,653 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		21FD62A01AF072CD00300809 /* UniversalFillrSDK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 21FD62A11AF072CD00300809 /* Build configuration list for PBXAggregateTarget "UniversalFillrSDK" */;
+			buildPhases = (
+				21FD62A41AF0814400300809 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = UniversalFillrSDK;
+			productName = UniversalFillrSDK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		211CC9F71AF1C3BC00B13FBD /* FillrAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 211CC9F61AF1C3BC00B13FBD /* FillrAlertView.m */; };
+		211CCA141AF1EB5300B13FBD /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 211CCA131AF1EB5300B13FBD /* WebKit.framework */; };
+		211CCA161AF1EF3000B13FBD /* UnwrappedMobileWidget.js in Resources */ = {isa = PBXBuildFile; fileRef = 211CCA151AF1EF3000B13FBD /* UnwrappedMobileWidget.js */; };
+		215D069D1B4A0E4C008CE3C9 /* FillrToolbarPopup.m in Sources */ = {isa = PBXBuildFile; fileRef = 215D069C1B4A0E4C008CE3C9 /* FillrToolbarPopup.m */; };
+		217FA11B1B4656E100E1CE0F /* fillr_sdk_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 217FA1181B4650EE00E1CE0F /* fillr_sdk_icon.png */; };
+		217FA11C1B4656E100E1CE0F /* fillr_sdk_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 217FA1191B4650EE00E1CE0F /* fillr_sdk_icon@2x.png */; };
+		217FA11D1B4656E100E1CE0F /* fillr_sdk_icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 217FA11A1B4650EE00E1CE0F /* fillr_sdk_icon@3x.png */; };
+		217FA1211B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 217FA11E1B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down.png */; };
+		217FA1221B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 217FA11F1B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@2x.png */; };
+		217FA1231B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 217FA1201B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@3x.png */; };
+		21DC3A8A1AF2122E00F275A3 /* NSData+Base64Fillr.m in Sources */ = {isa = PBXBuildFile; fileRef = 21DC3A891AF2122E00F275A3 /* NSData+Base64Fillr.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		21FD5CBB1AEF51AE00300809 /* Fillr.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 21FD5CBA1AEF51AE00300809 /* Fillr.h */; };
+		21FD5CBD1AEF51AE00300809 /* Fillr.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FD5CBC1AEF51AE00300809 /* Fillr.m */; };
+		21FD5CC31AEF51AE00300809 /* libFillrSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21FD5CB71AEF51AE00300809 /* libFillrSDK.a */; };
+		21FD629A1AF0535900300809 /* FillrAutofillInputAccessoryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FD62991AF0535900300809 /* FillrAutofillInputAccessoryView.m */; };
+		21FD629B1AF0535900300809 /* FillrAutofillInputAccessoryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FD62991AF0535900300809 /* FillrAutofillInputAccessoryView.m */; };
+		21FD629F1AF0718D00300809 /* FillrAutofillInputAccessoryView.h in Copy Files */ = {isa = PBXBuildFile; fileRef = 21FD62981AF0535900300809 /* FillrAutofillInputAccessoryView.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		21FD5CC41AEF51AE00300809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21FD5CAF1AEF51AE00300809 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21FD5CB61AEF51AE00300809;
+			remoteInfo = FillrSDK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		21FD5CB51AEF51AE00300809 /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				21FD5CBB1AEF51AE00300809 /* Fillr.h in Copy Files */,
+				21FD629F1AF0718D00300809 /* FillrAutofillInputAccessoryView.h in Copy Files */,
+			);
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		211CC9F51AF1C3BC00B13FBD /* FillrAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FillrAlertView.h; sourceTree = "<group>"; };
+		211CC9F61AF1C3BC00B13FBD /* FillrAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FillrAlertView.m; sourceTree = "<group>"; };
+		211CCA021AF1E2DD00B13FBD /* FillrSDKBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FillrSDKBundle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		211CCA051AF1E2DD00B13FBD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		211CCA131AF1EB5300B13FBD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		211CCA151AF1EF3000B13FBD /* UnwrappedMobileWidget.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = UnwrappedMobileWidget.js; sourceTree = "<group>"; };
+		215D069B1B4A0E4C008CE3C9 /* FillrToolbarPopup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FillrToolbarPopup.h; sourceTree = "<group>"; };
+		215D069C1B4A0E4C008CE3C9 /* FillrToolbarPopup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FillrToolbarPopup.m; sourceTree = "<group>"; };
+		217FA1181B4650EE00E1CE0F /* fillr_sdk_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fillr_sdk_icon.png; sourceTree = "<group>"; };
+		217FA1191B4650EE00E1CE0F /* fillr_sdk_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fillr_sdk_icon@2x.png"; sourceTree = "<group>"; };
+		217FA11A1B4650EE00E1CE0F /* fillr_sdk_icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fillr_sdk_icon@3x.png"; sourceTree = "<group>"; };
+		217FA11E1B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fillr_sdk_keyboard_arrow_down.png; sourceTree = "<group>"; };
+		217FA11F1B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fillr_sdk_keyboard_arrow_down@2x.png"; sourceTree = "<group>"; };
+		217FA1201B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fillr_sdk_keyboard_arrow_down@3x.png"; sourceTree = "<group>"; };
+		21DC3A881AF2122E00F275A3 /* NSData+Base64Fillr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64Fillr.h"; sourceTree = "<group>"; };
+		21DC3A891AF2122E00F275A3 /* NSData+Base64Fillr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64Fillr.m"; sourceTree = "<group>"; };
+		21FD5CB71AEF51AE00300809 /* libFillrSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFillrSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		21FD5CBA1AEF51AE00300809 /* Fillr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Fillr.h; sourceTree = "<group>"; };
+		21FD5CBC1AEF51AE00300809 /* Fillr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Fillr.m; sourceTree = "<group>"; };
+		21FD5CC21AEF51AE00300809 /* FillrSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FillrSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		21FD5CC81AEF51AE00300809 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		21FD62981AF0535900300809 /* FillrAutofillInputAccessoryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FillrAutofillInputAccessoryView.h; sourceTree = "<group>"; };
+		21FD62991AF0535900300809 /* FillrAutofillInputAccessoryView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FillrAutofillInputAccessoryView.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		211CC9FF1AF1E2DD00B13FBD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				211CCA141AF1EB5300B13FBD /* WebKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21FD5CB41AEF51AE00300809 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21FD5CBF1AEF51AE00300809 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21FD5CC31AEF51AE00300809 /* libFillrSDK.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		211CCA031AF1E2DD00B13FBD /* FillrSDKBundle */ = {
+			isa = PBXGroup;
+			children = (
+				211CCA041AF1E2DD00B13FBD /* Supporting Files */,
+			);
+			path = FillrSDKBundle;
+			sourceTree = "<group>";
+		};
+		211CCA041AF1E2DD00B13FBD /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				211CCA051AF1E2DD00B13FBD /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		215D069E1B4A0EA0008CE3C9 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				211CC9F51AF1C3BC00B13FBD /* FillrAlertView.h */,
+				211CC9F61AF1C3BC00B13FBD /* FillrAlertView.m */,
+				21DC3A881AF2122E00F275A3 /* NSData+Base64Fillr.h */,
+				21DC3A891AF2122E00F275A3 /* NSData+Base64Fillr.m */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+		217FA1171B4650CC00E1CE0F /* FillrResources */ = {
+			isa = PBXGroup;
+			children = (
+				211CCA151AF1EF3000B13FBD /* UnwrappedMobileWidget.js */,
+				21B5B62D1B4A576B00608DA5 /* Fonts */,
+				217FA1181B4650EE00E1CE0F /* fillr_sdk_icon.png */,
+				217FA1191B4650EE00E1CE0F /* fillr_sdk_icon@2x.png */,
+				217FA11A1B4650EE00E1CE0F /* fillr_sdk_icon@3x.png */,
+				217FA11E1B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down.png */,
+				217FA11F1B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@2x.png */,
+				217FA1201B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@3x.png */,
+			);
+			name = FillrResources;
+			sourceTree = "<group>";
+		};
+		21B5B62D1B4A576B00608DA5 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Fonts;
+			sourceTree = "<group>";
+		};
+		21FD5CAE1AEF51AE00300809 = {
+			isa = PBXGroup;
+			children = (
+				211CCA131AF1EB5300B13FBD /* WebKit.framework */,
+				217FA1171B4650CC00E1CE0F /* FillrResources */,
+				21FD5CB91AEF51AE00300809 /* FillrSDK */,
+				21FD5CC61AEF51AE00300809 /* FillrSDKTests */,
+				211CCA031AF1E2DD00B13FBD /* FillrSDKBundle */,
+				21FD5CB81AEF51AE00300809 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		21FD5CB81AEF51AE00300809 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				21FD5CB71AEF51AE00300809 /* libFillrSDK.a */,
+				21FD5CC21AEF51AE00300809 /* FillrSDKTests.xctest */,
+				211CCA021AF1E2DD00B13FBD /* FillrSDKBundle.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		21FD5CB91AEF51AE00300809 /* FillrSDK */ = {
+			isa = PBXGroup;
+			children = (
+				215D069E1B4A0EA0008CE3C9 /* Utilities */,
+				21FD5CBA1AEF51AE00300809 /* Fillr.h */,
+				21FD5CBC1AEF51AE00300809 /* Fillr.m */,
+				215D069B1B4A0E4C008CE3C9 /* FillrToolbarPopup.h */,
+				215D069C1B4A0E4C008CE3C9 /* FillrToolbarPopup.m */,
+				21FD62981AF0535900300809 /* FillrAutofillInputAccessoryView.h */,
+				21FD62991AF0535900300809 /* FillrAutofillInputAccessoryView.m */,
+			);
+			path = FillrSDK;
+			sourceTree = "<group>";
+		};
+		21FD5CC61AEF51AE00300809 /* FillrSDKTests */ = {
+			isa = PBXGroup;
+			children = (
+				21FD5CC71AEF51AE00300809 /* Supporting Files */,
+			);
+			path = FillrSDKTests;
+			sourceTree = "<group>";
+		};
+		21FD5CC71AEF51AE00300809 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				21FD5CC81AEF51AE00300809 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		211CCA011AF1E2DD00B13FBD /* FillrSDKBundle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 211CCA061AF1E2DD00B13FBD /* Build configuration list for PBXNativeTarget "FillrSDKBundle" */;
+			buildPhases = (
+				211CC9FE1AF1E2DD00B13FBD /* Sources */,
+				211CC9FF1AF1E2DD00B13FBD /* Frameworks */,
+				211CCA001AF1E2DD00B13FBD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FillrSDKBundle;
+			productName = FillrSDKBundle;
+			productReference = 211CCA021AF1E2DD00B13FBD /* FillrSDKBundle.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+		21FD5CB61AEF51AE00300809 /* FillrSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21FD5CCB1AEF51AE00300809 /* Build configuration list for PBXNativeTarget "FillrSDK" */;
+			buildPhases = (
+				21FD5CB31AEF51AE00300809 /* Sources */,
+				21FD5CB41AEF51AE00300809 /* Frameworks */,
+				21FD5CB51AEF51AE00300809 /* Copy Files */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FillrSDK;
+			productName = FillrSDK;
+			productReference = 21FD5CB71AEF51AE00300809 /* libFillrSDK.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		21FD5CC11AEF51AE00300809 /* FillrSDKTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21FD5CCE1AEF51AE00300809 /* Build configuration list for PBXNativeTarget "FillrSDKTests" */;
+			buildPhases = (
+				21FD5CBE1AEF51AE00300809 /* Sources */,
+				21FD5CBF1AEF51AE00300809 /* Frameworks */,
+				21FD5CC01AEF51AE00300809 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				21FD5CC51AEF51AE00300809 /* PBXTargetDependency */,
+			);
+			name = FillrSDKTests;
+			productName = FillrSDKTests;
+			productReference = 21FD5CC21AEF51AE00300809 /* FillrSDKTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		21FD5CAF1AEF51AE00300809 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0630;
+				ORGANIZATIONNAME = "Pop Tech Pty. Ltd.";
+				TargetAttributes = {
+					211CCA011AF1E2DD00B13FBD = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+					21FD5CB61AEF51AE00300809 = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+					21FD5CC11AEF51AE00300809 = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+					21FD62A01AF072CD00300809 = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 21FD5CB21AEF51AE00300809 /* Build configuration list for PBXProject "FillrSDK" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 21FD5CAE1AEF51AE00300809;
+			productRefGroup = 21FD5CB81AEF51AE00300809 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				21FD5CB61AEF51AE00300809 /* FillrSDK */,
+				21FD5CC11AEF51AE00300809 /* FillrSDKTests */,
+				21FD62A01AF072CD00300809 /* UniversalFillrSDK */,
+				211CCA011AF1E2DD00B13FBD /* FillrSDKBundle */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		211CCA001AF1E2DD00B13FBD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				217FA1221B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@2x.png in Resources */,
+				217FA11B1B4656E100E1CE0F /* fillr_sdk_icon.png in Resources */,
+				217FA11C1B4656E100E1CE0F /* fillr_sdk_icon@2x.png in Resources */,
+				217FA11D1B4656E100E1CE0F /* fillr_sdk_icon@3x.png in Resources */,
+				217FA1231B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down@3x.png in Resources */,
+				211CCA161AF1EF3000B13FBD /* UnwrappedMobileWidget.js in Resources */,
+				217FA1211B46715200E1CE0F /* fillr_sdk_keyboard_arrow_down.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21FD5CC01AEF51AE00300809 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		21FD62A41AF0814400300809 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# define output folder environment variable\nUNIVERSAL_OUTPUTFOLDER=${BUILD_DIR}/${CONFIGURATION}-universal\n\n# Step 1. Build Device and Simulator versions\nxcodebuild -target FillrSDK ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos  BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\"\nxcodebuild -target FillrSDK -configuration ${CONFIGURATION} -sdk iphonesimulator -arch x86_64 BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\"\n\n# make sure the output directory exists\nmkdir -p \"${UNIVERSAL_OUTPUTFOLDER}\"\n\n# Step 2. Create universal binary file using lipo\nlipo -create -output \"${UNIVERSAL_OUTPUTFOLDER}/lib${PROJECT_NAME}.a\" \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/lib${PROJECT_NAME}.a\" \"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/lib${PROJECT_NAME}.a\"\n\nlipo -info \"${UNIVERSAL_OUTPUTFOLDER}/lib${PROJECT_NAME}.a\"\n\n# Last touch. copy the header files. Just for convenience\ncp -R \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/include\" \"${UNIVERSAL_OUTPUTFOLDER}/\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		211CC9FE1AF1E2DD00B13FBD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21FD5CB31AEF51AE00300809 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21FD629A1AF0535900300809 /* FillrAutofillInputAccessoryView.m in Sources */,
+				215D069D1B4A0E4C008CE3C9 /* FillrToolbarPopup.m in Sources */,
+				21DC3A8A1AF2122E00F275A3 /* NSData+Base64Fillr.m in Sources */,
+				21FD5CBD1AEF51AE00300809 /* Fillr.m in Sources */,
+				211CC9F71AF1C3BC00B13FBD /* FillrAlertView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21FD5CBE1AEF51AE00300809 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21FD629B1AF0535900300809 /* FillrAutofillInputAccessoryView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		21FD5CC51AEF51AE00300809 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 21FD5CB61AEF51AE00300809 /* FillrSDK */;
+			targetProxy = 21FD5CC41AEF51AE00300809 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		211CCA071AF1E2DD00B13FBD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					x86_64,
+					armv7s,
+				);
+				COMBINE_HIDPI_IMAGES = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FillrSDKBundle/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		211CCA081AF1E2DD00B13FBD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					x86_64,
+					armv7s,
+				);
+				COMBINE_HIDPI_IMAGES = NO;
+				INFOPLIST_FILE = FillrSDKBundle/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+		21FD5CC91AEF51AE00300809 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		21FD5CCA1AEF51AE00300809 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		21FD5CCC1AEF51AE00300809 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		21FD5CCD1AEF51AE00300809 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		21FD5CCF1AEF51AE00300809 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FillrSDKTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		21FD5CD01AEF51AE00300809 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FillrSDKTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		21FD62A21AF072CD00300809 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					x86_64,
+					armv7s,
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+			};
+			name = Debug;
+		};
+		21FD62A31AF072CD00300809 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					x86_64,
+					armv7s,
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		211CCA061AF1E2DD00B13FBD /* Build configuration list for PBXNativeTarget "FillrSDKBundle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				211CCA071AF1E2DD00B13FBD /* Debug */,
+				211CCA081AF1E2DD00B13FBD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21FD5CB21AEF51AE00300809 /* Build configuration list for PBXProject "FillrSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21FD5CC91AEF51AE00300809 /* Debug */,
+				21FD5CCA1AEF51AE00300809 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21FD5CCB1AEF51AE00300809 /* Build configuration list for PBXNativeTarget "FillrSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21FD5CCC1AEF51AE00300809 /* Debug */,
+				21FD5CCD1AEF51AE00300809 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21FD5CCE1AEF51AE00300809 /* Build configuration list for PBXNativeTarget "FillrSDKTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21FD5CCF1AEF51AE00300809 /* Debug */,
+				21FD5CD01AEF51AE00300809 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21FD62A11AF072CD00300809 /* Build configuration list for PBXAggregateTarget "UniversalFillrSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21FD62A21AF072CD00300809 /* Debug */,
+				21FD62A31AF072CD00300809 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 21FD5CAF1AEF51AE00300809 /* Project object */;
+}

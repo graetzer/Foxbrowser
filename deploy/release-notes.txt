@@ -1,0 +1,7 @@
+Encryption upgrade fix for users can’t login in 0.9.10
+Pass through browser id and sdkversion to mapping request
+Log sdk sign up/install event
+Log launch screen event
+SDK v1.2 - pass browser id and sdk version to app in all mapping scenarios
+Bring PIN toggle back for Safari users
+Pass browser name to campaign monitor sign up list

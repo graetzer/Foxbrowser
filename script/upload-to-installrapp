@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -x
+
+CURL="/usr/bin/curl"
+JQ="/usr/local/bin/jq"
+
+TOKEN="KACJdfQl6sPsLjqBWKP4pINwv2Wmdo0V"
+HEADERS="X-InstallrAppToken: $TOKEN"
+ARGS="--progress-bar --verbose"
+BASE_URL="https://www.installrapp.com"
+ENDPOINT="apps.json"
+APP_DATA_ENDPOINT="apps/4975.json"
+APP_ENDPOINT="apps/4975"
+
+
+APP="./dist/Fillr.ipa"
+NOTES_FILE="./deploy/release-notes.txt"
+
+ME="mujtaba@fillr.com"
+DEVS="mujtaba@fillr.com,naveed@letspop.com,alexzhaobin@hotmail.com,stu@letspop.com,poptechtester@gmail.com"
+BIZ="chad@letspop.com,chris@letspop.com,sam@letspop.com,emma@fillr.com,merv@fillr.com"
+UX="ct@letspop.com,simon@letspop.com"
+MANILLA="marc@fillr.com,joseph@fillr.com,Michelle@fillr.com"
+
+TESTERS="$DEVS,$BIZ,$UX,$MANILLA"
+
+FILTER=".appData.latestBuild.id"
+
+if [ ! -f $APP ]; then
+  echo "No $APP to upload"
+  exit
+fi
+
+RELEASE_NOTE=""
+if [ -f $NOTES_FILE ]; then
+  while read note; do
+    RELEASE_NOTE="$note<br/>$RELEASE_NOTE"
+  done < $NOTES_FILE
+fi
+
+$CURL -H "$HEADERS" $ARGS -XPOST "$BASE_URL/$ENDPOINT" \
+  -F "qqfile=@$APP" \
+  -F "releaseNotes=\"$RELEASE_NOTE\"" \
+  -F "notify=\"$TESTERS\""
+
+LATEST_BUILD_ID=$($CURL -H "$HEADERS" $ARGS -XGET "$BASE_URL/$APP_DATA_ENDPOINT" | $JQ "$FILTER")
+
+$CURL -XPOST -H "$HEADERS" $ARGS \
+  "$BASE_URL/$APP_ENDPOINT/builds/$LATEST_BUILD_ID/team.json" \
+  -F "releaseNotes=\"$RELEASE_NOTE\"" \
+  -F "notify=$TESTERS"

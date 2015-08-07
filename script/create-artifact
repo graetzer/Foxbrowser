@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -x
+
+ADHOC="Adhoc"
+DEBUG="Debug"
+PROJECT="Foxbrowser.xcodeproj"
+XCODEBUILD=/usr/bin/xcodebuild
+XCTOOL=/usr/local/bin/xctool
+ARCHIVE="Foxbrowser.xcarchive"
+SCHEME="Foxbrowser"
+EXPORT_FORMAT="ipa"
+PROFILE="Fillr App Adhoc Provisioning Profile"
+ARTIFACT="Foxbrowser"
+TARGET="Foxbrowser"
+
+mkdir -p dist
+rm -rf dist/*.xcarchive
+rm -rf dist/*.$EXPORT_FORMAT
+
+echo "Cleaning all targets under scheme $SCHEME"
+$XCTOOL -scheme $SCHEME clean
+echo "... Done"
+
+echo "Building scheme $SCHEME for configuration $ADHOC"
+$XCTOOL \
+  -project $PROJECT \
+  -scheme $SCHEME \
+  -configuration $ADHOC \
+  build
+echo "... Done"
+
+echo "Creating $ARCHIVE for scheme $SCHEME and configuration $ADHOC"
+$XCTOOL \
+  -project $PROJECT \
+  -scheme $SCHEME \
+  -configuration $ADHOC \
+  archive \
+  -archivePath $ARCHIVE
+echo "... Done"
+
+echo "Creating Artifact $ARTIFACT"
+$XCODEBUILD -exportArchive \
+  -archivePath $ARCHIVE \
+  -exportPath $ARTIFACT \
+  -exportFormat $EXPORT_FORMAT \
+  -exportProvisioningProfile "$PROFILE"
+echo "... Done"
+
+echo "Moving files to dist/ folder"
+mv *.{$EXPORT_FORMAT,xcarchive} dist/
+echo "... Done"

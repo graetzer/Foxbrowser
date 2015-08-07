@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -x
+
+AWS=/usr/local/bin/aws
+AWK=/usr/local/bin/gawk
+DESTINATION=s3://fillr/sdk/ios/v1
+
+TODAY=`date +%s | $AWK '{ print strftime("%Y-%m-%d_%H-%M-%S", $1); }'`
+
+ARTEFACT="FillrSDK-${TODAY}.zip"
+
+zip -r $ARTEFACT FillrSDK/ -x "*.gitignore*" -x "*.DS_Store*" -x "*build*"
+
+$AWS s3 cp $ARTEFACT "$DESTINATION/"
+$AWS s3 rm "$DESTINATION/FillrSDK-latest.zip"
+$AWS s3 cp $ARTEFACT "$DESTINATION/FillrSDK-latest.zip"

@@ -13,7 +13,7 @@
 	<key>CFBundleIcons~ipad</key>
 	<dict/>
 	<key>CFBundleIdentifier</key>
-	<string>org.graetzer.$(PRODUCT_NAME:rfc1034identifier)</string>
+	<string>com.fillr.foxbrowser</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -32,14 +32,14 @@
 			<key>CFBundleURLIconFile</key>
 			<string>logo</string>
 			<key>CFBundleURLName</key>
-			<string>org.graetzer.Foxbrowser</string>
+			<string>com.fillr.foxbrowser</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>foxbrowsers</string>
 				<string>foxbrowser</string>
 				<string>http</string>
 				<string>https</string>
-				<string>org.graetzer.Foxbrowser</string>
+				<string>com.fillr.foxbrowser</string>
 			</array>
 		</dict>
 	</array>

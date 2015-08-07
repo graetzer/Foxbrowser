@@ -23,7 +23,10 @@
 #import "Reachability.h"
 #import "Appirater.h"
 
+#import "FillrSDK/Fillr.h"
 
+@interface SGAppDelegate()<FillrDelegate>
+@end
 
 SGAppDelegate *appDelegate;
 NSString *const kSGEnableStartpageKey = @"org.graetzer.enableStartpage";
@@ -80,6 +83,11 @@ NSString *const kSGDidRunBeforeKey = @"kSGDidRunBeforeKey";
     [Appirater setUsesUntilPrompt:3];
     [Appirater setTimeBeforeReminding:2];
     [Appirater appLaunched:YES];
+    
+    [[Fillr sharedInstance] initialiseWithDevKey:@"c4a8852ce67427a97330388659e0f2b5" andUrlSchema:@"com.fillr.foxbrowser"];
+    [Fillr sharedInstance].overlayInputAccessoryView = YES;
+    [[Fillr sharedInstance] setEnabled:YES];
+    [Fillr sharedInstance].delegate = self;
     
     return YES;
 }
@@ -160,6 +168,10 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
     } else if ([url.scheme hasPrefix:@"http"] || [url.scheme hasPrefix:@"https"]) {
         [self.browserViewController addTabWithURLRequest:[NSMutableURLRequest requestWithURL:url] title:sourceApplication];
         return YES;
+    } else if ([[Fillr sharedInstance] canHandleOpenURL:url]) {
+        [[Fillr sharedInstance] handleOpenURL:url];
+        
+        return YES;
     }
     return NO;
 }
@@ -235,6 +247,12 @@ viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents
                                                                action:@"Remind Later"
                                                                 label:nil
                                                                 value:nil] build]];
+}
+
+- (void)fillrStateChanged:(FillrSessionState)state currentWebView:(UIView *)currentWebView {
+    if (state == FillrStateDownloadingApp || state == FillrStateOpenApp) {
+        NSLog(@"Fillr App Called");
+    }
 }
 
 @end
